@@ -30,6 +30,7 @@ public class TDVocab {
   public static final IRI Array         = createIRI("Array");
   public static final IRI Number        = createIRI("Number");
   public static final IRI Boolean       = createIRI("Boolean");
+  public static final IRI String        = createIRI("String");
   
   public static final IRI schema        = createIRI("schema");
   public static final IRI inputSchema   = createIRI("inputSchema");
