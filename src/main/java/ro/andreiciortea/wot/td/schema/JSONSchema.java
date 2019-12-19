@@ -44,6 +44,9 @@ public class JSONSchema extends Schema {
     } else if (schemaType.get().equals(TDVocab.Boolean)) {
 //      System.out.println("Instantiating boolean schema!");
       return instantiateValue(TDVocab.Boolean, input);
+      } else if (schemaType.get().equals(TDVocab.String)) {
+//      System.out.println("Instantiating string schema!");
+      return instantiateValue(TDVocab.String, input);
     } else {
 //      System.out.println("Malformed JSON schema, unknown schema type: " + schemaType.get());
       throw new IllegalArgumentException("Malformed JSON schema, unknown schema type " + schemaType.get());
@@ -136,6 +139,11 @@ public class JSONSchema extends Schema {
       if (valueType.equals(TDVocab.Boolean) && (value instanceof Boolean)) {
 //        System.out.println("Found a typed boolean [" + dataType + "]: " + value.toString());
         return ((Boolean) value).toString();
+      }
+      
+      if (valueType.equals(TDVocab.String) && (value instanceof String)) {
+//        System.out.println("Found a typed string [" + dataType + "]: " + value);
+        return value;
       }
       
 //      System.out.println("Malformed JSON schema: value semantics missing or incompatible with parameter data type.");
