@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td.schema;
+package ch.unisg.ics.interactions.wot.td.schema;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import org.apache.commons.rdf.api.Literal;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import ro.andreiciortea.wot.vocabularies.TDVocab;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
 public class JSONSchema extends Schema {
 

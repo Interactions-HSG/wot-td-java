@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td;
+package ch.unisg.ics.interactions.wot.td;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,11 +40,11 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-import ro.andreiciortea.wot.td.interaction.Action;
-import ro.andreiciortea.wot.td.interaction.HTTPForm;
-import ro.andreiciortea.wot.td.schema.JSONSchema;
-import ro.andreiciortea.wot.td.schema.Schema;
-import ro.andreiciortea.wot.vocabularies.TDVocab;
+import ch.unisg.ics.interactions.wot.td.interaction.Action;
+import ch.unisg.ics.interactions.wot.td.interaction.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.schema.JSONSchema;
+import ch.unisg.ics.interactions.wot.td.schema.Schema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
 public class TDParser {
   

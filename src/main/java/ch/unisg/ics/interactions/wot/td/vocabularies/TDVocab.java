@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.vocabularies;
+package ch.unisg.ics.interactions.wot.td.vocabularies;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;

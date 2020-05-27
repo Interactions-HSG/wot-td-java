@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td.interaction;
+package ch.unisg.ics.interactions.wot.td.interaction;
 
 import java.util.List;
 

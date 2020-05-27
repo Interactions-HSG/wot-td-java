@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td;
+package ch.unisg.ics.interactions.wot.td;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -17,9 +17,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ro.andreiciortea.wot.td.interaction.Action;
-import ro.andreiciortea.wot.td.interaction.HTTPForm;
-import ro.andreiciortea.wot.td.schema.Schema;
+import ch.unisg.ics.interactions.wot.td.interaction.Action;
+import ch.unisg.ics.interactions.wot.td.interaction.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.schema.Schema;
 
 public class TDHttpClient {
 

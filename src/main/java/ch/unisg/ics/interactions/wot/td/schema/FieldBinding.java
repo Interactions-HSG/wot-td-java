@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td.schema;
+package ch.unisg.ics.interactions.wot.td.schema;
 
 public class FieldBinding {
   protected String fieldName;

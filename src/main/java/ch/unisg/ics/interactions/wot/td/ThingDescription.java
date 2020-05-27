@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td;
+package ch.unisg.ics.interactions.wot.td;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.IRI;
 
-import ro.andreiciortea.wot.td.interaction.Action;
+import ch.unisg.ics.interactions.wot.td.interaction.Action;
 
 public class ThingDescription {
   

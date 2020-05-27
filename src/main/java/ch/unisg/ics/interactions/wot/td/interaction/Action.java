@@ -1,4 +1,4 @@
-package ro.andreiciortea.wot.td.interaction;
+package ch.unisg.ics.interactions.wot.td.interaction;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 
-import ro.andreiciortea.wot.td.schema.Schema;
+import ch.unisg.ics.interactions.wot.td.schema.Schema;
 
 public class Action extends Interaction {
   
