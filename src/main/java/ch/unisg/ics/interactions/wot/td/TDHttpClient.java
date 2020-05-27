@@ -32,7 +32,7 @@ public class TDHttpClient {
   }
   
   public HttpResponse performActionByType(IRI actionTypeIRI, Map<IRI, Object> input) {
-    Optional<Action> action = td.getAction(actionTypeIRI);
+    Optional<Action> action = td.getAction(actionTypeIRI.getIRIString());
     
     if (action.isPresent()) {
       List<HTTPForm> forms = action.get().getForms();
@@ -79,10 +79,10 @@ public class TDHttpClient {
     URI requestURI;
     
     try {
-      Optional<IRI> baseIRI = td.getBaseIRI();
+      Optional<String> baseIRI = td.getBaseURI();
       
       if (baseIRI.isPresent()) {
-        requestURI = new URI(baseIRI.get().getIRIString());
+        requestURI = new URI(baseIRI.get());
         return requestURI.resolve(form.getHref());
       } else {
         return new URI(form.getHref());

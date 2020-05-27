@@ -3,34 +3,31 @@ package ch.unisg.ics.interactions.wot.td.interaction;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
-
+/**
+ * TODO: add javadoc
+ * 
+ * @author andreiciortea
+ *
+ */
 public class Interaction {
-  protected BlankNodeOrIRI iri;
-  protected Optional<String> name;
-  protected List<IRI> types;
+  protected Optional<String> title;
+  protected List<String> types;
   protected List<HTTPForm> forms;
   
-  public Interaction(BlankNodeOrIRI iri, Optional<String> name, List<IRI> types, List<HTTPForm> forms) {
-    this.iri = iri;
-    this.name = name;
+  protected Interaction(Optional<String> title, List<String> types, List<HTTPForm> forms) {
+    this.title = title;
     this.types = types;
     this.forms = forms;
   }
   
-  public BlankNodeOrIRI getIRI() {
-    return iri;
+  public Optional<String> getTitle() {
+    return title;
   }
-
-  public Optional<String> getName() {
-    return name;
-  }
-
-  public List<IRI> getTypes() {
+  
+  public List<String> getTypes() {
     return types;
   }
-
+  
   public List<HTTPForm> getForms() {
     return forms;
   }

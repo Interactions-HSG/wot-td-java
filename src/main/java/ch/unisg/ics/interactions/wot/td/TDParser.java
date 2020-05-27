@@ -136,14 +136,18 @@ public class TDParser {
     Graph graph = stringToGraph(rdfDataStr, thingIRI.getIRIString(), RDFSyntax.TURTLE);
     
     Optional<Literal> name = getFirstObjectAsLiteral(graph, thingIRI, TDVocab.name);
-    Optional<String> thingName = (name.isPresent()) ? Optional.of(name.get().getLexicalForm()) : Optional.empty();
+    Optional<String> thingTitle = (name.isPresent()) ? Optional.of(name.get().getLexicalForm()) : Optional.empty();
     
     Optional<Literal> baseIRIStr = getFirstObjectAsLiteral(graph, thingIRI, TDVocab.base);
     Optional<IRI> baseIRI = (baseIRIStr.isPresent()) ? Optional.of(RDF_IMPL.createIRI(baseIRIStr.get().getLexicalForm())) : Optional.empty();
     
-    Map<BlankNodeOrIRI, Action> actions = parseActions(graph, thingIRI);
+    List<Action> actions = new ArrayList<Action>(parseActions(graph, thingIRI).values());
     
-    return new ThingDescription(thingIRI, thingName, baseIRI, actions, graph);
+    return new ThingDescription.Builder(thingTitle.get())
+        .addURI(thingIRI.getIRIString())
+        .addBaseURI(baseIRI.get().getIRIString())
+        .addActions(actions)
+        .build();
   }
   
   private static Map<BlankNodeOrIRI, Action> parseActions(Graph graph, IRI thingIRI) {
@@ -169,13 +173,14 @@ public class TDParser {
     Optional<Literal> name = getFirstObjectAsLiteral(tdGraph, actionNode, TDVocab.name);
     Optional<String> actionName = (name.isPresent()) ? Optional.of(name.get().getLexicalForm()) : Optional.empty();
     
-    List<IRI> actionTypes = getActionTypes(tdGraph, actionNode);
+    List<String> actionTypes = getActionTypes(tdGraph, actionNode).stream()
+        .map(a -> a.getIRIString()).collect(Collectors.toList());
     
     List<HTTPForm> forms = getFormsForAction(tdGraph, actionNode);
     
     Optional<Schema> inputSchema = parseSchemaForAction(tdGraph, actionNode, TDVocab.inputSchema);
     
-    return Optional.of(new Action(actionNode, actionName, actionTypes, forms, inputSchema));
+    return Optional.of(new Action(actionName, actionTypes, forms, inputSchema));
   }
   
   private static List<IRI> getActionTypes(Graph tdGraph, BlankNodeOrIRI actionIRI) {

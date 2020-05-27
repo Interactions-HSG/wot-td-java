@@ -1,72 +1,112 @@
 package ch.unisg.ics.interactions.wot.td;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.IRI;
-
 import ch.unisg.ics.interactions.wot.td.interaction.Action;
 
+/**
+ * TODO: add javadoc
+ * ThingDescription is immutable (hence the builder pattern)
+ * can be extended
+ * fields follow the W3C WoT spec: https://www.w3.org/TR/wot-thing-description/#thing
+ * 
+ * @author andreiciortea
+ *
+ */
 public class ThingDescription {
+  // A human-readbale title of the Thing (required)
+  private String title;
   
-  private IRI thingIRI;
-  private Graph tdGraph;
+  // Identifier of the Thing in form of a URI
+  private Optional<String> uri;
+  // The base URI that is used for all relative URI references throughout a TD document
+  private Optional<String> baseURI;
+  // All Action-based interaction affordances of the Thing
+  private List<Action> actions;
   
-  private Optional<String> thingName;
-  private Optional<IRI> baseIRI;
-  
-  private Map<BlankNodeOrIRI,Action> actions;
-  
-  public ThingDescription(IRI thingIRI, Optional<String> thingName, Optional<IRI> baseIRI, 
-      Map<BlankNodeOrIRI, Action> actions, Graph tdGraph) {
+  protected ThingDescription(String title, Optional<String> uri, Optional<String> baseURI, 
+      List<Action> actions) {
     
-    this.thingIRI = thingIRI;
-    this.thingName = thingName;
+    this.uri = uri;
+    this.title = title;
     
-    this.baseIRI = baseIRI;
+    this.baseURI = baseURI;
     this.actions = actions;
+  }
+  
+  public String getTitle() {
+    return title;
+  }
+  
+  public Optional<String> getThingURI() {
+    return uri;
+  }
+  
+  public Optional<String> getBaseURI() {
+    return baseURI;
+  }
+  
+  public Set<String> getSupportedActionTypes() {
+    Set<String> supportedActionTypes = new HashSet<String>();
     
-    this.tdGraph = tdGraph;
-  }
-  
-  public IRI getThingIRI() {
-    return thingIRI;
-  }
-  
-  public Optional<String> getName() {
-    return thingName;
-  }
-  
-  public Optional<IRI> getBaseIRI() {
-    return baseIRI;
-  }
-  
-  public Set<IRI> getSupportedActionTypes() {
-    Set<IRI> supportedActionTypes = new HashSet<IRI>();
-    
-    for (Entry<BlankNodeOrIRI, Action> entry : actions.entrySet()) {
-      supportedActionTypes.addAll(entry.getValue().getTypes());
+    for (Action action : actions) {
+      supportedActionTypes.addAll(action.getTypes());
     }
     
     return supportedActionTypes;
   }
   
-  public Optional<Action> getAction(IRI actionTypeIRI) {
-    for (Entry<BlankNodeOrIRI, Action> entry : actions.entrySet()) {
-      if (entry.getValue().getTypes().contains(actionTypeIRI)) {
-        return Optional.of(entry.getValue());
+  // TODO: returns only the first action of a given type
+  public Optional<Action> getAction(String actionType) {
+    for (Action action : actions) {
+      if (action.getTypes().contains(actionType)) {
+        return Optional.of(action);
       }
     }
     
     return Optional.empty();
   }
   
-  public Graph getGraph() {
-    return tdGraph;
+  public static class Builder {
+    private String title;
+    private Optional<String> uri;
+    private Optional<String> baseURI;
+    private List<Action> actions;
+    
+    public Builder(String title) {
+      this.title = title;
+      this.baseURI = Optional.empty();
+      
+      this.actions = new ArrayList<Action>();
+    }
+    
+    public Builder addURI(String uri) {
+      this.uri = Optional.of(uri);
+      return this;
+    }
+    
+    public Builder addBaseURI(String baseURI) {
+      this.baseURI = Optional.of(baseURI);
+      return this;
+    }
+    
+    public Builder addAction(Action action) {
+      this.actions.add(action);
+      return this;
+    }
+    
+    public Builder addActions(List<Action> actions) {
+      this.actions.addAll(actions);
+      return this;
+    }
+    
+    public ThingDescription build() {
+      return new ThingDescription(title, uri, baseURI, actions);
+    }
+    
   }
 }
