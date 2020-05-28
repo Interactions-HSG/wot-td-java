@@ -14,7 +14,9 @@ import ch.unisg.ics.interactions.wot.td.schema.Schema;
  *
  */
 public class Action extends Interaction {
+  // TODO: currently Schema just holds an RDF graph
   private Optional<Schema> inputSchema;
+  
   // TODO: add outputschema, safe, idempotent
   
   protected Action(Optional<String> title, List<String> types, List<HTTPForm> forms, 
