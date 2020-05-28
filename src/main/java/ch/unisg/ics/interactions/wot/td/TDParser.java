@@ -181,10 +181,9 @@ public class TDParser {
     Optional<Schema> inputSchema = parseSchemaForAction(tdGraph, actionNode, TDVocab.inputSchema);
     
     
-    Action action = (new Action.Builder())
+    Action action = (new Action.Builder(forms))
         .addTitle(actionName.get())
         .addTypes(actionTypes)
-        .addForms(forms)
         .addInputSchema(inputSchema.get())
         .build();
     

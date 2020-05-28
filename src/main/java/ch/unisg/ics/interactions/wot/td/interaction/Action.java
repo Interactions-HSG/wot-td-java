@@ -1,5 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.interaction;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +15,7 @@ import ch.unisg.ics.interactions.wot.td.schema.Schema;
  */
 public class Action extends Interaction {
   private Optional<Schema> inputSchema;
+  // TODO: add outputschema, safe, idempotent
   
   protected Action(Optional<String> title, List<String> types, List<HTTPForm> forms, 
       Optional<Schema> inputSchema) {
@@ -28,10 +31,14 @@ public class Action extends Interaction {
   public static class Builder extends Interaction.Builder<Action, Action.Builder> {
     private Optional<Schema> inputSchema;
     
-    public Builder() {
-      super();
+    public Builder(List<HTTPForm> forms) {
+      super(forms);
       
       this.inputSchema = Optional.empty();
+    }
+    
+    public Builder(HTTPForm form) {
+      this(new ArrayList<HTTPForm>(Arrays.asList(form)));
     }
     
     public Builder addInputSchema(Schema inputSchema) {

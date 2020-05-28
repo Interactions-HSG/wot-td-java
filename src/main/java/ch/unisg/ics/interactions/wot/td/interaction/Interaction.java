@@ -1,6 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.interaction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,10 +40,14 @@ public class Interaction {
     protected List<String> types;
     protected List<HTTPForm> forms;
     
-    protected Builder() {
+    protected Builder(List<HTTPForm> forms) {
       this.title = Optional.empty();
       this.types = new ArrayList<String>();
-      this.forms = new ArrayList<HTTPForm>();
+      this.forms = forms;
+    }
+    
+    protected Builder(HTTPForm form) {
+      this(new ArrayList<HTTPForm>(Arrays.asList((form))));
     }
     
     @SuppressWarnings("unchecked")
