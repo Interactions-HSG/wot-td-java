@@ -14,7 +14,7 @@ import ch.unisg.ics.interactions.wot.td.interaction.Action;
  * can be extended
  * fields follow the W3C WoT spec: https://www.w3.org/TR/wot-thing-description/#thing
  * 
- * @author andreiciortea
+ * @author Andrei Ciortea
  *
  */
 public class ThingDescription {

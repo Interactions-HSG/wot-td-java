@@ -8,21 +8,39 @@ import ch.unisg.ics.interactions.wot.td.schema.Schema;
 /**
  * TODO: add javadoc
  * 
- * @author andreiciortea
+ * @author Andrei Ciortea
  *
  */
 public class Action extends Interaction {
-  
   private Optional<Schema> inputSchema;
   
-  public Action(Optional<String> name, List<String> types, List<HTTPForm> forms, 
+  protected Action(Optional<String> title, List<String> types, List<HTTPForm> forms, 
       Optional<Schema> inputSchema) {
-    super(name, types, forms);
+    super(title, types, forms);
     
     this.inputSchema = inputSchema;
   }
   
   public Optional<Schema> getInputSchema() {
     return inputSchema;
+  }
+  
+  public static class Builder extends Interaction.Builder<Action, Action.Builder> {
+    private Optional<Schema> inputSchema;
+    
+    public Builder() {
+      super();
+      
+      this.inputSchema = Optional.empty();
+    }
+    
+    public Builder addInputSchema(Schema inputSchema) {
+      this.inputSchema = Optional.of(inputSchema);
+      return this;
+    }
+    
+    public Action build() {
+      return new Action(this.title, this.types, this.forms, inputSchema);
+    }
   }
 }

@@ -180,7 +180,15 @@ public class TDParser {
     
     Optional<Schema> inputSchema = parseSchemaForAction(tdGraph, actionNode, TDVocab.inputSchema);
     
-    return Optional.of(new Action(actionName, actionTypes, forms, inputSchema));
+    
+    Action action = (new Action.Builder())
+        .addTitle(actionName.get())
+        .addTypes(actionTypes)
+        .addForms(forms)
+        .addInputSchema(inputSchema.get())
+        .build();
+    
+    return Optional.of(action);
   }
   
   private static List<IRI> getActionTypes(Graph tdGraph, BlankNodeOrIRI actionIRI) {
