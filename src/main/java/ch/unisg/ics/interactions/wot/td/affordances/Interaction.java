@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.interaction;
+package ch.unisg.ics.interactions.wot.td.affordances;
 
 import java.util.ArrayList;
 import java.util.Arrays;

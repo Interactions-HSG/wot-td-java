@@ -20,9 +20,9 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.interaction.Action;
-import ch.unisg.ics.interactions.wot.td.interaction.HTTPForm;
-import ch.unisg.ics.interactions.wot.td.interaction.Interaction;
+import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Interaction;
 import ch.unisg.ics.interactions.wot.td.schema.Schema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 

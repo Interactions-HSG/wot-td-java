@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import ch.unisg.ics.interactions.wot.td.interaction.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.Action;
 
 /**
  * TODO: add javadoc

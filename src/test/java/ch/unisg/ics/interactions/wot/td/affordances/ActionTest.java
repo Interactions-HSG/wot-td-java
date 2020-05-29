@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.interaction;
+package ch.unisg.ics.interactions.wot.td.affordances;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+
+import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 
 public class ActionTest {
 

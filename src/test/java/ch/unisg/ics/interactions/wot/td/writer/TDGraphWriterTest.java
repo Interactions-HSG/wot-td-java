@@ -22,8 +22,8 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.interaction.Action;
-import ch.unisg.ics.interactions.wot.td.interaction.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.JSONSchema;
 import ch.unisg.ics.interactions.wot.td.schema.Schema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;

@@ -17,8 +17,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.unisg.ics.interactions.wot.td.interaction.Action;
-import ch.unisg.ics.interactions.wot.td.interaction.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.Schema;
 
 public class TDHttpClient {

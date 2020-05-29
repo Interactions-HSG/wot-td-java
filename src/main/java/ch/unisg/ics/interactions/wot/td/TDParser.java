@@ -40,8 +40,8 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-import ch.unisg.ics.interactions.wot.td.interaction.Action;
-import ch.unisg.ics.interactions.wot.td.interaction.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.JSONSchema;
 import ch.unisg.ics.interactions.wot.td.schema.Schema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
