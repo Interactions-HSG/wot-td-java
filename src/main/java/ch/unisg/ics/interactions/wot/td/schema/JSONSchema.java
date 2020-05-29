@@ -54,7 +54,7 @@ public class JSONSchema extends Schema {
   }
 
   private String instantiateObject(IRI schemaType, Map<IRI,Object> input) {
-    JSONSchemaBuilder builder = new JSONSchemaBuilder(schemaType);
+    JSONBuilder builder = new JSONBuilder(schemaType);
 
     List<BlankNodeOrIRI> fields = graph.stream(this.schemaIRI, TDVocab.field, null)
         .filter(triple -> triple.getObject() instanceof BlankNodeOrIRI)
@@ -91,7 +91,7 @@ public class JSONSchema extends Schema {
   }
 
   private String instantiateArray(IRI schemaType, Map<IRI,Object> input) {
-    JSONSchemaBuilder builder = new JSONSchemaBuilder(schemaType);
+    JSONBuilder builder = new JSONBuilder(schemaType);
 
     List<BlankNodeOrIRI> items = graph.stream(this.schemaIRI, TDVocab.items, null)
                                         .filter(triple -> triple.getObject() instanceof BlankNodeOrIRI)
@@ -155,17 +155,16 @@ public class JSONSchema extends Schema {
     throw new IllegalArgumentException("Malformed JSON schema: could not instantiate value.");
   }
 
-
-  class JSONSchemaBuilder {
+  public static class JSONBuilder {
     IRI schemaType;
     StringBuilder builder;
 
     boolean hasPrevious = false;
-
-    JSONSchemaBuilder(IRI schemaType) {
+    
+    JSONBuilder(IRI schemaType) {
       this.schemaType = schemaType;
       this.builder = new StringBuilder();
-
+      
       if (schemaType.equals(TDVocab.Object)) {
         builder.append('{');
       } else if (schemaType.equals(TDVocab.Array)) {
