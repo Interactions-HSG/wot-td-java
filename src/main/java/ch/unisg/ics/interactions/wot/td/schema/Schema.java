@@ -16,6 +16,14 @@ public abstract class Schema {
     this.graph = graph;
   }
   
+  public BlankNodeOrIRI getSchemaIRI() {
+    return schemaIRI;
+  }
+  
+  public Graph getGraph() {
+    return graph;
+  }
+  
   public abstract String instantiate(Map<IRI,Object> input);
   
 }

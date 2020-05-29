@@ -18,21 +18,24 @@ import ch.unisg.ics.interactions.wot.td.interaction.Action;
  *
  */
 public class ThingDescription {
-  // A human-readbale title of the Thing (required)
+  // A human-readable title of the Thing (required)
   private String title;
   
   // Identifier of the Thing in form of a URI
   private Optional<String> uri;
+  // Semantic types of the Thing
+  private List<String> types;
   // The base URI that is used for all relative URI references throughout a TD document
   private Optional<String> baseURI;
   // All Action-based interaction affordances of the Thing
   private List<Action> actions;
   
-  protected ThingDescription(String title, Optional<String> uri, Optional<String> baseURI, 
+  protected ThingDescription(String title, Optional<String> uri, List<String> types, Optional<String> baseURI, 
       List<Action> actions) {
     
     this.uri = uri;
     this.title = title;
+    this.types = types;
     
     this.baseURI = baseURI;
     this.actions = actions;
@@ -44,6 +47,10 @@ public class ThingDescription {
   
   public Optional<String> getThingURI() {
     return uri;
+  }
+  
+  public List<String> getTypes() {
+    return types;
   }
   
   public Optional<String> getBaseURI() {
@@ -71,16 +78,26 @@ public class ThingDescription {
     return Optional.empty();
   }
   
+  public List<Action> getActions() {
+    return this.actions;
+  }
+  
   public static class Builder {
     private String title;
+    
     private Optional<String> uri;
+    private List<String> types;
+    
     private Optional<String> baseURI;
     private List<Action> actions;
     
     public Builder(String title) {
       this.title = title;
-      this.baseURI = Optional.empty();
       
+      this.uri = Optional.empty();
+      this.types= new ArrayList<String>();
+      
+      this.baseURI = Optional.empty();
       this.actions = new ArrayList<Action>();
     }
     
@@ -91,6 +108,16 @@ public class ThingDescription {
     
     public Builder addBaseURI(String baseURI) {
       this.baseURI = Optional.of(baseURI);
+      return this;
+    }
+    
+    public Builder addType(String type) {
+      this.types.add(type);
+      return this;
+    }
+    
+    public Builder addTypes(List<String> types) {
+      this.types.addAll(types);
       return this;
     }
     
@@ -105,7 +132,7 @@ public class ThingDescription {
     }
     
     public ThingDescription build() {
-      return new ThingDescription(title, uri, baseURI, actions);
+      return new ThingDescription(title, uri, types, baseURI, actions);
     }
     
   }

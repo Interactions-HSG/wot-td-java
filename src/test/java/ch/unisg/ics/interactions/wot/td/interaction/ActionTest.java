@@ -59,7 +59,7 @@ public class ActionTest {
         //.addInputSchema(inputSchema)
         .build();
     
-    assertEquals("Turn on", action.getTitle());
+    assertEquals("Turn on", action.getTitle().get());
     assertEquals(1, action.getTypes().size());
     assertEquals("iot:TurnOn", action.getTypes().get(0));
   }
