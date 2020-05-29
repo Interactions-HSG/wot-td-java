@@ -16,15 +16,16 @@ public class TDVocab {
   public static final IRI Thing         = createIRI("Thing");
   public static final IRI Action        = createIRI("Action");
   
-  public static final IRI name          = createIRI("name");
+  public static final IRI title         = createIRI("title");
   public static final IRI base          = createIRI("base");
   public static final IRI interaction   = createIRI("interaction");
+  public static final IRI security      = createIRI("security");
   
   public static final IRI form          = createIRI("form");
   public static final IRI methodName    = createIRI("methodName");
   public static final IRI href          = createIRI("href");
-  public static final IRI mediaType     = createIRI("mediaType");
-  public static final IRI rel           = createIRI("rel");
+  public static final IRI contentType   = createIRI("contentType");
+  public static final IRI op            = createIRI("op");
   
   public static final IRI Object        = createIRI("Object");
   public static final IRI Array         = createIRI("Array");
@@ -33,8 +34,8 @@ public class TDVocab {
   public static final IRI String        = createIRI("String");
   
   public static final IRI schema        = createIRI("schema");
-  public static final IRI inputSchema   = createIRI("inputSchema");
-  public static final IRI outputSchema  = createIRI("outputSchema");
+  public static final IRI input         = createIRI("input");
+  public static final IRI output        = createIRI("output");
   public static final IRI schemaType    = createIRI("schemaType");
   public static final IRI field         = createIRI("field");
   public static final IRI items         = createIRI("items");

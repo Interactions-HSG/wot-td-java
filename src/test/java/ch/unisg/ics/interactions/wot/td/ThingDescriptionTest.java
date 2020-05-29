@@ -1,6 +1,7 @@
 package ch.unisg.ics.interactions.wot.td;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class ThingDescriptionTest {
         .build();
     
     assertEquals(1, td.getTypes().size());
-    assertEquals("http://w3id.org/eve#Artifact", td.getTypes().get(0));
+    assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
   }
   
   @Test
@@ -43,9 +44,9 @@ public class ThingDescriptionTest {
         .build();
     
     assertEquals(3, td.getTypes().size());
-    assertEquals(TDVocab.Thing.getIRIString(), td.getTypes().get(0));
-    assertEquals("http://w3id.org/eve#Artifact", td.getTypes().get(1));
-    assertEquals("http://iot-schema.org/eve#Light", td.getTypes().get(2));
+    assertTrue(td.getTypes().contains(TDVocab.Thing.getIRIString()));
+    assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
+    assertTrue(td.getTypes().contains("http://iot-schema.org/eve#Light"));
   }
   
   @Test

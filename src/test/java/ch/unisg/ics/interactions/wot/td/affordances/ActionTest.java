@@ -4,19 +4,17 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
-
-import ch.unisg.ics.interactions.wot.td.affordances.Action;
-import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 
 public class ActionTest {
 
   @Test
   public void testOneForm() {
     HTTPForm form = new HTTPForm("GET", "http://example.org", "application/json", 
-        new ArrayList<String>());
+        new HashSet<String>());
     
     Action action = (new Action.Builder(form)).build();
     
@@ -29,13 +27,13 @@ public class ActionTest {
   @Test
   public void testMultipleForms() {
     HTTPForm form1 = new HTTPForm("GET", "http://example.org", "application/json", 
-        new ArrayList<String>());
+        new HashSet<String>());
     
     HTTPForm form2 = new HTTPForm("POST", "http://example.org", "application/json", 
-        new ArrayList<String>());
+        new HashSet<String>());
     
     HTTPForm form3 = new HTTPForm("PUT", "http://example.org", "application/json", 
-        new ArrayList<String>());
+        new HashSet<String>());
     
     List<HTTPForm> formList = new ArrayList<HTTPForm>(Arrays.asList(form1, form2, form3));
     
@@ -53,7 +51,7 @@ public class ActionTest {
   @Test
   public void testFullOptionAction() {
     HTTPForm form = new HTTPForm("GET", "http://example.org", "application/json", 
-        new ArrayList<String>());
+        new HashSet<String>());
     
     Action action = (new Action.Builder(form))
         .addTitle("Turn on")

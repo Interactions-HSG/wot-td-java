@@ -62,7 +62,7 @@ public class JSONSchema extends Schema {
         .collect(Collectors.toList());
 
     for (BlankNodeOrIRI field : fields) {
-      Optional<String> fieldName = graph.stream(field, TDVocab.name, null)
+      Optional<String> fieldName = graph.stream(field, TDVocab.title, null)
               .filter(triple -> (triple.getObject() instanceof Literal))
               .map(triple -> ((Literal) triple.getObject()).getLexicalForm())
               .findFirst();

@@ -13,7 +13,7 @@ import ch.unisg.ics.interactions.wot.td.schema.Schema;
  * @author Andrei Ciortea
  *
  */
-public class Action extends Interaction {
+public class Action extends InteractionAffordance {
   // TODO: currently Schema just holds an RDF graph
   private Optional<Schema> inputSchema;
   
@@ -30,7 +30,7 @@ public class Action extends Interaction {
     return inputSchema;
   }
   
-  public static class Builder extends Interaction.Builder<Action, Action.Builder> {
+  public static class Builder extends InteractionAffordance.Builder<Action, Action.Builder> {
     private Optional<Schema> inputSchema;
     
     public Builder(List<HTTPForm> forms) {

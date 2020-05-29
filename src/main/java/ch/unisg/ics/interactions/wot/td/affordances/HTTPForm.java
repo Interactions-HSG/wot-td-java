@@ -1,18 +1,18 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
-import java.util.List;
+import java.util.Set;
 
 public class HTTPForm {
   private String methodName;
   private String href;
   private String mediaType;
-  private List<String> rel;
+  private Set<String> ops;
   
-  public HTTPForm(String methodName, String href, String mediaType, List<String> rel) {
+  public HTTPForm(String methodName, String href, String mediaType, Set<String> op) {
     this.methodName = methodName;
     this.href = href;
     this.mediaType = mediaType;
-    this.rel = rel;
+    this.ops = op;
   }
 
   public String getMethodName() {
@@ -23,11 +23,11 @@ public class HTTPForm {
     return href;
   }
 
-  public String getMediaType() {
+  public String getContentType() {
     return mediaType;
   }
 
-  public List<String> getRel() {
-    return rel;
+  public Set<String> getOperations() {
+    return ops;
   }
 }

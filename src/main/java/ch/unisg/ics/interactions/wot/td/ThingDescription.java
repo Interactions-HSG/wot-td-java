@@ -20,23 +20,25 @@ import ch.unisg.ics.interactions.wot.td.affordances.Action;
 public class ThingDescription {
   // A human-readable title of the Thing (required)
   private String title;
+  private String security;
   
   // Identifier of the Thing in form of a URI
   private Optional<String> uri;
   // Semantic types of the Thing
-  private List<String> types;
+  private Set<String> types;
   // The base URI that is used for all relative URI references throughout a TD document
   private Optional<String> baseURI;
   // All Action-based interaction affordances of the Thing
   private List<Action> actions;
   
-  protected ThingDescription(String title, Optional<String> uri, List<String> types, Optional<String> baseURI, 
-      List<Action> actions) {
+  protected ThingDescription(String title, String security, Optional<String> uri, Set<String> types, 
+      Optional<String> baseURI, List<Action> actions) {
     
-    this.uri = uri;
     this.title = title;
+    this.security = security;
+
+    this.uri = uri;
     this.types = types;
-    
     this.baseURI = baseURI;
     this.actions = actions;
   }
@@ -45,11 +47,15 @@ public class ThingDescription {
     return title;
   }
   
+  public String getSecurity() {
+    return security;
+  }
+  
   public Optional<String> getThingURI() {
     return uri;
   }
   
-  public List<String> getTypes() {
+  public Set<String> getTypes() {
     return types;
   }
   
@@ -84,9 +90,10 @@ public class ThingDescription {
   
   public static class Builder {
     private String title;
+    private String security;
     
     private Optional<String> uri;
-    private List<String> types;
+    private Set<String> types;
     
     private Optional<String> baseURI;
     private List<Action> actions;
@@ -95,10 +102,15 @@ public class ThingDescription {
       this.title = title;
       
       this.uri = Optional.empty();
-      this.types= new ArrayList<String>();
+      this.types= new HashSet<String>();
       
       this.baseURI = Optional.empty();
       this.actions = new ArrayList<Action>();
+    }
+    
+    public Builder addSecurity(String security) {
+      this.security = security;
+      return this;
     }
     
     public Builder addURI(String uri) {
@@ -116,8 +128,8 @@ public class ThingDescription {
       return this;
     }
     
-    public Builder addTypes(List<String> types) {
-      this.types.addAll(types);
+    public Builder addTypes(Set<String> thingTypes) {
+      this.types.addAll(thingTypes);
       return this;
     }
     
@@ -132,7 +144,7 @@ public class ThingDescription {
     }
     
     public ThingDescription build() {
-      return new ThingDescription(title, uri, types, baseURI, actions);
+      return new ThingDescription(title, security, uri, types, baseURI, actions);
     }
     
   }

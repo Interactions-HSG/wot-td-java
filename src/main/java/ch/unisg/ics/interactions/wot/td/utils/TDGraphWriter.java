@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.writer;
+package ch.unisg.ics.interactions.wot.td.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,7 +22,7 @@ import org.eclipse.rdf4j.rio.Rio;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.Action;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
-import ch.unisg.ics.interactions.wot.td.affordances.Interaction;
+import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schema.Schema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
@@ -100,7 +100,7 @@ public class TDGraphWriter {
     }
     
     public Builder addTitle() {
-      model.add(rdfFactory.createStatement(thingIRI, rdf4jIRI(TDVocab.name), 
+      model.add(rdfFactory.createStatement(thingIRI, rdf4jIRI(TDVocab.title), 
           rdfFactory.createLiteral(td.getTitle())));
       
       return this;
@@ -109,7 +109,7 @@ public class TDGraphWriter {
     public Builder addBaseURI() {
       if (td.getBaseURI().isPresent()) {
         model.add(rdfFactory.createStatement(thingIRI, rdf4jIRI(TDVocab.base), 
-            rdfFactory.createLiteral(td.getBaseURI().get())));
+            rdfFactory.createIRI(td.getBaseURI().get())));
       }
       
       return this;
@@ -128,7 +128,7 @@ public class TDGraphWriter {
         }
         
         if (action.getTitle().isPresent()) {
-          model.add(rdfFactory.createStatement(actionId, rdf4jIRI(TDVocab.name), 
+          model.add(rdfFactory.createStatement(actionId, rdf4jIRI(TDVocab.title), 
               rdfFactory.createLiteral(action.getTitle().get())));
         }
         
@@ -143,7 +143,7 @@ public class TDGraphWriter {
             Optional<Model> input = ((RDF4JGraph) inputGraph).asModel();
             
             if (input.isPresent()) {
-              model.add(rdfFactory.createStatement(actionId, rdf4jIRI(TDVocab.inputSchema), schemaId));
+              model.add(rdfFactory.createStatement(actionId, rdf4jIRI(TDVocab.input), schemaId));
               model.addAll(input.get());
             }
           }
@@ -153,7 +153,7 @@ public class TDGraphWriter {
       return this;
     }
     
-    private void addFormsForInteraction(BNode interactionId, Interaction interaction) {
+    private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
       for (HTTPForm form : interaction.getForms()) {
         BNode formId = rdfFactory.createBNode();
         
@@ -162,14 +162,14 @@ public class TDGraphWriter {
         model.add(rdfFactory.createStatement(formId, rdf4jIRI(TDVocab.methodName), 
             rdfFactory.createLiteral(form.getMethodName())));
         model.add(rdfFactory.createStatement(formId, rdf4jIRI(TDVocab.href), 
-            rdfFactory.createLiteral(form.getHref())));
-        model.add(rdfFactory.createStatement(formId, rdf4jIRI(TDVocab.mediaType), 
-            rdfFactory.createLiteral(form.getMediaType())));
+            rdfFactory.createIRI(form.getHref())));
+        model.add(rdfFactory.createStatement(formId, rdf4jIRI(TDVocab.contentType), 
+            rdfFactory.createLiteral(form.getContentType())));
         
         // TODO: refactor when adding other interaction affordances
         if (interaction instanceof Action) {
-          model.add(rdfFactory.createStatement(formId, rdf4jIRI(TDVocab.rel), 
-              rdfFactory.createLiteral("invokeAction")));
+          model.add(rdfFactory.createStatement(formId, rdf4jIRI(TDVocab.op), 
+              rdfFactory.createLiteral("invokeaction")));
         }
       }
     }

@@ -1,11 +1,11 @@
-package ch.unisg.ics.interactions.wot.td.writer;
+package ch.unisg.ics.interactions.wot.td.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.Graph;
@@ -26,6 +26,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Action;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.JSONSchema;
 import ch.unisg.ics.interactions.wot.td.schema.Schema;
+import ch.unisg.ics.interactions.wot.td.utils.TDGraphWriter;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
 public class TDGraphWriterTest {
@@ -36,7 +37,7 @@ public class TDGraphWriterTest {
   @Test
   public void testNoThingURI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = "[ a <http://www.w3.org/ns/td#Thing> ; " +
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" ] .\n"; 
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" ] .\n"; 
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -54,7 +55,7 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteTitle() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ; " +
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" .\n"; 
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" .\n"; 
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -72,7 +73,7 @@ public class TDGraphWriterTest {
   public void testWriteAdditionalTypes() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing>, " +
         "<http://w3id.org/eve#Artifact>, <http://iot-schema.org/eve#Light> ;\n" + 
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" .\n"; 
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" .\n"; 
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -94,7 +95,7 @@ public class TDGraphWriterTest {
     
     String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing>, " +
         "<http://w3id.org/eve#Artifact> ;\n" + 
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" .\n"; 
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" .\n"; 
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -113,8 +114,8 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteBaseURI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ;\n" + 
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" ;\n" + 
-        "    <http://www.w3.org/ns/td#base> \"http://example.org/\" ." ;
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" ;\n" + 
+        "    <http://www.w3.org/ns/td#base> <http://example.org/> ." ;
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -132,23 +133,23 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteOneSimpleAction() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ;\n" + 
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" ;\n" + 
-        "    <http://www.w3.org/ns/td#base> \"http://example.org/\" ;\n" + 
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" ;\n" + 
+        "    <http://www.w3.org/ns/td#base> <http://example.org/> ;\n" + 
         "    <http://www.w3.org/ns/td#interaction> [\n" + 
         "        a <http://www.w3.org/ns/td#Action>, <http://iot-schema.org/#MyAction> ;\n" + 
-        "        <http://www.w3.org/ns/td#name> \"My Action\" ;\n" + 
+        "        <http://www.w3.org/ns/td#title> \"My Action\" ;\n" + 
         "        <http://www.w3.org/ns/td#form> [\n" + 
         "            <http://www.w3.org/ns/td#methodName> \"PUT\" ;\n" + 
-        "            <http://www.w3.org/ns/td#href> \"/action\";\n" + 
-        "            <http://www.w3.org/ns/td#mediaType> \"application/json\";\n" + 
-        "            <http://www.w3.org/ns/td#rel> \"invokeAction\";\n" + 
+        "            <http://www.w3.org/ns/td#href> <http://example.org/action> ;\n" + 
+        "            <http://www.w3.org/ns/td#contentType> \"application/json\" ;\n" + 
+        "            <http://www.w3.org/ns/td#op> \"invokeaction\";\n" + 
         "        ] ;\n" + 
         "    ] ." ;
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
-    Action simpleAction = new Action.Builder(new HTTPForm("PUT", "/action", "application/json",
-        new ArrayList<String>()))
+    Action simpleAction = new Action.Builder(new HTTPForm("PUT", "http://example.org/action", 
+        "application/json", new HashSet<String>()))
         .addTitle("My Action")
         .addType("http://iot-schema.org/#MyAction")
         .build();
@@ -162,6 +163,7 @@ public class TDGraphWriterTest {
     String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
+    assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
   
@@ -170,21 +172,21 @@ public class TDGraphWriterTest {
       IOException {
     
     String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ;\n" + 
-        "    <http://www.w3.org/ns/td#name> \"My Thing\" ;\n" + 
-        "    <http://www.w3.org/ns/td#base> \"http://example.org/\" ;\n" + 
+        "    <http://www.w3.org/ns/td#title> \"My Thing\" ;\n" + 
+        "    <http://www.w3.org/ns/td#base> <http://example.org/> ;\n" + 
         "    <http://www.w3.org/ns/td#interaction> [\n" + 
         "        a <http://www.w3.org/ns/td#Action> ;\n" + 
-        "        <http://www.w3.org/ns/td#name> \"My Action\" ;\n" + 
+        "        <http://www.w3.org/ns/td#title> \"My Action\" ;\n" + 
         "        <http://www.w3.org/ns/td#form> [\n" + 
         "            <http://www.w3.org/ns/td#methodName> \"PUT\" ;\n" + 
-        "            <http://www.w3.org/ns/td#href> \"/action\";\n" + 
-        "            <http://www.w3.org/ns/td#mediaType> \"application/json\";\n" + 
-        "            <http://www.w3.org/ns/td#rel> \"invokeAction\";\n" + 
+        "            <http://www.w3.org/ns/td#href> <http://example.org/action> ;\n" + 
+        "            <http://www.w3.org/ns/td#contentType> \"application/json\";\n" + 
+        "            <http://www.w3.org/ns/td#op> \"invokeaction\";\n" + 
         "        ] ;\n" + 
-        "        <http://www.w3.org/ns/td#inputSchema> [\n" + 
+        "        <http://www.w3.org/ns/td#input> [\n" + 
         "            <http://www.w3.org/ns/td#schemaType> <http://www.w3.org/ns/td#Object> ;\n" + 
         "            <http://www.w3.org/ns/td#field> [\n" + 
-        "                <http://www.w3.org/ns/td#name> \"value\";\n" + 
+        "                <http://www.w3.org/ns/td#title> \"value\";\n" + 
         "                <http://www.w3.org/ns/td#schema> [\n" + 
         "                    <http://www.w3.org/ns/td#schemaType> <http://www.w3.org/ns/td#Number>\n" + 
         "                ]\n" + 
@@ -204,14 +206,14 @@ public class TDGraphWriterTest {
     
     inputGraph.add(rdf.createTriple(inputNode, TDVocab.schemaType, TDVocab.Object));
     inputGraph.add(rdf.createTriple(inputNode, TDVocab.field, keyValueNode));
-    inputGraph.add(rdf.createTriple(keyValueNode, TDVocab.name, rdf.createLiteral("value")));
+    inputGraph.add(rdf.createTriple(keyValueNode, TDVocab.title, rdf.createLiteral("value")));
     inputGraph.add(rdf.createTriple(keyValueNode, TDVocab.schema, valueNode));
     inputGraph.add(rdf.createTriple(valueNode, TDVocab.schemaType, TDVocab.Number));
     
     Schema schema = new JSONSchema(inputNode, inputGraph);
     
-    Action actionWithInput = new Action.Builder(new HTTPForm("PUT", "/action", "application/json",
-        new ArrayList<String>()))
+    Action actionWithInput = new Action.Builder(new HTTPForm("PUT", "http://example.org/action", 
+        "application/json", new HashSet<String>()))
         .addTitle("My Action")
         .addInputSchema(schema)
         .build();
@@ -225,6 +227,7 @@ public class TDGraphWriterTest {
     String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
+    assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
   

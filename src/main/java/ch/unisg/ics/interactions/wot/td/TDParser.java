@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -135,7 +136,7 @@ public class TDParser {
   private static ThingDescription parseThingDescription(IRI thingIRI, String rdfDataStr, RDFSyntax syntax) throws IllegalArgumentException, IOException {
     Graph graph = stringToGraph(rdfDataStr, thingIRI.getIRIString(), RDFSyntax.TURTLE);
     
-    Optional<Literal> name = getFirstObjectAsLiteral(graph, thingIRI, TDVocab.name);
+    Optional<Literal> name = getFirstObjectAsLiteral(graph, thingIRI, TDVocab.title);
     Optional<String> thingTitle = (name.isPresent()) ? Optional.of(name.get().getLexicalForm()) : Optional.empty();
     
     Optional<Literal> baseIRIStr = getFirstObjectAsLiteral(graph, thingIRI, TDVocab.base);
@@ -170,7 +171,7 @@ public class TDParser {
   }
   
   private static Optional<Action> parseAction(Graph tdGraph, BlankNodeOrIRI actionNode) {
-    Optional<Literal> name = getFirstObjectAsLiteral(tdGraph, actionNode, TDVocab.name);
+    Optional<Literal> name = getFirstObjectAsLiteral(tdGraph, actionNode, TDVocab.title);
     Optional<String> actionName = (name.isPresent()) ? Optional.of(name.get().getLexicalForm()) : Optional.empty();
     
     List<String> actionTypes = getActionTypes(tdGraph, actionNode).stream()
@@ -178,7 +179,7 @@ public class TDParser {
     
     List<HTTPForm> forms = getFormsForAction(tdGraph, actionNode);
     
-    Optional<Schema> inputSchema = parseSchemaForAction(tdGraph, actionNode, TDVocab.inputSchema);
+    Optional<Schema> inputSchema = parseSchemaForAction(tdGraph, actionNode, TDVocab.input);
     
     
     Action action = (new Action.Builder(forms))
@@ -222,10 +223,10 @@ public class TDParser {
     Optional<Literal> hrefStr = getFirstObjectAsLiteral(tdGraph, form, TDVocab.href);
     Optional<String> href = (hrefStr.isPresent()) ? Optional.of(hrefStr.get().getLexicalForm()) : Optional.empty();
     
-    Optional<Literal> mt = getFirstObjectAsLiteral(tdGraph, form, TDVocab.mediaType);
+    Optional<Literal> mt = getFirstObjectAsLiteral(tdGraph, form, TDVocab.contentType);
     Optional<String> mediaType = (mt.isPresent()) ? Optional.of(mt.get().getLexicalForm()) : Optional.empty();
     
-    List<String> rels = tdGraph.stream(form, TDVocab.rel, null)
+    List<String> rels = tdGraph.stream(form, TDVocab.op, null)
                                   .filter(triple -> triple.getObject() instanceof Literal)
                                   .map(triple -> ((Literal) triple.getObject()).getLexicalForm())
                                   .collect(Collectors.toList());
@@ -234,7 +235,7 @@ public class TDParser {
       return null;
     }
     
-    return new HTTPForm(methodName.get(), href.get(), mediaType.get(), rels);
+    return new HTTPForm(methodName.get(), href.get(), mediaType.get(), new HashSet<String>(rels));
   }
   
   private static Optional<Schema> parseSchemaForAction(Graph tdGraph, BlankNodeOrIRI actionIRI, IRI hasSchemaIRI) {
