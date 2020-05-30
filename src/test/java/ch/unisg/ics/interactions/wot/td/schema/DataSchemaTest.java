@@ -17,7 +17,10 @@ public class DataSchemaTest {
     
     DataSchema nullSchema = new DataSchema(DataSchema.SCHEMA_NULL_TYPE);
     assertEquals("null", nullSchema.getType());
-    
+  }
+  
+  @Test
+  public void testIntegerSchema() {
     IntegerSchema integerSchema = (new IntegerSchema.Builder())
         .addMinimum(-100)
         .addMaximum(100)
@@ -25,7 +28,19 @@ public class DataSchemaTest {
     assertEquals("integer", integerSchema.getType());
     assertEquals(-100, integerSchema.getMinimum().get().longValue());
     assertEquals(100, integerSchema.getMaximum().get().longValue());
+  }
+  
+  @Test
+  public void testIntegerSchemaNoLimits() {
+    IntegerSchema integerSchema = (new IntegerSchema.Builder()).build();
     
+    assertEquals("integer", integerSchema.getType());
+    assertTrue(integerSchema.getMaximum().isEmpty());
+    assertTrue(integerSchema.getMinimum().isEmpty());
+  }
+  
+  @Test
+  public void testNumberSchema() {
     NumberSchema numberSchema = (new NumberSchema.Builder())
         .addMinimum(-100.05)
         .addMaximum(100.05)
@@ -33,6 +48,15 @@ public class DataSchemaTest {
     assertEquals("number", numberSchema.getType());
     assertEquals(-100.05, numberSchema.getMinimum().get().doubleValue(), 0.01);
     assertEquals(100.05, numberSchema.getMaximum().get().doubleValue(), 0.01);
+  }
+  
+  @Test
+  public void testNumberSchemaNoLimits() {
+    NumberSchema numberSchema = (new NumberSchema.Builder()).build();
+    
+    assertEquals("number", numberSchema.getType());
+    assertTrue(numberSchema.getMaximum().isEmpty());
+    assertTrue(numberSchema.getMinimum().isEmpty());
   }
   
   @Test
