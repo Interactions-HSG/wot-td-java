@@ -18,9 +18,11 @@ import ch.unisg.ics.interactions.wot.td.affordances.Action;
  *
  */
 public class ThingDescription {
+  public static final String DEFAULT_SECURITY_SCHEMA = "nosec_sc";
+  
   // A human-readable title of the Thing (required)
   private String title;
-  private String security;
+  private Set<String> security;
   
   // Identifier of the Thing in form of a URI
   private Optional<String> uri;
@@ -31,10 +33,14 @@ public class ThingDescription {
   // All Action-based interaction affordances of the Thing
   private List<Action> actions;
   
-  protected ThingDescription(String title, String security, Optional<String> uri, Set<String> types, 
+  protected ThingDescription(String title, Set<String> security, Optional<String> uri, Set<String> types, 
       Optional<String> baseURI, List<Action> actions) {
     
     this.title = title;
+    
+    if (security.isEmpty()) {
+      security.add(DEFAULT_SECURITY_SCHEMA);
+    }
     this.security = security;
 
     this.uri = uri;
@@ -47,7 +53,7 @@ public class ThingDescription {
     return title;
   }
   
-  public String getSecurity() {
+  public Set<String> getSecurity() {
     return security;
   }
   
@@ -90,7 +96,7 @@ public class ThingDescription {
   
   public static class Builder {
     private String title;
-    private String security;
+    private Set<String> security;
     
     private Optional<String> uri;
     private Set<String> types;
@@ -100,6 +106,7 @@ public class ThingDescription {
     
     public Builder(String title) {
       this.title = title;
+      this.security = new HashSet<String>();
       
       this.uri = Optional.empty();
       this.types= new HashSet<String>();
@@ -109,7 +116,12 @@ public class ThingDescription {
     }
     
     public Builder addSecurity(String security) {
-      this.security = security;
+      this.security.add(security);
+      return this;
+    }
+    
+    public Builder addSecurity(Set<String> security) {
+      this.security.addAll(security);
       return this;
     }
     

@@ -3,7 +3,7 @@ package ch.unisg.ics.interactions.wot.td.vocabularies;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
-public class JSONSchemaVocab {
+public class JSONSchema {
   
   private static final String PREFIX = "https://www.w3.org/2019/wot/json-schema#";
   

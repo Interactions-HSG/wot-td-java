@@ -14,7 +14,6 @@ import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -31,8 +30,9 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchemaVocab;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
+import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 /**
  * TODO: add javadoc
@@ -53,7 +53,7 @@ public class TDGraphReader {
     }
     
     try {
-      thingId = Models.subject(model.filter(null, rdf4jIRI(TDVocab.security), null)).get();
+      thingId = Models.subject(model.filter(null, TD.security, null)).get();
     } catch (NoSuchElementException e) {
       throw new RuntimeException("Invalid Thing Description: missing mandatory security definitions.");
     }
@@ -75,8 +75,7 @@ public class TDGraphReader {
   }
   
   public String readThingTitle() {
-    Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, rdf4jIRI(TDVocab.title), 
-        null));
+    Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, TD.title, null));
     
     return thingTitle.get().stringValue();
   }
@@ -90,7 +89,7 @@ public class TDGraphReader {
   }
   
   public Optional<String> readBaseURI() {
-    Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, rdf4jIRI(TDVocab.base), null));
+    Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, TD.base, null));
     
     if (baseURI.isPresent()) {
       return Optional.of(baseURI.get().stringValue());
@@ -100,16 +99,17 @@ public class TDGraphReader {
   }
   
   public Set<String> readSecuritySchemas() {
-    return Models.objectStrings(model.filter(thingId, rdf4jIRI(TDVocab.security), null));
+    return Models.objectStrings(model.filter(thingId, TD.security, null));
   }
   
   public List<Action> readActions() {
     List<Action> actions = new ArrayList<Action>();
     
-    for (Resource affordanceId : Models.objectResources(model.filter(thingId, 
-        rdf4jIRI(TDVocab.interaction), null))) {
-      
-      if (!model.contains(affordanceId, RDF.TYPE, rdf4jIRI(TDVocab.Action))) {
+    Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId, 
+        TD.interaction, null));
+    
+    for (Resource affordanceId : affordanceIds) {
+      if (!model.contains(affordanceId, RDF.TYPE, TD.ActionAffordance)) {
         continue;
       }
       
@@ -119,14 +119,14 @@ public class TDGraphReader {
       Set<IRI> actionTypes = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
       actionBuilder.addTypes(actionTypes.stream().map(type -> type.stringValue()).collect(Collectors.toList()));
       
-      Optional<Literal> actionTitle = Models.objectLiteral(model.filter(affordanceId, 
-          rdf4jIRI(TDVocab.title), null));
+      Optional<Literal> actionTitle = Models.objectLiteral(model.filter(affordanceId, TD.title, 
+          null));
       if (actionTitle.isPresent()) {
         actionBuilder.addTitle(actionTitle.get().stringValue());
       }
       
-      Optional<Resource> schemaId = Models.objectResource(model.filter(affordanceId, 
-          rdf4jIRI(TDVocab.input), null));
+      Optional<Resource> schemaId = Models.objectResource(model.filter(affordanceId, TD.input, 
+          null));
       if (schemaId.isPresent()) {
         try {
           Optional<DataSchema> input = readDataSchema(schemaId.get());
@@ -150,9 +150,9 @@ public class TDGraphReader {
   private Optional<DataSchema> readDataSchema(Resource schemaId) {
     Optional<IRI> type = Models.objectIRI(model.filter(schemaId, RDF.TYPE, null));
     if (type.isPresent()) {
-      if (type.get().equals(JSONSchemaVocab.ObjectSchema)) {
+      if (type.get().equals(JSONSchema.ObjectSchema)) {
         return readObjectSchema(schemaId);
-      } if (type.get().equals(JSONSchemaVocab.NumberSchema)) {
+      } if (type.get().equals(JSONSchema.NumberSchema)) {
         return Optional.of((new NumberSchema.Builder()).build());
       }
     }
@@ -165,7 +165,7 @@ public class TDGraphReader {
     
     /* Read properties */
     Set<Resource> propertyIds = Models.objectResources(model.filter(schemaId, 
-        JSONSchemaVocab.properties, null));
+        JSONSchema.properties, null));
     
     for (Resource property : propertyIds) {
       Optional<DataSchema> propertySchema = readDataSchema(property);
@@ -173,7 +173,7 @@ public class TDGraphReader {
       if (propertySchema.isPresent()) {
         // Each property of an object should also have an associated property name
         Optional<Literal> propertyName = Models.objectLiteral(model.filter(property, 
-            JSONSchemaVocab.propertyName, null));
+            JSONSchema.propertyName, null));
         
         if (propertyName.isEmpty()) {
           throw new InvalidTDException("ObjectSchema property does not contain a property name.");
@@ -185,7 +185,7 @@ public class TDGraphReader {
     
     /* Read required properties */
     Set<Literal> requiredProperties = Models.objectLiterals(model.filter(schemaId, 
-        JSONSchemaVocab.required, null));
+        JSONSchema.required, null));
     
     for (Literal requiredProp : requiredProperties) {
       builder.addRequiredProperties(requiredProp.stringValue());
@@ -197,27 +197,26 @@ public class TDGraphReader {
   private List<HTTPForm> readForms(Resource affordanceId, String affordanceType) {
     List<HTTPForm> forms = new ArrayList<HTTPForm>();
     
-    Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, 
-        rdf4jIRI(TDVocab.form), null));
+    Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, TD.form, null));
     
     for (Resource formId : formIdSet) {
-      Optional<IRI> hrefOpt = Models.objectIRI(model.filter(formId, rdf4jIRI(TDVocab.href), null));
+      Optional<IRI> hrefOpt = Models.objectIRI(model.filter(formId, TD.href, null));
       
       if (hrefOpt.isEmpty()) {
         continue;
       }
       
       // TODO: refactor to avoid hard coding the method name
-      Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, 
-          rdf4jIRI(TDVocab.methodName), null));      
+      Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, HTV.methodName,
+          null));      
       String methodName = (methodNameOpt.isPresent()) ? methodNameOpt.get().stringValue() : "POST";
       
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
-          rdf4jIRI(TDVocab.contentType), null));
+          TD.contentType, null));
       String contentType = (contentTypeOpt.isEmpty()) ? "application/json" 
           : contentTypeOpt.get().stringValue();
       
-      Set<Literal> opsLiterals = Models.objectLiterals(model.filter(formId, rdf4jIRI(TDVocab.op), null));
+      Set<Literal> opsLiterals = Models.objectLiterals(model.filter(formId, TD.op, null));
       
       Set<String> ops = opsLiterals.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
       
@@ -251,9 +250,5 @@ public class TDGraphReader {
       String baseURI) {
     
     return null;
-  }
-  
-  private static IRI rdf4jIRI(org.apache.commons.rdf.api.IRI iri) {
-    return SimpleValueFactory.getInstance().createIRI(iri.getIRIString());
   }
 }

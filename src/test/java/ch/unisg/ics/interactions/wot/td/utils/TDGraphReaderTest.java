@@ -11,12 +11,13 @@ import ch.unisg.ics.interactions.wot.td.affordances.Action;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class TDGraphReaderTest {
   
   private static final String TEST_TD =
       "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" + 
@@ -24,10 +25,10 @@ public class TDGraphReaderTest {
       "    td:security \"nosec_sc\" ;\n" +
       "    td:base <http://example.org/> ;\n" + 
       "    td:interaction [\n" + 
-      "        a td:Action ;\n" + 
+      "        a td:ActionAffordance ;\n" + 
       "        td:title \"My Action\" ;\n" + 
       "        td:form [\n" + 
-      "            td:methodName \"PUT\" ;\n" + 
+      "            htv:methodName \"PUT\" ;\n" + 
       "            td:href <http://example.org/action> ;\n" + 
       "            td:contentType \"application/json\";\n" + 
       "            td:op \"invokeaction\";\n" + 
@@ -54,7 +55,7 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(TEST_TD);
     
     assertEquals(1, reader.readThingTypes().size());
-    assertTrue(reader.readThingTypes().contains(TDVocab.Thing.getIRIString()));
+    assertTrue(reader.readThingTypes().contains(TD.Thing.stringValue()));
   }
   
   @Test
@@ -81,7 +82,7 @@ public class TDGraphReaderTest {
     
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getTypes().size());
-    assertEquals(TDVocab.Action.getIRIString(), action.getTypes().get(0));
+    assertEquals(TD.ActionAffordance.stringValue(), action.getTypes().get(0));
     
     assertEquals(1, action.getForms().size());
     HTTPForm form = action.getForms().get(0);

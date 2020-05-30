@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
 
-import org.apache.commons.rdf.api.BlankNode;
-import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
@@ -27,7 +24,6 @@ import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
 public class TDGraphWriterTest {
   private final static String THING_TITLE = "My Thing";
@@ -36,12 +32,17 @@ public class TDGraphWriterTest {
   
   @Test
   public void testNoThingURI() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = "[ a <http://www.w3.org/ns/td#Thing> ; " +
-        "    <http://www.w3.org/ns/td#title> \"My Thing\" ] .\n"; 
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "\n" +
+        "[] a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" .\n";
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
     String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
@@ -54,13 +55,18 @@ public class TDGraphWriterTest {
   
   @Test
   public void testWriteTitle() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ; " +
-        "    <http://www.w3.org/ns/td#title> \"My Thing\" .\n"; 
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" .\n";
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
     String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
@@ -71,21 +77,28 @@ public class TDGraphWriterTest {
   
   @Test
   public void testWriteAdditionalTypes() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing>, " +
-        "<http://w3id.org/eve#Artifact>, <http://iot-schema.org/eve#Light> ;\n" + 
-        "    <http://www.w3.org/ns/td#title> \"My Thing\" .\n"; 
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix eve: <http://w3id.org/eve#> .\n" +
+        "@prefix iot: <http://iotschema.org/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing, eve:Artifact, iot:Light ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" .\n";
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addURI(THING_IRI)
         .addType("http://w3id.org/eve#Artifact")
-        .addType("http://iot-schema.org/eve#Light")
+        .addType("http://iotschema.org/Light")
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
     String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
+    assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
   
@@ -93,9 +106,13 @@ public class TDGraphWriterTest {
   public void testWriteTypesDeduplication() throws RDFParseException, RDFHandlerException, 
       IOException {
     
-    String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing>, " +
-        "<http://w3id.org/eve#Artifact> ;\n" + 
-        "    <http://www.w3.org/ns/td#title> \"My Thing\" .\n"; 
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix eve: <http://w3id.org/eve#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing, eve:Artifact ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" .\n";
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -103,6 +120,7 @@ public class TDGraphWriterTest {
         .addURI(THING_IRI)
         .addType("http://w3id.org/eve#Artifact")
         .addType("http://w3id.org/eve#Artifact")
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
     String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
@@ -113,9 +131,13 @@ public class TDGraphWriterTest {
   
   @Test
   public void testWriteBaseURI() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ;\n" + 
-        "    <http://www.w3.org/ns/td#title> \"My Thing\" ;\n" + 
-        "    <http://www.w3.org/ns/td#base> <http://example.org/> ." ;
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
+        "    td:base <http://example.org/> .\n";
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
@@ -132,17 +154,24 @@ public class TDGraphWriterTest {
   
   @Test
   public void testWriteOneSimpleAction() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = "<http://example.org/#thing> a <http://www.w3.org/ns/td#Thing> ;\n" + 
-        "    <http://www.w3.org/ns/td#title> \"My Thing\" ;\n" + 
-        "    <http://www.w3.org/ns/td#base> <http://example.org/> ;\n" + 
-        "    <http://www.w3.org/ns/td#interaction> [\n" + 
-        "        a <http://www.w3.org/ns/td#Action>, <http://iot-schema.org/#MyAction> ;\n" + 
-        "        <http://www.w3.org/ns/td#title> \"My Action\" ;\n" + 
-        "        <http://www.w3.org/ns/td#form> [\n" + 
-        "            <http://www.w3.org/ns/td#methodName> \"PUT\" ;\n" + 
-        "            <http://www.w3.org/ns/td#href> <http://example.org/action> ;\n" + 
-        "            <http://www.w3.org/ns/td#contentType> \"application/json\" ;\n" + 
-        "            <http://www.w3.org/ns/td#op> \"invokeaction\";\n" + 
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix iot: <http://iotschema.org/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
+        "    td:base <http://example.org/> ;\n" + 
+        "    td:interaction [\n" + 
+        "        a td:ActionAffordance, iot:MyAction ;\n" + 
+        "        td:title \"My Action\" ;\n" + 
+        "        td:form [\n" + 
+        "            htv:methodName \"PUT\" ;\n" + 
+        "            td:href <http://example.org/action> ;\n" + 
+        "            td:contentType \"application/json\";\n" + 
+        "            td:op \"invokeaction\";\n" + 
         "        ] ;\n" + 
         "    ] ." ;
     
@@ -151,11 +180,12 @@ public class TDGraphWriterTest {
     Action simpleAction = new Action.Builder(new HTTPForm("PUT", "http://example.org/action", 
         "application/json", new HashSet<String>()))
         .addTitle("My Action")
-        .addType("http://iot-schema.org/#MyAction")
+        .addType("http://iotschema.org/MyAction")
         .build();
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .addBaseURI("http://example.org/")
         .addAction(simpleAction)
         .build();
@@ -173,17 +203,18 @@ public class TDGraphWriterTest {
     
     String testTD = 
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
         "    td:title \"My Thing\" ;\n" +
-//        "    td:security \"nosec_sc\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
         "    td:base <http://example.org/> ;\n" + 
         "    td:interaction [\n" + 
-        "        a td:Action ;\n" + 
+        "        a td:ActionAffordance ;\n" + 
         "        td:title \"My Action\" ;\n" + 
         "        td:form [\n" + 
-        "            td:methodName \"PUT\" ;\n" + 
+        "            htv:methodName \"PUT\" ;\n" + 
         "            td:href <http://example.org/action> ;\n" + 
         "            td:contentType \"application/json\";\n" + 
         "            td:op \"invokeaction\";\n" + 
@@ -200,20 +231,6 @@ public class TDGraphWriterTest {
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
-    RDF4J rdf = new RDF4J();
-    
-    Graph inputGraph = rdf.createGraph();
-    
-    BlankNode inputNode = rdf.createBlankNode();
-    BlankNode keyValueNode = rdf.createBlankNode();
-    BlankNode valueNode = rdf.createBlankNode();
-    
-    inputGraph.add(rdf.createTriple(inputNode, TDVocab.schemaType, TDVocab.Object));
-    inputGraph.add(rdf.createTriple(inputNode, TDVocab.field, keyValueNode));
-    inputGraph.add(rdf.createTriple(keyValueNode, TDVocab.title, rdf.createLiteral("value")));
-    inputGraph.add(rdf.createTriple(keyValueNode, TDVocab.schema, valueNode));
-    inputGraph.add(rdf.createTriple(valueNode, TDVocab.schemaType, TDVocab.Number));
-    
     DataSchema schema = new ObjectSchema.Builder()
         .addProperty("value", (new NumberSchema.Builder().build()))
         .addRequiredProperties("value")
@@ -227,6 +244,7 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .addBaseURI("http://example.org/")
         .addAction(actionWithInput)
         .build();

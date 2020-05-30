@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class ThingDescriptionTest {
   
@@ -38,13 +38,13 @@ public class ThingDescriptionTest {
   @Test
   public void testMultipleTypes() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addType(TDVocab.Thing.getIRIString())
+        .addType(TD.Thing.stringValue())
         .addType("http://w3id.org/eve#Artifact")
         .addType("http://iot-schema.org/eve#Light")
         .build();
     
     assertEquals(3, td.getTypes().size());
-    assertTrue(td.getTypes().contains(TDVocab.Thing.getIRIString()));
+    assertTrue(td.getTypes().contains(TD.Thing.stringValue()));
     assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
     assertTrue(td.getTypes().contains("http://iot-schema.org/eve#Light"));
   }
