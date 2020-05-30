@@ -10,8 +10,8 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -34,22 +34,159 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
  *
  */
 public class TDGraphWriter {
+  private Resource thingId;
+  private ThingDescription td;
+  private ModelBuilder graphBuilder;
   
-  private Model model;
-  
-  public TDGraphWriter(Model model) {
-    this.model = model;
+  public TDGraphWriter(ThingDescription td) {
+    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
+    
+    this.thingId = (td.getThingURI().isEmpty()) ? rdfFactory.createBNode()
+        : rdfFactory.createIRI(td.getThingURI().get());
+    
+    this.td = td;
+    this.graphBuilder = new ModelBuilder();
   }
   
-  public Model getModel() {
-    return model;
+  private Model getModel() {
+    return graphBuilder.build();
+  }
+  
+  private TDGraphWriter addSecurity() {
+    Set<String> securitySchemas = td.getSecurity();
+    
+    for (String schema : securitySchemas) {
+      graphBuilder.add(thingId, TD.security, schema);
+    }
+    
+    return this;
+  }
+  
+  private TDGraphWriter addTypes() {
+    // TODO: To be considered: always add td:Thing as a type?
+    graphBuilder.add(thingId, RDF.TYPE, TD.Thing);
+    
+    for (String type : td.getTypes()) {
+      graphBuilder.add(thingId, RDF.TYPE, SimpleValueFactory.getInstance().createIRI(type));
+    }
+    
+    return this;
+  }
+    
+  private TDGraphWriter addTitle() {
+    graphBuilder.add(thingId, TD.title, td.getTitle());
+    return this;
+  }
+    
+  private TDGraphWriter addBaseURI() {
+    if (td.getBaseURI().isPresent()) {
+      ValueFactory rdfFactory = SimpleValueFactory.getInstance();
+      graphBuilder.add(thingId, TD.base, rdfFactory.createIRI(td.getBaseURI().get()));
+    }
+    
+    return this;
+  }
+    
+  private TDGraphWriter addActions() {
+    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
+    
+    for (Action action : td.getActions()) {
+      BNode actionId = rdfFactory.createBNode();
+      
+      graphBuilder.add(thingId, TD.interaction, actionId);
+      graphBuilder.add(actionId, RDF.TYPE, TD.ActionAffordance);
+      
+      for (String type : action.getTypes()) {
+        graphBuilder.add(actionId, RDF.TYPE, rdfFactory.createIRI(type));
+      }
+      
+      if (action.getTitle().isPresent()) {
+        graphBuilder.add(actionId, TD.title, action.getTitle().get());
+      }
+      
+      addFormsForInteraction(actionId, action);
+      
+      if (action.getInputSchema().isPresent()) {
+        DataSchema schema = action.getInputSchema().get();
+        
+        Resource inputId = rdfFactory.createBNode();
+        graphBuilder.add(actionId, TD.input, inputId);
+        
+        addDataSchema(inputId, schema);
+      }
+    }
+    
+    return this;
+  }
+    
+  private void addDataSchema(Resource nodeId, DataSchema schema) {
+    switch (schema.getType()) {
+      case DataSchema.SCHEMA_OBJECT_TYPE:
+        addObjectSchema(nodeId, (ObjectSchema) schema);
+        break;
+      case DataSchema.SCHEMA_NUMBER_TYPE:
+        addNumberSchema(nodeId, (NumberSchema) schema);
+        break;
+    }
+  }
+    
+  private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
+    graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.ObjectSchema);
+    
+    /* Add object properties */
+    Map<String, DataSchema> properties = schema.getProperties();
+    
+    for (String propertyName : properties.keySet()) {
+      Resource propertyId = SimpleValueFactory.getInstance().createBNode();
+      
+      graphBuilder.add(nodeId, JSONSchema.properties, propertyId);
+      graphBuilder.add(propertyId, JSONSchema.propertyName, propertyName);
+      
+      addDataSchema(propertyId, properties.get(propertyName));
+    }
+      
+    /* Add names of required properties */
+    for (String required : schema.getRequiredProperties()) {
+      graphBuilder.add(nodeId, JSONSchema.required, required);
+    }
+  }
+    
+  private void addNumberSchema(Resource nodeId, NumberSchema schema) {
+    graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.NumberSchema);
+    
+    if (schema.getMinimum().isPresent()) {
+      graphBuilder.add(nodeId, JSONSchema.minimum, schema.getMinimum().get());
+    }
+    
+    if (schema.getMaximum().isPresent()) {
+      graphBuilder.add(nodeId, JSONSchema.maximum, schema.getMaximum().get());
+    }
+  }
+    
+  private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
+    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
+    
+    for (HTTPForm form : interaction.getForms()) {
+      BNode formId = rdfFactory.createBNode();
+      
+      graphBuilder.add(interactionId, TD.form, formId);
+      
+      graphBuilder.add(formId, HTV.methodName, form.getMethodName());
+      graphBuilder.add(formId, TD.href, rdfFactory.createIRI(form.getHref()));
+      graphBuilder.add(formId, TD.contentType, form.getContentType());
+      
+      // TODO: refactor when adding other interaction affordances
+      if (interaction instanceof Action) {
+        graphBuilder.add(formId, TD.op, "invokeaction");
+      }
+    }
   }
   
   public String write(RDFFormat format) {
     OutputStream out = new ByteArrayOutputStream();
     
     try {
-      Rio.write(model, out, format);
+      Rio.write(getModel(), out, format);
     } finally {
       try {
         out.close();
@@ -62,173 +199,13 @@ public class TDGraphWriter {
   }
   
   public static String write(RDFFormat format, ThingDescription td) {
-    TDGraphWriter tdWriter = (new TDGraphWriter.Builder(td))
+    TDGraphWriter tdWriter = new TDGraphWriter(td)
         .addTypes()
         .addTitle()
         .addSecurity()
         .addBaseURI()
-        .addActions()
-        .build();
+        .addActions();
     
     return tdWriter.write(format);
-  }
-  
-  public static class Builder {
-    private Model model;
-    private ValueFactory rdfFactory;
-    
-    private Resource thingIRI;
-    private ThingDescription td;
-    
-    public Builder(ThingDescription td) {
-      this.model = new LinkedHashModel();
-      this.rdfFactory = SimpleValueFactory.getInstance();
-      
-      this.thingIRI = (td.getThingURI().isEmpty()) ? rdfFactory.createBNode()
-          : rdfFactory.createIRI(td.getThingURI().get());
-      
-      this.td = td;
-    }
-    
-    public Builder addSecurity() {
-      Set<String> securitySchemas = td.getSecurity();
-      
-      for (String schema : securitySchemas) {
-        model.add(rdfFactory.createStatement(thingIRI, TD.security, 
-            rdfFactory.createLiteral(schema)));
-      }
-      
-      return this;
-    }
-    
-    public Builder addTypes() {
-      // Always add td:Thing as a type
-      model.add(rdfFactory.createStatement(thingIRI, RDF.TYPE, TD.Thing));
-      
-      for (String type : td.getTypes()) {
-        model.add(rdfFactory.createStatement(thingIRI, RDF.TYPE, rdfFactory.createIRI(type)));
-      }
-      
-      return this;
-    }
-    
-    public Builder addTitle() {
-      model.add(rdfFactory.createStatement(thingIRI, TD.title, 
-          rdfFactory.createLiteral(td.getTitle())));
-      
-      return this;
-    }
-    
-    public Builder addBaseURI() {
-      if (td.getBaseURI().isPresent()) {
-        model.add(rdfFactory.createStatement(thingIRI, TD.base, 
-            rdfFactory.createIRI(td.getBaseURI().get())));
-      }
-      
-      return this;
-    }
-    
-    public Builder addActions() {
-      for (Action action : td.getActions()) {
-        BNode actionId = rdfFactory.createBNode();
-        
-        model.add(rdfFactory.createStatement(thingIRI, TD.interaction, actionId));
-        
-        model.add(rdfFactory.createStatement(actionId, RDF.TYPE, TD.ActionAffordance));
-        
-        for (String type : action.getTypes()) {
-          model.add(rdfFactory.createStatement(actionId, RDF.TYPE, rdfFactory.createIRI(type)));
-        }
-        
-        if (action.getTitle().isPresent()) {
-          model.add(rdfFactory.createStatement(actionId, TD.title, 
-              rdfFactory.createLiteral(action.getTitle().get())));
-        }
-        
-        addFormsForInteraction(actionId, action);
-        
-        if (action.getInputSchema().isPresent()) {
-          DataSchema schema = action.getInputSchema().get();
-          
-          Resource inputId = rdfFactory.createBNode();
-          model.add(rdfFactory.createStatement(actionId, TD.input, inputId));
-          
-          addDataSchema(inputId, schema);
-        }
-      }
-      
-      return this;
-    }
-    
-    private void addDataSchema(Resource nodeId, DataSchema schema) {
-      switch (schema.getType()) {
-        case DataSchema.SCHEMA_OBJECT_TYPE:
-          addObjectSchema(nodeId, (ObjectSchema) schema);
-          break;
-        case DataSchema.SCHEMA_NUMBER_TYPE:
-          addNumberSchema(nodeId, (NumberSchema) schema);
-          break;
-      }
-    }
-    
-    private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
-      model.add(rdfFactory.createStatement(nodeId, RDF.TYPE, JSONSchema.ObjectSchema));
-      
-      Map<String, DataSchema> properties = schema.getProperties();
-      
-      for (String propertyName : properties.keySet()) {
-        Resource propertyId = rdfFactory.createBNode();
-        
-        model.add(rdfFactory.createStatement(nodeId, JSONSchema.properties, propertyId));
-        model.add(rdfFactory.createStatement(propertyId, JSONSchema.propertyName, 
-            rdfFactory.createLiteral(propertyName)));
-        
-        addDataSchema(propertyId, properties.get(propertyName));
-      }
-      
-      for (String required : schema.getRequiredProperties()) {
-        model.add(rdfFactory.createStatement(nodeId, JSONSchema.required, 
-            rdfFactory.createLiteral(required)));
-      }
-    }
-    
-    private void addNumberSchema(Resource nodeId, NumberSchema schema) {
-      model.add(rdfFactory.createStatement(nodeId, RDF.TYPE, JSONSchema.NumberSchema));
-      
-      if (schema.getMinimum().isPresent()) {
-        model.add(rdfFactory.createStatement(nodeId, JSONSchema.minimum, 
-            rdfFactory.createLiteral(schema.getMinimum().get())));
-      }
-      
-      if (schema.getMaximum().isPresent()) {
-        model.add(rdfFactory.createStatement(nodeId, JSONSchema.maximum, 
-            rdfFactory.createLiteral(schema.getMaximum().get())));
-      }
-    }
-    
-    private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
-      for (HTTPForm form : interaction.getForms()) {
-        BNode formId = rdfFactory.createBNode();
-        
-        model.add(rdfFactory.createStatement(interactionId, TD.form, formId));
-        
-        model.add(rdfFactory.createStatement(formId, HTV.methodName, 
-            rdfFactory.createLiteral(form.getMethodName())));
-        model.add(rdfFactory.createStatement(formId, TD.href, 
-            rdfFactory.createIRI(form.getHref())));
-        model.add(rdfFactory.createStatement(formId, TD.contentType, 
-            rdfFactory.createLiteral(form.getContentType())));
-        
-        // TODO: refactor when adding other interaction affordances
-        if (interaction instanceof Action) {
-          model.add(rdfFactory.createStatement(formId, TD.op, 
-              rdfFactory.createLiteral("invokeaction")));
-        }
-      }
-    }
-    
-    public TDGraphWriter build() {
-      return new TDGraphWriter(this.model);
-    }
   }
 }
