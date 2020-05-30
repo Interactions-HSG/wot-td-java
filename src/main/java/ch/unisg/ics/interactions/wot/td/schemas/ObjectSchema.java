@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.schema;
+package ch.unisg.ics.interactions.wot.td.schemas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,13 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class ObjectSchema extends DataSchema {
   private Map<String, DataSchema> properties;
   private List<String> required;
   
-  public ObjectSchema(String type, Map<String, DataSchema> properties, List<String> required) {
-    super(type);
+  protected ObjectSchema(Set<String> semanticTypes, Map<String, DataSchema> properties, 
+      List<String> required) {
+    super(DataSchema.OBJECT, semanticTypes);
+    
     this.properties = properties;
     this.required = required;
   }
@@ -30,7 +33,7 @@ public class ObjectSchema extends DataSchema {
     return required;
   }
 
-  public static class Builder {
+  public static class Builder extends DataSchema.Builder<ObjectSchema, ObjectSchema.Builder> {
     private Map<String, DataSchema> properties;
     private List<String> required;
     
@@ -62,7 +65,7 @@ public class ObjectSchema extends DataSchema {
         }
       }
       
-      return new ObjectSchema(DataSchema.OBJECT, properties, required);
+      return new ObjectSchema(semanticTypes, properties, required);
     }
   }
 }

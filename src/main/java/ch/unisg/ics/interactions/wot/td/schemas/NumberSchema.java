@@ -1,13 +1,14 @@
-package ch.unisg.ics.interactions.wot.td.schema;
+package ch.unisg.ics.interactions.wot.td.schemas;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class NumberSchema extends DataSchema {
   private Optional<Double> minimum;
   private Optional<Double> maximum;
   
-  private NumberSchema(String type, Optional<Double> minimum, Optional<Double> maximum) {
-    super(type);
+  protected NumberSchema(Set<String> semanticTypes, Optional<Double> minimum, Optional<Double> maximum) {
+    super(DataSchema.NUMBER, semanticTypes);
     
     this.minimum = minimum;
     this.maximum = maximum;
@@ -21,7 +22,7 @@ public class NumberSchema extends DataSchema {
     return maximum;
   }
   
-  public static class Builder {
+  public static class Builder extends DataSchema.Builder<NumberSchema, NumberSchema.Builder> {
     private Optional<Double> minimum;
     private Optional<Double> maximum;
     
@@ -41,7 +42,7 @@ public class NumberSchema extends DataSchema {
     }
     
     public NumberSchema build() {
-      return new NumberSchema(DataSchema.NUMBER, minimum, maximum);
+      return new NumberSchema(semanticTypes, minimum, maximum);
     }
   }
 }

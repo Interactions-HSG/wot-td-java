@@ -38,7 +38,7 @@ public class InteractionAffordance {
     return forms;
   }
   
-  /** Abstract builder for interaction affordances, intended to be extended. */
+  /** Abstract builder for interaction affordances. */
   public static abstract class Builder<T extends InteractionAffordance, S extends Builder<T,S>> {
     protected Optional<String> title;
     protected List<String> types;

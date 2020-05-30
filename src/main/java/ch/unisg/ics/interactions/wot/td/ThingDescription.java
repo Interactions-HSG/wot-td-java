@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 
 /**
  * TODO: add javadoc
@@ -31,10 +31,10 @@ public class ThingDescription {
   // The base URI that is used for all relative URI references throughout a TD document
   private Optional<String> baseURI;
   // All Action-based interaction affordances of the Thing
-  private List<Action> actions;
+  private List<ActionAffordance> actions;
   
   protected ThingDescription(String title, Set<String> security, Optional<String> uri, Set<String> types, 
-      Optional<String> baseURI, List<Action> actions) {
+      Optional<String> baseURI, List<ActionAffordance> actions) {
     
     this.title = title;
     
@@ -72,7 +72,7 @@ public class ThingDescription {
   public Set<String> getSupportedActionTypes() {
     Set<String> supportedActionTypes = new HashSet<String>();
     
-    for (Action action : actions) {
+    for (ActionAffordance action : actions) {
       supportedActionTypes.addAll(action.getTypes());
     }
     
@@ -80,8 +80,8 @@ public class ThingDescription {
   }
   
   // TODO: returns only the first action of a given type
-  public Optional<Action> getAction(String actionType) {
-    for (Action action : actions) {
+  public Optional<ActionAffordance> getAction(String actionType) {
+    for (ActionAffordance action : actions) {
       if (action.getTypes().contains(actionType)) {
         return Optional.of(action);
       }
@@ -90,7 +90,7 @@ public class ThingDescription {
     return Optional.empty();
   }
   
-  public List<Action> getActions() {
+  public List<ActionAffordance> getActions() {
     return this.actions;
   }
   
@@ -102,7 +102,7 @@ public class ThingDescription {
     private Set<String> types;
     
     private Optional<String> baseURI;
-    private List<Action> actions;
+    private List<ActionAffordance> actions;
     
     public Builder(String title) {
       this.title = title;
@@ -112,7 +112,7 @@ public class ThingDescription {
       this.types= new HashSet<String>();
       
       this.baseURI = Optional.empty();
-      this.actions = new ArrayList<Action>();
+      this.actions = new ArrayList<ActionAffordance>();
     }
     
     public Builder addSecurity(String security) {
@@ -145,12 +145,12 @@ public class ThingDescription {
       return this;
     }
     
-    public Builder addAction(Action action) {
+    public Builder addAction(ActionAffordance action) {
       this.actions.add(action);
       return this;
     }
     
-    public Builder addActions(List<Action> actions) {
+    public Builder addActions(List<ActionAffordance> actions) {
       this.actions.addAll(actions);
       return this;
     }

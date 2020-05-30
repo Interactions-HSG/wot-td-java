@@ -16,7 +16,7 @@ public class ActionTest {
     HTTPForm form = new HTTPForm("GET", "http://example.org", "application/json", 
         new HashSet<String>());
     
-    Action action = (new Action.Builder(form)).build();
+    ActionAffordance action = (new ActionAffordance.Builder(form)).build();
     
     List<HTTPForm> forms = action.getForms();
     
@@ -37,7 +37,7 @@ public class ActionTest {
     
     List<HTTPForm> formList = new ArrayList<HTTPForm>(Arrays.asList(form1, form2, form3));
     
-    Action action = (new Action.Builder(formList)).build();
+    ActionAffordance action = (new ActionAffordance.Builder(formList)).build();
     
     List<HTTPForm> forms = action.getForms();
     
@@ -53,7 +53,7 @@ public class ActionTest {
     HTTPForm form = new HTTPForm("GET", "http://example.org", "application/json", 
         new HashSet<String>());
     
-    Action action = (new Action.Builder(form))
+    ActionAffordance action = (new ActionAffordance.Builder(form))
         .addTitle("Turn on")
         .addType("iot:TurnOn")
         // TODO: add schema as well

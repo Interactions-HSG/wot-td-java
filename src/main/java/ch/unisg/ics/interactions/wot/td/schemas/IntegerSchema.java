@@ -1,13 +1,15 @@
-package ch.unisg.ics.interactions.wot.td.schema;
+package ch.unisg.ics.interactions.wot.td.schemas;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class IntegerSchema extends DataSchema {
   private Optional<Integer> minimum;
   private Optional<Integer> maximum;
   
-  private IntegerSchema(String type, Optional<Integer> minimum, Optional<Integer> maximum) {
-    super(type);
+  protected IntegerSchema(Set<String> semanticTypes, Optional<Integer> minimum,
+      Optional<Integer> maximum) {
+    super(DataSchema.INTEGER, semanticTypes);
     
     this.minimum = minimum;
     this.maximum = maximum;
@@ -21,7 +23,7 @@ public class IntegerSchema extends DataSchema {
     return maximum;
   }
   
-  public static class Builder {
+  public static class Builder extends DataSchema.Builder<IntegerSchema, IntegerSchema.Builder> {
     private Optional<Integer> minimum;
     private Optional<Integer> maximum;
     
@@ -41,7 +43,7 @@ public class IntegerSchema extends DataSchema {
     }
     
     public IntegerSchema build() {
-      return new IntegerSchema(DataSchema.INTEGER, minimum, maximum);
+      return new IntegerSchema(semanticTypes, minimum, maximum);
     }
   }
 }

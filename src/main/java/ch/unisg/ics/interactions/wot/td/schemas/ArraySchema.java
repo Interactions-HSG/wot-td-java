@@ -1,17 +1,18 @@
-package ch.unisg.ics.interactions.wot.td.schema;
+package ch.unisg.ics.interactions.wot.td.schemas;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class ArraySchema extends DataSchema {
   private List<DataSchema> items;
   private Optional<Integer> minItems;
   private Optional<Integer> maxItems;
   
-  public ArraySchema(String type, List<DataSchema> items, Optional<Integer> minItems, 
+  protected ArraySchema(Set<String> semanticTypes, List<DataSchema> items, Optional<Integer> minItems, 
       Optional<Integer> maxItems) {
-    super(type);
+    super(DataSchema.ARRAY, semanticTypes);
     
     this.items = items;
     this.minItems = minItems;
@@ -30,7 +31,7 @@ public class ArraySchema extends DataSchema {
     return maxItems;
   }
   
-  public static class Builder {
+  public static class Builder extends DataSchema.Builder<ArraySchema, ArraySchema.Builder> {
     private List<DataSchema> items;
     private Optional<Integer> minItems;
     private Optional<Integer> maxItems;
@@ -63,7 +64,7 @@ public class ArraySchema extends DataSchema {
     }
     
     public ArraySchema build() {
-      return new ArraySchema(DataSchema.ARRAY, items, minItems, maxItems);
+      return new ArraySchema(semanticTypes, items, minItems, maxItems);
     }
   }
 }

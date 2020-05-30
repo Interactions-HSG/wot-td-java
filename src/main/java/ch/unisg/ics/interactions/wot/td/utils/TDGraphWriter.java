@@ -17,12 +17,12 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -101,7 +101,7 @@ public class TDGraphWriter {
   private TDGraphWriter addActions() {
     ValueFactory rdfFactory = SimpleValueFactory.getInstance();
     
-    for (Action action : td.getActions()) {
+    for (ActionAffordance action : td.getActions()) {
       BNode actionId = rdfFactory.createBNode();
       
       graphBuilder.add(thingId, TD.interaction, actionId);
@@ -131,7 +131,7 @@ public class TDGraphWriter {
   }
     
   private void addDataSchema(Resource nodeId, DataSchema schema) {
-    switch (schema.getType()) {
+    switch (schema.getDatatype()) {
       case DataSchema.OBJECT:
         addObjectSchema(nodeId, (ObjectSchema) schema);
         break;
@@ -187,7 +187,7 @@ public class TDGraphWriter {
       graphBuilder.add(formId, TD.contentType, form.getContentType());
       
       // TODO: refactor when adding other interaction affordances
-      if (interaction instanceof Action) {
+      if (interaction instanceof ActionAffordance) {
         graphBuilder.add(formId, TD.op, "invokeaction");
       }
     }

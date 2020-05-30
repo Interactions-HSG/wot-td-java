@@ -8,10 +8,10 @@ import java.util.Optional;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
-import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class TDGraphReaderTest {
@@ -79,7 +79,7 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(TEST_TD);
     
     assertEquals(1, reader.readActions().size());
-    Action action = reader.readActions().get(0);
+    ActionAffordance action = reader.readActions().get(0);
     
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getTypes().size());
@@ -99,15 +99,15 @@ public class TDGraphReaderTest {
   public void testReadOneActionWithKeyValueInput() {
     TDGraphReader reader = new TDGraphReader(TEST_TD);
     
-    Action action = reader.readActions().get(0);
+    ActionAffordance action = reader.readActions().get(0);
     
     Optional<DataSchema> input = action.getInputSchema();
     assertTrue(input.isPresent());
-    assertEquals(DataSchema.OBJECT, input.get().getType());
+    assertEquals(DataSchema.OBJECT, input.get().getDatatype());
     
     ObjectSchema schema = (ObjectSchema) input.get();
     assertEquals(1, schema.getProperties().size());
-    assertEquals(DataSchema.NUMBER, schema.getProperties().get("value").getType());
+    assertEquals(DataSchema.NUMBER, schema.getProperties().get("value").getDatatype());
     
     assertEquals(1, schema.getRequiredProperties().size());
     assertEquals("value", schema.getRequiredProperties().get(0));
@@ -126,7 +126,7 @@ public class TDGraphReaderTest {
     assertEquals(1, td.getActions().size());
     
     // Check action metadata
-    Action action = td.getActions().get(0);
+    ActionAffordance action = td.getActions().get(0);
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getForms().size());
     
@@ -139,11 +139,11 @@ public class TDGraphReaderTest {
     
     // Check action input data schema
     ObjectSchema input = (ObjectSchema) action.getInputSchema().get();
-    assertEquals(DataSchema.OBJECT, input.getType());
+    assertEquals(DataSchema.OBJECT, input.getDatatype());
     assertEquals(1, input.getProperties().size());
     assertEquals(1, input.getRequiredProperties().size());
     
-    assertEquals(DataSchema.NUMBER, input.getProperties().get("value").getType());
+    assertEquals(DataSchema.NUMBER, input.getProperties().get("value").getDatatype());
     assertTrue(input.getRequiredProperties().contains("value"));
   }
 }

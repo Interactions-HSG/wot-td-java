@@ -19,11 +19,11 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
-import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 
 public class TDGraphWriterTest {
   private final static String THING_TITLE = "My Thing";
@@ -177,7 +177,7 @@ public class TDGraphWriterTest {
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
-    Action simpleAction = new Action.Builder(new HTTPForm("PUT", "http://example.org/action", 
+    ActionAffordance simpleAction = new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
         "application/json", new HashSet<String>()))
         .addTitle("My Action")
         .addType("http://iotschema.org/MyAction")
@@ -236,7 +236,7 @@ public class TDGraphWriterTest {
         .addRequiredProperties("value")
         .build();
     
-    Action actionWithInput = new Action.Builder(new HTTPForm("PUT", "http://example.org/action", 
+    ActionAffordance actionWithInput = new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
         "application/json", new HashSet<String>()))
         .addTitle("My Action")
         .addInputSchema(schema)

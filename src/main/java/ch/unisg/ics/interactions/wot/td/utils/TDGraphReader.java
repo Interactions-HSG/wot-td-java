@@ -24,12 +24,12 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.Action;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -132,8 +132,8 @@ public class TDGraphReader {
     return Models.objectStrings(model.filter(thingId, TD.security, null));
   }
   
-  List<Action> readActions() {
-    List<Action> actions = new ArrayList<Action>();
+  List<ActionAffordance> readActions() {
+    List<ActionAffordance> actions = new ArrayList<ActionAffordance>();
     
     Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId, 
         TD.interaction, null));
@@ -144,7 +144,7 @@ public class TDGraphReader {
       }
       
       List<HTTPForm> forms = readForms(affordanceId, InteractionAffordance.ACTION);
-      Action.Builder actionBuilder = new Action.Builder(forms);
+      ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
       
       Set<IRI> actionTypes = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
       actionBuilder.addTypes(actionTypes.stream().map(type -> type.stringValue()).collect(Collectors.toList()));
