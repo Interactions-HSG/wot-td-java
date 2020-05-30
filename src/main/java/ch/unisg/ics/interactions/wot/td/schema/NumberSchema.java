@@ -41,7 +41,7 @@ public class NumberSchema extends DataSchema {
     }
     
     public NumberSchema build() {
-      return new NumberSchema(DataSchema.SCHEMA_NUMBER_TYPE, minimum, maximum);
+      return new NumberSchema(DataSchema.NUMBER, minimum, maximum);
     }
   }
 }

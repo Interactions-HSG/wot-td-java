@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.junit.Test;
 
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.Action;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
@@ -102,13 +103,47 @@ public class TDGraphReaderTest {
     
     Optional<DataSchema> input = action.getInputSchema();
     assertTrue(input.isPresent());
-    assertEquals(DataSchema.SCHEMA_OBJECT_TYPE, input.get().getType());
+    assertEquals(DataSchema.OBJECT, input.get().getType());
     
     ObjectSchema schema = (ObjectSchema) input.get();
     assertEquals(1, schema.getProperties().size());
-    assertEquals(DataSchema.SCHEMA_NUMBER_TYPE, schema.getProperties().get("value").getType());
+    assertEquals(DataSchema.NUMBER, schema.getProperties().get("value").getType());
     
     assertEquals(1, schema.getRequiredProperties().size());
     assertEquals("value", schema.getRequiredProperties().get(0));
+  }
+  
+  @Test
+  public void testFullTDRead() {
+    ThingDescription td = TDGraphReader.readFromString(TEST_TD);
+    
+    // Check metadata
+    assertEquals("My Thing", td.getTitle());
+    assertEquals("http://example.org/#thing", td.getThingURI().get());
+    assertEquals(1, td.getTypes().size());
+    assertTrue(td.getTypes().contains("http://www.w3.org/ns/td#Thing"));
+    assertTrue(td.getSecurity().contains(ThingDescription.DEFAULT_SECURITY_SCHEMA));
+    assertEquals(1, td.getActions().size());
+    
+    // Check action metadata
+    Action action = td.getActions().get(0);
+    assertEquals("My Action", action.getTitle().get());
+    assertEquals(1, action.getForms().size());
+    
+    // Check action form
+    HTTPForm form = action.getForms().get(0);
+    assertEquals("PUT", form.getMethodName());
+    assertEquals("http://example.org/action", form.getHref());
+    assertEquals("application/json", form.getContentType());
+    assertTrue(form.getOperations().contains("invokeaction"));
+    
+    // Check action input data schema
+    ObjectSchema input = (ObjectSchema) action.getInputSchema().get();
+    assertEquals(DataSchema.OBJECT, input.getType());
+    assertEquals(1, input.getProperties().size());
+    assertEquals(1, input.getRequiredProperties().size());
+    
+    assertEquals(DataSchema.NUMBER, input.getProperties().get("value").getType());
+    assertTrue(input.getRequiredProperties().contains("value"));
   }
 }

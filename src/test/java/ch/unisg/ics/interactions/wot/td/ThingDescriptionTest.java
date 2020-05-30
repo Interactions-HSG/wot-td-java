@@ -19,7 +19,7 @@ public class ThingDescriptionTest {
   @Test
   public void testURI() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addURI("http://example.org/#thing")
+        .addThingURI("http://example.org/#thing")
         .build();
     
     assertEquals("http://example.org/#thing", td.getThingURI().get());
@@ -52,7 +52,7 @@ public class ThingDescriptionTest {
   @Test
   public void testBaseURI() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addURI("http://example.org/#thing")
+        .addThingURI("http://example.org/#thing")
         .addBaseURI("http://example.org/")
         .build();
     

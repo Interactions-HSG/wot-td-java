@@ -63,7 +63,7 @@ public class ArraySchema extends DataSchema {
     }
     
     public ArraySchema build() {
-      return new ArraySchema(DataSchema.SCHEMA_ARRAY_TYPE, items, minItems, maxItems);
+      return new ArraySchema(DataSchema.ARRAY, items, minItems, maxItems);
     }
   }
 }

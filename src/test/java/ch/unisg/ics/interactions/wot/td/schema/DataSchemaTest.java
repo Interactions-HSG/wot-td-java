@@ -9,13 +9,13 @@ public class DataSchemaTest {
 
   @Test
   public void testBasicSchemas() {
-    DataSchema stringSchema = new DataSchema(DataSchema.SCHEMA_STRING_TYPE);
+    DataSchema stringSchema = new DataSchema(DataSchema.STRING);
     assertEquals("string", stringSchema.getType());
     
-    DataSchema booleanSchema = new DataSchema(DataSchema.SCHEMA_BOOLEAN_TYPE);
+    DataSchema booleanSchema = new DataSchema(DataSchema.BOOLEAN);
     assertEquals("boolean", booleanSchema.getType());
     
-    DataSchema nullSchema = new DataSchema(DataSchema.SCHEMA_NULL_TYPE);
+    DataSchema nullSchema = new DataSchema(DataSchema.NULL);
     assertEquals("null", nullSchema.getType());
   }
   
@@ -63,12 +63,12 @@ public class DataSchemaTest {
   public void testObjectSchema() {
     ObjectSchema schema = (new ObjectSchema.Builder())
         .addProperty("id", (new IntegerSchema.Builder()).build())
-        .addProperty("active", new DataSchema(DataSchema.SCHEMA_BOOLEAN_TYPE))
-        .addProperty("first_name", new DataSchema(DataSchema.SCHEMA_STRING_TYPE))
-        .addProperty("last_name", new DataSchema(DataSchema.SCHEMA_STRING_TYPE))
+        .addProperty("active", new DataSchema(DataSchema.BOOLEAN))
+        .addProperty("first_name", new DataSchema(DataSchema.STRING))
+        .addProperty("last_name", new DataSchema(DataSchema.STRING))
         .addProperty("age", (new IntegerSchema.Builder()).addMaximum(18).addMaximum(150).build())
         .addProperty("height", (new NumberSchema.Builder()).addMaximum(299.99).addMaximum(100.0).build())
-        .addProperty("connections", new DataSchema(DataSchema.SCHEMA_NULL_TYPE))
+        .addProperty("connections", new DataSchema(DataSchema.NULL))
         .addRequiredProperties("id", "active")
         .build();
     
@@ -85,19 +85,19 @@ public class DataSchemaTest {
     assertTrue(schema.getRequiredProperties().contains("id"));
     assertTrue(schema.getRequiredProperties().contains("active"));
     
-    assertEquals(DataSchema.SCHEMA_INTEGER_TYPE, schema.getProperty("id").get().getType());
-    assertEquals(DataSchema.SCHEMA_BOOLEAN_TYPE, schema.getProperty("active").get().getType());
-    assertEquals(DataSchema.SCHEMA_STRING_TYPE, schema.getProperty("first_name").get().getType());
-    assertEquals(DataSchema.SCHEMA_STRING_TYPE, schema.getProperty("last_name").get().getType());
-    assertEquals(DataSchema.SCHEMA_INTEGER_TYPE, schema.getProperty("age").get().getType());
-    assertEquals(DataSchema.SCHEMA_NUMBER_TYPE, schema.getProperty("height").get().getType());
-    assertEquals(DataSchema.SCHEMA_NULL_TYPE, schema.getProperty("connections").get().getType());
+    assertEquals(DataSchema.INTEGER, schema.getProperty("id").get().getType());
+    assertEquals(DataSchema.BOOLEAN, schema.getProperty("active").get().getType());
+    assertEquals(DataSchema.STRING, schema.getProperty("first_name").get().getType());
+    assertEquals(DataSchema.STRING, schema.getProperty("last_name").get().getType());
+    assertEquals(DataSchema.INTEGER, schema.getProperty("age").get().getType());
+    assertEquals(DataSchema.NUMBER, schema.getProperty("height").get().getType());
+    assertEquals(DataSchema.NULL, schema.getProperty("connections").get().getType());
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testObjectSchemaMissingRequired() {
     (new ObjectSchema.Builder())
-        .addProperty("full_name", new DataSchema(DataSchema.SCHEMA_STRING_TYPE))
+        .addProperty("full_name", new DataSchema(DataSchema.STRING))
         .addRequiredProperties("id")
         .build();
   }
@@ -106,7 +106,7 @@ public class DataSchemaTest {
   public void testSchemaNestedObjects() {
     ObjectSchema userSchema = (new ObjectSchema.Builder())
         .addProperty("id", (new IntegerSchema.Builder()).build())
-        .addProperty("full_name", new DataSchema(DataSchema.SCHEMA_STRING_TYPE))
+        .addProperty("full_name", new DataSchema(DataSchema.STRING))
         .addRequiredProperties("id")
         .build();
     
@@ -142,9 +142,9 @@ public class DataSchemaTest {
   public void testArraySchemaMultipleItems() {
     IntegerSchema integerSchema = (new IntegerSchema.Builder()).build();
     NumberSchema numberSchema = new NumberSchema.Builder().build();
-    DataSchema stringSchema = new DataSchema(DataSchema.SCHEMA_STRING_TYPE);
-    DataSchema booleanSchema = new DataSchema(DataSchema.SCHEMA_BOOLEAN_TYPE);
-    DataSchema nullSchema = new DataSchema(DataSchema.SCHEMA_NULL_TYPE);
+    DataSchema stringSchema = new DataSchema(DataSchema.STRING);
+    DataSchema booleanSchema = new DataSchema(DataSchema.BOOLEAN);
+    DataSchema nullSchema = new DataSchema(DataSchema.NULL);
     
     ArraySchema array = (new ArraySchema.Builder())
         .addItem(integerSchema)
@@ -182,7 +182,7 @@ public class DataSchemaTest {
   public void testSchemaArrayOfObjects() {
     ObjectSchema userSchema = (new ObjectSchema.Builder())
         .addProperty("id", (new IntegerSchema.Builder()).build())
-        .addProperty("full_name", new DataSchema(DataSchema.SCHEMA_STRING_TYPE))
+        .addProperty("full_name", new DataSchema(DataSchema.STRING))
         .addRequiredProperties("id")
         .build();
     
@@ -196,8 +196,8 @@ public class DataSchemaTest {
         .build();
     
     assertEquals(2, userGroup.getProperties().size());
-    assertEquals(DataSchema.SCHEMA_INTEGER_TYPE, userGroup.getProperty("count").get().getType());
-    assertEquals(DataSchema.SCHEMA_ARRAY_TYPE, userGroup.getProperty("users").get().getType());
+    assertEquals(DataSchema.INTEGER, userGroup.getProperty("count").get().getType());
+    assertEquals(DataSchema.ARRAY, userGroup.getProperty("users").get().getType());
     assertEquals(userSchema, ((ArraySchema) userGroup.getProperty("users").get()).getItems().get(0));
   }
 }

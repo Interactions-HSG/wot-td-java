@@ -125,7 +125,7 @@ public class ThingDescription {
       return this;
     }
     
-    public Builder addURI(String uri) {
+    public Builder addThingURI(String uri) {
       this.uri = Optional.of(uri);
       return this;
     }

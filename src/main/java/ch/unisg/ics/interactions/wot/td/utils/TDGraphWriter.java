@@ -38,7 +38,18 @@ public class TDGraphWriter {
   private ThingDescription td;
   private ModelBuilder graphBuilder;
   
-  public TDGraphWriter(ThingDescription td) {
+  public static String write(ThingDescription td) {
+    TDGraphWriter tdWriter = new TDGraphWriter(td)
+        .addTypes()
+        .addTitle()
+        .addSecurity()
+        .addBaseURI()
+        .addActions();
+    
+    return tdWriter.write(RDFFormat.TURTLE);
+  }
+  
+  private TDGraphWriter(ThingDescription td) {
     ValueFactory rdfFactory = SimpleValueFactory.getInstance();
     
     this.thingId = (td.getThingURI().isEmpty()) ? rdfFactory.createBNode()
@@ -121,10 +132,10 @@ public class TDGraphWriter {
     
   private void addDataSchema(Resource nodeId, DataSchema schema) {
     switch (schema.getType()) {
-      case DataSchema.SCHEMA_OBJECT_TYPE:
+      case DataSchema.OBJECT:
         addObjectSchema(nodeId, (ObjectSchema) schema);
         break;
-      case DataSchema.SCHEMA_NUMBER_TYPE:
+      case DataSchema.NUMBER:
         addNumberSchema(nodeId, (NumberSchema) schema);
         break;
     }
@@ -182,7 +193,7 @@ public class TDGraphWriter {
     }
   }
   
-  public String write(RDFFormat format) {
+  private String write(RDFFormat format) {
     OutputStream out = new ByteArrayOutputStream();
     
     try {
@@ -196,16 +207,5 @@ public class TDGraphWriter {
     }
     
     return out.toString();
-  }
-  
-  public static String write(RDFFormat format, ThingDescription td) {
-    TDGraphWriter tdWriter = new TDGraphWriter(td)
-        .addTypes()
-        .addTitle()
-        .addSecurity()
-        .addBaseURI()
-        .addActions();
-    
-    return tdWriter.write(format);
   }
 }

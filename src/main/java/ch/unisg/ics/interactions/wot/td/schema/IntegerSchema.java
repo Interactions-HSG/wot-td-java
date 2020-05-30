@@ -41,7 +41,7 @@ public class IntegerSchema extends DataSchema {
     }
     
     public IntegerSchema build() {
-      return new IntegerSchema(DataSchema.SCHEMA_INTEGER_TYPE, minimum, maximum);
+      return new IntegerSchema(DataSchema.INTEGER, minimum, maximum);
     }
   }
 }

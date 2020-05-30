@@ -45,7 +45,7 @@ public class TDGraphWriterTest {
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertEquals(testModel, tdModel);
@@ -65,11 +65,11 @@ public class TDGraphWriterTest {
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addURI(THING_IRI)
+        .addThingURI(THING_IRI)
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertTrue(Models.isomorphic(testModel, tdModel));
@@ -89,13 +89,13 @@ public class TDGraphWriterTest {
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addURI(THING_IRI)
+        .addThingURI(THING_IRI)
         .addType("http://w3id.org/eve#Artifact")
         .addType("http://iotschema.org/Light")
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertEquals(testModel, tdModel);
@@ -117,13 +117,13 @@ public class TDGraphWriterTest {
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addURI(THING_IRI)
+        .addThingURI(THING_IRI)
         .addType("http://w3id.org/eve#Artifact")
         .addType("http://w3id.org/eve#Artifact")
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertTrue(Models.isomorphic(testModel, tdModel));
@@ -142,11 +142,11 @@ public class TDGraphWriterTest {
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addURI(THING_IRI)
+        .addThingURI(THING_IRI)
         .addBaseURI("http://example.org/")
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertTrue(Models.isomorphic(testModel, tdModel));
@@ -184,13 +184,13 @@ public class TDGraphWriterTest {
         .build();
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addURI(THING_IRI)
+        .addThingURI(THING_IRI)
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .addBaseURI("http://example.org/")
         .addAction(simpleAction)
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertEquals(testModel, tdModel);
@@ -243,13 +243,13 @@ public class TDGraphWriterTest {
         .build();
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addURI(THING_IRI)
+        .addThingURI(THING_IRI)
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .addBaseURI("http://example.org/")
         .addAction(actionWithInput)
         .build();
     
-    String description = TDGraphWriter.write(RDFFormat.TURTLE, td);
+    String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
     assertEquals(testModel, tdModel);

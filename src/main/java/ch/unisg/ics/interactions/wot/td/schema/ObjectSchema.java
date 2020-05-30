@@ -62,7 +62,7 @@ public class ObjectSchema extends DataSchema {
         }
       }
       
-      return new ObjectSchema(DataSchema.SCHEMA_OBJECT_TYPE, properties, required);
+      return new ObjectSchema(DataSchema.OBJECT, properties, required);
     }
   }
 }

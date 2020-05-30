@@ -44,7 +44,29 @@ public class TDGraphReader {
   private Resource thingId;
   private Model model;
   
-  public TDGraphReader(String representation) {
+  public static ThingDescription readFromString(String representation) {
+    
+    TDGraphReader reader = new TDGraphReader(representation);
+    
+    ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
+        .addTypes(reader.readThingTypes())
+        .addSecurity(reader.readSecuritySchemas())
+        .addActions(reader.readActions());
+    
+    Optional<String> thingURI = reader.getThingURI();
+    if (thingURI.isPresent()) {
+      tdBuilder.addThingURI(thingURI.get());
+    }
+    
+    Optional<String> base = reader.readBaseURI();
+    if (base.isPresent()) {
+      tdBuilder.addBaseURI(base.get());
+    }
+    
+    return tdBuilder.build();
+  }
+  
+  TDGraphReader(String representation) {
     loadModel(representation, "");
     
     Optional<String> baseURI = readBaseURI();
@@ -74,13 +96,21 @@ public class TDGraphReader {
     }
   }
   
-  public String readThingTitle() {
+  Optional<String> getThingURI() {
+    if (thingId instanceof IRI) {
+      return Optional.of(thingId.stringValue());
+    }
+    
+    return Optional.empty();
+  }
+  
+  String readThingTitle() {
     Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, TD.title, null));
     
     return thingTitle.get().stringValue();
   }
   
-  public Set<String> readThingTypes() {
+  Set<String> readThingTypes() {
     Set<IRI> thingTypes = Models.objectIRIs(model.filter(thingId, RDF.TYPE, null));
     
     return thingTypes.stream()
@@ -88,7 +118,7 @@ public class TDGraphReader {
         .collect(Collectors.toSet());
   }
   
-  public Optional<String> readBaseURI() {
+  Optional<String> readBaseURI() {
     Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, TD.base, null));
     
     if (baseURI.isPresent()) {
@@ -98,11 +128,11 @@ public class TDGraphReader {
     return Optional.empty();
   }
   
-  public Set<String> readSecuritySchemas() {
+  Set<String> readSecuritySchemas() {
     return Models.objectStrings(model.filter(thingId, TD.security, null));
   }
   
-  public List<Action> readActions() {
+  List<Action> readActions() {
     List<Action> actions = new ArrayList<Action>();
     
     Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId, 
@@ -244,11 +274,5 @@ public class TDGraphReader {
     }
     
     return forms;
-  }
-  
-  public static ThingDescription readFromString(RDFFormat format, String representation, 
-      String baseURI) {
-    
-    return null;
   }
 }
