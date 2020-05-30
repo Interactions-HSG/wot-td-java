@@ -25,6 +25,11 @@ public class NumberSchema extends DataSchema {
     private Optional<Double> minimum;
     private Optional<Double> maximum;
     
+    public Builder() {
+      this.minimum = Optional.empty();
+      this.maximum = Optional.empty();
+    }
+    
     public Builder addMinimum(double minimum) {
       this.minimum = Optional.of(minimum);
       return this;

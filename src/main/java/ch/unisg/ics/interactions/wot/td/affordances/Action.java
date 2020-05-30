@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import ch.unisg.ics.interactions.wot.td.schema.Schema;
+import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
 
 /**
  * TODO: add javadoc
@@ -15,23 +15,23 @@ import ch.unisg.ics.interactions.wot.td.schema.Schema;
  */
 public class Action extends InteractionAffordance {
   // TODO: currently Schema just holds an RDF graph
-  private Optional<Schema> inputSchema;
+  private Optional<DataSchema> input;
   
   // TODO: add outputschema, safe, idempotent
   
   protected Action(Optional<String> title, List<String> types, List<HTTPForm> forms, 
-      Optional<Schema> inputSchema) {
+      Optional<DataSchema> input) {
     super(title, types, forms);
     
-    this.inputSchema = inputSchema;
+    this.input = input;
   }
   
-  public Optional<Schema> getInputSchema() {
-    return inputSchema;
+  public Optional<DataSchema> getInputSchema() {
+    return input;
   }
   
   public static class Builder extends InteractionAffordance.Builder<Action, Action.Builder> {
-    private Optional<Schema> inputSchema;
+    private Optional<DataSchema> inputSchema;
     
     public Builder(List<HTTPForm> forms) {
       super(forms);
@@ -43,7 +43,7 @@ public class Action extends InteractionAffordance {
       this(new ArrayList<HTTPForm>(Arrays.asList(form)));
     }
     
-    public Builder addInputSchema(Schema inputSchema) {
+    public Builder addInputSchema(DataSchema inputSchema) {
       this.inputSchema = Optional.of(inputSchema);
       return this;
     }

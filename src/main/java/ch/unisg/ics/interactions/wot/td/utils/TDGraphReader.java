@@ -28,6 +28,10 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.Action;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
+import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchemaVocab;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
 /**
@@ -121,12 +125,73 @@ public class TDGraphReader {
         actionBuilder.addTitle(actionTitle.get().stringValue());
       }
       
-      // TODO: input schema, output schema
+      Optional<Resource> schemaId = Models.objectResource(model.filter(affordanceId, 
+          rdf4jIRI(TDVocab.input), null));
+      if (schemaId.isPresent()) {
+        try {
+          Optional<DataSchema> input = readDataSchema(schemaId.get());
+          if (input.isPresent()) {
+            actionBuilder.addInputSchema(input.get());
+          }
+        } catch (InvalidTDException e) {
+          throw new InvalidTDException("Invalid input schema for action: " + 
+              ((actionTitle.isPresent()) ? actionTitle.get().stringValue() : "anonymous") + 
+              ". " + e.getMessage());
+        }
+      }
+      // TODO: output schema
       
       actions.add(actionBuilder.build());
     }
     
     return actions;
+  }
+  
+  private Optional<DataSchema> readDataSchema(Resource schemaId) {
+    Optional<IRI> type = Models.objectIRI(model.filter(schemaId, RDF.TYPE, null));
+    if (type.isPresent()) {
+      if (type.get().equals(JSONSchemaVocab.ObjectSchema)) {
+        return readObjectSchema(schemaId);
+      } if (type.get().equals(JSONSchemaVocab.NumberSchema)) {
+        return Optional.of((new NumberSchema.Builder()).build());
+      }
+    }
+    
+    return Optional.empty();
+  }
+  
+  private Optional<DataSchema> readObjectSchema(Resource schemaId) {
+    ObjectSchema.Builder builder = new ObjectSchema.Builder();
+    
+    /* Read properties */
+    Set<Resource> propertyIds = Models.objectResources(model.filter(schemaId, 
+        JSONSchemaVocab.properties, null));
+    
+    for (Resource property : propertyIds) {
+      Optional<DataSchema> propertySchema = readDataSchema(property);
+      
+      if (propertySchema.isPresent()) {
+        // Each property of an object should also have an associated property name
+        Optional<Literal> propertyName = Models.objectLiteral(model.filter(property, 
+            JSONSchemaVocab.propertyName, null));
+        
+        if (propertyName.isEmpty()) {
+          throw new InvalidTDException("ObjectSchema property does not contain a property name.");
+        }
+        
+        builder.addProperty(propertyName.get().stringValue(), propertySchema.get());
+      }
+    }
+    
+    /* Read required properties */
+    Set<Literal> requiredProperties = Models.objectLiterals(model.filter(schemaId, 
+        JSONSchemaVocab.required, null));
+    
+    for (Literal requiredProp : requiredProperties) {
+      builder.addRequiredProperties(requiredProp.stringValue());
+    }
+    
+    return Optional.of(builder.build());
   }
   
   private List<HTTPForm> readForms(Resource affordanceId, String affordanceType) {

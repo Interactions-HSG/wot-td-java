@@ -3,11 +3,8 @@ package ch.unisg.ics.interactions.wot.td.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Optional;
+import java.util.Map;
 
-import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.rdf4j.RDF4JBlankNodeOrIRI;
-import org.apache.commons.rdf.rdf4j.RDF4JGraph;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -23,7 +20,10 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.Action;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.schema.Schema;
+import ch.unisg.ics.interactions.wot.td.schema.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schema.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schema.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchemaVocab;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
 
 /**
@@ -135,22 +135,62 @@ public class TDGraphWriter {
         addFormsForInteraction(actionId, action);
         
         if (action.getInputSchema().isPresent()) {
-          Schema schema = action.getInputSchema().get();
-          Resource schemaId = ((RDF4JBlankNodeOrIRI) schema.getSchemaIRI()).asValue();
-          Graph inputGraph = schema.getGraph();
+          DataSchema schema = action.getInputSchema().get();
           
-          if (inputGraph instanceof RDF4JGraph) {
-            Optional<Model> input = ((RDF4JGraph) inputGraph).asModel();
-            
-            if (input.isPresent()) {
-              model.add(rdfFactory.createStatement(actionId, rdf4jIRI(TDVocab.input), schemaId));
-              model.addAll(input.get());
-            }
-          }
+          Resource inputId = rdfFactory.createBNode();
+          model.add(rdfFactory.createStatement(actionId, rdf4jIRI(TDVocab.input), inputId));
+          
+          addDataSchema(inputId, schema);
         }
       }
       
       return this;
+    }
+    
+    private void addDataSchema(Resource nodeId, DataSchema schema) {
+      switch (schema.getType()) {
+        case DataSchema.SCHEMA_OBJECT_TYPE:
+          addObjectSchema(nodeId, (ObjectSchema) schema);
+          break;
+        case DataSchema.SCHEMA_NUMBER_TYPE:
+          addNumberSchema(nodeId, (NumberSchema) schema);
+          break;
+      }
+    }
+    
+    private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
+      model.add(rdfFactory.createStatement(nodeId, RDF.TYPE, JSONSchemaVocab.ObjectSchema));
+      
+      Map<String, DataSchema> properties = schema.getProperties();
+      
+      for (String propertyName : properties.keySet()) {
+        Resource propertyId = rdfFactory.createBNode();
+        
+        model.add(rdfFactory.createStatement(nodeId, JSONSchemaVocab.properties, propertyId));
+        model.add(rdfFactory.createStatement(propertyId, JSONSchemaVocab.propertyName, 
+            rdfFactory.createLiteral(propertyName)));
+        
+        addDataSchema(propertyId, properties.get(propertyName));
+      }
+      
+      for (String required : schema.getRequiredProperties()) {
+        model.add(rdfFactory.createStatement(nodeId, JSONSchemaVocab.required, 
+            rdfFactory.createLiteral(required)));
+      }
+    }
+    
+    private void addNumberSchema(Resource nodeId, NumberSchema schema) {
+      model.add(rdfFactory.createStatement(nodeId, RDF.TYPE, JSONSchemaVocab.NumberSchema));
+      
+      if (schema.getMinimum().isPresent()) {
+        model.add(rdfFactory.createStatement(nodeId, JSONSchemaVocab.minimum, 
+            rdfFactory.createLiteral(schema.getMinimum().get())));
+      }
+      
+      if (schema.getMaximum().isPresent()) {
+        model.add(rdfFactory.createStatement(nodeId, JSONSchemaVocab.maximum, 
+            rdfFactory.createLiteral(schema.getMaximum().get())));
+      }
     }
     
     private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {

@@ -25,6 +25,11 @@ public class IntegerSchema extends DataSchema {
     private Optional<Integer> minimum;
     private Optional<Integer> maximum;
     
+    public Builder() {
+      this.minimum = Optional.empty();
+      this.maximum = Optional.empty();
+    }
+    
     public Builder addMinimum(Integer minimum) {
       this.minimum = Optional.of(minimum);
       return this;

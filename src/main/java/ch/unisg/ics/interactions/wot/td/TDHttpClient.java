@@ -34,29 +34,30 @@ public class TDHttpClient {
   public HttpResponse performActionByType(IRI actionTypeIRI, Map<IRI, Object> input) {
     Optional<Action> action = td.getAction(actionTypeIRI.getIRIString());
     
+    // TODO: update implementation!
     if (action.isPresent()) {
-      List<HTTPForm> forms = action.get().getForms();
-      Optional<Schema> inputSchema = action.get().getInputSchema();
-      
-      if (!forms.isEmpty()) {
-        // TODO: select form
-        HTTPForm form = forms.get(0);
-        
-        try {
-          HttpUriRequest request = buildHttpRequest(actionTypeIRI, form, inputSchema, input);
-          
-          System.out.println("Ready to execute request for: " + request.getRequestLine() + ", with input: " + input);
-          
-          HttpClient client = HttpClientBuilder.create().build();
-          HttpResponse response = client.execute(request);
-          
-          System.out.println("Status code: " + response.getStatusLine().getStatusCode());
-          
-          return response;
-        } catch (Exception e) {
-          LOGGER.error(e.getMessage());
-        }
-      }
+//      List<HTTPForm> forms = action.get().getForms();
+//      Optional<Schema> inputSchema = action.get().getInputSchema();
+//      
+//      if (!forms.isEmpty()) {
+//        // TODO: select form
+//        HTTPForm form = forms.get(0);
+//        
+//        try {
+//          HttpUriRequest request = buildHttpRequest(actionTypeIRI, form, inputSchema, input);
+//          
+//          System.out.println("Ready to execute request for: " + request.getRequestLine() + ", with input: " + input);
+//          
+//          HttpClient client = HttpClientBuilder.create().build();
+//          HttpResponse response = client.execute(request);
+//          
+//          System.out.println("Status code: " + response.getStatusLine().getStatusCode());
+//          
+//          return response;
+//        } catch (Exception e) {
+//          LOGGER.error(e.getMessage());
+//        }
+//      }
     }
     
     return null;
