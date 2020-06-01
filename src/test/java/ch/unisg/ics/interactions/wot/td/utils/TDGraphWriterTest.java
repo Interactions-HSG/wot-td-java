@@ -23,6 +23,7 @@ import org.junit.Test;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
@@ -346,6 +347,8 @@ public class TDGraphWriterTest {
   public void testWriteNestedSemanticObjectInput() throws RDFParseException, RDFHandlerException, 
       IOException {
     
+    String prefix = "https://example.org/#";
+    
     String testTD = 
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
@@ -397,31 +400,29 @@ public class TDGraphWriterTest {
         "        ]\n" + 
         "    ] ." ;
     
-    String prefix = "https://example.org/#";
-    
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     DataSchema schema = new ObjectSchema.Builder()
         .addSemanticType(prefix + "SemObject")
         .addProperty("string_value", (new StringSchema.Builder()
-          .addSemanticType(prefix + "SemString")
-          .build()))
+            .addSemanticType(prefix + "SemString")
+            .build()))
         .addProperty("inner_object", (new ObjectSchema.Builder()
-          .addSemanticType(prefix + "AnotherSemObject")
-          .addProperty("boolean_value", (new BooleanSchema.Builder()
-              .addSemanticType(prefix + "SemBoolean")
-              .build()))
-          .addProperty("integer_value", (new IntegerSchema.Builder()
-              .addSemanticType(prefix + "SemInteger")
-              .build()))
-          .addProperty("number_value", (new NumberSchema.Builder()
-            .addSemanticType(prefix + "SemNumber")
+            .addSemanticType(prefix + "AnotherSemObject")
+            .addProperty("boolean_value", (new BooleanSchema.Builder()
+                .addSemanticType(prefix + "SemBoolean")
+                .build()))
+            .addProperty("integer_value", (new IntegerSchema.Builder()
+                .addSemanticType(prefix + "SemInteger")
+                .build()))
+            .addProperty("number_value", (new NumberSchema.Builder()
+                .addSemanticType(prefix + "SemNumber")
+                .build()))
+            .addProperty("null_value", (new NullSchema.Builder()
+                .addSemanticType(prefix + "SemNull")
+                .build()))
+            .addRequiredProperties("integer_value")
             .build()))
-          .addProperty("null_value", (new NullSchema.Builder()
-            .addSemanticType(prefix + "SemNull")
-            .build()))
-          .addRequiredProperties("integer_value")
-          .build()))
         .addRequiredProperties("string_value")
         .build();
     
@@ -441,6 +442,250 @@ public class TDGraphWriterTest {
     String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
+    assertTrue(Models.isomorphic(testModel, tdModel));
+  }
+  
+  @Test
+  public void testWriteInputObjectWithArray() throws RDFParseException, RDFHandlerException, 
+      IOException {
+    
+    String prefix = "https://example.org/#";
+    
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+        "@prefix ex: <https://example.org/#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
+        "    td:base <http://example.org/> ;\n" + 
+        "    td:interaction [\n" + 
+        "        a td:ActionAffordance ;\n" + 
+        "        td:title \"My Action\" ;\n" + 
+        "        td:form [\n" + 
+        "            htv:methodName \"PUT\" ;\n" + 
+        "            td:href <http://example.org/action> ;\n" + 
+        "            td:contentType \"application/json\";\n" + 
+        "            td:op \"invokeaction\";\n" + 
+        "        ] ;\n" + 
+        "        td:input [\n" + 
+        "            a js:ObjectSchema, ex:UserDB ;\n" +
+        "            js:properties [\n" + 
+        "                a js:IntegerSchema, ex:UserCount ;\n" + 
+        "                js:propertyName \"count\";\n" +
+        "            ] ;\n" +
+        "            js:properties [\n" + 
+        "                a js:ArraySchema, ex:UserAccountList ;\n" + 
+        "                js:propertyName \"user_list\";\n" +
+        "                js:minItems \"0\"^^xsd:int ;\n" +
+        "                js:maxItems \"100\"^^xsd:int ;\n" +
+        "                js:items [\n" + 
+        "                    a js:ObjectSchema, ex:UserAccount ;\n" +
+        "                    js:properties [\n" + 
+        "                        a js:StringSchema, ex:FullName ;\n" + 
+        "                        js:propertyName \"full_name\";\n" +
+        "                    ] ;\n" +
+        "                    js:required \"full_name\" ;\n" +
+        "                ] ;\n" +
+        "            ] ;\n" +
+        "            js:required \"count\" ;\n" +
+        "        ]\n" + 
+        "    ] ." ;
+    
+    Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
+    
+    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addThingURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
+        .addBaseURI("http://example.org/")
+        .addAction(new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
+            "application/json", new HashSet<String>()))
+            .addTitle("My Action")
+            .addInputSchema(new ObjectSchema.Builder()
+                .addSemanticType(prefix + "UserDB")
+                .addProperty("count", new IntegerSchema.Builder()
+                    .addSemanticType(prefix + "UserCount")
+                    .build())
+                .addProperty("user_list", new ArraySchema.Builder()
+                    .addSemanticType(prefix + "UserAccountList")
+                    .addMaxItems(100)
+                    .addMinItems(0)
+                    .addItem(new ObjectSchema.Builder()
+                        .addSemanticType(prefix + "UserAccount")
+                        .addProperty("full_name", new StringSchema.Builder()
+                            .addSemanticType(prefix + "FullName")
+                            .build())
+                        .addRequiredProperties("full_name")
+                        .build())
+                    .build())
+                .addRequiredProperties("count")
+                .build())
+            .build())
+        .build();
+    
+    String description = TDGraphWriter.write(td);
+    Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
+    
+    assertTrue(Models.isomorphic(testModel, tdModel));
+  }
+  
+  @Test
+  public void testWriteInputArrayOneObject() throws RDFParseException, RDFHandlerException, 
+      IOException {
+    
+    String prefix = "https://example.org/#";
+    
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+        "@prefix ex: <https://example.org/#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
+        "    td:base <http://example.org/> ;\n" + 
+        "    td:interaction [\n" + 
+        "        a td:ActionAffordance ;\n" + 
+        "        td:title \"My Action\" ;\n" + 
+        "        td:form [\n" + 
+        "            htv:methodName \"PUT\" ;\n" + 
+        "            td:href <http://example.org/action> ;\n" + 
+        "            td:contentType \"application/json\";\n" + 
+        "            td:op \"invokeaction\";\n" + 
+        "        ] ;\n" + 
+        "        td:input [\n" + 
+        "            a js:ArraySchema, ex:UserAccountList ;\n" + 
+        "            js:minItems \"0\"^^xsd:int ;\n" +
+        "            js:maxItems \"100\"^^xsd:int ;\n" +
+        "            js:items [\n" + 
+        "                a js:ObjectSchema, ex:UserAccount ;\n" +
+        "                js:properties [\n" + 
+        "                    a js:StringSchema, ex:FullName ;\n" + 
+        "                    js:propertyName \"full_name\";\n" +
+        "                ] ;\n" +
+        "                js:required \"full_name\" ;\n" +
+        "            ] ;\n" +
+        "        ] ;\n" +
+        "    ] ." ;
+    
+    Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
+    
+    ObjectSchema userAccount = new ObjectSchema.Builder()
+        .addSemanticType(prefix + "UserAccount")
+        .addProperty("full_name", new StringSchema.Builder()
+            .addSemanticType(prefix + "FullName")
+            .build())
+        .addRequiredProperties("full_name")
+        .build();
+    
+    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addThingURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
+        .addBaseURI("http://example.org/")
+        .addAction(new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
+            "application/json", new HashSet<String>()))
+            .addTitle("My Action")
+            .addInputSchema(new ArraySchema.Builder()
+                .addSemanticType(prefix + "UserAccountList")
+                .addMaxItems(100)
+                .addMinItems(0)
+                .addItem(userAccount)
+                .build())
+            .build())
+        .build();
+    
+    String description = TDGraphWriter.write(td);
+    Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
+    
+    assertEquals(testModel, tdModel);
+    assertTrue(Models.isomorphic(testModel, tdModel));
+  }
+  
+  @Test
+  public void testWriteInputArrayMultipleObjects() throws RDFParseException, RDFHandlerException, 
+      IOException {
+    
+    String prefix = "https://example.org/#";
+    
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+        "@prefix ex: <https://example.org/#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
+        "    td:base <http://example.org/> ;\n" + 
+        "    td:interaction [\n" + 
+        "        a td:ActionAffordance ;\n" + 
+        "        td:title \"My Action\" ;\n" + 
+        "        td:form [\n" + 
+        "            htv:methodName \"PUT\" ;\n" + 
+        "            td:href <http://example.org/action> ;\n" + 
+        "            td:contentType \"application/json\";\n" + 
+        "            td:op \"invokeaction\";\n" + 
+        "        ] ;\n" + 
+        "        td:input [\n" + 
+        "            a js:ArraySchema, ex:UserAccountList ;\n" + 
+        "            js:minItems \"0\"^^xsd:int ;\n" +
+        "            js:maxItems \"100\"^^xsd:int ;\n" +
+        "            js:items [\n" + 
+        "                a js:ObjectSchema, ex:UserAccount ;\n" +
+        "                js:properties [\n" + 
+        "                    a js:StringSchema, ex:FullName ;\n" + 
+        "                    js:propertyName \"full_name\";\n" +
+        "                ] ;\n" +
+        "                js:required \"full_name\" ;\n" +
+        "            ] ;\n" +
+        "            js:items [\n" + 
+        "                a js:ObjectSchema, ex:UserAccount ;\n" +
+        "                js:properties [\n" + 
+        "                    a js:StringSchema, ex:FullName ;\n" + 
+        "                    js:propertyName \"full_name\";\n" +
+        "                ] ;\n" +
+        "                js:required \"full_name\" ;\n" +
+        "            ] ;\n" +
+        "        ] ;\n" +
+        "    ] ." ;
+    
+    Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
+    
+    ObjectSchema userAccount = new ObjectSchema.Builder()
+        .addSemanticType(prefix + "UserAccount")
+        .addProperty("full_name", new StringSchema.Builder()
+            .addSemanticType(prefix + "FullName")
+            .build())
+        .addRequiredProperties("full_name")
+        .build();
+    
+    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addThingURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
+        .addBaseURI("http://example.org/")
+        .addAction(new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
+            "application/json", new HashSet<String>()))
+            .addTitle("My Action")
+            .addInputSchema(new ArraySchema.Builder()
+                .addSemanticType(prefix + "UserAccountList")
+                .addMaxItems(100)
+                .addMinItems(0)
+                .addItem(userAccount)
+                .addItem(userAccount)
+                .build())
+            .build())
+        .build();
+    
+    String description = TDGraphWriter.write(td);
+    Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
+    
+    assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
   

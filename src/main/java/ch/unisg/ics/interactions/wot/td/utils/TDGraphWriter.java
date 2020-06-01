@@ -22,6 +22,7 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
+import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
@@ -140,6 +141,9 @@ public class TDGraphWriter {
       case DataSchema.OBJECT:
         addObjectSchema(nodeId, (ObjectSchema) schema);
         break;
+      case DataSchema.ARRAY:
+        addArraySchema(nodeId, (ArraySchema) schema);
+        break;
       case DataSchema.BOOLEAN:
         addSimpleSchema(nodeId, schema, JSONSchema.BooleanSchema);
         break;
@@ -180,6 +184,25 @@ public class TDGraphWriter {
     /* Add names of required properties */
     for (String required : schema.getRequiredProperties()) {
       graphBuilder.add(nodeId, JSONSchema.required, required);
+    }
+  }
+  
+  private void addArraySchema(Resource nodeId, ArraySchema schema) {
+    graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.ArraySchema);
+    addSemanticTypesforDataSchema(nodeId, schema);
+    
+    if (schema.getMinItems().isPresent()) {
+      graphBuilder.add(nodeId, JSONSchema.minItems, schema.getMinItems().get().intValue());
+    }
+    
+    if (schema.getMaxItems().isPresent()) {
+      graphBuilder.add(nodeId, JSONSchema.maxItems, schema.getMaxItems().get().intValue());
+    }
+    
+    for (DataSchema item : schema.getItems()) {
+      BNode itemId = SimpleValueFactory.getInstance().createBNode();
+      graphBuilder.add(nodeId, JSONSchema.items, itemId);
+      addDataSchema(itemId, item);
     }
   }
   

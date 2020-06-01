@@ -38,6 +38,8 @@ public class ArraySchema extends DataSchema {
     
     public Builder() {
       this.items = new ArrayList<DataSchema>();
+      this.minItems = Optional.empty();
+      this.maxItems = Optional.empty();
     }
     
     public Builder addItem(DataSchema item) {
