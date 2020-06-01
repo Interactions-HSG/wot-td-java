@@ -13,12 +13,12 @@ public class ActionTest {
 
   @Test
   public void testOneForm() {
-    HTTPForm form = new HTTPForm("GET", "http://example.org", "application/json", 
+    Form form = new Form("GET", "http://example.org", "application/json", 
         new HashSet<String>());
     
     ActionAffordance action = (new ActionAffordance.Builder(form)).build();
     
-    List<HTTPForm> forms = action.getForms();
+    List<Form> forms = action.getForms();
     
     assertEquals(1, forms.size());
     assertEquals(form, forms.get(0));
@@ -26,20 +26,20 @@ public class ActionTest {
   
   @Test
   public void testMultipleForms() {
-    HTTPForm form1 = new HTTPForm("GET", "http://example.org", "application/json", 
+    Form form1 = new Form("GET", "http://example.org", "application/json", 
         new HashSet<String>());
     
-    HTTPForm form2 = new HTTPForm("POST", "http://example.org", "application/json", 
+    Form form2 = new Form("POST", "http://example.org", "application/json", 
         new HashSet<String>());
     
-    HTTPForm form3 = new HTTPForm("PUT", "http://example.org", "application/json", 
+    Form form3 = new Form("PUT", "http://example.org", "application/json", 
         new HashSet<String>());
     
-    List<HTTPForm> formList = new ArrayList<HTTPForm>(Arrays.asList(form1, form2, form3));
+    List<Form> formList = new ArrayList<Form>(Arrays.asList(form1, form2, form3));
     
     ActionAffordance action = (new ActionAffordance.Builder(formList)).build();
     
-    List<HTTPForm> forms = action.getForms();
+    List<Form> forms = action.getForms();
     
     assertEquals(3, forms.size());
     
@@ -50,12 +50,12 @@ public class ActionTest {
   
   @Test
   public void testFullOptionAction() {
-    HTTPForm form = new HTTPForm("GET", "http://example.org", "application/json", 
+    Form form = new Form("GET", "http://example.org", "application/json", 
         new HashSet<String>());
     
     ActionAffordance action = (new ActionAffordance.Builder(form))
         .addTitle("Turn on")
-        .addType("iot:TurnOn")
+        .addSemanticType("iot:TurnOn")
         // TODO: add schema as well
         //.addInputSchema(inputSchema)
         .build();

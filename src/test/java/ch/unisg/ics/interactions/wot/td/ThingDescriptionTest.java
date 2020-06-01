@@ -28,25 +28,25 @@ public class ThingDescriptionTest {
   @Test
   public void testOneType() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addType("http://w3id.org/eve#Artifact")
+        .addSemanticType("http://w3id.org/eve#Artifact")
         .build();
     
-    assertEquals(1, td.getTypes().size());
-    assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
+    assertEquals(1, td.getSemanticTypes().size());
+    assertTrue(td.getSemanticTypes().contains("http://w3id.org/eve#Artifact"));
   }
   
   @Test
   public void testMultipleTypes() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addType(TD.Thing.stringValue())
-        .addType("http://w3id.org/eve#Artifact")
-        .addType("http://iot-schema.org/eve#Light")
+        .addSemanticType(TD.Thing.stringValue())
+        .addSemanticType("http://w3id.org/eve#Artifact")
+        .addSemanticType("http://iot-schema.org/eve#Light")
         .build();
     
-    assertEquals(3, td.getTypes().size());
-    assertTrue(td.getTypes().contains(TD.Thing.stringValue()));
-    assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
-    assertTrue(td.getTypes().contains("http://iot-schema.org/eve#Light"));
+    assertEquals(3, td.getSemanticTypes().size());
+    assertTrue(td.getSemanticTypes().contains(TD.Thing.stringValue()));
+    assertTrue(td.getSemanticTypes().contains("http://w3id.org/eve#Artifact"));
+    assertTrue(td.getSemanticTypes().contains("http://iot-schema.org/eve#Light"));
   }
   
   @Test

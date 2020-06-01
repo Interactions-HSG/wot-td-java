@@ -20,7 +20,7 @@ public class ActionAffordance extends InteractionAffordance {
   
   // TODO: add safe, idempotent
   
-  protected ActionAffordance(Optional<String> title, List<String> types, List<HTTPForm> forms, 
+  protected ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
       Optional<DataSchema> input, Optional<DataSchema> output) {
     
     super(title, types, forms);
@@ -42,15 +42,15 @@ public class ActionAffordance extends InteractionAffordance {
     private Optional<DataSchema> inputSchema;
     private Optional<DataSchema> outputSchema;
     
-    public Builder(List<HTTPForm> forms) {
+    public Builder(List<Form> forms) {
       super(forms);
       
       this.inputSchema = Optional.empty();
       this.outputSchema = Optional.empty();
     }
     
-    public Builder(HTTPForm form) {
-      this(new ArrayList<HTTPForm>(Arrays.asList(form)));
+    public Builder(Form form) {
+      this(new ArrayList<Form>(Arrays.asList(form)));
     }
     
     public Builder addInputSchema(DataSchema inputSchema) {

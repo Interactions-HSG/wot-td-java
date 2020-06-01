@@ -61,7 +61,7 @@ public class ThingDescription {
     return uri;
   }
   
-  public Set<String> getTypes() {
+  public Set<String> getSemanticTypes() {
     return types;
   }
   
@@ -135,12 +135,12 @@ public class ThingDescription {
       return this;
     }
     
-    public Builder addType(String type) {
+    public Builder addSemanticType(String type) {
       this.types.add(type);
       return this;
     }
     
-    public Builder addTypes(Set<String> thingTypes) {
+    public Builder addSemanticTypes(Set<String> thingTypes) {
       this.types.addAll(thingTypes);
       return this;
     }

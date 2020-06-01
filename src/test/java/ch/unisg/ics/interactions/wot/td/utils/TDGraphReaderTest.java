@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
@@ -140,7 +140,7 @@ public class TDGraphReaderTest {
     assertEquals(TD.ActionAffordance.stringValue(), action.getTypes().get(0));
     
     assertEquals(1, action.getForms().size());
-    HTTPForm form = action.getForms().get(0);
+    Form form = action.getForms().get(0);
     
     assertEquals("PUT", form.getMethodName());
     assertEquals("http://example.org/action", form.getHref());
@@ -277,8 +277,8 @@ public class TDGraphReaderTest {
     // Check metadata
     assertEquals("My Thing", td.getTitle());
     assertEquals("http://example.org/#thing", td.getThingURI().get());
-    assertEquals(1, td.getTypes().size());
-    assertTrue(td.getTypes().contains("http://www.w3.org/ns/td#Thing"));
+    assertEquals(1, td.getSemanticTypes().size());
+    assertTrue(td.getSemanticTypes().contains("http://www.w3.org/ns/td#Thing"));
     assertTrue(td.getSecurity().contains(ThingDescription.DEFAULT_SECURITY_SCHEMA));
     assertEquals(1, td.getActions().size());
     
@@ -288,7 +288,7 @@ public class TDGraphReaderTest {
     assertEquals(1, action.getForms().size());
     
     // Check action form
-    HTTPForm form = action.getForms().get(0);
+    Form form = action.getForms().get(0);
     assertEquals("PUT", form.getMethodName());
     assertEquals("http://example.org/action", form.getHref());
     assertEquals("application/json", form.getContentType());

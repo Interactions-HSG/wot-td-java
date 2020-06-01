@@ -14,10 +14,12 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.WriterConfig;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -34,6 +36,16 @@ public class TDGraphWriter {
   private ThingDescription td;
   private ModelBuilder graphBuilder;
   
+  public TDGraphWriter(ThingDescription td) {
+    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
+    
+    this.thingId = (!td.getThingURI().isPresent()) ? rdfFactory.createBNode()
+        : rdfFactory.createIRI(td.getThingURI().get());
+    
+    this.td = td;
+    this.graphBuilder = new ModelBuilder();
+  }
+  
   public static String write(ThingDescription td) {
     TDGraphWriter tdWriter = new TDGraphWriter(td)
         .addTypes()
@@ -45,14 +57,18 @@ public class TDGraphWriter {
     return tdWriter.write(RDFFormat.TURTLE);
   }
   
-  private TDGraphWriter(ThingDescription td) {
-    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
-    
-    this.thingId = (!td.getThingURI().isPresent()) ? rdfFactory.createBNode()
-        : rdfFactory.createIRI(td.getThingURI().get());
-    
-    this.td = td;
-    this.graphBuilder = new ModelBuilder();
+  public TDGraphWriter setNamespace(String prefix, String namespace) {
+    this.graphBuilder.setNamespace(prefix, namespace);
+    return this;
+  }
+  
+  public String write() {
+    return this.addTypes()
+        .addTitle()
+        .addSecurity()
+        .addBaseURI()
+        .addActions()
+        .write(RDFFormat.TURTLE);
   }
   
   private Model getModel() {
@@ -73,7 +89,7 @@ public class TDGraphWriter {
     // TODO: To be considered: always add td:Thing as a type?
     graphBuilder.add(thingId, RDF.TYPE, TD.Thing);
     
-    for (String type : td.getTypes()) {
+    for (String type : td.getSemanticTypes()) {
       graphBuilder.add(thingId, RDF.TYPE, SimpleValueFactory.getInstance().createIRI(type));
     }
     
@@ -138,7 +154,7 @@ public class TDGraphWriter {
   private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
     ValueFactory rdfFactory = SimpleValueFactory.getInstance();
     
-    for (HTTPForm form : interaction.getForms()) {
+    for (Form form : interaction.getForms()) {
       BNode formId = rdfFactory.createBNode();
       
       graphBuilder.add(interactionId, TD.form, formId);
@@ -158,7 +174,8 @@ public class TDGraphWriter {
     OutputStream out = new ByteArrayOutputStream();
     
     try {
-      Rio.write(getModel(), out, format);
+      Rio.write(getModel(), out, format, 
+          new WriterConfig().set(BasicWriterSettings.INLINE_BLANK_NODES, true));
     } finally {
       try {
         out.close();

@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -46,7 +46,7 @@ public class TDGraphReader {
     TDGraphReader reader = new TDGraphReader(representation);
     
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
-        .addTypes(reader.readThingTypes())
+        .addSemanticTypes(reader.readThingTypes())
         .addSecurity(reader.readSecuritySchemas())
         .addActions(reader.readActions());
     
@@ -140,11 +140,11 @@ public class TDGraphReader {
         continue;
       }
       
-      List<HTTPForm> forms = readForms(affordanceId, InteractionAffordance.ACTION);
+      List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
       ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
       
       Set<IRI> actionTypes = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
-      actionBuilder.addTypes(actionTypes.stream().map(type -> type.stringValue())
+      actionBuilder.addSemanticTypes(actionTypes.stream().map(type -> type.stringValue())
           .collect(Collectors.toList()));
       
       Optional<Literal> actionTitle = Models.objectLiteral(model.filter(affordanceId, TD.title, 
@@ -189,8 +189,8 @@ public class TDGraphReader {
     return actions;
   }
   
-  private List<HTTPForm> readForms(Resource affordanceId, String affordanceType) {
-    List<HTTPForm> forms = new ArrayList<HTTPForm>();
+  private List<Form> readForms(Resource affordanceId, String affordanceType) {
+    List<Form> forms = new ArrayList<Form>();
     
     Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, TD.form, null));
     
@@ -230,7 +230,7 @@ public class TDGraphReader {
         }
       }
       
-      forms.add(new HTTPForm(methodName, hrefOpt.get().stringValue(), contentType, ops));
+      forms.add(new Form(methodName, hrefOpt.get().stringValue(), contentType, ops));
     }
     
     if (forms.size() == 0) {

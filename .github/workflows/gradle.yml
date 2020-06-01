@@ -1,6 +1,6 @@
 # This workflow builds the project with Gradle, generates coverage reports, 
 # and pushes the reports to Codecov
-name: Java CI with Gradle
+name: build 
 
 on:
   push:

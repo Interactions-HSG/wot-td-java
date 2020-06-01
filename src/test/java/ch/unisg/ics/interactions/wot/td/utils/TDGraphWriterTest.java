@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.HashSet;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.Models;
@@ -15,7 +14,7 @@ import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
@@ -87,8 +86,8 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addType("http://w3id.org/eve#Artifact")
-        .addType("http://iotschema.org/Light")
+        .addSemanticType("http://w3id.org/eve#Artifact")
+        .addSemanticType("http://iotschema.org/Light")
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
@@ -116,8 +115,8 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addType("http://w3id.org/eve#Artifact")
-        .addType("http://w3id.org/eve#Artifact")
+        .addSemanticType("http://w3id.org/eve#Artifact")
+        .addSemanticType("http://w3id.org/eve#Artifact")
         .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
         .build();
     
@@ -193,10 +192,10 @@ public class TDGraphWriterTest {
     
     Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
     
-    ActionAffordance simpleAction = new ActionAffordance.Builder(new HTTPForm("PUT", 
-        "http://example.org/action", "application/json", new HashSet<String>()))
+    ActionAffordance simpleAction = new ActionAffordance.Builder(new Form("PUT", 
+        "http://example.org/action"))
         .addTitle("My Action")
-        .addType("http://iotschema.org/MyAction")
+        .addSemanticType("http://iotschema.org/MyAction")
         .addInputSchema(new ObjectSchema.Builder()
             .addProperty("number_value", new NumberSchema.Builder().build())
             .addRequiredProperties("number_value")
@@ -219,6 +218,71 @@ public class TDGraphWriterTest {
         IO_BASE_IRI);
     
     assertEquals(testModel, tdModel);
+    assertTrue(Models.isomorphic(testModel, tdModel));
+  }
+  
+  @Test
+  public void testWriteReadmeExample() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD =
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" + 
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" + 
+        "@prefix saref: <https://w3id.org/saref#> .\n" + 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" + 
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" + 
+        "\n" + 
+        "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" + 
+        "  td:security \"nosec_sc\";\n" + 
+        "  td:title \"My Lamp Thing\" ;\n" + 
+        "  td:interaction [ a td:ActionAffordance, saref:ToggleCommand;\n" + 
+        "      td:form [\n" + 
+        "          htv:methodName \"PUT\";\n" + 
+        "          td:contentType \"application/json\";\n" + 
+        "          td:href <http://mylamp.example.org/toggle>;\n" + 
+        "          td:op \"invokeaction\"\n" + 
+        "        ];\n" + 
+        "      td:input [ a saref:OnOffState, js:ObjectSchema;\n" + 
+        "          js:properties [ a js:BooleanSchema;\n" + 
+        "              js:propertyName \"status\"\n" + 
+        "            ];\n" + 
+        "          js:required \"status\"\n" + 
+        "        ];\n" + 
+        "      td:title \"Toggle\"\n" + 
+        "    ].";
+    
+    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, 
+        testTD, "http://example.org/");
+    
+    Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
+    
+    ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
+        .addTitle("Toggle")
+        .addSemanticType("https://w3id.org/saref#ToggleCommand")
+        .addInputSchema(new ObjectSchema.Builder()
+            .addSemanticType("https://w3id.org/saref#OnOffState")
+            .addProperty("status", new BooleanSchema.Builder()
+                .build())
+            .addRequiredProperties("status")
+            .build())
+        .build();
+    
+    ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
+        .addThingURI("http://example.org/lamp123")
+        .addSemanticType("https://w3id.org/saref#LightSwitch")
+        .addAction(toggle)
+        .build();
+    
+    String description = new TDGraphWriter(td)
+        .setNamespace("td", "http://www.w3.org/ns/td#")
+        .setNamespace("htv", "http://www.w3.org/2011/http#")
+        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+        .setNamespace("saref", "https://w3id.org/saref#")
+        .write();
+    
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        "http://example.org/");
+    
+    assertEquals(testModel, tdModel);
+    
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
 }

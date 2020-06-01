@@ -18,9 +18,9 @@ public class InteractionAffordance {
   
   protected Optional<String> title;
   protected List<String> types;
-  protected List<HTTPForm> forms;
+  protected List<Form> forms;
   
-  protected InteractionAffordance(Optional<String> title, List<String> types, List<HTTPForm> forms) {
+  protected InteractionAffordance(Optional<String> title, List<String> types, List<Form> forms) {
     this.title = title;
     this.types = types;
     this.forms = forms;
@@ -34,7 +34,7 @@ public class InteractionAffordance {
     return types;
   }
   
-  public List<HTTPForm> getForms() {
+  public List<Form> getForms() {
     return forms;
   }
   
@@ -42,16 +42,16 @@ public class InteractionAffordance {
   public static abstract class Builder<T extends InteractionAffordance, S extends Builder<T,S>> {
     protected Optional<String> title;
     protected List<String> types;
-    protected List<HTTPForm> forms;
+    protected List<Form> forms;
     
-    protected Builder(List<HTTPForm> forms) {
+    protected Builder(List<Form> forms) {
       this.title = Optional.empty();
       this.types = new ArrayList<String>();
       this.forms = forms;
     }
     
-    protected Builder(HTTPForm form) {
-      this(new ArrayList<HTTPForm>(Arrays.asList((form))));
+    protected Builder(Form form) {
+      this(new ArrayList<Form>(Arrays.asList((form))));
     }
     
     @SuppressWarnings("unchecked")
@@ -61,25 +61,25 @@ public class InteractionAffordance {
     }
     
     @SuppressWarnings("unchecked")
-    public S addType(String type) {
+    public S addSemanticType(String type) {
       this.types.add(type);
       return (S) this;
     }
     
     @SuppressWarnings("unchecked")
-    public S addTypes(List<String> types) {
+    public S addSemanticTypes(List<String> types) {
       this.types.addAll(types);
       return (S) this;
     }
     
     @SuppressWarnings("unchecked")
-    public S addForm(HTTPForm form) {
+    public S addForm(Form form) {
       this.forms.add(form);
       return (S) this;
     }
     
     @SuppressWarnings("unchecked")
-    public S addForms(List<HTTPForm> forms) {
+    public S addForms(List<Form> forms) {
       this.forms.addAll(forms);
       return (S) this;
     }
