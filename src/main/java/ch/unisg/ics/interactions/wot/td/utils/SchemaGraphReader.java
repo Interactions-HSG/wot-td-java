@@ -30,7 +30,6 @@ class SchemaGraphReader {
   
   static Optional<DataSchema> readDataSchema(Resource nodeId, Model model) {
     SchemaGraphReader reader = new SchemaGraphReader(model);
-    
     return reader.readDataSchema(nodeId);
   }
   

@@ -4,21 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Optional;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
@@ -66,7 +61,8 @@ public class SchemaGraphReaderTest {
         "    js:required \"integer_value\", \"number_value\" ;\n" +
         "] .\n";
     
-    Model model = readModelFromString(RDFFormat.TURTLE, testSimpleSemObject);
+    Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSimpleSemObject, 
+        IO_BASE_IRI);
     Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ObjectSchema));
     
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
@@ -130,7 +126,8 @@ public class SchemaGraphReaderTest {
         "    js:required \"count\" ;\n" +
         "] .\n";
     
-    Model model = readModelFromString(RDFFormat.TURTLE, testSemObjectWithArray);
+    Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSemObjectWithArray, 
+        IO_BASE_IRI);
     Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ObjectSchema));
     
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
@@ -205,7 +202,8 @@ public class SchemaGraphReaderTest {
         "    js:required \"string_value\" ;\n" +
         "] .\n";
     
-    Model model = readModelFromString(RDFFormat.TURTLE, testNestedSemanticObject);
+    Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testNestedSemanticObject, 
+        IO_BASE_IRI);
     Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, 
         SimpleValueFactory.getInstance().createIRI(prefix + "SemObject")));
     
@@ -266,7 +264,7 @@ public class SchemaGraphReaderTest {
         "    ] ;\n" +
         "] .\n";
     
-    Model model = readModelFromString(RDFFormat.TURTLE, testArray);
+    Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testArray, IO_BASE_IRI);
     Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ArraySchema));
     
     DataSchema schema = SchemaGraphReader.readDataSchema(nodeId.get(), model).get();
@@ -319,7 +317,7 @@ public class SchemaGraphReaderTest {
         "    ] ;\n" +
         "] .\n";
     
-    Model model = readModelFromString(RDFFormat.TURTLE, testArray);
+    Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testArray, IO_BASE_IRI);
     Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ArraySchema));
     
     DataSchema schema = SchemaGraphReader.readDataSchema(nodeId.get(), model).get();
@@ -332,18 +330,5 @@ public class SchemaGraphReaderTest {
     assertEquals(2, array.getItems().size());
     assertEquals(DataSchema.OBJECT, array.getItems().get(0).getDatatype());
     assertEquals(DataSchema.OBJECT, array.getItems().get(1).getDatatype());
-  }
-  
-  private Model readModelFromString(RDFFormat format, String description) throws RDFParseException, 
-      RDFHandlerException, IOException {
-    StringReader stringReader = new StringReader(description);
-    
-    RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE);
-    Model model = new LinkedHashModel();
-    rdfParser.setRDFHandler(new StatementCollector(model));
-    
-    rdfParser.parse(stringReader, IO_BASE_IRI);
-    
-    return model;
   }
 }
