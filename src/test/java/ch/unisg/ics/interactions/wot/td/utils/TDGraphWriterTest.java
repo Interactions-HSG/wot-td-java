@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashSet;
+import java.util.Optional;
 
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.util.Models;
@@ -21,9 +23,14 @@ import org.junit.Test;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NullSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 public class TDGraphWriterTest {
   private final static String THING_TITLE = "My Thing";
@@ -198,13 +205,15 @@ public class TDGraphWriterTest {
   }
   
   @Test
-  public void testWriteOneActionWithInput() throws RDFParseException, RDFHandlerException, 
-      IOException {
-    
+  public void testWriteOneSemanticObjectInputNoDecimals() throws RDFParseException, 
+      RDFHandlerException, IOException {
+    // Serialization of decimal values requires specific testing
     String testTD = 
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+        "@prefix ex: <https://example.org/#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
         "    td:title \"My Thing\" ;\n" +
@@ -220,24 +229,61 @@ public class TDGraphWriterTest {
         "            td:op \"invokeaction\";\n" + 
         "        ] ;\n" + 
         "        td:input [\n" + 
-        "            a js:ObjectSchema ;\n" + 
+        "            a js:ObjectSchema, ex:SemObject ;\n" +  
         "            js:properties [\n" + 
-        "                a js:NumberSchema ;\n" + 
-        "                js:propertyName \"value\";\n" + 
+        "                a js:BooleanSchema, ex:SemBoolean ;\n" + 
+        "                js:propertyName \"boolean_value\";\n" +
         "            ] ;\n" +
-        "            js:required \"value\" ;\n" +
+        "            js:properties [\n" +
+        "                a js:IntegerSchema, ex:SemInteger ;\n" + 
+        "                js:propertyName \"integer_value\" ;\n" +
+        "                js:minimum \"-1000\"^^xsd:int ;\n" +
+        "                js:maximum \"1000\"^^xsd:int ;\n" +
+        "            ] ;\n" +
+        "            js:properties [\n" + 
+        "                a js:NumberSchema, ex:SemNumber ;\n" + 
+        "                js:propertyName \"number_value\";\n" +
+        "            ] ;\n" +
+        "            js:properties [\n" + 
+        "                a js:StringSchema, ex:SemString ;\n" + 
+        "                js:propertyName \"string_value\";\n" +
+        "            ] ;\n" +
+        "            js:properties [\n" + 
+        "                a js:NullSchema, ex:SemNull ;\n" + 
+        "                js:propertyName \"null_value\";\n" +
+        "            ] ;\n" +
+        "            js:required \"string_value\" ;\n" +
         "        ]\n" + 
         "    ] ." ;
+    
+    String prefix = "https://example.org/#";
     
     Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
     
     DataSchema schema = new ObjectSchema.Builder()
-        .addProperty("value", (new NumberSchema.Builder().build()))
-        .addRequiredProperties("value")
+        .addSemanticType(prefix + "SemObject")
+        .addProperty("boolean_value", (new BooleanSchema.Builder()
+            .addSemanticType(prefix + "SemBoolean")
+            .build()))
+        .addProperty("integer_value", (new IntegerSchema.Builder()
+            .addSemanticType(prefix + "SemInteger")
+            .addMinimum(-1000)
+            .addMaximum(1000)
+            .build()))
+        .addProperty("number_value", (new NumberSchema.Builder()
+            .addSemanticType(prefix + "SemNumber")
+            .build()))
+        .addProperty("string_value", (new StringSchema.Builder()
+            .addSemanticType(prefix + "SemString")
+            .build()))
+        .addProperty("null_value", (new NullSchema.Builder()
+            .addSemanticType(prefix + "SemNull")
+            .build()))
+        .addRequiredProperties("string_value")
         .build();
     
-    ActionAffordance actionWithInput = new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
-        "application/json", new HashSet<String>()))
+    ActionAffordance actionWithInput = new ActionAffordance.Builder(new HTTPForm("PUT", 
+        "http://example.org/action", "application/json", new HashSet<String>()))
         .addTitle("My Action")
         .addInputSchema(schema)
         .build();
@@ -252,8 +298,48 @@ public class TDGraphWriterTest {
     String description = TDGraphWriter.write(td);
     Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
     
-    assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));
+  }
+  
+  // Serialization of decimal values requires specific testing
+  @Test
+  public void testWriteOneSemanticObjectInputWithDecimals() throws RDFParseException, 
+      RDFHandlerException, IOException {
+    
+    String prefix = "https://example.org/#";
+    
+    DataSchema schema = new ObjectSchema.Builder()
+        .addSemanticType(prefix + "SemObject")
+        .addProperty("number_value", (new NumberSchema.Builder()
+            .addSemanticType(prefix + "SemNumber")
+            .addMinimum(-1000.005)
+            .addMaximum(1000.005)
+            .build()))
+        .build();
+    
+    ActionAffordance actionWithInput = new ActionAffordance.Builder(new HTTPForm("PUT", 
+        "http://example.org/action", "application/json", new HashSet<String>()))
+        .addTitle("My Action")
+        .addInputSchema(schema)
+        .build();
+    
+    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addThingURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
+        .addBaseURI("http://example.org/")
+        .addAction(actionWithInput)
+        .build();
+    
+    String description = TDGraphWriter.write(td);
+    Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
+    
+    Optional<Literal> minimum = Models.objectLiteral(tdModel.filter(null, JSONSchema.minimum, null));
+    assertTrue(minimum.isPresent());
+    assertEquals(-1000.005, minimum.get().doubleValue(), 0.001);
+    
+    Optional<Literal> maximum = Models.objectLiteral(tdModel.filter(null, JSONSchema.minimum, null));
+    assertTrue(maximum.isPresent());
+    assertEquals(-1000.005, maximum.get().doubleValue(), 0.001);
   }
   
   private Model readModelFromString(RDFFormat format, String description) 

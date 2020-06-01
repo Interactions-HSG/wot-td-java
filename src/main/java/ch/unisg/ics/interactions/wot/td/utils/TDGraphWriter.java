@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -21,6 +23,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -34,6 +37,8 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
  *
  */
 public class TDGraphWriter {
+  private final static Logger LOGGER = Logger.getLogger(TDGraphWriter.class.getCanonicalName());
+  
   private Resource thingId;
   private ThingDescription td;
   private ModelBuilder graphBuilder;
@@ -135,14 +140,30 @@ public class TDGraphWriter {
       case DataSchema.OBJECT:
         addObjectSchema(nodeId, (ObjectSchema) schema);
         break;
+      case DataSchema.BOOLEAN:
+        addSimpleSchema(nodeId, schema, JSONSchema.BooleanSchema);
+        break;
+      case DataSchema.INTEGER:
+        addIntegerSchema(nodeId, (IntegerSchema) schema);
+        break;
       case DataSchema.NUMBER:
         addNumberSchema(nodeId, (NumberSchema) schema);
+        break;
+      case DataSchema.STRING:
+        addSimpleSchema(nodeId, schema, JSONSchema.StringSchema);
+        break;
+      case DataSchema.NULL:
+        addSimpleSchema(nodeId, schema, JSONSchema.NullSchema);
+        break;
+      default:
+        LOGGER.info("Ignoring a DataSchema of unknown type: " + schema.getDatatype());
         break;
     }
   }
     
   private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
     graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.ObjectSchema);
+    addSemanticTypesforDataSchema(nodeId, schema);
     
     /* Add object properties */
     Map<String, DataSchema> properties = schema.getProperties();
@@ -161,9 +182,15 @@ public class TDGraphWriter {
       graphBuilder.add(nodeId, JSONSchema.required, required);
     }
   }
-    
-  private void addNumberSchema(Resource nodeId, NumberSchema schema) {
-    graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.NumberSchema);
+  
+  private void addSimpleSchema(Resource nodeId, DataSchema schema, IRI schemaType) {
+    graphBuilder.add(nodeId, RDF.TYPE, schemaType);
+    addSemanticTypesforDataSchema(nodeId, schema);
+  }
+  
+  private void addIntegerSchema(Resource nodeId, IntegerSchema schema) {
+    graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.IntegerSchema);
+    addSemanticTypesforDataSchema(nodeId, schema);
     
     if (schema.getMinimum().isPresent()) {
       graphBuilder.add(nodeId, JSONSchema.minimum, schema.getMinimum().get());
@@ -171,6 +198,30 @@ public class TDGraphWriter {
     
     if (schema.getMaximum().isPresent()) {
       graphBuilder.add(nodeId, JSONSchema.maximum, schema.getMaximum().get());
+    }
+  }
+  
+  private void addNumberSchema(Resource nodeId, NumberSchema schema) {
+    graphBuilder.add(nodeId, RDF.TYPE, JSONSchema.NumberSchema);
+    addSemanticTypesforDataSchema(nodeId, schema);
+    
+    if (schema.getMinimum().isPresent()) {
+      graphBuilder.add(nodeId, JSONSchema.minimum, schema.getMinimum().get());
+    }
+    
+    if (schema.getMaximum().isPresent()) {
+      graphBuilder.add(nodeId, JSONSchema.maximum, schema.getMaximum().get());
+    }
+  }
+  
+  private void addSemanticTypesforDataSchema(Resource nodeId, DataSchema schema) {
+    for (String type : schema.getSemanticTypes()) {
+      try {
+        graphBuilder.add(nodeId, RDF.TYPE, SimpleValueFactory.getInstance().createIRI(type));
+      } catch (IllegalArgumentException e) {
+        // The semantic type is not an URI, but a string label
+        graphBuilder.add(nodeId, RDF.TYPE, type);
+      }
     }
   }
     
