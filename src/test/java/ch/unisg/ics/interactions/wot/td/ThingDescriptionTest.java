@@ -1,10 +1,11 @@
 package ch.unisg.ics.interactions.wot.td;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.vocabularies.TDVocab;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class ThingDescriptionTest {
   
@@ -18,7 +19,7 @@ public class ThingDescriptionTest {
   @Test
   public void testURI() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addURI("http://example.org/#thing")
+        .addThingURI("http://example.org/#thing")
         .build();
     
     assertEquals("http://example.org/#thing", td.getThingURI().get());
@@ -31,27 +32,27 @@ public class ThingDescriptionTest {
         .build();
     
     assertEquals(1, td.getTypes().size());
-    assertEquals("http://w3id.org/eve#Artifact", td.getTypes().get(0));
+    assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
   }
   
   @Test
   public void testMultipleTypes() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addType(TDVocab.Thing.getIRIString())
+        .addType(TD.Thing.stringValue())
         .addType("http://w3id.org/eve#Artifact")
         .addType("http://iot-schema.org/eve#Light")
         .build();
     
     assertEquals(3, td.getTypes().size());
-    assertEquals(TDVocab.Thing.getIRIString(), td.getTypes().get(0));
-    assertEquals("http://w3id.org/eve#Artifact", td.getTypes().get(1));
-    assertEquals("http://iot-schema.org/eve#Light", td.getTypes().get(2));
+    assertTrue(td.getTypes().contains(TD.Thing.stringValue()));
+    assertTrue(td.getTypes().contains("http://w3id.org/eve#Artifact"));
+    assertTrue(td.getTypes().contains("http://iot-schema.org/eve#Light"));
   }
   
   @Test
   public void testBaseURI() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addURI("http://example.org/#thing")
+        .addThingURI("http://example.org/#thing")
         .addBaseURI("http://example.org/")
         .build();
     

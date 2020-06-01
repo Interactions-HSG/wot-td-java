@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.interaction;
+package ch.unisg.ics.interactions.wot.td.affordances;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,12 +11,16 @@ import java.util.Optional;
  * @author Andrei Ciortea
  *
  */
-public class Interaction {
+public class InteractionAffordance {
+  public static final String PROPERTY = "property";
+  public static final String EVENT = "event";
+  public static final String ACTION = "action";
+  
   protected Optional<String> title;
   protected List<String> types;
   protected List<HTTPForm> forms;
   
-  protected Interaction(Optional<String> title, List<String> types, List<HTTPForm> forms) {
+  protected InteractionAffordance(Optional<String> title, List<String> types, List<HTTPForm> forms) {
     this.title = title;
     this.types = types;
     this.forms = forms;
@@ -34,8 +38,8 @@ public class Interaction {
     return forms;
   }
   
-  /** Abstract builder for interaction affordances, intended to be extended. */
-  public static abstract class Builder<T extends Interaction, S extends Builder<T,S>> {
+  /** Abstract builder for interaction affordances. */
+  public static abstract class Builder<T extends InteractionAffordance, S extends Builder<T,S>> {
     protected Optional<String> title;
     protected List<String> types;
     protected List<HTTPForm> forms;
