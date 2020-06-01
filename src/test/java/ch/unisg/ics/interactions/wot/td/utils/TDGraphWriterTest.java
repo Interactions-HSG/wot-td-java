@@ -16,6 +16,9 @@ import org.junit.Test;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 
 public class TDGraphWriterTest {
   private final static String THING_TITLE = "My Thing";
@@ -38,7 +41,8 @@ public class TDGraphWriterTest {
         .build();
     
     String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
     
     assertEquals(testModel, tdModel);
     
@@ -62,7 +66,8 @@ public class TDGraphWriterTest {
         .build();
     
     String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
     
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
@@ -88,7 +93,8 @@ public class TDGraphWriterTest {
         .build();
     
     String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
     
     assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));
@@ -116,7 +122,8 @@ public class TDGraphWriterTest {
         .build();
     
     String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
     
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
@@ -139,13 +146,14 @@ public class TDGraphWriterTest {
         .build();
     
     String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
     
     assertTrue(Models.isomorphic(testModel, tdModel));
   }
   
   @Test
-  public void testWriteOneSimpleAction() throws RDFParseException, RDFHandlerException, IOException {
+  public void testWriteOneAction() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = 
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
@@ -165,14 +173,38 @@ public class TDGraphWriterTest {
         "            td:contentType \"application/json\";\n" + 
         "            td:op \"invokeaction\";\n" + 
         "        ] ;\n" + 
+        "        td:input [\n" + 
+        "            a js:ObjectSchema ;\n" + 
+        "            js:properties [\n" + 
+        "                a js:NumberSchema ;\n" +
+        "                js:propertyName \"number_value\";\n" +
+        "            ] ;\n" +
+        "            js:required \"number_value\" ;\n" +
+        "        ] ;\n" + 
+        "        td:output [\n" + 
+        "            a js:ObjectSchema ;\n" + 
+        "            js:properties [\n" + 
+        "                a js:BooleanSchema ;\n" +
+        "                js:propertyName \"boolean_value\";\n" +
+        "            ] ;\n" +
+        "            js:required \"boolean_value\" ;\n" +
+        "        ]\n" + 
         "    ] ." ;
     
     Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
     
-    ActionAffordance simpleAction = new ActionAffordance.Builder(new HTTPForm("PUT", "http://example.org/action", 
-        "application/json", new HashSet<String>()))
+    ActionAffordance simpleAction = new ActionAffordance.Builder(new HTTPForm("PUT", 
+        "http://example.org/action", "application/json", new HashSet<String>()))
         .addTitle("My Action")
         .addType("http://iotschema.org/MyAction")
+        .addInputSchema(new ObjectSchema.Builder()
+            .addProperty("number_value", new NumberSchema.Builder().build())
+            .addRequiredProperties("number_value")
+            .build())
+        .addOutputSchema(new ObjectSchema.Builder()
+            .addProperty("boolean_value", new BooleanSchema.Builder().build())
+            .addRequiredProperties("boolean_value")
+            .build())
         .build();
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
@@ -183,7 +215,8 @@ public class TDGraphWriterTest {
         .build();
     
     String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
+    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
     
     assertEquals(testModel, tdModel);
     assertTrue(Models.isomorphic(testModel, tdModel));

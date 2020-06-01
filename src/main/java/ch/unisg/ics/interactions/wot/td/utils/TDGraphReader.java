@@ -153,11 +153,11 @@ public class TDGraphReader {
         actionBuilder.addTitle(actionTitle.get().stringValue());
       }
       
-      Optional<Resource> schemaId = Models.objectResource(model.filter(affordanceId, TD.input, 
+      Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, TD.input, 
           null));
-      if (schemaId.isPresent()) {
+      if (inputSchemaId.isPresent()) {
         try {
-          Optional<DataSchema> input = SchemaGraphReader.readDataSchema(schemaId.get(), model);
+          Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
           if (input.isPresent()) {
             actionBuilder.addInputSchema(input.get());
           }
@@ -167,7 +167,21 @@ public class TDGraphReader {
               ". " + e.getMessage());
         }
       }
-      // TODO: output schema
+      
+      Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, TD.output, 
+          null));
+      if (outSchemaId.isPresent()) {
+        try {
+          Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
+          if (output.isPresent()) {
+            actionBuilder.addOutputSchema(output.get());
+          }
+        } catch (InvalidTDException e) {
+          throw new InvalidTDException("Invalid output schema for action: " + 
+              ((actionTitle.isPresent()) ? actionTitle.get().stringValue() : "anonymous") + 
+              ". " + e.getMessage());
+        }
+      }
       
       actions.add(actionBuilder.build());
     }

@@ -42,11 +42,19 @@ public class TDGraphReaderTest {
       "            a js:ObjectSchema ;\n" + 
       "            js:properties [\n" + 
       "                a js:NumberSchema ;\n" +
-      "                js:propertyName \"value\";\n" +
+      "                js:propertyName \"number_value\";\n" +
       "                js:maximum 100.05 ;\n" + 
       "                js:minimum -100.05 ;\n" +
       "            ] ;\n" +
-      "            js:required \"value\" ;\n" +
+      "            js:required \"number_value\" ;\n" +
+      "        ] ;\n" + 
+      "        td:output [\n" + 
+      "            a js:ObjectSchema ;\n" + 
+      "            js:properties [\n" + 
+      "                a js:BooleanSchema ;\n" +
+      "                js:propertyName \"boolean_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"boolean_value\" ;\n" +
       "        ]\n" + 
       "    ] ." ;
   
@@ -292,8 +300,17 @@ public class TDGraphReaderTest {
     assertEquals(1, input.getProperties().size());
     assertEquals(1, input.getRequiredProperties().size());
     
-    assertEquals(DataSchema.NUMBER, input.getProperties().get("value").getDatatype());
-    assertTrue(input.getRequiredProperties().contains("value"));
+    assertEquals(DataSchema.NUMBER, input.getProperties().get("number_value").getDatatype());
+    assertTrue(input.getRequiredProperties().contains("number_value"));
+    
+    // Check action output data schema
+    ObjectSchema output = (ObjectSchema) action.getOutputSchema().get();
+    assertEquals(DataSchema.OBJECT, output.getDatatype());
+    assertEquals(1, output.getProperties().size());
+    assertEquals(1, output.getRequiredProperties().size());
+    
+    assertEquals(DataSchema.BOOLEAN, output.getProperties().get("boolean_value").getDatatype());
+    assertTrue(output.getRequiredProperties().contains("boolean_value"));
   }
   
 }

@@ -16,28 +16,37 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 public class ActionAffordance extends InteractionAffordance {
   // TODO: currently Schema just holds an RDF graph
   private Optional<DataSchema> input;
+  private Optional<DataSchema> output;
   
-  // TODO: add outputschema, safe, idempotent
+  // TODO: add safe, idempotent
   
   protected ActionAffordance(Optional<String> title, List<String> types, List<HTTPForm> forms, 
-      Optional<DataSchema> input) {
-    super(title, types, forms);
+      Optional<DataSchema> input, Optional<DataSchema> output) {
     
+    super(title, types, forms);
     this.input = input;
+    this.output = output;
   }
   
   public Optional<DataSchema> getInputSchema() {
     return input;
   }
   
+  public Optional<DataSchema> getOutputSchema() {
+    return output;
+  }
+  
   public static class Builder 
       extends InteractionAffordance.Builder<ActionAffordance, ActionAffordance.Builder> {
+    
     private Optional<DataSchema> inputSchema;
+    private Optional<DataSchema> outputSchema;
     
     public Builder(List<HTTPForm> forms) {
       super(forms);
       
       this.inputSchema = Optional.empty();
+      this.outputSchema = Optional.empty();
     }
     
     public Builder(HTTPForm form) {
@@ -49,8 +58,13 @@ public class ActionAffordance extends InteractionAffordance {
       return this;
     }
     
+    public Builder addOutputSchema(DataSchema outputSchema) {
+      this.outputSchema = Optional.of(outputSchema);
+      return this;
+    }
+    
     public ActionAffordance build() {
-      return new ActionAffordance(this.title, this.types, this.forms, inputSchema);
+      return new ActionAffordance(this.title, this.types, this.forms, inputSchema, outputSchema);
     }
   }
 }

@@ -121,6 +121,15 @@ public class TDGraphWriter {
         
         SchemaGraphWriter.write(graphBuilder, inputId, schema);
       }
+      
+      if (action.getOutputSchema().isPresent()) {
+        DataSchema schema = action.getOutputSchema().get();
+        
+        Resource outputId = rdfFactory.createBNode();
+        graphBuilder.add(actionId, TD.output, outputId);
+        
+        SchemaGraphWriter.write(graphBuilder, outputId, schema);
+      }
     }
     
     return this;

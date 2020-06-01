@@ -49,13 +49,8 @@ public class ObjectSchema extends DataSchema {
       return this;
     }
     
-    public Builder addRequiredProperties(String propertyName, String... properties) {
-      this.required.add(propertyName);
-      
-      if (properties.length > 0) {
-        this.required.addAll(Arrays.asList(properties));
-      }
-      
+    public Builder addRequiredProperties(String... properties) {
+      this.required.addAll(Arrays.asList(properties));
       return this;
     }
     
