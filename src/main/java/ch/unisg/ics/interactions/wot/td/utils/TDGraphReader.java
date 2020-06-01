@@ -27,6 +27,7 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.HTTPForm;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
+import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
@@ -187,6 +188,8 @@ public class TDGraphReader {
     if (type.isPresent()) {
       if (type.get().equals(JSONSchema.ObjectSchema)) {
         return readObjectSchema(schemaId);
+      } else if (type.get().equals(JSONSchema.ArraySchema)) {
+        return readArraySchema(schemaId);
       } else if (type.get().equals(JSONSchema.BooleanSchema)) {
         BooleanSchema.Builder builder = new BooleanSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
@@ -211,7 +214,6 @@ public class TDGraphReader {
   
   private Optional<DataSchema> readObjectSchema(Resource schemaId) {
     ObjectSchema.Builder builder = new ObjectSchema.Builder();
-    
     readSemanticTypesForDataSchema(builder, schemaId);
     
     /* Read properties */
@@ -235,6 +237,36 @@ public class TDGraphReader {
         JSONSchema.required, null));
     for (Literal requiredProp : requiredProperties) {
       builder.addRequiredProperties(requiredProp.stringValue());
+    }
+    
+    return Optional.of(builder.build());
+  }
+  
+  private Optional<DataSchema> readArraySchema(Resource schemaId) {
+    ArraySchema.Builder builder = new ArraySchema.Builder();
+    readSemanticTypesForDataSchema(builder, schemaId);
+    
+    /* Read minItems */
+    Optional<Literal> minItems = Models.objectLiteral(model.filter(schemaId, JSONSchema.minItems, 
+        null));
+    if (minItems.isPresent()) {
+      builder.addMinItems(minItems.get().intValue());
+    }
+    
+    /* Read maxItems */
+    Optional<Literal> maxItems = Models.objectLiteral(model.filter(schemaId, JSONSchema.maxItems, 
+        null));
+    if (maxItems.isPresent()) {
+      builder.addMaxItems(maxItems.get().intValue());
+    }
+    
+    /* Read items */
+    Set<Resource> itemIds = Models.objectResources(model.filter(schemaId, JSONSchema.items, null));
+    for (Resource itemId : itemIds) {
+      Optional<DataSchema> item = readDataSchema(itemId);
+      if (item.isPresent()) {
+        builder.addItem(item.get());
+      }
     }
     
     return Optional.of(builder.build());
