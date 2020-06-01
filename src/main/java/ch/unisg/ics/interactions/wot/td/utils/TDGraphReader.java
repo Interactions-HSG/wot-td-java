@@ -197,7 +197,7 @@ public class TDGraphReader {
     for (Resource formId : formIdSet) {
       Optional<IRI> hrefOpt = Models.objectIRI(model.filter(formId, TD.href, null));
       
-      if (hrefOpt.isEmpty()) {
+      if (!hrefOpt.isPresent()) {
         continue;
       }
       
@@ -208,7 +208,7 @@ public class TDGraphReader {
       
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
           TD.contentType, null));
-      String contentType = (contentTypeOpt.isEmpty()) ? "application/json" 
+      String contentType = (!contentTypeOpt.isPresent()) ? "application/json" 
           : contentTypeOpt.get().stringValue();
       
       Set<Literal> opsLiterals = Models.objectLiterals(model.filter(formId, TD.op, null));

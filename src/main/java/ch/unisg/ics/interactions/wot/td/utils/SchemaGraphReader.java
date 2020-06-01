@@ -75,7 +75,7 @@ class SchemaGraphReader {
         // Each property of an object should also have an associated property name
         Optional<Literal> propertyName = Models.objectLiteral(model.filter(property, 
             JSONSchema.propertyName, null));
-        if (propertyName.isEmpty()) {
+        if (!propertyName.isPresent()) {
           throw new InvalidTDException("ObjectSchema property is missing a property name.");
         }
         builder.addProperty(propertyName.get().stringValue(), propertySchema.get());

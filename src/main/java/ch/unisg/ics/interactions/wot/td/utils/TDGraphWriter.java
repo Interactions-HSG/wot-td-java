@@ -48,7 +48,7 @@ public class TDGraphWriter {
   private TDGraphWriter(ThingDescription td) {
     ValueFactory rdfFactory = SimpleValueFactory.getInstance();
     
-    this.thingId = (td.getThingURI().isEmpty()) ? rdfFactory.createBNode()
+    this.thingId = (!td.getThingURI().isPresent()) ? rdfFactory.createBNode()
         : rdfFactory.createIRI(td.getThingURI().get());
     
     this.td = td;

@@ -83,8 +83,8 @@ public class DataSchemaTest {
     IntegerSchema integerSchema = (new IntegerSchema.Builder()).build();
     
     assertEquals("integer", integerSchema.getDatatype());
-    assertTrue(integerSchema.getMaximum().isEmpty());
-    assertTrue(integerSchema.getMinimum().isEmpty());
+    assertTrue(!integerSchema.getMaximum().isPresent());
+    assertTrue(!integerSchema.getMinimum().isPresent());
   }
   
   @Test
@@ -103,8 +103,8 @@ public class DataSchemaTest {
     NumberSchema numberSchema = (new NumberSchema.Builder()).build();
     
     assertEquals("number", numberSchema.getDatatype());
-    assertTrue(numberSchema.getMaximum().isEmpty());
-    assertTrue(numberSchema.getMinimum().isEmpty());
+    assertTrue(!numberSchema.getMaximum().isPresent());
+    assertTrue(!numberSchema.getMinimum().isPresent());
   }
   
   @Test
