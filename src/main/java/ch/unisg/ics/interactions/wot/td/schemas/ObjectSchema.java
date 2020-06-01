@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import ch.unisg.ics.interactions.wot.td.utils.InvalidTDException;
+
 public class ObjectSchema extends DataSchema {
   private Map<String, DataSchema> properties;
   private List<String> required;
@@ -57,10 +59,10 @@ public class ObjectSchema extends DataSchema {
       return this;
     }
     
-    public ObjectSchema build() throws IllegalArgumentException {
+    public ObjectSchema build() throws InvalidTDException {
       for (String propertyName : required) {
         if (!properties.containsKey(propertyName)) {
-          throw new IllegalArgumentException("Required property is not in the list of properties: " 
+          throw new InvalidTDException("Required property is not in the list of properties: " 
               + propertyName);
         }
       }

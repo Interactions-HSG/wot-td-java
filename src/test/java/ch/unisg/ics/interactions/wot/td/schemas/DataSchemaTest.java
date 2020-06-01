@@ -8,6 +8,8 @@ import java.util.HashSet;
 
 import org.junit.Test;
 
+import ch.unisg.ics.interactions.wot.td.utils.InvalidTDException;
+
 public class DataSchemaTest {
 
   @Test
@@ -140,7 +142,7 @@ public class DataSchemaTest {
     assertEquals(DataSchema.NULL, schema.getProperty("connections").get().getDatatype());
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidTDException.class)
   public void testObjectSchemaMissingRequired() {
     (new ObjectSchema.Builder())
         .addProperty("full_name", new StringSchema.Builder().build())
