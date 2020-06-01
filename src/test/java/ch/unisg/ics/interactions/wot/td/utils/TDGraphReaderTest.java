@@ -129,6 +129,41 @@ public class TDGraphReaderTest {
       "            js:required \"integer_value\", \"number_value\" ;\n" +
       "        ]\n";
   
+  private static final String TEST_IO_NESTED_SEMANTIC_OBJECT =
+      "        td:input [\n" + 
+      "            a js:ObjectSchema, <http://example.org/#SemObject> ;\n" +
+      "            js:properties [\n" + 
+      "                a js:StringSchema, <http://example.org/#SemString> ;\n" +
+      "                js:propertyName \"string_value\";\n" +
+      "            ] ;\n" +
+      "            js:properties [\n" + 
+      "                a js:ObjectSchema, <http://example.org/#AnotherSemObject> ;\n" +
+      "                js:propertyName \"inner_object\";\n" +
+      "                js:properties [\n" + 
+      "                    a js:BooleanSchema, <http://example.org/#SemBool> ;\n" +
+      "                    js:propertyName \"boolean_value\";\n" +
+      "                ] ;\n" +
+      "                js:properties [\n" + 
+      "                    a js:NumberSchema, <http://example.org/#SemNumber> ;\n" +
+      "                    js:propertyName \"number_value\";\n" +
+      "                    js:maximum 100.05 ;\n" + 
+      "                    js:minimum -100.05 ;\n" +
+      "                ] ;\n" +
+      "                js:properties [\n" + 
+      "                    a js:IntegerSchema, <http://example.org/#SemInt> ;\n" +
+      "                    js:propertyName \"integer_value\";\n" +
+      "                    js:maximum 100 ;\n" + 
+      "                    js:minimum -100 ;\n" +
+      "                ] ;\n" +
+      "                js:properties [\n" + 
+      "                    a js:NullSchema, <http://example.org/#SemNull> ;\n" +
+      "                    js:propertyName \"null_value\";\n" +
+      "                ] ;\n" +
+      "                js:required \"integer_value\" ;\n" +
+      "            ] ;\n" +
+      "            js:required \"string_value\" ;\n" +
+      "        ]\n";
+  
   private static final String TEST_IO_TAIL = "    ] ." ;
   
   @Test
@@ -293,7 +328,7 @@ public class TDGraphReaderTest {
   }
   
   @Test
-  public void testReadOneActionOneSemanticObjectInput() {
+  public void testReadSimpleSemanticObjectInput() {
     String prefix = "http://example.org/#";
     
     TDGraphReader reader = new TDGraphReader(TEST_IO_HEAD + TEST_IO_SIMPLE_SEMANTIC_OBJECT 
@@ -324,6 +359,47 @@ public class TDGraphReaderTest {
     assertTrue(stringProperty.getSemanticTypes().contains(prefix + "SemString"));
     
     DataSchema nullProperty = schema.getProperties().get("null_value");
+    assertEquals(DataSchema.NULL, nullProperty.getDatatype());
+    assertTrue(nullProperty.getSemanticTypes().contains(prefix + "SemNull"));
+  }
+  
+  @Test
+  public void testReadNestedSemanticObjectInput() {
+    String prefix = "http://example.org/#";
+    
+    TDGraphReader reader = new TDGraphReader(TEST_IO_HEAD + TEST_IO_NESTED_SEMANTIC_OBJECT 
+        + TEST_IO_TAIL);
+    
+    Optional<DataSchema> input = reader.readActions().get(0).getInputSchema();
+    assertTrue(input.isPresent());
+    assertEquals(DataSchema.OBJECT, input.get().getDatatype());
+    assertTrue(input.get().getSemanticTypes().contains(prefix + "SemObject"));
+    
+    ObjectSchema schema = (ObjectSchema) input.get();
+    assertEquals(2, schema.getProperties().size());
+    assertTrue(schema.getRequiredProperties().contains("string_value"));
+    
+    DataSchema stringProperty = schema.getProperties().get("string_value");
+    assertEquals(DataSchema.STRING, stringProperty.getDatatype());
+    assertTrue(stringProperty.getSemanticTypes().contains(prefix + "SemString"));
+    
+    ObjectSchema innerObject = (ObjectSchema) schema.getProperties().get("inner_object");
+    assertEquals(4, innerObject.getProperties().size());
+    assertTrue(innerObject.getRequiredProperties().contains("integer_value"));
+    
+    DataSchema booleanProperty = innerObject.getProperties().get("boolean_value");
+    assertEquals(DataSchema.BOOLEAN, booleanProperty.getDatatype());
+    assertTrue(booleanProperty.getSemanticTypes().contains(prefix + "SemBool"));
+    
+    DataSchema integerProperty = innerObject.getProperties().get("integer_value");
+    assertEquals(DataSchema.INTEGER, integerProperty.getDatatype());
+    assertTrue(integerProperty.getSemanticTypes().contains(prefix + "SemInt"));
+    
+    DataSchema numberProperty = innerObject.getProperties().get("number_value");
+    assertEquals(DataSchema.NUMBER, numberProperty.getDatatype());
+    assertTrue(numberProperty.getSemanticTypes().contains(prefix + "SemNumber"));
+    
+    DataSchema nullProperty = innerObject.getProperties().get("null_value");
     assertEquals(DataSchema.NULL, nullProperty.getDatatype());
     assertTrue(nullProperty.getSemanticTypes().contains(prefix + "SemNull"));
   }

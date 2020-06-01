@@ -342,6 +342,108 @@ public class TDGraphWriterTest {
     assertEquals(-1000.005, maximum.get().doubleValue(), 0.001);
   }
   
+  @Test
+  public void testWriteNestedSemanticObjectInput() throws RDFParseException, RDFHandlerException, 
+      IOException {
+    
+    String testTD = 
+        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+        "@prefix ex: <https://example.org/#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    td:title \"My Thing\" ;\n" +
+        "    td:security \"nosec_sc\" ;\n" +
+        "    td:base <http://example.org/> ;\n" + 
+        "    td:interaction [\n" + 
+        "        a td:ActionAffordance ;\n" + 
+        "        td:title \"My Action\" ;\n" + 
+        "        td:form [\n" + 
+        "            htv:methodName \"PUT\" ;\n" + 
+        "            td:href <http://example.org/action> ;\n" + 
+        "            td:contentType \"application/json\";\n" + 
+        "            td:op \"invokeaction\";\n" + 
+        "        ] ;\n" + 
+        "        td:input [\n" + 
+        "            a js:ObjectSchema, ex:SemObject ;\n" +
+        "            js:properties [\n" + 
+        "                a js:StringSchema, ex:SemString ;\n" + 
+        "                js:propertyName \"string_value\";\n" +
+        "            ] ;\n" +
+        "            js:properties [\n" + 
+        "                a js:ObjectSchema, ex:AnotherSemObject ;\n" + 
+        "                js:propertyName \"inner_object\";\n" +
+        "                js:properties [\n" + 
+        "                    a js:BooleanSchema, ex:SemBoolean ;\n" + 
+        "                    js:propertyName \"boolean_value\";\n" +
+        "                ] ;\n" +
+        "                js:properties [\n" +
+        "                    a js:IntegerSchema, ex:SemInteger ;\n" + 
+        "                    js:propertyName \"integer_value\" ;\n" +
+        "                ] ;\n" +
+        "                js:properties [\n" + 
+        "                    a js:NumberSchema, ex:SemNumber ;\n" + 
+        "                    js:propertyName \"number_value\";\n" +
+        "                ] ;\n" +
+        "                js:properties [\n" + 
+        "                    a js:NullSchema, ex:SemNull ;\n" + 
+        "                    js:propertyName \"null_value\";\n" +
+        "                ] ;\n" +
+        "                js:required \"integer_value\" ;\n" +
+        "            ] ;\n" +
+        "            js:required \"string_value\" ;\n" +
+        "        ]\n" + 
+        "    ] ." ;
+    
+    String prefix = "https://example.org/#";
+    
+    Model testModel = readModelFromString(RDFFormat.TURTLE, testTD);
+    
+    DataSchema schema = new ObjectSchema.Builder()
+        .addSemanticType(prefix + "SemObject")
+        .addProperty("string_value", (new StringSchema.Builder()
+          .addSemanticType(prefix + "SemString")
+          .build()))
+        .addProperty("inner_object", (new ObjectSchema.Builder()
+          .addSemanticType(prefix + "AnotherSemObject")
+          .addProperty("boolean_value", (new BooleanSchema.Builder()
+              .addSemanticType(prefix + "SemBoolean")
+              .build()))
+          .addProperty("integer_value", (new IntegerSchema.Builder()
+              .addSemanticType(prefix + "SemInteger")
+              .build()))
+          .addProperty("number_value", (new NumberSchema.Builder()
+            .addSemanticType(prefix + "SemNumber")
+            .build()))
+          .addProperty("null_value", (new NullSchema.Builder()
+            .addSemanticType(prefix + "SemNull")
+            .build()))
+          .addRequiredProperties("integer_value")
+          .build()))
+        .addRequiredProperties("string_value")
+        .build();
+    
+    ActionAffordance actionWithInput = new ActionAffordance.Builder(new HTTPForm("PUT", 
+        "http://example.org/action", "application/json", new HashSet<String>()))
+        .addTitle("My Action")
+        .addInputSchema(schema)
+        .build();
+    
+    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addThingURI(THING_IRI)
+        .addSecurity(ThingDescription.DEFAULT_SECURITY_SCHEMA)
+        .addBaseURI("http://example.org/")
+        .addAction(actionWithInput)
+        .build();
+    
+    String description = TDGraphWriter.write(td);
+    Model tdModel = readModelFromString(RDFFormat.TURTLE, description);
+    
+    assertTrue(Models.isomorphic(testModel, tdModel));
+  }
+  
   private Model readModelFromString(RDFFormat format, String description) 
       throws RDFParseException, RDFHandlerException, IOException {
     StringReader stringReader = new StringReader(description);
