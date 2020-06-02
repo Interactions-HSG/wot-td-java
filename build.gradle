@@ -17,7 +17,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.0-alpha1'
 
     // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
 }
 
 jacocoTestReport {
