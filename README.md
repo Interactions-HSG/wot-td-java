@@ -69,21 +69,25 @@ The generated TD is:
 @prefix htv: <http://www.w3.org/2011/http#> .
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
 @prefix saref: <https://w3id.org/saref#> .
-@prefix td: <http://www.w3.org/ns/td#> .
+@prefix td: <https://www.w3.org/2019/wot/td#> .
+@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
+@prefix wotsec: <https://www.w3.org/2019/wot/security#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
 
 <http://example.org/lamp123> a td:Thing, saref:LightSwitch;
-  td:security "nosec_sc";
-  td:title "My Lamp Thing" ;
-  td:interaction [ a td:ActionAffordance, saref:ToggleCommand;
-      td:title "Toggle";
-      td:form [
+  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];
+  dct:title "My Lamp Thing" ;
+  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
+      td:name "toggle";
+      dct:title "Toggle";
+      td:hasForm [
           htv:methodName "PUT";
-          td:contentType "application/json";
-          td:href <http://mylamp.example.org/toggle>;
-          td:op "invokeaction"
+          hctl:forContentType "application/json";
+          hctl:hasTarget <http://mylamp.example.org/toggle>;
+          hctl:hasOperationType td:invokeAction
         ];
-      td:input [ a saref:OnOffState, js:ObjectSchema;
+      td:hasInputSchema [ a saref:OnOffState, js:ObjectSchema;
           js:properties [ a js:BooleanSchema;
               js:propertyName "status"
             ];
