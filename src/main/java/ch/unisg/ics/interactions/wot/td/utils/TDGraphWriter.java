@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -22,6 +23,8 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
+import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
@@ -76,10 +79,12 @@ public class TDGraphWriter {
   }
   
   private TDGraphWriter addSecurity() {
-    Set<String> securitySchemas = td.getSecurity();
+    Set<IRI> securitySchemas = td.getSecurity();
     
-    for (String schema : securitySchemas) {
-      graphBuilder.add(thingId, TD.security, schema);
+    for (IRI schema : securitySchemas) {
+      BNode schemaId = SimpleValueFactory.getInstance().createBNode();
+      graphBuilder.add(thingId, TD.hasSecurityConfiguration, schemaId);
+      graphBuilder.add(schemaId, RDF.TYPE, schema);
     }
     
     return this;
@@ -97,14 +102,14 @@ public class TDGraphWriter {
   }
     
   private TDGraphWriter addTitle() {
-    graphBuilder.add(thingId, TD.title, td.getTitle());
+    graphBuilder.add(thingId, DCT.title, td.getTitle());
     return this;
   }
     
   private TDGraphWriter addBaseURI() {
     if (td.getBaseURI().isPresent()) {
       ValueFactory rdfFactory = SimpleValueFactory.getInstance();
-      graphBuilder.add(thingId, TD.base, rdfFactory.createIRI(td.getBaseURI().get()));
+      graphBuilder.add(thingId, TD.hasBase, rdfFactory.createIRI(td.getBaseURI().get()));
     }
     
     return this;
@@ -116,7 +121,7 @@ public class TDGraphWriter {
     for (ActionAffordance action : td.getActions()) {
       BNode actionId = rdfFactory.createBNode();
       
-      graphBuilder.add(thingId, TD.interaction, actionId);
+      graphBuilder.add(thingId, TD.hasActionAffordance, actionId);
       graphBuilder.add(actionId, RDF.TYPE, TD.ActionAffordance);
       
       for (String type : action.getTypes()) {
@@ -124,7 +129,7 @@ public class TDGraphWriter {
       }
       
       if (action.getTitle().isPresent()) {
-        graphBuilder.add(actionId, TD.title, action.getTitle().get());
+        graphBuilder.add(actionId, DCT.title, action.getTitle().get());
       }
       
       addFormsForInteraction(actionId, action);
@@ -133,7 +138,7 @@ public class TDGraphWriter {
         DataSchema schema = action.getInputSchema().get();
         
         Resource inputId = rdfFactory.createBNode();
-        graphBuilder.add(actionId, TD.input, inputId);
+        graphBuilder.add(actionId, TD.hasInputSchema, inputId);
         
         SchemaGraphWriter.write(graphBuilder, inputId, schema);
       }
@@ -142,7 +147,7 @@ public class TDGraphWriter {
         DataSchema schema = action.getOutputSchema().get();
         
         Resource outputId = rdfFactory.createBNode();
-        graphBuilder.add(actionId, TD.output, outputId);
+        graphBuilder.add(actionId, TD.hasOutputSchema, outputId);
         
         SchemaGraphWriter.write(graphBuilder, outputId, schema);
       }
@@ -157,15 +162,15 @@ public class TDGraphWriter {
     for (Form form : interaction.getForms()) {
       BNode formId = rdfFactory.createBNode();
       
-      graphBuilder.add(interactionId, TD.form, formId);
+      graphBuilder.add(interactionId, TD.hasForm, formId);
       
       graphBuilder.add(formId, HTV.methodName, form.getMethodName());
-      graphBuilder.add(formId, TD.href, rdfFactory.createIRI(form.getHref()));
-      graphBuilder.add(formId, TD.contentType, form.getContentType());
+      graphBuilder.add(formId, HCTL.hasTarget, rdfFactory.createIRI(form.getHref()));
+      graphBuilder.add(formId, HCTL.forContentType, form.getContentType());
       
       // TODO: refactor when adding other interaction affordances
       if (interaction instanceof ActionAffordance) {
-        graphBuilder.add(formId, TD.op, "invokeaction");
+        graphBuilder.add(formId, HCTL.hasOperationType, TD.invokeAction);
       }
     }
   }

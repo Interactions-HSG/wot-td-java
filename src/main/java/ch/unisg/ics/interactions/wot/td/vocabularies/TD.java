@@ -5,7 +5,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 public class TD {
 
-  private static final String PREFIX = "http://www.w3.org/ns/td#";
+  private static final String PREFIX = "https://www.w3.org/2019/wot/td#";
   
   public static IRI createIRI(String fragment) {
     return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
@@ -16,20 +16,19 @@ public class TD {
   public static final IRI ActionAffordance = createIRI("ActionAffordance");
   
   /* Object properties */
-  public static final IRI title = createIRI("title");
+  public static final IRI hasBase = createIRI("hasBase");
+  public static final IRI name = createIRI("name");
   
-  /* td:Thing properties */
-  public static final IRI base = createIRI("base");
-  public static final IRI interaction = createIRI("interaction");
-  public static final IRI security = createIRI("security");
+  public static final IRI hasInteractionAffordance = createIRI("hasInteractionAffordance");
+  public static final IRI hasActionAffordance = createIRI("hasActionAffordance");
   
-  /* td:ActionAffordance properties */
-  public static final IRI input = createIRI("input");
-  public static final IRI output = createIRI("output");
+  public static final IRI hasSecurityConfiguration = createIRI("hasSecurityConfiguration");
   
-  /* td:Form properties */
-  public static final IRI form = createIRI("form");
-  public static final IRI href = createIRI("href");
-  public static final IRI contentType = createIRI("contentType");
-  public static final IRI op = createIRI("op");
+  public static final IRI hasInputSchema = createIRI("hasInputSchema");
+  public static final IRI hasOutputSchema = createIRI("hasOutputSchema");
+  
+  public static final IRI hasForm = createIRI("hasForm");
+  
+  /* Named individuals */
+  public static final IRI invokeAction = createIRI("invokeAction");
 }

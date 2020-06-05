@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
@@ -17,28 +19,32 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
 public class TDGraphReaderTest {
   
   private static final String TEST_SIMPLE_TD =
-      "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" + 
-      "    td:title \"My Thing\" ;\n" +
-      "    td:security \"nosec_sc\" ;\n" +
-      "    td:base <http://example.org/> ;\n" + 
-      "    td:interaction [\n" + 
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" + 
+      "    td:hasActionAffordance [\n" + 
       "        a td:ActionAffordance ;\n" + 
-      "        td:title \"My Action\" ;\n" + 
-      "        td:form [\n" + 
+      "        dct:title \"My Action\" ;\n" + 
+      "        td:hasForm [\n" + 
       "            htv:methodName \"PUT\" ;\n" + 
-      "            td:href <http://example.org/action> ;\n" + 
-      "            td:contentType \"application/json\";\n" + 
-      "            td:op \"invokeaction\";\n" + 
+      "            hctl:hasTarget <http://example.org/action> ;\n" + 
+      "            hctl:forContentType \"application/json\";\n" + 
+      "            hctl:hasOperationType td:invokeAction;\n" + 
       "        ] ;\n" + 
-      "        td:input [\n" + 
+      "        td:hasInputSchema [\n" + 
       "            a js:ObjectSchema ;\n" + 
       "            js:properties [\n" + 
       "                a js:NumberSchema ;\n" +
@@ -48,7 +54,7 @@ public class TDGraphReaderTest {
       "            ] ;\n" +
       "            js:required \"number_value\" ;\n" +
       "        ] ;\n" + 
-      "        td:output [\n" + 
+      "        td:hasOutputSchema [\n" + 
       "            a js:ObjectSchema ;\n" + 
       "            js:properties [\n" + 
       "                a js:BooleanSchema ;\n" +
@@ -59,22 +65,25 @@ public class TDGraphReaderTest {
       "    ] ." ;
   
   private static final String TEST_IO_HEAD =
-      "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" + 
-      "    td:title \"My Thing\" ;\n" +
-      "    td:security \"nosec_sc\" ;\n" +
-      "    td:base <http://example.org/> ;\n" + 
-      "    td:interaction [\n" + 
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" + 
+      "    td:hasActionAffordance [\n" + 
       "        a td:ActionAffordance ;\n" + 
-      "        td:title \"My Action\" ;\n" + 
-      "        td:form [\n" + 
+      "        dct:title \"My Action\" ;\n" + 
+      "        td:hasForm [\n" + 
       "            htv:methodName \"PUT\" ;\n" + 
-      "            td:href <http://example.org/action> ;\n" + 
-      "            td:contentType \"application/json\";\n" + 
-      "            td:op \"invokeaction\";\n" + 
+      "            hctl:hasTarget <http://example.org/action> ;\n" + 
+      "            hctl:forContentType \"application/json\";\n" + 
+      "            hctl:hasOperationType td:invokeAction;\n" + 
       "        ] ;\n";
       
   private static final String TEST_IO_TAIL = "    ] ." ;
@@ -106,26 +115,34 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(TEST_SIMPLE_TD);
     
     assertEquals(1, reader.readSecuritySchemas().size());
-    assertTrue(reader.readSecuritySchemas().contains("nosec_sc"));
+    assertTrue(reader.readSecuritySchemas().contains(WoTSec.NoSecurityScheme));
   }
   
   @Test
   public void testReadMultipleSecuritySchemas() {
+    String prefix = "https://example.org#";
     String testTD =
-        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix ex: <" + prefix + "> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
-        "    td:title \"My Thing\" ;\n" +
-        "    td:security \"nosec_sc\", \"mysec_sc\", \"yoursec_sc\" ;\n" +
-        "    td:base <http://example.org/> .";
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasSecurityConfiguration [ a ex:MySecurityScheme ] ;\n" +
+        "    td:hasSecurityConfiguration [ a ex:YourSecurityScheme ] ;\n" +
+        "    td:hasBase <http://example.org/> .";
     
     TDGraphReader reader = new TDGraphReader(testTD);
     
-    assertTrue(reader.readSecuritySchemas().contains("nosec_sc"));
-    assertTrue(reader.readSecuritySchemas().contains("mysec_sc"));
-    assertTrue(reader.readSecuritySchemas().contains("yoursec_sc"));
+    ValueFactory rdf = SimpleValueFactory.getInstance();
+    
+    assertTrue(reader.readSecuritySchemas().contains(WoTSec.NoSecurityScheme));
+    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(prefix + "MySecurityScheme")));
+    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(prefix + "YourSecurityScheme")));
   }
   
   @Test
@@ -152,42 +169,45 @@ public class TDGraphReaderTest {
   @Test
   public void testReadMultipleSimpleActions() {
     String testTD =
-        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
-        "    td:title \"My Thing\" ;\n" +
-        "    td:security \"nosec_sc\" ;\n" +
-        "    td:base <http://example.org/> ;\n" + 
-        "    td:interaction [\n" + 
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasBase <http://example.org/> ;\n" + 
+        "    td:hasActionAffordance [\n" + 
         "        a td:ActionAffordance ;\n" + 
-        "        td:title \"First Action\" ;\n" + 
-        "        td:form [\n" + 
+        "        dct:title \"First Action\" ;\n" + 
+        "        td:hasForm [\n" + 
         "            htv:methodName \"PUT\" ;\n" + 
-        "            td:href <http://example.org/action1> ;\n" + 
-        "            td:contentType \"application/json\";\n" + 
-        "            td:op \"invokeaction\";\n" + 
+        "            hctl:hasTarget <http://example.org/action1> ;\n" + 
+        "            hctl:forContentType \"application/json\";\n" + 
+        "            hctl:hasOperationType td:invokeAction;\n" + 
         "        ] ;\n" + 
         "    ] ;\n" +
-        "    td:interaction [\n" + 
+        "    td:hasActionAffordance [\n" + 
         "        a td:ActionAffordance ;\n" + 
-        "        td:title \"Second Action\" ;\n" + 
-        "        td:form [\n" + 
+        "        dct:title \"Second Action\" ;\n" + 
+        "        td:hasForm [\n" + 
         "            htv:methodName \"PUT\" ;\n" + 
-        "            td:href <http://example.org/action2> ;\n" + 
-        "            td:contentType \"application/json\";\n" + 
-        "            td:op \"invokeaction\";\n" + 
+        "            hctl:hasTarget <http://example.org/action2> ;\n" + 
+        "            hctl:forContentType \"application/json\";\n" + 
+        "            hctl:hasOperationType td:invokeAction;\n" + 
         "        ] ;\n" +
         "    ] ;\n" +
-        "    td:interaction [\n" + 
+        "    td:hasActionAffordance [\n" + 
         "        a td:ActionAffordance ;\n" + 
-        "        td:title \"Third Action\" ;\n" + 
-        "        td:form [\n" + 
+        "        dct:title \"Third Action\" ;\n" + 
+        "        td:hasForm [\n" + 
         "            htv:methodName \"PUT\" ;\n" + 
-        "            td:href <http://example.org/action3> ;\n" + 
-        "            td:contentType \"application/json\";\n" + 
-        "            td:op \"invokeaction\";\n" + 
+        "            hctl:hasTarget <http://example.org/action3> ;\n" + 
+        "            hctl:forContentType \"application/json\";\n" + 
+        "            hctl:hasOperationType td:invokeAction;\n" + 
         "        ] ;\n" + 
         "    ] ." ;
     
@@ -206,7 +226,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadOneActionOneObjectInput() {
     String testSimpleObject =
-        "        td:input [\n" + 
+        "        td:hasInputSchema [\n" + 
         "            a js:ObjectSchema ;\n" + 
         "            js:properties [\n" + 
         "                a js:BooleanSchema ;\n" +
@@ -278,8 +298,8 @@ public class TDGraphReaderTest {
     assertEquals("My Thing", td.getTitle());
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
-    assertTrue(td.getSemanticTypes().contains("http://www.w3.org/ns/td#Thing"));
-    assertTrue(td.getSecurity().contains(ThingDescription.DEFAULT_SECURITY_SCHEMA));
+    assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
+    assertTrue(td.getSecurity().contains(WoTSec.NoSecurityScheme));
     assertEquals(1, td.getActions().size());
     
     // Check action metadata
