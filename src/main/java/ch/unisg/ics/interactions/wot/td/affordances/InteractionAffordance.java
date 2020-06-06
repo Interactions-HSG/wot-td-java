@@ -51,7 +51,7 @@ public class InteractionAffordance {
     }
     
     protected Builder(Form form) {
-      this(new ArrayList<Form>(Arrays.asList((form))));
+      this(new ArrayList<Form>(Arrays.asList(form)));
     }
     
     @SuppressWarnings("unchecked")

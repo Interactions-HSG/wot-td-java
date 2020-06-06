@@ -22,17 +22,17 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
  */
 public class ThingDescription {
   // A human-readable title of the Thing (required)
-  private String title;
-  private Set<IRI> security;
+  final private String title;
+  final private Set<IRI> security;
   
   // Identifier of the Thing in form of a URI
-  private Optional<String> uri;
+  final private Optional<String> uri;
   // Semantic types of the Thing
-  private Set<String> types;
+  final private Set<String> types;
   // The base URI that is used for all relative URI references throughout a TD document
-  private Optional<String> baseURI;
+  final private Optional<String> baseURI;
   // All Action-based interaction affordances of the Thing
-  private List<ActionAffordance> actions;
+  final private List<ActionAffordance> actions;
   
   protected ThingDescription(String title, Set<IRI> security, Optional<String> uri, Set<String> types, 
       Optional<String> baseURI, List<ActionAffordance> actions) {
@@ -96,14 +96,14 @@ public class ThingDescription {
   }
   
   public static class Builder {
-    private String title;
-    private Set<IRI> security;
+    final private String title;
+    final private Set<IRI> security;
     
     private Optional<String> uri;
-    private Set<String> types;
+    final private Set<String> types;
     
     private Optional<String> baseURI;
-    private List<ActionAffordance> actions;
+    final private List<ActionAffordance> actions;
     
     public Builder(String title) {
       this.title = title;

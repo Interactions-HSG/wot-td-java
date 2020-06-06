@@ -22,7 +22,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 class SchemaGraphReader {
-  private Model model;
+  final private Model model;
   
   SchemaGraphReader(Model model) {
     this.model = model;

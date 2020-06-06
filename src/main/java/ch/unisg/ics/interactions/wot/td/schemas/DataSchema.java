@@ -13,8 +13,8 @@ public class DataSchema {
   public static final String BOOLEAN = "boolean";
   public static final String NULL = "null";
   
-  private String datatype;
-  private Set<String> semanticTypes;
+  final private String datatype;
+  final private Set<String> semanticTypes;
   
   protected DataSchema(String datatype, Set<String> semanticTypes) {
     this.datatype = datatype;

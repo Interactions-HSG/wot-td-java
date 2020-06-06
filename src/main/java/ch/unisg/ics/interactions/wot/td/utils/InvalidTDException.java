@@ -7,4 +7,8 @@ public class InvalidTDException extends RuntimeException {
   public InvalidTDException(String errorMessage) {
     super(errorMessage);
   }
+  
+  public InvalidTDException(String errorMessage, Exception e) {
+    super(errorMessage, e);
+  }
 }

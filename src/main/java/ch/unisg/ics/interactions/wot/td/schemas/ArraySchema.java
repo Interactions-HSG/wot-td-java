@@ -6,9 +6,9 @@ import java.util.Optional;
 import java.util.Set;
 
 public class ArraySchema extends DataSchema {
-  private List<DataSchema> items;
-  private Optional<Integer> minItems;
-  private Optional<Integer> maxItems;
+  final private List<DataSchema> items;
+  final private Optional<Integer> minItems;
+  final private Optional<Integer> maxItems;
   
   protected ArraySchema(Set<String> semanticTypes, List<DataSchema> items, Optional<Integer> minItems, 
       Optional<Integer> maxItems) {
@@ -32,7 +32,7 @@ public class ArraySchema extends DataSchema {
   }
   
   public static class Builder extends DataSchema.Builder<ArraySchema, ArraySchema.Builder> {
-    private List<DataSchema> items;
+    final private List<DataSchema> items;
     private Optional<Integer> minItems;
     private Optional<Integer> maxItems;
     

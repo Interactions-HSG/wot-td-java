@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public class IntegerSchema extends DataSchema {
-  private Optional<Integer> minimum;
-  private Optional<Integer> maximum;
+  final private Optional<Integer> minimum;
+  final private Optional<Integer> maximum;
   
   protected IntegerSchema(Set<String> semanticTypes, Optional<Integer> minimum,
       Optional<Integer> maximum) {

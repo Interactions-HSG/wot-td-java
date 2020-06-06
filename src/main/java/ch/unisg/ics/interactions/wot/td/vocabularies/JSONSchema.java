@@ -3,13 +3,9 @@ package ch.unisg.ics.interactions.wot.td.vocabularies;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
-public class JSONSchema {
+public final class JSONSchema {
   
-  private static final String PREFIX = "https://www.w3.org/2019/wot/json-schema#";
-  
-  public static IRI createIRI(String fragment) {
-    return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
-  }
+  public static final String PREFIX = "https://www.w3.org/2019/wot/json-schema#";
   
   /* Classes */
   public static final IRI ArraySchema = createIRI("ArraySchema");
@@ -40,4 +36,10 @@ public class JSONSchema {
   public static final IRI readOnly = createIRI("readOnly");
   public static final IRI required = createIRI("required");
   public static final IRI writeOnly = createIRI("writeOnly");
+  
+  public static IRI createIRI(String fragment) {
+    return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
+  }
+  
+  private JSONSchema() { }
 }
