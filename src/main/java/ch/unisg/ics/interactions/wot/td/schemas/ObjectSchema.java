@@ -11,8 +11,8 @@ import java.util.Set;
 import ch.unisg.ics.interactions.wot.td.utils.InvalidTDException;
 
 public class ObjectSchema extends DataSchema {
-  private Map<String, DataSchema> properties;
-  private List<String> required;
+  final private Map<String, DataSchema> properties;
+  final private List<String> required;
   
   protected ObjectSchema(Set<String> semanticTypes, Map<String, DataSchema> properties, 
       List<String> required) {
@@ -36,8 +36,8 @@ public class ObjectSchema extends DataSchema {
   }
 
   public static class Builder extends DataSchema.Builder<ObjectSchema, ObjectSchema.Builder> {
-    private Map<String, DataSchema> properties;
-    private List<String> required;
+    final private Map<String, DataSchema> properties;
+    final private List<String> required;
     
     public Builder() {
       this.properties = new HashMap<String, DataSchema>();

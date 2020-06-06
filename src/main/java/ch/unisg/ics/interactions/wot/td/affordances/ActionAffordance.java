@@ -15,8 +15,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
  */
 public class ActionAffordance extends InteractionAffordance {
   // TODO: currently Schema just holds an RDF graph
-  private Optional<DataSchema> input;
-  private Optional<DataSchema> output;
+  final private Optional<DataSchema> input;
+  final private Optional<DataSchema> output;
   
   // TODO: add safe, idempotent
   

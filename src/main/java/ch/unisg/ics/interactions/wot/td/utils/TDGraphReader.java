@@ -77,7 +77,7 @@ public class TDGraphReader {
     try {
       thingId = Models.subject(model.filter(null, TD.hasSecurityConfiguration, null)).get();
     } catch (NoSuchElementException e) {
-      throw new InvalidTDException("Missing mandatory security definitions.");
+      throw new InvalidTDException("Missing mandatory security definitions.", e);
     }
   }
   
@@ -92,7 +92,9 @@ public class TDGraphReader {
     try {
       parser.parse(stringReader, baseURI);
     } catch (RDFParseException | RDFHandlerException | IOException e) {
-      throw new InvalidTDException(e.getMessage());
+      throw new InvalidTDException("RDF Syntax Error", e);
+    } finally {
+      stringReader.close();
     }
   }
   
@@ -118,7 +120,7 @@ public class TDGraphReader {
         .collect(Collectors.toSet());
   }
   
-  Optional<String> readBaseURI() {
+  final Optional<String> readBaseURI() {
     Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, TD.hasBase, null));
     
     if (baseURI.isPresent()) {
@@ -156,53 +158,58 @@ public class TDGraphReader {
         continue;
       }
       
-      List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
-      ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
-      
-      Set<IRI> actionTypes = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
-      actionBuilder.addSemanticTypes(actionTypes.stream().map(type -> type.stringValue())
-          .collect(Collectors.toList()));
-      
-      Optional<Literal> actionTitle = Models.objectLiteral(model.filter(affordanceId, DCT.title, 
-          null));
-      if (actionTitle.isPresent()) {
-        actionBuilder.addTitle(actionTitle.get().stringValue());
-      }
-      
-      Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
-          TD.hasInputSchema, null));
-      if (inputSchemaId.isPresent()) {
-        try {
-          Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
-          if (input.isPresent()) {
-            actionBuilder.addInputSchema(input.get());
-          }
-        } catch (InvalidTDException e) {
-          throw new InvalidTDException("Invalid input schema for action: " + 
-              ((actionTitle.isPresent()) ? actionTitle.get().stringValue() : "anonymous") + 
-              ". " + e.getMessage());
-        }
-      }
-      
-      Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, 
-          TD.hasOutputSchema, null));
-      if (outSchemaId.isPresent()) {
-        try {
-          Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
-          if (output.isPresent()) {
-            actionBuilder.addOutputSchema(output.get());
-          }
-        } catch (InvalidTDException e) {
-          throw new InvalidTDException("Invalid output schema for action: " + 
-              ((actionTitle.isPresent()) ? actionTitle.get().stringValue() : "anonymous") + 
-              ". " + e.getMessage());
-        }
-      }
-      
-      actions.add(actionBuilder.build());
+      ActionAffordance action = readAction(affordanceId);
+      actions.add(action);
     }
     
     return actions;
+  }
+  
+  private ActionAffordance readAction(Resource affordanceId) {
+    List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
+    ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
+    
+    Set<IRI> actionTypes = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
+    actionBuilder.addSemanticTypes(actionTypes.stream().map(type -> type.stringValue())
+        .collect(Collectors.toList()));
+    
+    Optional<Literal> actionTitle = Models.objectLiteral(model.filter(affordanceId, DCT.title, 
+        null));
+    if (actionTitle.isPresent()) {
+      actionBuilder.addTitle(actionTitle.get().stringValue());
+    }
+    
+    Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
+        TD.hasInputSchema, null));
+    if (inputSchemaId.isPresent()) {
+      try {
+        Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
+        if (input.isPresent()) {
+          actionBuilder.addInputSchema(input.get());
+        }
+      } catch (InvalidTDException e) {
+        throw new InvalidTDException("Invalid input schema for action: " + 
+            (actionTitle.isPresent() ? actionTitle.get().stringValue() : "anonymous") + 
+            ". " + e.getMessage(), e);
+      }
+    }
+    
+    Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, 
+        TD.hasOutputSchema, null));
+    if (outSchemaId.isPresent()) {
+      try {
+        Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
+        if (output.isPresent()) {
+          actionBuilder.addOutputSchema(output.get());
+        }
+      } catch (InvalidTDException e) {
+        throw new InvalidTDException("Invalid output schema for action: " + 
+            (actionTitle.isPresent() ? actionTitle.get().stringValue() : "anonymous") + 
+            ". " + e.getMessage(), e);
+      }
+    }
+    
+    return actionBuilder.build();
   }
   
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
@@ -220,12 +227,12 @@ public class TDGraphReader {
       // TODO: refactor to avoid hard coding the method name
       Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, HTV.methodName,
           null));      
-      String methodName = (methodNameOpt.isPresent()) ? methodNameOpt.get().stringValue() : "POST";
+      String methodName = methodNameOpt.isPresent() ? methodNameOpt.get().stringValue() : "POST";
       
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
           HCTL.forContentType, null));
-      String contentType = (!contentTypeOpt.isPresent()) ? "application/json" 
-          : contentTypeOpt.get().stringValue();
+      String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
+          : "application/json";
       
       Set<Literal> opsLiterals = Models.objectLiterals(model.filter(formId, HCTL.hasOperationType, 
           null));
@@ -244,13 +251,15 @@ public class TDGraphReader {
           case InteractionAffordance.EVENT:
             ops.add("subscribeevent");
             break;
+          default:
+            break;
         }
       }
       
       forms.add(new Form(methodName, hrefOpt.get().stringValue(), contentType, ops));
     }
     
-    if (forms.size() == 0) {
+    if (forms.isEmpty()) {
       throw new InvalidTDException("All interaction affordances should have at least one "
           + "valid form.");
     }

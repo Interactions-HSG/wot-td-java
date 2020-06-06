@@ -35,15 +35,15 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
  *
  */
 public class TDGraphWriter {
-  private Resource thingId;
-  private ThingDescription td;
-  private ModelBuilder graphBuilder;
+  final private Resource thingId;
+  final private ThingDescription td;
+  final private ModelBuilder graphBuilder;
   
   public TDGraphWriter(ThingDescription td) {
     ValueFactory rdfFactory = SimpleValueFactory.getInstance();
     
-    this.thingId = (!td.getThingURI().isPresent()) ? rdfFactory.createBNode()
-        : rdfFactory.createIRI(td.getThingURI().get());
+    this.thingId = td.getThingURI().isPresent() ? rdfFactory.createIRI(td.getThingURI().get())
+        : rdfFactory.createBNode();
     
     this.td = td;
     this.graphBuilder = new ModelBuilder();

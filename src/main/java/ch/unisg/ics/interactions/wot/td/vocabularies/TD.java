@@ -3,13 +3,8 @@ package ch.unisg.ics.interactions.wot.td.vocabularies;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
-public class TD {
-
-  private static final String PREFIX = "https://www.w3.org/2019/wot/td#";
-  
-  public static IRI createIRI(String fragment) {
-    return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
-  }
+public final class TD {
+  public static final String PREFIX = "https://www.w3.org/2019/wot/td#";
   
   /* Classes */
   public static final IRI Thing = createIRI("Thing");
@@ -31,4 +26,10 @@ public class TD {
   
   /* Named individuals */
   public static final IRI invokeAction = createIRI("invokeAction");
+  
+  public static IRI createIRI(String fragment) {
+    return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
+  }
+  
+  private TD() { }
 }

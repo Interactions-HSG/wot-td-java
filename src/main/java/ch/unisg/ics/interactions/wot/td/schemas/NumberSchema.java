@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public class NumberSchema extends DataSchema {
-  private Optional<Double> minimum;
-  private Optional<Double> maximum;
+  final private Optional<Double> minimum;
+  final private Optional<Double> maximum;
   
   protected NumberSchema(Set<String> semanticTypes, Optional<Double> minimum, Optional<Double> maximum) {
     super(DataSchema.NUMBER, semanticTypes);

@@ -20,7 +20,7 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 class SchemaGraphWriter {
   private final static Logger LOGGER = Logger.getLogger(SchemaGraphWriter.class.getCanonicalName());
   
-  private ModelBuilder graphBuilder;
+  final private ModelBuilder graphBuilder;
   
   SchemaGraphWriter(ModelBuilder builder) {
     this.graphBuilder = builder;
