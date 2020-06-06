@@ -14,7 +14,7 @@ import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-public class ReadWriteTestUtils {
+final public class ReadWriteTestUtils {
 
   static Model readModelFromString(RDFFormat format, String description, String baseURI) 
       throws RDFParseException, RDFHandlerException, IOException {
@@ -44,4 +44,6 @@ public class ReadWriteTestUtils {
     
     return out.toString();
   }
+  
+  private ReadWriteTestUtils() { }
 }

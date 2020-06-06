@@ -81,7 +81,7 @@ public class ThingDescription {
   }
   
   // TODO: returns only the first action of a given type
-  public Optional<ActionAffordance> getAction(String actionType) {
+  public Optional<ActionAffordance> getActionBySemanticType(String actionType) {
     for (ActionAffordance action : actions) {
       if (action.getTypes().contains(actionType)) {
         return Optional.of(action);
