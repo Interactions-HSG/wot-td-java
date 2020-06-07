@@ -34,25 +34,26 @@ class SchemaGraphReader {
   }
   
   private Optional<DataSchema> readDataSchema(Resource schemaId) {
-    Optional<IRI> type = Models.objectIRI(model.filter(schemaId, RDF.TYPE, null));
-    if (type.isPresent()) {
-      if (type.get().equals(JSONSchema.ObjectSchema)) {
+    Set<IRI> type = Models.objectIRIs(model.filter(schemaId, RDF.TYPE, null));
+    
+    if (!type.isEmpty()) {
+      if (type.contains(JSONSchema.ObjectSchema)) {
         return readObjectSchema(schemaId);
-      } else if (type.get().equals(JSONSchema.ArraySchema)) {
+      } else if (type.contains(JSONSchema.ArraySchema)) {
         return readArraySchema(schemaId);
-      } else if (type.get().equals(JSONSchema.BooleanSchema)) {
+      } else if (type.contains(JSONSchema.BooleanSchema)) {
         BooleanSchema.Builder builder = new BooleanSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
-      } else if (type.get().equals(JSONSchema.NumberSchema)) {
+      } else if (type.contains(JSONSchema.NumberSchema)) {
         return readNumberSchema(schemaId);
-      } else if (type.get().equals(JSONSchema.IntegerSchema)) {
+      } else if (type.contains(JSONSchema.IntegerSchema)) {
         return readIntegerSchema(schemaId);
-      } else if (type.get().equals(JSONSchema.StringSchema)) {
+      } else if (type.contains(JSONSchema.StringSchema)) {
         StringSchema.Builder builder = new StringSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
-      } else if (type.get().equals(JSONSchema.NullSchema)) {
+      } else if (type.contains(JSONSchema.NullSchema)) {
         NullSchema.Builder builder = new NullSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());

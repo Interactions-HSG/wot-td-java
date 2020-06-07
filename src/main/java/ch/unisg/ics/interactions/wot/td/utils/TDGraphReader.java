@@ -29,6 +29,7 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
@@ -157,6 +158,39 @@ public class TDGraphReader {
     return schemes;
   }
   
+  List<PropertyAffordance> readProperties() {
+    List<PropertyAffordance> properties = new ArrayList<PropertyAffordance>();
+    
+    Set<Resource> propertyIds = Models.objectResources(model.filter(thingId, 
+        TD.hasPropertyAffordance, null));
+    
+    for (Resource propertyId : propertyIds) {
+      try {
+        Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(propertyId, model);
+        
+        if (schema.isPresent()) {
+          List<Form> forms = readForms(propertyId, InteractionAffordance.PROPERTY);
+          PropertyAffordance.Builder builder = new PropertyAffordance.Builder(schema.get(), forms);
+          
+          readAffordanceTitle(builder, propertyId);
+          readAffordanceSemanticTypes(builder, propertyId);
+          
+          Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId, 
+              TD.isObservable, null));
+          if (observable.isPresent() && observable.get().booleanValue()) {
+            builder.addObserve();
+          }
+          
+          properties.add(builder.build());
+        }
+      } catch (InvalidTDException e) {
+        throw new InvalidTDException("Invalid property definition.", e);
+      }
+    }
+    
+    return properties;
+  }
+  
   List<ActionAffordance> readActions() {
     List<ActionAffordance> actions = new ArrayList<ActionAffordance>();
     
@@ -179,47 +213,54 @@ public class TDGraphReader {
     List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
     ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
     
-    Set<IRI> actionTypes = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
-    actionBuilder.addSemanticTypes(actionTypes.stream().map(type -> type.stringValue())
-        .collect(Collectors.toList()));
+    readAffordanceTitle(actionBuilder, affordanceId);
+    readAffordanceSemanticTypes(actionBuilder, affordanceId);
     
-    Optional<Literal> actionTitle = Models.objectLiteral(model.filter(affordanceId, DCT.title, 
-        null));
-    if (actionTitle.isPresent()) {
-      actionBuilder.addTitle(actionTitle.get().stringValue());
-    }
-    
-    Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
-        TD.hasInputSchema, null));
-    if (inputSchemaId.isPresent()) {
-      try {
-        Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
-        if (input.isPresent()) {
-          actionBuilder.addInputSchema(input.get());
+    try {
+      Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
+          TD.hasInputSchema, null));
+      if (inputSchemaId.isPresent()) {
+        try {
+          Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
+          if (input.isPresent()) {
+            actionBuilder.addInputSchema(input.get());
+          }
+        } catch (InvalidTDException e) {
+          throw new InvalidTDException("Invalid action definition.", e);
         }
-      } catch (InvalidTDException e) {
-        throw new InvalidTDException("Invalid input schema for action: " + 
-            (actionTitle.isPresent() ? actionTitle.get().stringValue() : "anonymous") + 
-            ". " + e.getMessage(), e);
       }
-    }
-    
-    Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, 
-        TD.hasOutputSchema, null));
-    if (outSchemaId.isPresent()) {
-      try {
-        Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
-        if (output.isPresent()) {
-          actionBuilder.addOutputSchema(output.get());
-        }
-      } catch (InvalidTDException e) {
-        throw new InvalidTDException("Invalid output schema for action: " + 
-            (actionTitle.isPresent() ? actionTitle.get().stringValue() : "anonymous") + 
-            ". " + e.getMessage(), e);
+      
+      Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, 
+          TD.hasOutputSchema, null));
+      if (outSchemaId.isPresent()) {
+          Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
+          if (output.isPresent()) {
+            actionBuilder.addOutputSchema(output.get());
+          }
       }
+    } catch (InvalidTDException e) {
+      throw new InvalidTDException("Invalid action definition.", e);
     }
     
     return actionBuilder.build();
+  }
+  
+  private void readAffordanceSemanticTypes(InteractionAffordance
+      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
+    
+    Set<IRI> types = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
+    builder.addSemanticTypes(types.stream().map(type -> type.stringValue())
+        .collect(Collectors.toList()));
+  }
+  
+  private void readAffordanceTitle(InteractionAffordance
+      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
+    
+    Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId, DCT.title, 
+        null));
+    if (title.isPresent()) {
+      builder.addTitle(title.get().stringValue());
+    }
   }
   
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
@@ -228,45 +269,46 @@ public class TDGraphReader {
     Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, TD.hasForm, null));
     
     for (Resource formId : formIdSet) {
-      Optional<IRI> hrefOpt = Models.objectIRI(model.filter(formId, HCTL.hasTarget, null));
+      Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, HCTL.hasTarget, null));
       
-      if (!hrefOpt.isPresent()) {
+      if (!targetOpt.isPresent()) {
         continue;
       }
       
-      // TODO: refactor to avoid hard coding the method name
       Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, HTV.methodName,
-          null));      
-      String methodName = methodNameOpt.isPresent() ? methodNameOpt.get().stringValue() : "POST";
-      
-      Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
-          HCTL.forContentType, null));
-      String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
-          : "application/json";
-      
-      Set<Literal> opsLiterals = Models.objectLiterals(model.filter(formId, HCTL.hasOperationType, 
           null));
       
-      Set<String> ops = opsLiterals.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
-      
-      if (opsLiterals.isEmpty()) {
-        switch (affordanceType) {
-          case InteractionAffordance.PROPERTY:
-            ops.add("readproperty");
-            ops.add("writeproperty");
-            break;
-          case InteractionAffordance.ACTION:
-            ops.add("invokeaction");
-            break;
-          case InteractionAffordance.EVENT:
-            ops.add("subscribeevent");
-            break;
-          default:
-            break;
-        }
+      if (methodNameOpt.isPresent()) {
+        Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
+            HCTL.forContentType, null));
+        String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
+            : "application/json";
+        
+        Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, HCTL.hasOperationType, null));
+        Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
+        
+        // TODO: refactor, move this into the classes
+//        if (opsIRIs.isEmpty()) {
+//          switch (affordanceType) {
+//            case InteractionAffordance.PROPERTY:
+//              ops.add("readproperty");
+//              ops.add("writeproperty");
+//              break;
+//            case InteractionAffordance.ACTION:
+//              ops.add("invokeaction");
+//              break;
+//            case InteractionAffordance.EVENT:
+//              ops.add("subscribeevent");
+//              break;
+//            default:
+//              break;
+//          }
+//        }
+        
+        String methodName = methodNameOpt.get().stringValue();
+        String target = targetOpt.get().stringValue();
+        forms.add(new Form(methodName, target, contentType, ops));
       }
-      
-      forms.add(new Form(methodName, hrefOpt.get().stringValue(), contentType, ops));
     }
     
     if (forms.isEmpty()) {

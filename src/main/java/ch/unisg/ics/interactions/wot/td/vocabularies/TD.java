@@ -16,8 +16,11 @@ public final class TD {
   
   public static final IRI hasInteractionAffordance = createIRI("hasInteractionAffordance");
   public static final IRI hasActionAffordance = createIRI("hasActionAffordance");
+  public static final IRI hasPropertyAffordance = createIRI("hasPropertyAffordance");
   
   public static final IRI hasSecurityConfiguration = createIRI("hasSecurityConfiguration");
+  
+  public static final IRI isObservable = createIRI("isObservable");
   
   public static final IRI hasInputSchema = createIRI("hasInputSchema");
   public static final IRI hasOutputSchema = createIRI("hasOutputSchema");

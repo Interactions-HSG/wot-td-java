@@ -23,18 +23,13 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
  *
  */
 public class ThingDescription {
-  // A human-readable title of the Thing (required)
   private final String title;
   private final Set<IRI> security;
   
-  // Identifier of the Thing in form of a URI
   private final Optional<String> uri;
-  // Semantic types of the Thing
   private final Set<String> types;
-  // The base URI that is used for all relative URI references throughout a TD document
   private final Optional<String> baseURI;
   
-  // All interaction affordances of the Thing
   private final List<PropertyAffordance> properties;
   private final List<ActionAffordance> actions;
   
@@ -96,8 +91,7 @@ public class ThingDescription {
         .collect(Collectors.toList());
   }
   
-  // TODO: returns only the first action of a given type
-  public Optional<ActionAffordance> getActionBySemanticType(String actionType) {
+  public Optional<ActionAffordance> getFirstActionBySemanticType(String actionType) {
     for (ActionAffordance action : actions) {
       if (action.getSemanticTypes().contains(actionType)) {
         return Optional.of(action);

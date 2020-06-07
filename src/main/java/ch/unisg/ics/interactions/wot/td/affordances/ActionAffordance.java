@@ -21,7 +21,6 @@ public class ActionAffordance extends InteractionAffordance {
   
   private ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
       Optional<DataSchema> input, Optional<DataSchema> output) {
-    
     super(title, types, forms);
     this.input = input;
     this.output = output;

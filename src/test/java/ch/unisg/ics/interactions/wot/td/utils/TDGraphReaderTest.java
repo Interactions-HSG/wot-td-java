@@ -15,6 +15,7 @@ import org.junit.Test;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
@@ -35,7 +36,24 @@ public class TDGraphReaderTest {
       "<http://example.org/#thing> a td:Thing ;\n" + 
       "    dct:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" + 
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasPropertyAffordance [\n" + 
+      "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+      "        dct:title \"My Property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" + 
+      "            htv:methodName \"PUT\" ;\n" + 
+      "            hctl:hasTarget <http://example.org/property> ;\n" + 
+      "            hctl:forContentType \"application/json\";\n" + 
+      "            hctl:hasOperationType td:writeProperty;\n" + 
+      "        ] ;\n" + 
+      "        td:hasForm [\n" + 
+      "            htv:methodName \"GET\" ;\n" + 
+      "            hctl:hasTarget <http://example.org/property> ;\n" + 
+      "            hctl:forContentType \"application/json\";\n" + 
+      "            hctl:hasOperationType td:readProperty;\n" + 
+      "        ] ;\n" + 
+      "    ] ;\n" + 
       "    td:hasActionAffordance [\n" + 
       "        a td:ActionAffordance ;\n" + 
       "        dct:title \"My Action\" ;\n" + 
@@ -234,6 +252,20 @@ public class TDGraphReaderTest {
   }
   
   @Test
+  public void testReadOneSimpleProperty() {
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
+    
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+    
+    PropertyAffordance property = properties.get(0);
+    assertEquals("My Property", property.getTitle().get());
+    assertTrue(property.isObservable());
+    assertEquals(2, property.getSemanticTypes().size());
+    assertEquals(2, property.getForms().size());
+  }
+  
+  @Test
   public void testReadOneSimpleAction() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
@@ -251,7 +283,7 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
     assertEquals(1, form.getOperationTypes().size());
-    assertTrue(form.getOperationTypes().contains("invokeaction"));
+    assertTrue(form.getOperationTypes().contains(TD.invokeAction.stringValue()));
   }
   
   @Test
@@ -401,7 +433,7 @@ public class TDGraphReaderTest {
     assertEquals("PUT", form.getMethodName());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertTrue(form.getOperationTypes().contains("invokeaction"));
+    assertTrue(form.getOperationTypes().contains(TD.invokeAction.stringValue()));
     
     // Check action input data schema
     ObjectSchema input = (ObjectSchema) action.getInputSchema().get();
