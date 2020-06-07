@@ -1,0 +1,46 @@
+@prefix td: <https://www.w3.org/2019/wot/td#> .
+@prefix htv: <http://www.w3.org/2011/http#> .
+@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix wotsec: <https://www.w3.org/2019/wot/security#> .
+@prefix js: <https://www.w3.org/2019/wot/json-schema#> .
+@prefix ex: <http://example.org/> .
+
+ex:forkliftRobot a td:Thing ; 
+    dct:title "forkliftRobot" ;
+    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;
+    td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; 
+        td:hasForm [
+            hctl:hasTarget <http://example.org/forkliftRobot/busy> ; 
+        ] ; 
+    ] ;
+    td:hasActionAffordance [
+        a td:ActionAffordance, ex:CarryFromTo ;
+        dct:title "carry" ; 
+        td:hasForm [
+            hctl:hasTarget <http://example.org/forkliftRobot/carry> ; 
+        ] ; 
+        td:hasInputSchema [ 
+            a js:ObjectSchema ;
+            js:properties [ 
+                a js:ArraySchema, ex:SourcePosition ;
+                js:propertyName "sourcePosition";
+                js:minItems 3 ;
+                js:maxItems 3 ;
+                js:items [
+                    a js:NumberSchema ;
+                ] ;
+            ] ;
+            js:properties [
+                a js:ArraySchema, ex:TargetPosition ;
+                js:propertyName "targetPosition";
+                js:minItems 3 ;
+                js:maxItems 3 ;
+                js:items [
+                    a js:NumberSchema ;
+                ] ;
+            ] ;
+        ] ; 
+    ] .
+

@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 
 public class TDHttpRequest {
@@ -71,6 +72,57 @@ public class TDHttpRequest {
 //    
 //    return request;
 //  }
+  
+  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value) 
+      throws IllegalArgumentException {
+    if (dataSchema.getDatatype() == DataSchema.BOOLEAN) {
+      request.setEntity(new StringEntity(String.valueOf(value), 
+          ContentType.create(form.getContentType())));
+    } else {
+      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
+          + dataSchema.getDatatype());
+    }
+    
+    return this;
+  }
+  
+  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, String value) 
+      throws IllegalArgumentException {
+    if (dataSchema.getDatatype() == DataSchema.STRING) {
+      request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
+    } else {
+      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
+          + dataSchema.getDatatype());
+    }
+    
+    return this;
+  }
+  
+  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, long value) 
+      throws IllegalArgumentException {
+    if (dataSchema.getDatatype() == DataSchema.STRING) {
+      request.setEntity(new StringEntity(String.valueOf(value), 
+          ContentType.create(form.getContentType())));
+    } else {
+      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
+          + dataSchema.getDatatype());
+    }
+    
+    return this;
+  }
+  
+  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, double value) 
+      throws IllegalArgumentException {
+    if (dataSchema.getDatatype() == DataSchema.STRING) {
+      request.setEntity(new StringEntity(String.valueOf(value), 
+          ContentType.create(form.getContentType())));
+    } else {
+      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
+          + dataSchema.getDatatype());
+    }
+    
+    return this;
+  }
   
   public TDHttpRequest setObjectPayload(ObjectSchema objectSchema, Map<String, Object> payload) {
     if (objectSchema.validate(payload)) {

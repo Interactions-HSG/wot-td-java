@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import ch.unisg.ics.interactions.wot.td.utils.InvalidTDException;
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 
 public class ObjectSchema extends DataSchema {
   final private Map<String, DataSchema> properties;

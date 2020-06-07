@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -18,6 +18,7 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Before;
 import org.junit.Test;
 
+import ch.unisg.ics.interactions.wot.td.io.SchemaGraphWriter;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;

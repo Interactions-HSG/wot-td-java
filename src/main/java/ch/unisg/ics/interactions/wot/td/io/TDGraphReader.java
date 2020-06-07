@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -62,6 +62,7 @@ public class TDGraphReader {
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
         .addSemanticTypes(reader.readThingTypes())
         .addSecurity(reader.readSecuritySchemas())
+        .addProperties(reader.readProperties())
         .addActions(reader.readActions());
     
     Optional<String> thingURI = reader.getThingURI();
@@ -278,28 +279,30 @@ public class TDGraphReader {
       Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, HTV.methodName,
           null));
       
+      Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
+          HCTL.forContentType, null));
+      String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
+          : "application/json";
+      
+      Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, HCTL.hasOperationType, null));
+      Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
+      
+      String target = targetOpt.get().stringValue();
+      
+      Form.Builder builder = new Form.Builder(target)
+          .setContentType(contentType)
+          .addOperationTypes(ops); 
+      
       if (methodNameOpt.isPresent()) {
-        Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
-            HCTL.forContentType, null));
-        String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
-            : "application/json";
-        
-        Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, HCTL.hasOperationType, null));
-        Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
-        
-        String methodName = methodNameOpt.get().stringValue();
-        String target = targetOpt.get().stringValue();
-        forms.add(new Form.Builder(target)
-            .setMethodName(methodName)
-            .setContentType(contentType)
-            .addOperationTypes(ops)
-            .build());
+        builder.setMethodName(methodNameOpt.get().stringValue());
       }
+      
+      forms.add(builder.build());
     }
     
     if (forms.isEmpty()) {
-      throw new InvalidTDException("All interaction affordances should have at least one "
-          + "valid form.");
+      throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have at least one "
+          + "valid.");
     }
     
     return forms;

@@ -19,7 +19,7 @@ public class ActionAffordanceTest {
   
   @Before
   public void init() {
-    form = new Form.Builder("http://example.org/action").setMethodName("PUT").build();
+    form = new Form.Builder("http://example.org/action").build();
     testAction = new ActionAffordance.Builder(form).build();
   }
 
@@ -59,8 +59,10 @@ public class ActionAffordanceTest {
   }
   
   @Test
-  public void testDefaultOperationType() {
-    assertTrue(testAction.hasFormWithOperationType(TD.invokeAction.stringValue()));
+  public void testDefaultValues() {
+    String invokeAction = TD.invokeAction.stringValue();
+    assertTrue(testAction.hasFormWithOperationType(invokeAction));
+    assertEquals("POST", testAction.getForms().get(0).getMethodName(invokeAction).get());
   }
   
   @Test

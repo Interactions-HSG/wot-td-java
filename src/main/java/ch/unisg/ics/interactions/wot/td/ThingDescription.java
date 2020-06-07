@@ -86,6 +86,16 @@ public class ThingDescription {
         .collect(Collectors.toList());
   }
   
+  public Optional<PropertyAffordance> getFirstPropertyBySemanticType(String propertyType) {
+    for (PropertyAffordance property : properties) {
+      if (property.getSemanticTypes().contains(propertyType)) {
+        return Optional.of(property);
+      }
+    }
+    
+    return Optional.empty();
+  }
+  
   public List<ActionAffordance> getActionsByOperationType(String operationType) {
     return actions.stream().filter(action -> action.hasFormWithOperationType(operationType))
         .collect(Collectors.toList());
@@ -99,6 +109,10 @@ public class ThingDescription {
     }
     
     return Optional.empty();
+  }
+  
+  public List<PropertyAffordance> getProperties() {
+    return this.properties;
   }
   
   public List<ActionAffordance> getActions() {

@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.utils.InvalidTDException;
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 
 public class DataSchemaTest {
 

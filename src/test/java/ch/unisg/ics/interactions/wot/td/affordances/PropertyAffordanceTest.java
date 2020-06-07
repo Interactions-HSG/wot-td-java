@@ -18,7 +18,6 @@ public class PropertyAffordanceTest {
   public void init() {
     DataSchema schema = new NumberSchema.Builder().build();
     Form form = new Form.Builder("http://example.org/action1")
-        .setMethodName("PUT")
         .build();
     
     testProperty = new PropertyAffordance.Builder(schema, form)
@@ -41,5 +40,9 @@ public class PropertyAffordanceTest {
   public void testDefaultOperationTypes() {
     assertTrue(testProperty.hasFormWithOperationType(TD.readProperty.stringValue()));
     assertTrue(testProperty.hasFormWithOperationType(TD.writeProperty.stringValue()));
+    
+    Form form = testProperty.getForms().get(0);
+    assertEquals("GET", form.getMethodName(TD.readProperty.stringValue()).get());
+    assertEquals("PUT", form.getMethodName(TD.writeProperty.stringValue()).get());
   }
 }

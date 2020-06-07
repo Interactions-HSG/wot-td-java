@@ -27,6 +27,10 @@ public class ActionAffordance extends InteractionAffordance {
     this.output = output;
   }
   
+  public Optional<Form> getFirstForm() {
+    return getFirstFormForOperationType(TD.invokeAction.stringValue());
+  }
+  
   public Optional<DataSchema> getInputSchema() {
     return input;
   }

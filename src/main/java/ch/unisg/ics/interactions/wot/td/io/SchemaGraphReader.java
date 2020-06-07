@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 import java.util.Optional;
 import java.util.Set;
@@ -34,26 +34,26 @@ class SchemaGraphReader {
   }
   
   private Optional<DataSchema> readDataSchema(Resource schemaId) {
-    Set<IRI> type = Models.objectIRIs(model.filter(schemaId, RDF.TYPE, null));
+    Set<IRI> types = Models.objectIRIs(model.filter(schemaId, RDF.TYPE, null));
     
-    if (!type.isEmpty()) {
-      if (type.contains(JSONSchema.ObjectSchema)) {
+    if (!types.isEmpty()) {
+      if (types.contains(JSONSchema.ObjectSchema)) {
         return readObjectSchema(schemaId);
-      } else if (type.contains(JSONSchema.ArraySchema)) {
+      } else if (types.contains(JSONSchema.ArraySchema)) {
         return readArraySchema(schemaId);
-      } else if (type.contains(JSONSchema.BooleanSchema)) {
+      } else if (types.contains(JSONSchema.BooleanSchema)) {
         BooleanSchema.Builder builder = new BooleanSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
-      } else if (type.contains(JSONSchema.NumberSchema)) {
+      } else if (types.contains(JSONSchema.NumberSchema)) {
         return readNumberSchema(schemaId);
-      } else if (type.contains(JSONSchema.IntegerSchema)) {
+      } else if (types.contains(JSONSchema.IntegerSchema)) {
         return readIntegerSchema(schemaId);
-      } else if (type.contains(JSONSchema.StringSchema)) {
+      } else if (types.contains(JSONSchema.StringSchema)) {
         StringSchema.Builder builder = new StringSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
-      } else if (type.contains(JSONSchema.NullSchema)) {
+      } else if (types.contains(JSONSchema.NullSchema)) {
         NullSchema.Builder builder = new NullSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
