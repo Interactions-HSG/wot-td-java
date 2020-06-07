@@ -19,6 +19,11 @@ public class ArraySchema extends DataSchema {
     this.maxItems = maxItems;
   }
   
+  public boolean validate(List<Object> values) {
+    // TODO
+    return true;
+  }
+  
   public List<DataSchema> getItems() {
     return items;
   }

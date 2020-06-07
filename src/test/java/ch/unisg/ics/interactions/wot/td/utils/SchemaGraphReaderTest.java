@@ -23,12 +23,12 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 public class SchemaGraphReaderTest {
   private final static String IO_BASE_IRI = "http://example.org/";
+  private final static String PREFIX = "http://example.org/#";
 
   @Test
   public void testReadSimpleSemanticObject() throws RDFParseException, RDFHandlerException, 
       IOException {
     
-    String prefix = "http://example.org/#";
     String testSimpleSemObject =
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
@@ -69,37 +69,36 @@ public class SchemaGraphReaderTest {
     
     assertTrue(schema.isPresent());
     assertEquals(DataSchema.OBJECT, schema.get().getDatatype());
-    assertTrue(schema.get().getSemanticTypes().contains(prefix + "SemObject"));
+    assertTrue(schema.get().getSemanticTypes().contains(PREFIX + "SemObject"));
     
     ObjectSchema object = (ObjectSchema) schema.get();
     assertEquals(5, object.getProperties().size());
     
     DataSchema booleanProperty = object.getProperties().get("boolean_value");
     assertEquals(DataSchema.BOOLEAN, booleanProperty.getDatatype());
-    assertTrue(booleanProperty.getSemanticTypes().contains(prefix + "SemBool"));
+    assertTrue(booleanProperty.getSemanticTypes().contains(PREFIX + "SemBool"));
     
     DataSchema integerProperty = object.getProperties().get("integer_value");
     assertEquals(DataSchema.INTEGER, integerProperty.getDatatype());
-    assertTrue(integerProperty.getSemanticTypes().contains(prefix + "SemInt"));
+    assertTrue(integerProperty.getSemanticTypes().contains(PREFIX + "SemInt"));
     
     DataSchema numberProperty = object.getProperties().get("number_value");
     assertEquals(DataSchema.NUMBER, numberProperty.getDatatype());
-    assertTrue(numberProperty.getSemanticTypes().contains(prefix + "SemNumber"));
+    assertTrue(numberProperty.getSemanticTypes().contains(PREFIX + "SemNumber"));
     
     DataSchema stringProperty = object.getProperties().get("string_value");
     assertEquals(DataSchema.STRING, stringProperty.getDatatype());
-    assertTrue(stringProperty.getSemanticTypes().contains(prefix + "SemString"));
+    assertTrue(stringProperty.getSemanticTypes().contains(PREFIX + "SemString"));
     
     DataSchema nullProperty = object.getProperties().get("null_value");
     assertEquals(DataSchema.NULL, nullProperty.getDatatype());
-    assertTrue(nullProperty.getSemanticTypes().contains(prefix + "SemNull"));
+    assertTrue(nullProperty.getSemanticTypes().contains(PREFIX + "SemNull"));
   }
   
   @Test
   public void testReadSimpleSemanticObjectWithArray() throws RDFParseException, 
       RDFHandlerException, IOException {
     
-    String prefix = "http://example.org/#";
     String testSemObjectWithArray =
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
@@ -133,7 +132,7 @@ public class SchemaGraphReaderTest {
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
     assertTrue(schema.isPresent());
     assertEquals(DataSchema.OBJECT, schema.get().getDatatype());
-    assertTrue(schema.get().getSemanticTypes().contains(prefix + "UserDB"));
+    assertTrue(schema.get().getSemanticTypes().contains(PREFIX + "UserDB"));
     
     ObjectSchema object = (ObjectSchema) schema.get();
     assertEquals(2, object.getProperties().size());
@@ -142,7 +141,7 @@ public class SchemaGraphReaderTest {
     
     DataSchema count = object.getProperties().get("count");
     assertEquals(DataSchema.INTEGER, count.getDatatype());
-    assertTrue(count.getSemanticTypes().contains(prefix + "UserCount"));
+    assertTrue(count.getSemanticTypes().contains(PREFIX + "UserCount"));
     
     ArraySchema array = (ArraySchema) object.getProperties().get("user_list");
     assertEquals(DataSchema.ARRAY, array.getDatatype());
@@ -157,14 +156,13 @@ public class SchemaGraphReaderTest {
     assertTrue(user.getRequiredProperties().contains("full_name"));
     assertEquals(DataSchema.STRING, user.getProperties().get("full_name").getDatatype());
     assertTrue(user.getProperties().get("full_name").getSemanticTypes()
-        .contains(prefix + "FullName"));
+        .contains(PREFIX + "FullName"));
   }
   
   @Test
   public void testReadNestedSemanticObject() throws RDFParseException, RDFHandlerException, 
       IOException {
     
-    String prefix = "http://example.org/#";
     String testNestedSemanticObject =
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
@@ -205,12 +203,12 @@ public class SchemaGraphReaderTest {
     Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testNestedSemanticObject, 
         IO_BASE_IRI);
     Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, 
-        SimpleValueFactory.getInstance().createIRI(prefix + "SemObject")));
+        SimpleValueFactory.getInstance().createIRI(PREFIX + "SemObject")));
     
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
     assertTrue(schema.isPresent());
     assertEquals(DataSchema.OBJECT, schema.get().getDatatype());
-    assertTrue(schema.get().getSemanticTypes().contains(prefix + "SemObject"));
+    assertTrue(schema.get().getSemanticTypes().contains(PREFIX + "SemObject"));
     
     ObjectSchema object = (ObjectSchema) schema.get();
     assertEquals(2, object.getProperties().size());
@@ -218,35 +216,39 @@ public class SchemaGraphReaderTest {
     
     DataSchema stringProperty = object.getProperties().get("string_value");
     assertEquals(DataSchema.STRING, stringProperty.getDatatype());
-    assertTrue(stringProperty.getSemanticTypes().contains(prefix + "SemString"));
+    assertTrue(stringProperty.getSemanticTypes().contains(PREFIX + "SemString"));
     
     ObjectSchema innerObject = (ObjectSchema) object.getProperties().get("inner_object");
-    assertTrue(innerObject.getSemanticTypes().contains(prefix + "AnotherSemObject"));
+    assertTrue(innerObject.getSemanticTypes().contains(PREFIX + "AnotherSemObject"));
     assertEquals(4, innerObject.getProperties().size());
     assertTrue(innerObject.getRequiredProperties().contains("integer_value"));
     
     DataSchema booleanProperty = innerObject.getProperties().get("boolean_value");
     assertEquals(DataSchema.BOOLEAN, booleanProperty.getDatatype());
-    assertTrue(booleanProperty.getSemanticTypes().contains(prefix + "SemBool"));
+    assertTrue(booleanProperty.getSemanticTypes().contains(PREFIX + "SemBool"));
     
     DataSchema integerProperty = innerObject.getProperties().get("integer_value");
     assertEquals(DataSchema.INTEGER, integerProperty.getDatatype());
-    assertTrue(integerProperty.getSemanticTypes().contains(prefix + "SemInt"));
+    assertTrue(integerProperty.getSemanticTypes().contains(PREFIX + "SemInt"));
     
     DataSchema numberProperty = innerObject.getProperties().get("number_value");
     assertEquals(DataSchema.NUMBER, numberProperty.getDatatype());
-    assertTrue(numberProperty.getSemanticTypes().contains(prefix + "SemNumber"));
+    assertTrue(numberProperty.getSemanticTypes().contains(PREFIX + "SemNumber"));
     
     DataSchema nullProperty = innerObject.getProperties().get("null_value");
     assertEquals(DataSchema.NULL, nullProperty.getDatatype());
-    assertTrue(nullProperty.getSemanticTypes().contains(prefix + "SemNull"));
+    assertTrue(nullProperty.getSemanticTypes().contains(PREFIX + "SemNull"));
+  }
+  
+  @Test
+  public void testReadSimpleArray() {
+    // TODO
   }
   
   @Test
   public void testReadArrayOneSemanticObject() throws RDFParseException, RDFHandlerException,
       IOException {
     
-    String prefix = "http://example.org/#";
     String testArray =
         "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
@@ -271,18 +273,18 @@ public class SchemaGraphReaderTest {
     assertEquals(DataSchema.ARRAY, schema.getDatatype());
     
     ArraySchema array = (ArraySchema) schema;
-    assertTrue(array.getSemanticTypes().contains(prefix + "UserAccountList"));
+    assertTrue(array.getSemanticTypes().contains(PREFIX + "UserAccountList"));
     assertEquals(0, array.getMinItems().get().intValue());
     assertEquals(100, array.getMaxItems().get().intValue());
     assertEquals(1, array.getItems().size());
     assertEquals(DataSchema.OBJECT, array.getItems().get(0).getDatatype());
     
     ObjectSchema user = (ObjectSchema) array.getItems().get(0);
-    assertTrue(user.getSemanticTypes().contains(prefix + "UserAccount"));
+    assertTrue(user.getSemanticTypes().contains(PREFIX + "UserAccount"));
     assertEquals(1, user.getProperties().size());
     assertTrue(user.getProperties().containsKey("full_name"));
     assertTrue(user.getProperties().get("full_name").getSemanticTypes()
-        .contains(prefix + "FullName"));
+        .contains(PREFIX + "FullName"));
     assertEquals(1, user.getRequiredProperties().size());
     assertTrue(user.getRequiredProperties().contains("full_name"));
   }
@@ -300,7 +302,7 @@ public class SchemaGraphReaderTest {
         "    js:minItems 0 ;\n" +
         "    js:maxItems 100 ;\n" +
         "    js:items [\n" +
-        "        a js:ObjectSchema, <http://example.org/#UserAccount> ;\n" + 
+        "        a js:ObjectSchema, <http://example.org/#UserAccountTyope1> ;\n" + 
         "        js:properties [\n" + 
         "            a js:StringSchema, <http://example.org/#FullName> ;\n" +
         "            js:propertyName \"full_name\";\n" +
@@ -308,12 +310,12 @@ public class SchemaGraphReaderTest {
         "        js:required \"full_name\" ;\n" +
         "    ] ;\n" +
         "    js:items [\n" +
-        "        a js:ObjectSchema, <http://example.org/#UserAccount> ;\n" + 
+        "        a js:ObjectSchema, <http://example.org/UserAccountTyope2> ;\n" + 
         "        js:properties [\n" + 
-        "            a js:StringSchema, <http://example.org/#FullName> ;\n" +
-        "            js:propertyName \"full_name\";\n" +
+        "            a js:StringSchema, <http://example.org/#Username> ;\n" +
+        "            js:propertyName \"username\";\n" +
         "        ] ;\n" +
-        "        js:required \"full_name\" ;\n" +
+        "        js:required \"username\" ;\n" +
         "    ] ;\n" +
         "] .\n";
     

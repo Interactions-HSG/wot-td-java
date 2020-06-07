@@ -34,12 +34,6 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
-/**
- * TODO: add javadoc
- * 
- * @author Andrei Ciortea
- *
- */
 public class TDGraphReader {
   private Resource thingId;
   private Model model;

@@ -28,12 +28,6 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
-/**
- * TODO: add doc
- * 
- * @author Andrei Ciortea
- *
- */
 public class TDGraphWriter {
   final private Resource thingId;
   final private ThingDescription td;

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.eclipse.rdf4j.model.IRI;
 
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
 /**
@@ -78,6 +79,10 @@ public class ThingDescription {
     }
     
     return supportedActionTypes;
+  }
+  
+  public List<InteractionAffordance> getAffordancesByOperationType(String operationType) {
+    return new ArrayList<InteractionAffordance>();
   }
   
   // TODO: returns only the first action of a given type

@@ -22,6 +22,11 @@ public class ObjectSchema extends DataSchema {
     this.required = required;
   }
   
+  public boolean validate(Map<String, Object> values) {
+    // TODO
+    return true;
+  }
+  
   public Map<String, Object> instantiate(Map<String, Object> values) {
     Map<String, Object> instance = new HashMap<String, Object>();
     
