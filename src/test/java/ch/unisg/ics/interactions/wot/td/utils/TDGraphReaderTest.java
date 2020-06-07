@@ -241,17 +241,17 @@ public class TDGraphReaderTest {
     ActionAffordance action = reader.readActions().get(0);
     
     assertEquals("My Action", action.getTitle().get());
-    assertEquals(1, action.getTypes().size());
-    assertEquals(TD.ActionAffordance.stringValue(), action.getTypes().get(0));
+    assertEquals(1, action.getSemanticTypes().size());
+    assertEquals(TD.ActionAffordance.stringValue(), action.getSemanticTypes().get(0));
     
     assertEquals(1, action.getForms().size());
     Form form = action.getForms().get(0);
     
     assertEquals("PUT", form.getMethodName());
-    assertEquals("http://example.org/action", form.getHref());
+    assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertEquals(1, form.getOperations().size());
-    assertTrue(form.getOperations().contains("invokeaction"));
+    assertEquals(1, form.getOperationTypes().size());
+    assertTrue(form.getOperationTypes().contains("invokeaction"));
   }
   
   @Test
@@ -399,9 +399,9 @@ public class TDGraphReaderTest {
     // Check action form
     Form form = action.getForms().get(0);
     assertEquals("PUT", form.getMethodName());
-    assertEquals("http://example.org/action", form.getHref());
+    assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertTrue(form.getOperations().contains("invokeaction"));
+    assertTrue(form.getOperationTypes().contains("invokeaction"));
     
     // Check action input data schema
     ObjectSchema input = (ObjectSchema) action.getInputSchema().get();

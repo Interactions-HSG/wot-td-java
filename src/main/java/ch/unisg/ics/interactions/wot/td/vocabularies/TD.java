@@ -25,6 +25,8 @@ public final class TD {
   public static final IRI hasForm = createIRI("hasForm");
   
   /* Named individuals */
+  public static final IRI readProperty = createIRI("readProperty");
+  public static final IRI writeProperty = createIRI("writeProperty");
   public static final IRI invokeAction = createIRI("invokeAction");
   
   public static IRI createIRI(String fragment) {

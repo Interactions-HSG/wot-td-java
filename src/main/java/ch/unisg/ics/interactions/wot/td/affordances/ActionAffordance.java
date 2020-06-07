@@ -14,13 +14,12 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
  *
  */
 public class ActionAffordance extends InteractionAffordance {
-  // TODO: currently Schema just holds an RDF graph
   final private Optional<DataSchema> input;
   final private Optional<DataSchema> output;
   
   // TODO: add safe, idempotent
   
-  protected ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
+  private ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
       Optional<DataSchema> input, Optional<DataSchema> output) {
     
     super(title, types, forms);

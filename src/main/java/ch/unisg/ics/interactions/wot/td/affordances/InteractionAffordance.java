@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * TODO: add javadoc
@@ -30,12 +31,52 @@ public class InteractionAffordance {
     return title;
   }
   
-  public List<String> getTypes() {
+  public List<String> getSemanticTypes() {
     return types;
   }
   
   public List<Form> getForms() {
     return forms;
+  }
+  
+  public boolean hasFormWithOperationType(String operationType) {
+    return !forms.stream().filter(form -> form.hasOperationType(operationType))
+        .collect(Collectors.toList()).isEmpty();
+  }
+  
+  public Optional<Form> getFirstFormForOperationType(String operationType) {
+    if (hasFormWithOperationType(operationType)) {
+      Form firstForm = forms.stream().filter(form -> form.hasOperationType(operationType))
+          .collect(Collectors.toList()).get(0);
+      
+      return Optional.of(firstForm);
+    }
+    
+    return Optional.empty();
+  }
+  
+  public boolean hasSemanticType(String type) {
+    return this.types.contains(type);
+  }
+  
+  public boolean hasOneSemanticType(List<String> types) {
+    for (String type : types) {
+      if (this.types.contains(type)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  public boolean hasAllSemanticTypes(List<String> types) {
+    for (String type : types) {
+      if (!this.types.contains(type)) {
+        return false;
+      }
+    }
+    
+    return true;
   }
   
   /** Abstract builder for interaction affordances. */

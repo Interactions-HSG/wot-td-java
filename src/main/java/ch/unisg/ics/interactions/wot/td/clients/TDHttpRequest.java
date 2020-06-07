@@ -24,7 +24,7 @@ public class TDHttpRequest {
   
   public TDHttpRequest(Form form) {
     this.form = form;
-    this.request = new BasicClassicHttpRequest(form.getMethodName(), form.getHref());
+    this.request = new BasicClassicHttpRequest(form.getMethodName(), form.getTarget());
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
   }
   

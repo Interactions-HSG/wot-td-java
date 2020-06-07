@@ -118,7 +118,7 @@ public class TDGraphWriter {
       graphBuilder.add(thingId, TD.hasActionAffordance, actionId);
       graphBuilder.add(actionId, RDF.TYPE, TD.ActionAffordance);
       
-      for (String type : action.getTypes()) {
+      for (String type : action.getSemanticTypes()) {
         graphBuilder.add(actionId, RDF.TYPE, rdfFactory.createIRI(type));
       }
       
@@ -159,7 +159,7 @@ public class TDGraphWriter {
       graphBuilder.add(interactionId, TD.hasForm, formId);
       
       graphBuilder.add(formId, HTV.methodName, form.getMethodName());
-      graphBuilder.add(formId, HCTL.hasTarget, rdfFactory.createIRI(form.getHref()));
+      graphBuilder.add(formId, HCTL.hasTarget, rdfFactory.createIRI(form.getTarget()));
       graphBuilder.add(formId, HCTL.forContentType, form.getContentType());
       
       // TODO: refactor when adding other interaction affordances

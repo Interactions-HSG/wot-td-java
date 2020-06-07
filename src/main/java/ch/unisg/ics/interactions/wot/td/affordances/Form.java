@@ -5,34 +5,38 @@ import java.util.Set;
 
 public class Form {
   private String methodName;
-  private String href;
+  private String target;
   private String mediaType;
-  private Set<String> ops;
+  private Set<String> operationTypes;
   
-  public Form(String methodName, String href) {
-    this(methodName, href, "application/json", new HashSet<String>());
+  public Form(String methodName, String target) {
+    this(methodName, target, "application/json", new HashSet<String>());
   }
   
-  public Form(String methodName, String href, String mediaType, Set<String> op) {
+  public Form(String methodName, String href, String mediaType, Set<String> operationTypes) {
     this.methodName = methodName;
-    this.href = href;
+    this.target = href;
     this.mediaType = mediaType;
-    this.ops = op;
+    this.operationTypes = operationTypes;
   }
 
   public String getMethodName() {
     return methodName;
   }
 
-  public String getHref() {
-    return href;
+  public String getTarget() {
+    return target;
   }
 
   public String getContentType() {
     return mediaType;
   }
-
-  public Set<String> getOperations() {
-    return ops;
+  
+  public Set<String> getOperationTypes() {
+    return operationTypes;
+  }
+  
+  public boolean hasOperationType(String type) {
+    return operationTypes.contains(type);
   }
 }
