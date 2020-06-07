@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
@@ -37,6 +38,21 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 public class TDGraphReader {
   private Resource thingId;
   private Model model;
+  
+  public static ThingDescription readFromURL(String url) throws IOException {
+    String representation = Request.get(url).execute().returnContent().asString();
+    
+    try {
+      return readFromString(RDFFormat.JSONLD, representation);
+    } catch (InvalidTDException jsonldException) {
+      try {
+        return readFromString(RDFFormat.TURTLE, representation);
+      } catch (InvalidTDException turtleException) {
+        throw new InvalidTDException("Invalid TD or unsupported RDF format (supported formats: "
+            + "Turtle and JSON-LD.", turtleException);
+      }
+    }
+  }
   
   public static ThingDescription readFromString(RDFFormat format, String representation) {
     
