@@ -287,27 +287,13 @@ public class TDGraphReader {
         Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, HCTL.hasOperationType, null));
         Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
         
-        // TODO: refactor, move this into the classes
-//        if (opsIRIs.isEmpty()) {
-//          switch (affordanceType) {
-//            case InteractionAffordance.PROPERTY:
-//              ops.add("readproperty");
-//              ops.add("writeproperty");
-//              break;
-//            case InteractionAffordance.ACTION:
-//              ops.add("invokeaction");
-//              break;
-//            case InteractionAffordance.EVENT:
-//              ops.add("subscribeevent");
-//              break;
-//            default:
-//              break;
-//          }
-//        }
-        
         String methodName = methodNameOpt.get().stringValue();
         String target = targetOpt.get().stringValue();
-        forms.add(new Form(methodName, target, contentType, ops));
+        forms.add(new Form.Builder(target)
+            .setMethodName(methodName)
+            .setContentType(contentType)
+            .addOperationTypes(ops)
+            .build());
       }
     }
     

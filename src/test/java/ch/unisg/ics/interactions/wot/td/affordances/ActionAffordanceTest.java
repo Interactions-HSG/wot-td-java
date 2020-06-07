@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Before;
@@ -20,7 +19,7 @@ public class ActionAffordanceTest {
   
   @Before
   public void init() {
-    form = new Form("PUT", "http://example.org/action");
+    form = new Form.Builder("http://example.org/action").setMethodName("PUT").build();
     testAction = new ActionAffordance.Builder(form).build();
   }
 
@@ -33,14 +32,20 @@ public class ActionAffordanceTest {
   
   @Test
   public void testMultipleForms() {
-    Form form1 = new Form("GET", "http://example.org", "application/json", 
-        new HashSet<String>());
+    Form form1 = new Form.Builder("http://example.org")
+        .setMethodName("GET")
+        .setContentType("application/json")
+        .build();
     
-    Form form2 = new Form("POST", "http://example.org", "application/json", 
-        new HashSet<String>());
+    Form form2 = new Form.Builder("http://example.org")
+        .setMethodName("POST")
+        .setContentType("application/json")
+        .build();
     
-    Form form3 = new Form("PUT", "http://example.org", "application/json", 
-        new HashSet<String>());
+    Form form3 = new Form.Builder("http://example.org")
+        .setMethodName("PUT")
+        .setContentType("application/json")
+        .build();
     
     List<Form> formList = new ArrayList<Form>(Arrays.asList(form1, form2, form3));
     
@@ -60,8 +65,7 @@ public class ActionAffordanceTest {
   
   @Test
   public void testFullOptionAction() {
-    Form form = new Form("GET", "http://example.org", "application/json", 
-        new HashSet<String>());
+    Form form = new Form.Builder("http://example.org").setMethodName("GET").build();
     
     ActionAffordance action = (new ActionAffordance.Builder(form))
         .addTitle("Turn on")

@@ -46,6 +46,10 @@ public class ActionAffordance extends InteractionAffordance {
       
       for (Form form : this.forms) {
         form.addOperationType(TD.invokeAction.stringValue());
+        
+        if (!form.getMethodName().isPresent()) {
+          form.setMethodName("POST");
+        }
       }
       
       this.inputSchema = Optional.empty();

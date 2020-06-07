@@ -94,7 +94,7 @@ public class TDGraphWriter {
     
     return this;
   }
-    
+  
   private TDGraphWriter addTitle() {
     graphBuilder.add(thingId, DCT.title, td.getTitle());
     return this;
@@ -158,13 +158,17 @@ public class TDGraphWriter {
       
       graphBuilder.add(interactionId, TD.hasForm, formId);
       
-      graphBuilder.add(formId, HTV.methodName, form.getMethodName());
+      graphBuilder.add(formId, HTV.methodName, form.getMethodName().get());
       graphBuilder.add(formId, HCTL.hasTarget, rdfFactory.createIRI(form.getTarget()));
       graphBuilder.add(formId, HCTL.forContentType, form.getContentType());
       
-      // TODO: refactor when adding other interaction affordances
-      if (interaction instanceof ActionAffordance) {
-        graphBuilder.add(formId, HCTL.hasOperationType, TD.invokeAction);
+      for (String opType : form.getOperationTypes()) {
+        try {
+          IRI opTypeIri = rdfFactory.createIRI(opType);
+          graphBuilder.add(formId, HCTL.hasOperationType, opTypeIri);
+        } catch (IllegalArgumentException e) {
+          graphBuilder.add(formId, HCTL.hasOperationType, opType);
+        }
       }
     }
   }

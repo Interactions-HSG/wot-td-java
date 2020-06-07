@@ -17,7 +17,9 @@ public class PropertyAffordanceTest {
   @Before
   public void init() {
     DataSchema schema = new NumberSchema.Builder().build();
-    Form form = new Form("PUT", "http://example.org/action1");
+    Form form = new Form.Builder("http://example.org/action1")
+        .setMethodName("PUT")
+        .build();
     
     testProperty = new PropertyAffordance.Builder(schema, form)
         .addTitle("My Property")

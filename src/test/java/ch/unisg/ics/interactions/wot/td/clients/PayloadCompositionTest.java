@@ -31,15 +31,20 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class PayloadCompositionTest {
 
   private final static String PREFIX = "http://example.org/";
-  private final static Form FORM = new Form("PUT", PREFIX + "toggle");
+  private final static Form FORM = new Form.Builder(PREFIX + "toggle")
+      .setMethodName("PUT")
+      .addOperationType(TD.invokeAction.stringValue())
+      .build();
   
   @Test
   public void testNoPayload() {
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM).getRequest();
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+        .getRequest();
     assertNull(request.getEntity());
   }
   
@@ -60,7 +65,7 @@ public class PayloadCompositionTest {
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
     
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM)
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
         .setObjectPayload(payloadSchema, payloadVariables)
         .getRequest();
     
@@ -87,7 +92,7 @@ public class PayloadCompositionTest {
     payloadVariables.add(3);
     payloadVariables.add(5);
     
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM)
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
         .setArrayPayload(payloadSchema, payloadVariables)
         .getRequest();
     
@@ -123,7 +128,7 @@ public class PayloadCompositionTest {
     payloadVariables.put(PREFIX + "Speed", 3.5);
     payloadVariables.put(PREFIX + "3DCoordinates", coordinates);
     
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM)
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
         .setObjectPayload(payloadSchema, payloadVariables)
         .getRequest();
     
@@ -169,7 +174,7 @@ public class PayloadCompositionTest {
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
     
-    new TDHttpRequest(FORM)
+    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
         .setObjectPayload(payloadSchema, payloadVariables)
         .getRequest();
   }

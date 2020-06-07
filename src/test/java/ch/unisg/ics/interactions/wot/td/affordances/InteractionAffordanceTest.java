@@ -4,11 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,13 +17,13 @@ public class InteractionAffordanceTest {
   
   @Before
   public void init() {
-    Set<String> operationRead = Stream.of(TD.readProperty.stringValue())
-        .collect(Collectors.toCollection(HashSet::new));
-    Set<String> operationWrite = Stream.of(TD.writeProperty.stringValue())
-        .collect(Collectors.toCollection(HashSet::new));
+    Form form1 = new Form.Builder("http://example.org/property1")
+        .addOperationType(TD.readProperty.stringValue())
+        .build();
     
-    Form form1 = new Form("PUT", "http://example.org/action1", "application/json", operationRead);
-    Form form2 = new Form("POST", "http://example.org/action2", "application/json", operationWrite);
+    Form form2 = new Form.Builder("http://example.org/property2")
+        .addOperationType(TD.writeProperty.stringValue())
+        .build();
     
     test_affordance = new InteractionAffordance(Optional.of("My Affordance"), 
         Arrays.asList(prefix + "Type1", prefix + "Type2"), Arrays.asList(form1, form2));

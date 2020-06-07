@@ -3,6 +3,7 @@ package ch.unisg.ics.interactions.wot.td.clients;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -22,9 +23,18 @@ public class TDHttpRequest {
   private final Form form;
   private BasicClassicHttpRequest request;
   
-  public TDHttpRequest(Form form) {
+  public TDHttpRequest(Form form, String operationType) {
     this.form = form;
-    this.request = new BasicClassicHttpRequest(form.getMethodName(), form.getTarget());
+    
+    Optional<String> methodName = form.getMethodName(operationType);
+    
+    if (methodName.isPresent()) {
+      this.request = new BasicClassicHttpRequest(methodName.get(), form.getTarget());
+    } else {
+      throw new IllegalArgumentException("No default binding for the given operation type: " 
+          + operationType);
+    }
+    
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
   }
   

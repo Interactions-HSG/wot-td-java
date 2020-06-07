@@ -203,8 +203,10 @@ public class TDGraphWriterTest {
     
     Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
     
-    ActionAffordance simpleAction = new ActionAffordance.Builder(new Form("PUT", 
-        "http://example.org/action"))
+    ActionAffordance simpleAction = new ActionAffordance.Builder(
+            new Form.Builder( "http://example.org/action")
+              .setMethodName("PUT")
+              .build())
         .addTitle("My Action")
         .addSemanticType("http://iotschema.org/MyAction")
         .addInputSchema(new ObjectSchema.Builder()
@@ -274,7 +276,9 @@ public class TDGraphWriterTest {
     Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, 
         testTD, "http://example.org/");
     
-    Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
+    Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
+        .setMethodName("PUT")
+        .build();
     
     ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
         .addTitle("Toggle")

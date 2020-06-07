@@ -279,7 +279,7 @@ public class TDGraphReaderTest {
     assertEquals(1, action.getForms().size());
     Form form = action.getForms().get(0);
     
-    assertEquals("PUT", form.getMethodName());
+    assertEquals("PUT", form.getMethodName().get());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
     assertTrue(form.hasOperationType(TD.invokeAction.stringValue()));
@@ -429,7 +429,7 @@ public class TDGraphReaderTest {
     
     // Check action form
     Form form = action.getForms().get(0);
-    assertEquals("PUT", form.getMethodName());
+    assertEquals("PUT", form.getMethodName().get());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
     assertTrue(form.hasOperationType(TD.invokeAction.stringValue()));
