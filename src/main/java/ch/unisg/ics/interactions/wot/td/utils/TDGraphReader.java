@@ -38,9 +38,9 @@ public class TDGraphReader {
   private Resource thingId;
   private Model model;
   
-  public static ThingDescription readFromString(String representation) {
+  public static ThingDescription readFromString(RDFFormat format, String representation) {
     
-    TDGraphReader reader = new TDGraphReader(representation);
+    TDGraphReader reader = new TDGraphReader(format, representation);
     
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
         .addSemanticTypes(reader.readThingTypes())
@@ -60,12 +60,12 @@ public class TDGraphReader {
     return tdBuilder.build();
   }
   
-  TDGraphReader(String representation) {
-    loadModel(representation, "");
+  TDGraphReader(RDFFormat format, String representation) {
+    loadModel(format, representation, "");
     
     Optional<String> baseURI = readBaseURI();
     if (baseURI.isPresent()) {
-      loadModel(representation, baseURI.get());
+      loadModel(format, representation, baseURI.get());
     }
     
     try {
@@ -75,10 +75,10 @@ public class TDGraphReader {
     }
   }
   
-  private void loadModel(String representation, String baseURI) {
+  private void loadModel(RDFFormat format, String representation, String baseURI) {
     this.model = new LinkedHashModel();
     
-    RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+    RDFParser parser = Rio.createParser(format);
     parser.setRDFHandler(new StatementCollector(model));
 
     StringReader stringReader = new StringReader(representation);

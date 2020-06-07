@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.rio.RDFFormat;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
@@ -64,6 +65,93 @@ public class TDGraphReaderTest {
       "        ]\n" + 
       "    ] ." ;
   
+  private static final String TEST_SIMPLE_TD_JSONLD = "[ {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx111\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/security#NoSecurityScheme\" ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx112\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#ActionAffordance\" ],\n" + 
+      "  \"http://purl.org/dc/terms/title\" : [ {\n" + 
+      "    \"@value\" : \"My Action\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/td#hasForm\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx113\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/td#hasInputSchema\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx114\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/td#hasOutputSchema\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx116\"\n" + 
+      "  } ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx113\",\n" + 
+      "  \"http://www.w3.org/2011/http#methodName\" : [ {\n" + 
+      "    \"@value\" : \"PUT\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/hypermedia#forContentType\" : [ {\n" + 
+      "    \"@value\" : \"application/json\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/hypermedia#hasOperationType\" : [ {\n" + 
+      "    \"@id\" : \"https://www.w3.org/2019/wot/td#invokeAction\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/hypermedia#hasTarget\" : [ {\n" + 
+      "    \"@id\" : \"http://example.org/action\"\n" + 
+      "  } ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx114\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx115\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" + 
+      "    \"@value\" : \"number_value\"\n" + 
+      "  } ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx115\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#NumberSchema\" ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#maximum\" : [ {\n" + 
+      "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" + 
+      "    \"@value\" : \"100.05\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#minimum\" : [ {\n" + 
+      "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" + 
+      "    \"@value\" : \"-100.05\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" + 
+      "    \"@value\" : \"number_value\"\n" + 
+      "  } ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx116\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx117\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" + 
+      "    \"@value\" : \"boolean_value\"\n" + 
+      "  } ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"_:node1ea75dfphx117\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#BooleanSchema\" ],\n" + 
+      "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" + 
+      "    \"@value\" : \"boolean_value\"\n" + 
+      "  } ]\n" + 
+      "}, {\n" + 
+      "  \"@id\" : \"http://example.org/#thing\",\n" + 
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#Thing\" ],\n" + 
+      "  \"http://purl.org/dc/terms/title\" : [ {\n" + 
+      "    \"@value\" : \"My Thing\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx112\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" + 
+      "    \"@id\" : \"http://example.org/\"\n" + 
+      "  } ],\n" + 
+      "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" + 
+      "    \"@id\" : \"_:node1ea75dfphx111\"\n" + 
+      "  } ]\n" + 
+      "} ]";
+  
   private static final String TEST_IO_HEAD =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
@@ -90,14 +178,14 @@ public class TDGraphReaderTest {
   
   @Test
   public void testReadTitle() {
-    TDGraphReader reader = new TDGraphReader(TEST_SIMPLE_TD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.JSONLD, TEST_SIMPLE_TD_JSONLD);
     
     assertEquals("My Thing", reader.readThingTitle());
   }
   
   @Test
   public void testReadThingTypes() {
-    TDGraphReader reader = new TDGraphReader(TEST_SIMPLE_TD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     assertEquals(1, reader.readThingTypes().size());
     assertTrue(reader.readThingTypes().contains(TD.Thing.stringValue()));
@@ -105,14 +193,14 @@ public class TDGraphReaderTest {
   
   @Test
   public void testReadBaseURI() {
-    TDGraphReader reader = new TDGraphReader(TEST_SIMPLE_TD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     assertEquals("http://example.org/", reader.readBaseURI().get());
   }
   
   @Test
   public void testReadOneSecuritySchema() {
-    TDGraphReader reader = new TDGraphReader(TEST_SIMPLE_TD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     assertEquals(1, reader.readSecuritySchemas().size());
     assertTrue(reader.readSecuritySchemas().contains(WoTSec.NoSecurityScheme));
@@ -136,7 +224,7 @@ public class TDGraphReaderTest {
         "    td:hasSecurityConfiguration [ a ex:YourSecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> .";
     
-    TDGraphReader reader = new TDGraphReader(testTD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     
     ValueFactory rdf = SimpleValueFactory.getInstance();
     
@@ -147,7 +235,7 @@ public class TDGraphReaderTest {
   
   @Test
   public void testReadOneSimpleAction() {
-    TDGraphReader reader = new TDGraphReader(TEST_SIMPLE_TD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     assertEquals(1, reader.readActions().size());
     ActionAffordance action = reader.readActions().get(0);
@@ -211,7 +299,7 @@ public class TDGraphReaderTest {
         "        ] ;\n" + 
         "    ] ." ;
     
-    TDGraphReader reader = new TDGraphReader(testTD);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     
     assertEquals(3, reader.readActions().size());
     
@@ -255,7 +343,8 @@ public class TDGraphReaderTest {
         "            js:required \"integer_value\", \"number_value\" ;\n" +
         "        ]\n";
     
-    TDGraphReader reader = new TDGraphReader(TEST_IO_HEAD + testSimpleObject + TEST_IO_TAIL);
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_IO_HEAD + testSimpleObject 
+        + TEST_IO_TAIL);
     
     ActionAffordance action = reader.readActions().get(0);
     
@@ -292,7 +381,7 @@ public class TDGraphReaderTest {
   
   @Test
   public void testReadSimpleFullTD() {
-    ThingDescription td = TDGraphReader.readFromString(TEST_SIMPLE_TD);
+    ThingDescription td = TDGraphReader.readFromString(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     // Check metadata
     assertEquals("My Thing", td.getTitle());
