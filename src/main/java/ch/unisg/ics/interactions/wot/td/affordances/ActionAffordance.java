@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 /**
  * TODO: add javadoc
@@ -42,6 +43,10 @@ public class ActionAffordance extends InteractionAffordance {
     
     public Builder(List<Form> forms) {
       super(forms);
+      
+      for (Form form : this.forms) {
+        form.addOperationType(TD.invokeAction.stringValue());
+      }
       
       this.inputSchema = Optional.empty();
       this.outputSchema = Optional.empty();

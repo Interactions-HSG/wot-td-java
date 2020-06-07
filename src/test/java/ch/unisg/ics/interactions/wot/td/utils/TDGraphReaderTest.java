@@ -282,8 +282,7 @@ public class TDGraphReaderTest {
     assertEquals("PUT", form.getMethodName());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertEquals(1, form.getOperationTypes().size());
-    assertTrue(form.getOperationTypes().contains(TD.invokeAction.stringValue()));
+    assertTrue(form.hasOperationType(TD.invokeAction.stringValue()));
   }
   
   @Test
@@ -433,7 +432,7 @@ public class TDGraphReaderTest {
     assertEquals("PUT", form.getMethodName());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertTrue(form.getOperationTypes().contains(TD.invokeAction.stringValue()));
+    assertTrue(form.hasOperationType(TD.invokeAction.stringValue()));
     
     // Check action input data schema
     ObjectSchema input = (ObjectSchema) action.getInputSchema().get();

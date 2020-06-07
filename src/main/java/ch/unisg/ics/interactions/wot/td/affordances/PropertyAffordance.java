@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class PropertyAffordance extends InteractionAffordance {
   private final DataSchema schema;
@@ -34,6 +35,12 @@ public class PropertyAffordance extends InteractionAffordance {
     
     public Builder(DataSchema schema, List<Form> forms) {
       super(forms);
+      
+      for (Form form : this.forms) {
+        form.addOperationType(TD.readProperty.stringValue());
+        form.addOperationType(TD.writeProperty.stringValue());
+      }
+      
       this.schema = schema;
       this.observable = false;
     }

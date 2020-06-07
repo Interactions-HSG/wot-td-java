@@ -32,8 +32,8 @@ public class Form {
     return mediaType;
   }
   
-  public Set<String> getOperationTypes() {
-    return operationTypes;
+  public void addOperationType(String operationType) {
+    operationTypes.add(operationType);
   }
   
   public boolean hasOperationType(String type) {
