@@ -1,15 +1,20 @@
 package ch.unisg.ics.interactions.wot.td.clients;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 
@@ -100,7 +105,7 @@ public class TDHttpRequest {
   
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, long value) 
       throws IllegalArgumentException {
-    if (dataSchema.getDatatype() == DataSchema.STRING) {
+    if (dataSchema.getDatatype() == DataSchema.INTEGER) {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
@@ -113,7 +118,7 @@ public class TDHttpRequest {
   
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, double value) 
       throws IllegalArgumentException {
-    if (dataSchema.getDatatype() == DataSchema.STRING) {
+    if (dataSchema.getDatatype() == DataSchema.NUMBER) {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
@@ -145,6 +150,33 @@ public class TDHttpRequest {
   
   BasicClassicHttpRequest getRequest() {
     return this.request;
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("[TDHttpRequest] Method: " + request.getMethod());
+    
+    try {
+      builder.append(", Target: " + request.getUri().toString());
+      builder.append(", Content-Type: " + request.getHeader(HttpHeaders.CONTENT_TYPE).getValue());
+      
+      if (request.getEntity() != null) {
+        StringWriter writer = new StringWriter();
+        IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
+        builder.append(", Payload: " + writer.toString());
+      }
+    } catch (UnsupportedOperationException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    } catch (ProtocolException e) {
+      e.printStackTrace();
+    }
+    
+    return builder.toString();
   }
   
 }

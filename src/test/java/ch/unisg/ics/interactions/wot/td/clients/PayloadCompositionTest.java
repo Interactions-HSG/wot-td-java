@@ -27,6 +27,7 @@ import com.google.gson.JsonSyntaxException;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
@@ -79,6 +80,34 @@ public class PayloadCompositionTest {
     JsonObject payload = JsonParser.parseString(writer.toString()).getAsJsonObject();
     assertEquals("Andrei", payload.get("first_name").getAsString());
     assertEquals("Ciortea", payload.get("last_name").getAsString());
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidBooleanPayload() {
+    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
+    .getRequest();
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidIntegerPayload() {
+    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
+    .getRequest();
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidNumberPayload() {
+    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    .setPrimitivePayload(new NumberSchema.Builder().build(), 1)
+    .getRequest();
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidStringPayload() {
+    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    .setPrimitivePayload(new StringSchema.Builder().build(), true)
+    .getRequest();
   }
   
   @Test

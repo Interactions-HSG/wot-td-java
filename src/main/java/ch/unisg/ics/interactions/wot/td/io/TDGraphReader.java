@@ -40,24 +40,24 @@ public class TDGraphReader {
   private Resource thingId;
   private Model model;
   
-  public static ThingDescription readFromURL(String url) throws IOException {
+  public static ThingDescription readFromURL(String url) throws IOException, InvalidTDException {
     String representation = Request.get(url).execute().returnContent().asString();
+    return readFromString(representation);
+  }
+  
+  public static ThingDescription readFromString(String representation) throws InvalidTDException {
+    TDGraphReader reader;
     
     try {
-      return readFromString(RDFFormat.JSONLD, representation);
-    } catch (InvalidTDException jsonldException) {
+      reader = new TDGraphReader(RDFFormat.JSONLD, representation);
+    } catch (Exception jsonldException) {
       try {
-        return readFromString(RDFFormat.TURTLE, representation);
-      } catch (InvalidTDException turtleException) {
+        reader = new TDGraphReader(RDFFormat.TURTLE, representation);
+      } catch (Exception turtleException) {
         throw new InvalidTDException("Invalid TD or unsupported RDF format (supported formats: "
             + "Turtle and JSON-LD.", turtleException);
       }
     }
-  }
-  
-  public static ThingDescription readFromString(RDFFormat format, String representation) {
-    
-    TDGraphReader reader = new TDGraphReader(format, representation);
     
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
         .addSemanticTypes(reader.readThingTypes())

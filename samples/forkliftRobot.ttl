@@ -24,7 +24,7 @@ ex:forkliftRobot a td:Thing ;
         td:hasInputSchema [ 
             a js:ObjectSchema ;
             js:properties [ 
-                a js:ArraySchema, ex:SourcePosition ;
+                a js:ArraySchema, ex:SourcePosition, ex:3DCordinates ;
                 js:propertyName "sourcePosition";
                 js:minItems 3 ;
                 js:maxItems 3 ;
@@ -33,13 +33,29 @@ ex:forkliftRobot a td:Thing ;
                 ] ;
             ] ;
             js:properties [
-                a js:ArraySchema, ex:TargetPosition ;
+                a js:ArraySchema, ex:TargetPosition, ex:3DCordinates ;
                 js:propertyName "targetPosition";
                 js:minItems 3 ;
                 js:maxItems 3 ;
                 js:items [
                     a js:NumberSchema ;
                 ] ;
+            ] ;
+            js:required "sourcePosition", "targetPosition" ;
+        ] ; 
+    ] ;
+    td:hasActionAffordance [
+        a td:ActionAffordance, ex:MoveTo ;
+        dct:title "moveTo" ; 
+        td:hasForm [
+            hctl:hasTarget <http://example.org/forkliftRobot/moveTo> ; 
+        ] ; 
+        td:hasInputSchema [ 
+            a js:ArraySchema, ex:3DCordinates ;
+            js:minItems 3 ;
+            js:maxItems 3 ;
+            js:items [
+                a js:NumberSchema ;
             ] ;
         ] ; 
     ] .

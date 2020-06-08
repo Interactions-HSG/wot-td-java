@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
-import org.eclipse.rdf4j.rio.RDFFormat;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,6 +75,7 @@ public class TDHttpRequestTest {
       "                    a js:NumberSchema ;\n" + 
       "                ] ;\n" + 
       "            ] ;\n" + 
+      "            js:required \"sourcePosition\", \"targetPosition\" ;" +
       "        ] ; \n" + 
       "    ] .\n";
   
@@ -83,7 +83,17 @@ public class TDHttpRequestTest {
   
   @Before
   public void init() {
-    td = TDGraphReader.readFromString(RDFFormat.TURTLE, FORKLIFT_ROBOT_TD);
+    td = TDGraphReader.readFromString(FORKLIFT_ROBOT_TD);
+  }
+  
+  @Test
+  public void testToStringNullEntity() {
+    TDHttpRequest request = new TDHttpRequest(new Form.Builder("http://example.org/action")
+        .addOperationType(TD.invokeAction.stringValue()).build(), 
+        TD.invokeAction.stringValue());
+    
+    assertEquals("[TDHttpRequest] Method: POST, Target: http://example.org/action, "
+        + "Content-Type: application/json", request.toString());
   }
   
   @Test

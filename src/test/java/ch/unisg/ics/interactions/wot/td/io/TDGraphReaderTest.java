@@ -16,7 +16,6 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
@@ -413,7 +412,7 @@ public class TDGraphReaderTest {
   
   @Test
   public void testReadSimpleFullTD() {
-    ThingDescription td = TDGraphReader.readFromString(RDFFormat.TURTLE, TEST_SIMPLE_TD);
+    ThingDescription td = TDGraphReader.readFromString(TEST_SIMPLE_TD);
     
     // Check metadata
     assertEquals("My Thing", td.getTitle());
