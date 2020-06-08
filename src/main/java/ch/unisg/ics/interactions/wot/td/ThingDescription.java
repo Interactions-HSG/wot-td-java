@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
 /**
@@ -21,32 +24,31 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
  *
  */
 public class ThingDescription {
-  // A human-readable title of the Thing (required)
-  final private String title;
-  final private Set<IRI> security;
+  private final String title;
+  private final Set<IRI> security;
   
-  // Identifier of the Thing in form of a URI
-  final private Optional<String> uri;
-  // Semantic types of the Thing
-  final private Set<String> types;
-  // The base URI that is used for all relative URI references throughout a TD document
-  final private Optional<String> baseURI;
-  // All Action-based interaction affordances of the Thing
-  final private List<ActionAffordance> actions;
+  private final Optional<String> uri;
+  private final Set<String> types;
+  private final Optional<String> baseURI;
+  
+  private final List<PropertyAffordance> properties;
+  private final List<ActionAffordance> actions;
   
   protected ThingDescription(String title, Set<IRI> security, Optional<String> uri, Set<String> types, 
-      Optional<String> baseURI, List<ActionAffordance> actions) {
+      Optional<String> baseURI, List<PropertyAffordance> properties, List<ActionAffordance> actions) {
     
     this.title = title;
     
     if (security.isEmpty()) {
-      security.add(WoTSec.NoSecurityScheme);
+      security.add(SimpleValueFactory.getInstance().createIRI(WoTSec.NoSecurityScheme));
     }
     this.security = security;
 
     this.uri = uri;
     this.types = types;
     this.baseURI = baseURI;
+    
+    this.properties = properties;
     this.actions = actions;
   }
   
@@ -74,16 +76,35 @@ public class ThingDescription {
     Set<String> supportedActionTypes = new HashSet<String>();
     
     for (ActionAffordance action : actions) {
-      supportedActionTypes.addAll(action.getTypes());
+      supportedActionTypes.addAll(action.getSemanticTypes());
     }
     
     return supportedActionTypes;
   }
   
-  // TODO: returns only the first action of a given type
-  public Optional<ActionAffordance> getAction(String actionType) {
+  public List<PropertyAffordance> getPropertiesByOperationType(String operationType) {
+    return properties.stream().filter(property -> property.hasFormWithOperationType(operationType))
+        .collect(Collectors.toList());
+  }
+  
+  public Optional<PropertyAffordance> getFirstPropertyBySemanticType(String propertyType) {
+    for (PropertyAffordance property : properties) {
+      if (property.getSemanticTypes().contains(propertyType)) {
+        return Optional.of(property);
+      }
+    }
+    
+    return Optional.empty();
+  }
+  
+  public List<ActionAffordance> getActionsByOperationType(String operationType) {
+    return actions.stream().filter(action -> action.hasFormWithOperationType(operationType))
+        .collect(Collectors.toList());
+  }
+  
+  public Optional<ActionAffordance> getFirstActionBySemanticType(String actionType) {
     for (ActionAffordance action : actions) {
-      if (action.getTypes().contains(actionType)) {
+      if (action.getSemanticTypes().contains(actionType)) {
         return Optional.of(action);
       }
     }
@@ -91,28 +112,34 @@ public class ThingDescription {
     return Optional.empty();
   }
   
+  public List<PropertyAffordance> getProperties() {
+    return this.properties;
+  }
+  
   public List<ActionAffordance> getActions() {
     return this.actions;
   }
   
   public static class Builder {
-    final private String title;
-    final private Set<IRI> security;
+    private final String title;
+    private final Set<IRI> security;
     
     private Optional<String> uri;
-    final private Set<String> types;
-    
     private Optional<String> baseURI;
-    final private List<ActionAffordance> actions;
+    private final Set<String> types;
+    
+    private final List<PropertyAffordance> properties;
+    private final List<ActionAffordance> actions;
     
     public Builder(String title) {
       this.title = title;
       this.security = new HashSet<IRI>();
       
       this.uri = Optional.empty();
+      this.baseURI = Optional.empty();
       this.types= new HashSet<String>();
       
-      this.baseURI = Optional.empty();
+      this.properties = new ArrayList<PropertyAffordance>();
       this.actions = new ArrayList<ActionAffordance>();
     }
     
@@ -146,6 +173,16 @@ public class ThingDescription {
       return this;
     }
     
+    public Builder addProperty(PropertyAffordance property) {
+      this.properties.add(property);
+      return this;
+    }
+    
+    public Builder addProperties(List<PropertyAffordance> properties) {
+      this.properties.addAll(properties);
+      return this;
+    }
+    
     public Builder addAction(ActionAffordance action) {
       this.actions.add(action);
       return this;
@@ -157,8 +194,7 @@ public class ThingDescription {
     }
     
     public ThingDescription build() {
-      return new ThingDescription(title, security, uri, types, baseURI, actions);
+      return new ThingDescription(title, security, uri, types, baseURI, properties, actions);
     }
-    
   }
 }

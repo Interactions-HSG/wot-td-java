@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 /**
  * TODO: add javadoc
@@ -14,18 +15,20 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
  *
  */
 public class ActionAffordance extends InteractionAffordance {
-  // TODO: currently Schema just holds an RDF graph
   final private Optional<DataSchema> input;
   final private Optional<DataSchema> output;
   
   // TODO: add safe, idempotent
   
-  protected ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
+  private ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
       Optional<DataSchema> input, Optional<DataSchema> output) {
-    
     super(title, types, forms);
     this.input = input;
     this.output = output;
+  }
+  
+  public Optional<Form> getFirstForm() {
+    return getFirstFormForOperationType(TD.invokeAction);
   }
   
   public Optional<DataSchema> getInputSchema() {
@@ -44,6 +47,14 @@ public class ActionAffordance extends InteractionAffordance {
     
     public Builder(List<Form> forms) {
       super(forms);
+      
+      for (Form form : this.forms) {
+        form.addOperationType(TD.invokeAction);
+        
+        if (!form.getMethodName().isPresent()) {
+          form.setMethodName("POST");
+        }
+      }
       
       this.inputSchema = Optional.empty();
       this.outputSchema = Optional.empty();

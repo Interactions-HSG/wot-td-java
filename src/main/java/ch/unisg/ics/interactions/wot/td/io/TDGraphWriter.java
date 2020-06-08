@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,22 +28,15 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
-/**
- * TODO: add doc
- * 
- * @author Andrei Ciortea
- *
- */
 public class TDGraphWriter {
-  final private Resource thingId;
-  final private ThingDescription td;
-  final private ModelBuilder graphBuilder;
+  private final Resource thingId;
+  private final ThingDescription td;
+  private final ModelBuilder graphBuilder;
+  private final ValueFactory rdf = SimpleValueFactory.getInstance();
   
   public TDGraphWriter(ThingDescription td) {
-    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
-    
-    this.thingId = td.getThingURI().isPresent() ? rdfFactory.createIRI(td.getThingURI().get())
-        : rdfFactory.createBNode();
+    this.thingId = td.getThingURI().isPresent() ? rdf.createIRI(td.getThingURI().get())
+        : rdf.createBNode();
     
     this.td = td;
     this.graphBuilder = new ModelBuilder();
@@ -82,8 +75,8 @@ public class TDGraphWriter {
     Set<IRI> securitySchemas = td.getSecurity();
     
     for (IRI schema : securitySchemas) {
-      BNode schemaId = SimpleValueFactory.getInstance().createBNode();
-      graphBuilder.add(thingId, TD.hasSecurityConfiguration, schemaId);
+      BNode schemaId = rdf.createBNode();
+      graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemaId);
       graphBuilder.add(schemaId, RDF.TYPE, schema);
     }
     
@@ -92,44 +85,42 @@ public class TDGraphWriter {
   
   private TDGraphWriter addTypes() {
     // TODO: To be considered: always add td:Thing as a type?
-    graphBuilder.add(thingId, RDF.TYPE, TD.Thing);
+    graphBuilder.add(thingId, RDF.TYPE, rdf.createIRI(TD.Thing));
     
     for (String type : td.getSemanticTypes()) {
-      graphBuilder.add(thingId, RDF.TYPE, SimpleValueFactory.getInstance().createIRI(type));
+      graphBuilder.add(thingId, RDF.TYPE, rdf.createIRI(type));
     }
     
     return this;
   }
-    
+  
   private TDGraphWriter addTitle() {
-    graphBuilder.add(thingId, DCT.title, td.getTitle());
+    graphBuilder.add(thingId, rdf.createIRI(DCT.title), td.getTitle());
     return this;
   }
     
   private TDGraphWriter addBaseURI() {
     if (td.getBaseURI().isPresent()) {
-      ValueFactory rdfFactory = SimpleValueFactory.getInstance();
-      graphBuilder.add(thingId, TD.hasBase, rdfFactory.createIRI(td.getBaseURI().get()));
+      graphBuilder.add(thingId, rdf.createIRI(TD.hasBase), 
+          rdf.createIRI(td.getBaseURI().get()));
     }
     
     return this;
   }
     
   private TDGraphWriter addActions() {
-    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
-    
     for (ActionAffordance action : td.getActions()) {
-      BNode actionId = rdfFactory.createBNode();
+      BNode actionId = rdf.createBNode();
       
-      graphBuilder.add(thingId, TD.hasActionAffordance, actionId);
-      graphBuilder.add(actionId, RDF.TYPE, TD.ActionAffordance);
+      graphBuilder.add(thingId, rdf.createIRI(TD.hasActionAffordance), actionId);
+      graphBuilder.add(actionId, RDF.TYPE, rdf.createIRI(TD.ActionAffordance));
       
-      for (String type : action.getTypes()) {
-        graphBuilder.add(actionId, RDF.TYPE, rdfFactory.createIRI(type));
+      for (String type : action.getSemanticTypes()) {
+        graphBuilder.add(actionId, RDF.TYPE, rdf.createIRI(type));
       }
       
       if (action.getTitle().isPresent()) {
-        graphBuilder.add(actionId, DCT.title, action.getTitle().get());
+        graphBuilder.add(actionId, rdf.createIRI(DCT.title), action.getTitle().get());
       }
       
       addFormsForInteraction(actionId, action);
@@ -137,8 +128,8 @@ public class TDGraphWriter {
       if (action.getInputSchema().isPresent()) {
         DataSchema schema = action.getInputSchema().get();
         
-        Resource inputId = rdfFactory.createBNode();
-        graphBuilder.add(actionId, TD.hasInputSchema, inputId);
+        Resource inputId = rdf.createBNode();
+        graphBuilder.add(actionId, rdf.createIRI(TD.hasInputSchema), inputId);
         
         SchemaGraphWriter.write(graphBuilder, inputId, schema);
       }
@@ -146,8 +137,8 @@ public class TDGraphWriter {
       if (action.getOutputSchema().isPresent()) {
         DataSchema schema = action.getOutputSchema().get();
         
-        Resource outputId = rdfFactory.createBNode();
-        graphBuilder.add(actionId, TD.hasOutputSchema, outputId);
+        Resource outputId = rdf.createBNode();
+        graphBuilder.add(actionId, rdf.createIRI(TD.hasOutputSchema), outputId);
         
         SchemaGraphWriter.write(graphBuilder, outputId, schema);
       }
@@ -157,20 +148,22 @@ public class TDGraphWriter {
   }
     
   private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
-    ValueFactory rdfFactory = SimpleValueFactory.getInstance();
-    
     for (Form form : interaction.getForms()) {
-      BNode formId = rdfFactory.createBNode();
+      BNode formId = rdf.createBNode();
       
-      graphBuilder.add(interactionId, TD.hasForm, formId);
+      graphBuilder.add(interactionId, rdf.createIRI(TD.hasForm), formId);
       
-      graphBuilder.add(formId, HTV.methodName, form.getMethodName());
-      graphBuilder.add(formId, HCTL.hasTarget, rdfFactory.createIRI(form.getHref()));
-      graphBuilder.add(formId, HCTL.forContentType, form.getContentType());
+      graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
+      graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
+      graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
       
-      // TODO: refactor when adding other interaction affordances
-      if (interaction instanceof ActionAffordance) {
-        graphBuilder.add(formId, HCTL.hasOperationType, TD.invokeAction);
+      for (String opType : form.getOperationTypes()) {
+        try {
+          IRI opTypeIri = rdf.createIRI(opType);
+          graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opTypeIri);
+        } catch (IllegalArgumentException e) {
+          graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opType);
+        }
       }
     }
   }

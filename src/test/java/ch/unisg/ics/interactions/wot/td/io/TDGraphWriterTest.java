@@ -1,10 +1,12 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -20,66 +22,58 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
 public class TDGraphWriterTest {
-  private final static String THING_TITLE = "My Thing";
-  private final static String THING_IRI = "http://example.org/#thing";
-  private final static String IO_BASE_IRI = "http://example.org/";
+  private static final String THING_TITLE = "My Thing";
+  private static final String THING_IRI = "http://example.org/#thing";
+  private static final String IO_BASE_IRI = "http://example.org/";
+  private static final ValueFactory rdf = SimpleValueFactory.getInstance();
+  
+  private static final String PREFIXES =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" + 
+      "@prefix saref: <https://w3id.org/saref#> .\n" + 
+      "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
   
   @Test
   public void testNoThingURI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = 
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        PREFIXES +
         "\n" +
         "[] a td:Thing ;\n" + 
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
-    
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
-    String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertIsomorphicGraphs(testTD, td);
   }
   
   @Test
   public void testWriteTitle() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = 
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n" ;
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
-    
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
-    String description = TDGraphWriter.write(td);
-    
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertIsomorphicGraphs(testTD, td);
   }
   
   @Test
   public void testWriteAdditionalTypes() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = 
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        PREFIXES +
         "@prefix eve: <http://w3id.org/eve#> .\n" +
         "@prefix iot: <http://iotschema.org/> .\n" +
         "\n" +
@@ -87,20 +81,14 @@ public class TDGraphWriterTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
-    
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iotschema.org/Light")
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
-    String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertIsomorphicGraphs(testTD, td);
   }
   
   @Test
@@ -108,66 +96,45 @@ public class TDGraphWriterTest {
       IOException {
     
     String testTD = 
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        PREFIXES +
         "@prefix eve: <http://w3id.org/eve#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing, eve:Artifact ;\n" + 
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
-    
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
-    String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertIsomorphicGraphs(testTD, td);
   }
   
   @Test
   public void testWriteBaseURI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = 
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasBase <http://example.org/> .\n";
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
-    
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
         .addBaseURI("http://example.org/")
         .build();
     
-    String description = TDGraphWriter.write(td);
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertIsomorphicGraphs(testTD, td);
   }
   
   @Test
   public void testWriteOneAction() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = 
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        PREFIXES +
         "@prefix iot: <http://iotschema.org/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
@@ -201,10 +168,10 @@ public class TDGraphWriterTest {
         "        ]\n" + 
         "    ] ." ;
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
-    
-    ActionAffordance simpleAction = new ActionAffordance.Builder(new Form("PUT", 
-        "http://example.org/action"))
+    ActionAffordance simpleAction = new ActionAffordance.Builder(
+            new Form.Builder( "http://example.org/action")
+              .setMethodName("PUT")
+              .build())
         .addTitle("My Action")
         .addSemanticType("http://iotschema.org/MyAction")
         .addInputSchema(new ObjectSchema.Builder()
@@ -219,38 +186,18 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .addBaseURI("http://example.org/")
         .addAction(simpleAction)
         .build();
     
-    String description = new TDGraphWriter(td)
-        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
-        .setNamespace("htv", "http://www.w3.org/2011/http#")
-        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
-        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
-        .setNamespace("dct", "http://purl.org/dc/terms/")
-        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("iot", "http://iotschema.org/")
-        .write();
-    
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertIsomorphicGraphs(testTD, td);
   }
   
   @Test
   public void testWriteReadmeExample() throws RDFParseException, RDFHandlerException, IOException {
     String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" + 
-        "@prefix saref: <https://w3id.org/saref#> .\n" + 
-        "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" + 
+        PREFIXES +
         "\n" + 
         "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" + 
         "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" + 
@@ -271,10 +218,9 @@ public class TDGraphWriterTest {
         "        ];\n" + 
         "    ].";
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, 
-        testTD, "http://example.org/");
-    
-    Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
+    Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
+        .setMethodName("PUT")
+        .build();
     
     ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
         .addTitle("Toggle")
@@ -293,6 +239,26 @@ public class TDGraphWriterTest {
         .addAction(toggle)
         .build();
     
+    assertIsomorphicGraphs(testTD, td);
+    
+    String description = new TDGraphWriter(td)
+        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
+        .setNamespace("htv", "http://www.w3.org/2011/http#")
+        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
+        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
+        .setNamespace("dct", "http://purl.org/dc/terms/")
+        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+        .setNamespace("saref", "https://w3id.org/saref#")
+        .write();
+    
+    System.out.println(description);
+  }
+  
+  private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException, 
+      RDFHandlerException, IOException {
+    Model expectedModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, 
+        IO_BASE_IRI);
+    
     String description = new TDGraphWriter(td)
         .setNamespace("td", "https://www.w3.org/2019/wot/td#")
         .setNamespace("htv", "http://www.w3.org/2011/http#")
@@ -304,8 +270,9 @@ public class TDGraphWriterTest {
         .write();
     
     Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        "http://example.org/");
+        IO_BASE_IRI);
     
-    assertTrue(Models.isomorphic(testModel, tdModel));
+    assertTrue(Models.isomorphic(expectedModel, tdModel));
+    
   }
 }

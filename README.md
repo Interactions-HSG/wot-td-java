@@ -8,23 +8,38 @@ A Java library for the [W3C Web of Things (WoT) Thing Description (TD)](https://
 
 This library is a work-in-progress. What you can do with the current version:
 - read/write TDs in RDF; the current version works with [Turtle](https://www.w3.org/TR/turtle/)
-- use action affordances with the data schemas defined by the [W3C Recommendation](https://www.w3.org/TR/wot-thing-description/#sec-data-schema-vocabulary-definition)
+- use property and action affordances with the data schemas defined by the [W3C Recommendation](https://www.w3.org/TR/wot-thing-description/#sec-data-schema-vocabulary-definition)
     - JSON Schema keywords are mapped to IRIs using the [JSON Schema in RDF vocabulary](https://www.w3.org/2019/wot/json-schema)
     - not all terms (and not all default values) are currently supported
 - use composite data schemas (e.g., arrays of nested objects with semantic annotations) 
 
 Coming soon:
 - an HTTP client able to compose HTTP requests based on TDs
-- support for *property affordances* and *event affordances*
+- support for event affordances
 - support for all the terms defined for data schemas (and default values)
-
 
 ## Prerequisites
 * Java 8
 
+## Reading TDs
+
+We can parse a TD from a string like so: 
+
+```java
+ThingDescription td = TDGraphReader.readFromString(description);
+```
+
+Or from a URL:
+
+```java
+ThingDescription td = TDGraphReader.readFromURL(url);
+```
+
 ## Creating and Writing TDs
 
-The library provides a fluent API for constructing TDs. For instance, we can construct a TD for a lamp as follows:
+The library provides a fluent API for constructing TDs. This feature can be useful, for instance, to expose TDs for resources hosted on origin servers, or to expose TDs via intermediaries in order to integrate legacy devices.
+
+For instance, we can construct a TD for a lamp as follows:
 
 ```java
 ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
@@ -60,34 +75,41 @@ Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
 We can serialize our TD in Turtle like so (support for other formats is to be added): 
 
 ```java
-String description = TDGraphWriter.write(td);
+String description = new TDGraphWriter(td)
+        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
+        .setNamespace("htv", "http://www.w3.org/2011/http#")
+        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
+        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
+        .setNamespace("dct", "http://purl.org/dc/terms/")
+        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+        .setNamespace("saref", "https://w3id.org/saref#")
+        .write();
 ```
 
 The generated TD is:
 
 ```
-@prefix htv: <http://www.w3.org/2011/http#> .
-@prefix js: <https://www.w3.org/2019/wot/json-schema#> .
-@prefix saref: <https://w3id.org/saref#> .
 @prefix td: <https://www.w3.org/2019/wot/td#> .
+@prefix htv: <http://www.w3.org/2011/http#> .
 @prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
 @prefix wotsec: <https://www.w3.org/2019/wot/security#> .
+@prefix js: <https://www.w3.org/2019/wot/json-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dct: <http://purl.org/dc/terms/> .
+@prefix saref: <https://w3id.org/saref#> .
 
 <http://example.org/lamp123> a td:Thing, saref:LightSwitch;
+  dct:title "My Lamp Thing";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];
-  dct:title "My Lamp Thing" ;
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
-      td:name "toggle";
       dct:title "Toggle";
       td:hasForm [
           htv:methodName "PUT";
-          hctl:forContentType "application/json";
           hctl:hasTarget <http://mylamp.example.org/toggle>;
+          hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction
         ];
-      td:hasInputSchema [ a saref:OnOffState, js:ObjectSchema;
+      td:hasInputSchema [ a js:ObjectSchema, saref:OnOffState;
           js:properties [ a js:BooleanSchema;
               js:propertyName "status"
             ];
@@ -98,10 +120,3 @@ The generated TD is:
 
 In the above listing, notice the `TDGraphWriter` added for us a number of default values specified by the W3C WoT TD recommendation (e.g., `application/json` for our form's content type). 
 
-## Parsing TDs
-
-We can parse a TD from a string like so: 
-
-```java
-ThingDescription td = TDGraphReader.readFromString(description);
-```

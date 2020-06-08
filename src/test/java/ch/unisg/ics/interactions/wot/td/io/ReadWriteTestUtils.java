@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,9 +12,11 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.WriterConfig;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-public class ReadWriteTestUtils {
+public final class ReadWriteTestUtils {
 
   static Model readModelFromString(RDFFormat format, String description, String baseURI) 
       throws RDFParseException, RDFHandlerException, IOException {
@@ -33,7 +35,8 @@ public class ReadWriteTestUtils {
     OutputStream out = new ByteArrayOutputStream();
     
     try {
-      Rio.write(model, out, format);
+      Rio.write(model, out, format, 
+          new WriterConfig().set(BasicWriterSettings.INLINE_BLANK_NODES, true));
     } finally {
       try {
         out.close();
@@ -44,4 +47,6 @@ public class ReadWriteTestUtils {
     
     return out.toString();
   }
+  
+  private ReadWriteTestUtils() { }
 }

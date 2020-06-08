@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.utils;
+package ch.unisg.ics.interactions.wot.td.io;
 
 public class InvalidTDException extends RuntimeException {
 

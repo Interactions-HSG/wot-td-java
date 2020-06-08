@@ -29,6 +29,10 @@ public class DataSchema {
     return semanticTypes;
   }
   
+  public boolean isA(String type) {
+    return semanticTypes.contains(type);
+  }
+  
   public static abstract class Builder<T extends DataSchema, S extends Builder<T,S>> {
     protected Set<String> semanticTypes;
     

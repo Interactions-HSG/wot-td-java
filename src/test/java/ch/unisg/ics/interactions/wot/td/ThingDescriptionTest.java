@@ -38,13 +38,13 @@ public class ThingDescriptionTest {
   @Test
   public void testMultipleTypes() {
     ThingDescription td = (new ThingDescription.Builder("My Thing"))
-        .addSemanticType(TD.Thing.stringValue())
+        .addSemanticType(TD.Thing)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iot-schema.org/eve#Light")
         .build();
     
     assertEquals(3, td.getSemanticTypes().size());
-    assertTrue(td.getSemanticTypes().contains(TD.Thing.stringValue()));
+    assertTrue(td.getSemanticTypes().contains(TD.Thing));
     assertTrue(td.getSemanticTypes().contains("http://w3id.org/eve#Artifact"));
     assertTrue(td.getSemanticTypes().contains("http://iot-schema.org/eve#Light"));
   }
