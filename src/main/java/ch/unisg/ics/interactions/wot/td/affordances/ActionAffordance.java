@@ -28,7 +28,7 @@ public class ActionAffordance extends InteractionAffordance {
   }
   
   public Optional<Form> getFirstForm() {
-    return getFirstFormForOperationType(TD.invokeAction.stringValue());
+    return getFirstFormForOperationType(TD.invokeAction);
   }
   
   public Optional<DataSchema> getInputSchema() {
@@ -49,7 +49,7 @@ public class ActionAffordance extends InteractionAffordance {
       super(forms);
       
       for (Form form : this.forms) {
-        form.addOperationType(TD.invokeAction.stringValue());
+        form.addOperationType(TD.invokeAction);
         
         if (!form.getMethodName().isPresent()) {
           form.setMethodName("POST");

@@ -18,11 +18,11 @@ public class InteractionAffordanceTest {
   @Before
   public void init() {
     Form form1 = new Form.Builder("http://example.org/property1")
-        .addOperationType(TD.readProperty.stringValue())
+        .addOperationType(TD.readProperty)
         .build();
     
     Form form2 = new Form.Builder("http://example.org/property2")
-        .addOperationType(TD.writeProperty.stringValue())
+        .addOperationType(TD.writeProperty)
         .build();
     
     test_affordance = new InteractionAffordance(Optional.of("My Affordance"), 
@@ -31,8 +31,8 @@ public class InteractionAffordanceTest {
   
   @Test
   public void testHasFormForOperationType() {
-    assertTrue(test_affordance.hasFormWithOperationType(TD.readProperty.stringValue()));
-    assertTrue(test_affordance.hasFormWithOperationType(TD.writeProperty.stringValue()));
+    assertTrue(test_affordance.hasFormWithOperationType(TD.readProperty));
+    assertTrue(test_affordance.hasFormWithOperationType(TD.writeProperty));
   }
   
   @Test
@@ -76,13 +76,13 @@ public class InteractionAffordanceTest {
   
   @Test
   public void testGetFirstFormForOperationType() {
-    assertTrue(test_affordance.getFirstFormForOperationType(TD.readProperty.stringValue())
+    assertTrue(test_affordance.getFirstFormForOperationType(TD.readProperty)
         .isPresent());
   }
   
   @Test
   public void testNoFirstFormForOperationType() {
-    assertFalse(test_affordance.getFirstFormForOperationType(TD.invokeAction.stringValue())
+    assertFalse(test_affordance.getFirstFormForOperationType(TD.invokeAction)
         .isPresent());
   }
 }

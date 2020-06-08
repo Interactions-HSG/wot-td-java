@@ -39,12 +39,12 @@ public class PayloadCompositionTest {
   private final static String PREFIX = "http://example.org/";
   private final static Form FORM = new Form.Builder(PREFIX + "toggle")
       .setMethodName("PUT")
-      .addOperationType(TD.invokeAction.stringValue())
+      .addOperationType(TD.invokeAction)
       .build();
   
   @Test
   public void testNoPayload() {
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
         .getRequest();
     assertNull(request.getEntity());
   }
@@ -66,7 +66,7 @@ public class PayloadCompositionTest {
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
     
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
         .setObjectPayload(payloadSchema, payloadVariables)
         .getRequest();
     
@@ -84,28 +84,28 @@ public class PayloadCompositionTest {
   
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidBooleanPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    new TDHttpRequest(FORM, TD.invokeAction)
     .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
     .getRequest();
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidIntegerPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    new TDHttpRequest(FORM, TD.invokeAction)
     .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
     .getRequest();
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidNumberPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    new TDHttpRequest(FORM, TD.invokeAction)
     .setPrimitivePayload(new NumberSchema.Builder().build(), 1)
     .getRequest();
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    new TDHttpRequest(FORM, TD.invokeAction)
     .setPrimitivePayload(new StringSchema.Builder().build(), true)
     .getRequest();
   }
@@ -121,7 +121,7 @@ public class PayloadCompositionTest {
     payloadVariables.add(3);
     payloadVariables.add(5);
     
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
         .setArrayPayload(payloadSchema, payloadVariables)
         .getRequest();
     
@@ -157,7 +157,7 @@ public class PayloadCompositionTest {
     payloadVariables.put(PREFIX + "Speed", 3.5);
     payloadVariables.put(PREFIX + "3DCoordinates", coordinates);
     
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
         .setObjectPayload(payloadSchema, payloadVariables)
         .getRequest();
     
@@ -203,7 +203,7 @@ public class PayloadCompositionTest {
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
     
-    new TDHttpRequest(FORM, TD.invokeAction.stringValue())
+    new TDHttpRequest(FORM, TD.invokeAction)
         .setObjectPayload(payloadSchema, payloadVariables)
         .getRequest();
   }

@@ -15,7 +15,9 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -37,8 +39,9 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class TDGraphReader {
-  private Resource thingId;
+  private final Resource thingId;
   private Model model;
+  private final ValueFactory rdf = SimpleValueFactory.getInstance();
   
   public static ThingDescription readFromURL(String url) throws IOException, InvalidTDException {
     String representation = Request.get(url).execute().returnContent().asString();
@@ -87,7 +90,8 @@ public class TDGraphReader {
     }
     
     try {
-      thingId = Models.subject(model.filter(null, TD.hasSecurityConfiguration, null)).get();
+      thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration), 
+          null)).get();
     } catch (NoSuchElementException e) {
       throw new InvalidTDException("Missing mandatory security definitions.", e);
     }
@@ -119,7 +123,8 @@ public class TDGraphReader {
   }
   
   String readThingTitle() {
-    Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, DCT.title, null));
+    Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, 
+        rdf.createIRI(DCT.title), null));
     
     return thingTitle.get().stringValue();
   }
@@ -133,7 +138,7 @@ public class TDGraphReader {
   }
   
   final Optional<String> readBaseURI() {
-    Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, TD.hasBase, null));
+    Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, rdf.createIRI(TD.hasBase), null));
     
     if (baseURI.isPresent()) {
       return Optional.of(baseURI.get().stringValue());
@@ -143,8 +148,8 @@ public class TDGraphReader {
   }
   
   Set<IRI> readSecuritySchemas() {
-    Set<Resource> nodeIds = Models.objectResources(model.filter(thingId, TD.hasSecurityConfiguration, 
-        null));
+    Set<Resource> nodeIds = Models.objectResources(model.filter(thingId, 
+        rdf.createIRI(TD.hasSecurityConfiguration), null));
     
     Set<IRI> schemes = new HashSet<IRI>();
     
@@ -163,7 +168,7 @@ public class TDGraphReader {
     List<PropertyAffordance> properties = new ArrayList<PropertyAffordance>();
     
     Set<Resource> propertyIds = Models.objectResources(model.filter(thingId, 
-        TD.hasPropertyAffordance, null));
+        rdf.createIRI(TD.hasPropertyAffordance), null));
     
     for (Resource propertyId : propertyIds) {
       try {
@@ -177,7 +182,7 @@ public class TDGraphReader {
           readAffordanceSemanticTypes(builder, propertyId);
           
           Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId, 
-              TD.isObservable, null));
+              rdf.createIRI(TD.isObservable), null));
           if (observable.isPresent() && observable.get().booleanValue()) {
             builder.addObserve();
           }
@@ -196,10 +201,10 @@ public class TDGraphReader {
     List<ActionAffordance> actions = new ArrayList<ActionAffordance>();
     
     Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId, 
-        TD.hasActionAffordance, null));
+        rdf.createIRI(TD.hasActionAffordance), null));
     
     for (Resource affordanceId : affordanceIds) {
-      if (!model.contains(affordanceId, RDF.TYPE, TD.ActionAffordance)) {
+      if (!model.contains(affordanceId, RDF.TYPE, rdf.createIRI(TD.ActionAffordance))) {
         continue;
       }
       
@@ -219,7 +224,7 @@ public class TDGraphReader {
     
     try {
       Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
-          TD.hasInputSchema, null));
+          rdf.createIRI(TD.hasInputSchema), null));
       if (inputSchemaId.isPresent()) {
         try {
           Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
@@ -232,7 +237,7 @@ public class TDGraphReader {
       }
       
       Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, 
-          TD.hasOutputSchema, null));
+          rdf.createIRI(TD.hasOutputSchema), null));
       if (outSchemaId.isPresent()) {
           Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
           if (output.isPresent()) {
@@ -257,8 +262,8 @@ public class TDGraphReader {
   private void readAffordanceTitle(InteractionAffordance
       .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
     
-    Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId, DCT.title, 
-        null));
+    Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId, 
+        rdf.createIRI(DCT.title), null));
     if (title.isPresent()) {
       builder.addTitle(title.get().stringValue());
     }
@@ -267,24 +272,27 @@ public class TDGraphReader {
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
     List<Form> forms = new ArrayList<Form>();
     
-    Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, TD.hasForm, null));
+    Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, 
+        rdf.createIRI(TD.hasForm), null));
     
     for (Resource formId : formIdSet) {
-      Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, HCTL.hasTarget, null));
+      Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, rdf.createIRI(HCTL.hasTarget), 
+          null));
       
       if (!targetOpt.isPresent()) {
         continue;
       }
       
-      Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, HTV.methodName,
-          null));
+      Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, 
+          rdf.createIRI(HTV.methodName), null));
       
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
-          HCTL.forContentType, null));
+          rdf.createIRI(HCTL.forContentType), null));
       String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
           : "application/json";
       
-      Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, HCTL.hasOperationType, null));
+      Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType), 
+          null));
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
       
       String target = targetOpt.get().stringValue();
@@ -301,8 +309,8 @@ public class TDGraphReader {
     }
     
     if (forms.isEmpty()) {
-      throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have at least one "
-          + "valid.");
+      throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have "
+          + "at least one valid.");
     }
     
     return forms;

@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -14,16 +16,16 @@ import org.junit.Test;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.io.TDGraphWriter;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
 public class TDGraphWriterTest {
-  private final static String THING_TITLE = "My Thing";
-  private final static String THING_IRI = "http://example.org/#thing";
-  private final static String IO_BASE_IRI = "http://example.org/";
+  private static final String THING_TITLE = "My Thing";
+  private static final String THING_IRI = "http://example.org/#thing";
+  private static final String IO_BASE_IRI = "http://example.org/";
+  private static final ValueFactory rdf = SimpleValueFactory.getInstance();
   
   @Test
   public void testNoThingURI() throws RDFParseException, RDFHandlerException, IOException {
@@ -39,7 +41,7 @@ public class TDGraphWriterTest {
     Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testTD, IO_BASE_IRI);
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
     String description = TDGraphWriter.write(td);
@@ -64,7 +66,7 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
     String description = TDGraphWriter.write(td);
@@ -94,7 +96,7 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iotschema.org/Light")
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
     String description = TDGraphWriter.write(td);
@@ -124,7 +126,7 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .build();
     
     String description = TDGraphWriter.write(td);
@@ -222,7 +224,7 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addSecurity(WoTSec.NoSecurityScheme)
+        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
         .addBaseURI("http://example.org/")
         .addAction(simpleAction)
         .build();

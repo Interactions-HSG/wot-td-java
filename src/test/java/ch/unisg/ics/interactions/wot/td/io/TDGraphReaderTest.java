@@ -194,6 +194,8 @@ public class TDGraphReaderTest {
       
   private static final String TEST_IO_TAIL = "    ] ." ;
   
+  private static final ValueFactory rdf = SimpleValueFactory.getInstance();
+  
   @Test
   public void testReadTitle() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.JSONLD, TEST_SIMPLE_TD_JSONLD);
@@ -206,7 +208,7 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     assertEquals(1, reader.readThingTypes().size());
-    assertTrue(reader.readThingTypes().contains(TD.Thing.stringValue()));
+    assertTrue(reader.readThingTypes().contains(TD.Thing));
   }
   
   @Test
@@ -221,7 +223,7 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
     assertEquals(1, reader.readSecuritySchemas().size());
-    assertTrue(reader.readSecuritySchemas().contains(WoTSec.NoSecurityScheme));
+    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(WoTSec.NoSecurityScheme)));
   }
   
   @Test
@@ -246,7 +248,7 @@ public class TDGraphReaderTest {
     
     ValueFactory rdf = SimpleValueFactory.getInstance();
     
-    assertTrue(reader.readSecuritySchemas().contains(WoTSec.NoSecurityScheme));
+    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(WoTSec.NoSecurityScheme)));
     assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(prefix + "MySecurityScheme")));
     assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(prefix + "YourSecurityScheme")));
   }
@@ -274,7 +276,7 @@ public class TDGraphReaderTest {
     
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getSemanticTypes().size());
-    assertEquals(TD.ActionAffordance.stringValue(), action.getSemanticTypes().get(0));
+    assertEquals(TD.ActionAffordance, action.getSemanticTypes().get(0));
     
     assertEquals(1, action.getForms().size());
     Form form = action.getForms().get(0);
@@ -282,7 +284,7 @@ public class TDGraphReaderTest {
     assertEquals("PUT", form.getMethodName().get());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertTrue(form.hasOperationType(TD.invokeAction.stringValue()));
+    assertTrue(form.hasOperationType(TD.invokeAction));
   }
   
   @Test
@@ -419,7 +421,7 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecurity().contains(WoTSec.NoSecurityScheme));
+    assertTrue(td.getSecurity().contains(rdf.createIRI(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
     
     // Check action metadata
@@ -432,7 +434,7 @@ public class TDGraphReaderTest {
     assertEquals("PUT", form.getMethodName().get());
     assertEquals("http://example.org/action", form.getTarget());
     assertEquals("application/json", form.getContentType());
-    assertTrue(form.hasOperationType(TD.invokeAction.stringValue()));
+    assertTrue(form.hasOperationType(TD.invokeAction));
     
     // Check action input data schema
     ObjectSchema input = (ObjectSchema) action.getInputSchema().get();

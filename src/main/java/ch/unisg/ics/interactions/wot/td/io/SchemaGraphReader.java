@@ -8,6 +8,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -22,7 +24,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 class SchemaGraphReader {
-  final private Model model;
+  private final Model model;
+  private final ValueFactory rdf = SimpleValueFactory.getInstance();
   
   SchemaGraphReader(Model model) {
     this.model = model;
@@ -37,23 +40,23 @@ class SchemaGraphReader {
     Set<IRI> types = Models.objectIRIs(model.filter(schemaId, RDF.TYPE, null));
     
     if (!types.isEmpty()) {
-      if (types.contains(JSONSchema.ObjectSchema)) {
+      if (types.contains(rdf.createIRI(JSONSchema.ObjectSchema))) {
         return readObjectSchema(schemaId);
-      } else if (types.contains(JSONSchema.ArraySchema)) {
+      } else if (types.contains(rdf.createIRI(JSONSchema.ArraySchema))) {
         return readArraySchema(schemaId);
-      } else if (types.contains(JSONSchema.BooleanSchema)) {
+      } else if (types.contains(rdf.createIRI(JSONSchema.BooleanSchema))) {
         BooleanSchema.Builder builder = new BooleanSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
-      } else if (types.contains(JSONSchema.NumberSchema)) {
+      } else if (types.contains(rdf.createIRI(JSONSchema.NumberSchema))) {
         return readNumberSchema(schemaId);
-      } else if (types.contains(JSONSchema.IntegerSchema)) {
+      } else if (types.contains(rdf.createIRI(JSONSchema.IntegerSchema))) {
         return readIntegerSchema(schemaId);
-      } else if (types.contains(JSONSchema.StringSchema)) {
+      } else if (types.contains(rdf.createIRI(JSONSchema.StringSchema))) {
         StringSchema.Builder builder = new StringSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
-      } else if (types.contains(JSONSchema.NullSchema)) {
+      } else if (types.contains(rdf.createIRI(JSONSchema.NullSchema))) {
         NullSchema.Builder builder = new NullSchema.Builder();
         readSemanticTypesForDataSchema(builder, schemaId);
         return Optional.of(builder.build());
@@ -69,13 +72,13 @@ class SchemaGraphReader {
     
     /* Read properties */
     Set<Resource> propertyIds = Models.objectResources(model.filter(schemaId, 
-        JSONSchema.properties, null));
+        rdf.createIRI(JSONSchema.properties), null));
     for (Resource property : propertyIds) {
       Optional<DataSchema> propertySchema = readDataSchema(property);
       if (propertySchema.isPresent()) {
         // Each property of an object should also have an associated property name
         Optional<Literal> propertyName = Models.objectLiteral(model.filter(property, 
-            JSONSchema.propertyName, null));
+            rdf.createIRI(JSONSchema.propertyName), null));
         if (!propertyName.isPresent()) {
           throw new InvalidTDException("ObjectSchema property is missing a property name.");
         }
@@ -85,7 +88,7 @@ class SchemaGraphReader {
     
     /* Read required properties */
     Set<Literal> requiredProperties = Models.objectLiterals(model.filter(schemaId, 
-        JSONSchema.required, null));
+        rdf.createIRI(JSONSchema.required), null));
     for (Literal requiredProp : requiredProperties) {
       builder.addRequiredProperties(requiredProp.stringValue());
     }
@@ -98,21 +101,22 @@ class SchemaGraphReader {
     readSemanticTypesForDataSchema(builder, schemaId);
     
     /* Read minItems */
-    Optional<Literal> minItems = Models.objectLiteral(model.filter(schemaId, JSONSchema.minItems, 
-        null));
+    Optional<Literal> minItems = Models.objectLiteral(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.minItems), null));
     if (minItems.isPresent()) {
       builder.addMinItems(minItems.get().intValue());
     }
     
     /* Read maxItems */
-    Optional<Literal> maxItems = Models.objectLiteral(model.filter(schemaId, JSONSchema.maxItems, 
-        null));
+    Optional<Literal> maxItems = Models.objectLiteral(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.maxItems), null));
     if (maxItems.isPresent()) {
       builder.addMaxItems(maxItems.get().intValue());
     }
     
     /* Read items */
-    Set<Resource> itemIds = Models.objectResources(model.filter(schemaId, JSONSchema.items, null));
+    Set<Resource> itemIds = Models.objectResources(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.items), null));
     for (Resource itemId : itemIds) {
       Optional<DataSchema> item = readDataSchema(itemId);
       if (item.isPresent()) {
@@ -128,14 +132,14 @@ class SchemaGraphReader {
     
     readSemanticTypesForDataSchema(builder, schemaId);
     
-    Optional<Literal> maximum = Models.objectLiteral(model.filter(schemaId, JSONSchema.maximum, 
-        null));
+    Optional<Literal> maximum = Models.objectLiteral(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.maximum), null));
     if (maximum.isPresent()) {
       builder.addMaximum(maximum.get().intValue());
     }
     
-    Optional<Literal> minimum = Models.objectLiteral(model.filter(schemaId, JSONSchema.minimum, 
-        null));
+    Optional<Literal> minimum = Models.objectLiteral(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.minimum), null));
     if (minimum.isPresent()) {
       builder.addMinimum(minimum.get().intValue());
     }
@@ -148,14 +152,14 @@ class SchemaGraphReader {
     
     readSemanticTypesForDataSchema(builder, schemaId);
     
-    Optional<Literal> maximum = Models.objectLiteral(model.filter(schemaId, JSONSchema.maximum, 
-        null));
+    Optional<Literal> maximum = Models.objectLiteral(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.maximum), null));
     if (maximum.isPresent()) {
       builder.addMaximum(maximum.get().doubleValue());
     }
     
-    Optional<Literal> minimum = Models.objectLiteral(model.filter(schemaId, JSONSchema.minimum, 
-        null));
+    Optional<Literal> minimum = Models.objectLiteral(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.minimum), null));
     if (minimum.isPresent()) {
       builder.addMinimum(minimum.get().doubleValue());
     }

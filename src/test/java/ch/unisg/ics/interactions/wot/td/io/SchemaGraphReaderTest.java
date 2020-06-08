@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -16,15 +17,15 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.io.SchemaGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 public class SchemaGraphReaderTest {
-  private final static String IO_BASE_IRI = "http://example.org/";
-  private final static String PREFIX = "http://example.org/#";
+  private static final String IO_BASE_IRI = "http://example.org/";
+  private static final String PREFIX = "http://example.org/#";
+  private static final ValueFactory rdf = SimpleValueFactory.getInstance();
 
   @Test
   public void testReadSimpleSemanticObject() throws RDFParseException, RDFHandlerException, 
@@ -64,7 +65,8 @@ public class SchemaGraphReaderTest {
     
     Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSimpleSemObject, 
         IO_BASE_IRI);
-    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ObjectSchema));
+    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, 
+        rdf.createIRI(JSONSchema.ObjectSchema)));
     
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
     
@@ -128,7 +130,8 @@ public class SchemaGraphReaderTest {
     
     Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSemObjectWithArray, 
         IO_BASE_IRI);
-    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ObjectSchema));
+    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, 
+        rdf.createIRI(JSONSchema.ObjectSchema)));
     
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
     assertTrue(schema.isPresent());
@@ -268,7 +271,8 @@ public class SchemaGraphReaderTest {
         "] .\n";
     
     Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testArray, IO_BASE_IRI);
-    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ArraySchema));
+    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, 
+        rdf.createIRI(JSONSchema.ArraySchema)));
     
     DataSchema schema = SchemaGraphReader.readDataSchema(nodeId.get(), model).get();
     assertEquals(DataSchema.ARRAY, schema.getDatatype());
@@ -321,7 +325,8 @@ public class SchemaGraphReaderTest {
         "] .\n";
     
     Model model = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testArray, IO_BASE_IRI);
-    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, JSONSchema.ArraySchema));
+    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE, 
+        rdf.createIRI(JSONSchema.ArraySchema)));
     
     DataSchema schema = SchemaGraphReader.readDataSchema(nodeId.get(), model).get();
     assertEquals(DataSchema.ARRAY, schema.getDatatype());

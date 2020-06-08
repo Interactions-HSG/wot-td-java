@@ -11,9 +11,9 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class Form {
   private static final Map<String, String> DEFAULT_HTTP_BINDING = Stream.of(new String[][] { 
-    { TD.readProperty.stringValue(), "GET" }, 
-    { TD.writeProperty.stringValue(), "PUT" },
-    { TD.invokeAction.stringValue(), "POST" },
+    { TD.readProperty, "GET" }, 
+    { TD.writeProperty, "PUT" },
+    { TD.invokeAction, "POST" },
   }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
   
   private Optional<String> methodName;

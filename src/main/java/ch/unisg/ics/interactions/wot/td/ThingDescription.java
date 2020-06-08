@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
@@ -39,7 +40,7 @@ public class ThingDescription {
     this.title = title;
     
     if (security.isEmpty()) {
-      security.add(WoTSec.NoSecurityScheme);
+      security.add(SimpleValueFactory.getInstance().createIRI(WoTSec.NoSecurityScheme));
     }
     this.security = security;
 

@@ -60,7 +60,7 @@ public class ActionAffordanceTest {
   
   @Test
   public void testDefaultValues() {
-    String invokeAction = TD.invokeAction.stringValue();
+    String invokeAction = TD.invokeAction;
     assertTrue(testAction.hasFormWithOperationType(invokeAction));
     assertEquals("POST", testAction.getForms().get(0).getMethodName(invokeAction).get());
   }

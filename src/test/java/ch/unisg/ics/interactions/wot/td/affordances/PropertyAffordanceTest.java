@@ -38,11 +38,11 @@ public class PropertyAffordanceTest {
   
   @Test
   public void testDefaultOperationTypes() {
-    assertTrue(testProperty.hasFormWithOperationType(TD.readProperty.stringValue()));
-    assertTrue(testProperty.hasFormWithOperationType(TD.writeProperty.stringValue()));
+    assertTrue(testProperty.hasFormWithOperationType(TD.readProperty));
+    assertTrue(testProperty.hasFormWithOperationType(TD.writeProperty));
     
     Form form = testProperty.getForms().get(0);
-    assertEquals("GET", form.getMethodName(TD.readProperty.stringValue()).get());
-    assertEquals("PUT", form.getMethodName(TD.writeProperty.stringValue()).get());
+    assertEquals("GET", form.getMethodName(TD.readProperty).get());
+    assertEquals("PUT", form.getMethodName(TD.writeProperty).get());
   }
 }

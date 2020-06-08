@@ -89,8 +89,8 @@ public class TDHttpRequestTest {
   @Test
   public void testToStringNullEntity() {
     TDHttpRequest request = new TDHttpRequest(new Form.Builder("http://example.org/action")
-        .addOperationType(TD.invokeAction.stringValue()).build(), 
-        TD.invokeAction.stringValue());
+        .addOperationType(TD.invokeAction).build(), 
+        TD.invokeAction);
     
     assertEquals("[TDHttpRequest] Method: POST, Target: http://example.org/action, "
         + "Content-Type: application/json", request.toString());
@@ -101,10 +101,10 @@ public class TDHttpRequestTest {
     assertEquals(1, td.getProperties().size());
     Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
     assertTrue(property.isPresent());
-    Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty.stringValue());
+    Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
     assertTrue(form.isPresent());
     
-    BasicClassicHttpRequest request = new TDHttpRequest(form.get(), TD.writeProperty.stringValue())
+    BasicClassicHttpRequest request = new TDHttpRequest(form.get(), TD.writeProperty)
         .setPrimitivePayload(property.get().getDataSchema(), true)
         .getRequest();
     
@@ -129,7 +129,7 @@ public class TDHttpRequestTest {
     payloadVariables.put(PREFIX + "SourcePosition", Arrays.asList(30, 50, 70));
     payloadVariables.put(PREFIX + "TargetPosition", Arrays.asList(30, 60, 70));
     
-    BasicClassicHttpRequest request = new TDHttpRequest(form.get(), TD.invokeAction.stringValue())
+    BasicClassicHttpRequest request = new TDHttpRequest(form.get(), TD.invokeAction)
         .setObjectPayload((ObjectSchema) action.get().getInputSchema().get(), payloadVariables)
         .getRequest();
     

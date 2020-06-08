@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Models;
@@ -18,7 +19,6 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Before;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.io.SchemaGraphWriter;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
@@ -31,7 +31,6 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 public class SchemaGraphWriterTest {
   private final static String IO_BASE_IRI = "http://example.org/";
-
   private final static String PREFIX = "https://example.org/#";
   
   private final static String TEST_SCHEMA_PREFIXES = 
@@ -76,6 +75,7 @@ public class SchemaGraphWriterTest {
       "        ]";
   
   private static DataSchema semanticObjectSchema;
+  private static final ValueFactory rdf = SimpleValueFactory.getInstance(); 
   
   @Before
   public void init() {
@@ -136,13 +136,13 @@ public class SchemaGraphWriterTest {
     Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
     
-    Optional<Literal> minimum = Models.objectLiteral(schemaModel.filter(null, JSONSchema.minimum, 
-        null));
+    Optional<Literal> minimum = Models.objectLiteral(schemaModel.filter(null, 
+        rdf.createIRI(JSONSchema.minimum), null));
     assertTrue(minimum.isPresent());
     assertEquals(-1000.005, minimum.get().doubleValue(), 0.001);
     
-    Optional<Literal> maximum = Models.objectLiteral(schemaModel.filter(null, JSONSchema.minimum, 
-        null));
+    Optional<Literal> maximum = Models.objectLiteral(schemaModel.filter(null, 
+        rdf.createIRI(JSONSchema.minimum), null));
     assertTrue(maximum.isPresent());
     assertEquals(-1000.005, maximum.get().doubleValue(), 0.001);
   }
