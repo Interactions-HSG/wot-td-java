@@ -281,10 +281,7 @@ public class TDGraphReaderTest {
     assertEquals(1, action.getForms().size());
     Form form = action.getForms().get(0);
     
-    assertEquals("PUT", form.getMethodName().get());
-    assertEquals("http://example.org/action", form.getTarget());
-    assertEquals("application/json", form.getContentType());
-    assertTrue(form.hasOperationType(TD.invokeAction));
+    assertForm(form, "PUT", "http://example.org/action", "application/json", TD.invokeAction);
   }
   
   @Test
@@ -431,10 +428,7 @@ public class TDGraphReaderTest {
     
     // Check action form
     Form form = action.getForms().get(0);
-    assertEquals("PUT", form.getMethodName().get());
-    assertEquals("http://example.org/action", form.getTarget());
-    assertEquals("application/json", form.getContentType());
-    assertTrue(form.hasOperationType(TD.invokeAction));
+    assertForm(form, "PUT", "http://example.org/action", "application/json", TD.invokeAction);
     
     // Check action input data schema
     ObjectSchema input = (ObjectSchema) action.getInputSchema().get();
@@ -453,6 +447,14 @@ public class TDGraphReaderTest {
     
     assertEquals(DataSchema.BOOLEAN, output.getProperties().get("boolean_value").getDatatype());
     assertTrue(output.getRequiredProperties().contains("boolean_value"));
+  }
+  
+  private void assertForm(Form form, String methodName, String target, 
+      String contentType, String operationType) {
+    assertEquals(methodName, form.getMethodName().get());
+    assertEquals(target, form.getTarget());
+    assertEquals(contentType, form.getContentType());
+    assertTrue(form.hasOperationType(operationType));
   }
   
 }

@@ -283,20 +283,14 @@ public class SchemaGraphWriterTest {
     String testSchema = TEST_SCHEMA_PREFIXES +
         "[\n" + 
         "    a js:ArraySchema, ex:UserAccountList ;\n" + 
-        "    js:minItems \"0\"^^xsd:int ;\n" +
-        "    js:maxItems \"100\"^^xsd:int ;\n" +
         "    js:items " + USER_ACCOUNT_OBJECT + ";\n" + 
         "    js:items " + USER_ACCOUNT_OBJECT + ";\n" + 
         "] ." ;
-    
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, IO_BASE_IRI);
     
     ObjectSchema userAccount = getUserAccountSchema();
     
     ArraySchema schema = new ArraySchema.Builder()
         .addSemanticType(PREFIX + "UserAccountList")
-        .addMaxItems(100)
-        .addMinItems(0)
         .addItem(userAccount)
         .addItem(userAccount)
         .build();
@@ -304,6 +298,8 @@ public class SchemaGraphWriterTest {
     String description = getTestModelDescription(schema);
     Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
+    
+    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, IO_BASE_IRI);
     
     assertTrue(Models.isomorphic(testModel, schemaModel));
   }

@@ -111,29 +111,29 @@ class SchemaGraphWriter {
     addSemanticTypesforDataSchema(nodeId, schema);
   }
   
-  private void addIntegerSchema(Resource nodeId, IntegerSchema schema) {
+  private void addIntegerSchema(Resource nodeId, IntegerSchema integerSchema) {
     graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.IntegerSchema));
-    addSemanticTypesforDataSchema(nodeId, schema);
+    addSemanticTypesforDataSchema(nodeId, integerSchema);
     
-    if (schema.getMinimum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), schema.getMinimum().get());
+    if (integerSchema.getMinimum().isPresent()) {
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), integerSchema.getMinimum().get());
     }
     
-    if (schema.getMaximum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), schema.getMaximum().get());
+    if (integerSchema.getMaximum().isPresent()) {
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), integerSchema.getMaximum().get());
     }
   }
   
-  private void addNumberSchema(Resource nodeId, NumberSchema schema) {
+  private void addNumberSchema(Resource nodeId, NumberSchema numberSchema) {
     graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.NumberSchema));
-    addSemanticTypesforDataSchema(nodeId, schema);
+    addSemanticTypesforDataSchema(nodeId, numberSchema);
     
-    if (schema.getMinimum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), schema.getMinimum().get());
+    if (numberSchema.getMinimum().isPresent()) {
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), numberSchema.getMinimum().get());
     }
     
-    if (schema.getMaximum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), schema.getMaximum().get());
+    if (numberSchema.getMaximum().isPresent()) {
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), numberSchema.getMaximum().get());
     }
   }
   
