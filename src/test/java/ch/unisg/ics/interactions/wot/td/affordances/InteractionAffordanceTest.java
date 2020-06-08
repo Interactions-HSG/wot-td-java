@@ -12,7 +12,7 @@ import org.junit.Test;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class InteractionAffordanceTest {
-  private String prefix = "http://example.org";
+  private static final String prefix = "http://example.org";
   private InteractionAffordance test_affordance;
   
   @Before

@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
@@ -43,23 +44,18 @@ public class TDGraphReader {
   private Model model;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
   
-  public static ThingDescription readFromURL(String url) throws IOException, InvalidTDException {
+  public static ThingDescription readFromURL(TDFormat format, String url) throws IOException {
     String representation = Request.get(url).execute().returnContent().asString();
-    return readFromString(representation);
+    return readFromString(format, representation);
   }
   
-  public static ThingDescription readFromString(String representation) throws InvalidTDException {
+  public static ThingDescription readFromString(TDFormat format, String representation) {
     TDGraphReader reader;
     
-    try {
+    if (format == TDFormat.RDF_TURTLE) {
+      reader = new TDGraphReader(RDFFormat.TURTLE, representation);
+    } else {
       reader = new TDGraphReader(RDFFormat.JSONLD, representation);
-    } catch (Exception jsonldException) {
-      try {
-        reader = new TDGraphReader(RDFFormat.TURTLE, representation);
-      } catch (Exception turtleException) {
-        throw new InvalidTDException("Invalid TD or unsupported RDF format (supported formats: "
-            + "Turtle and JSON-LD.", turtleException);
-      }
     }
     
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())

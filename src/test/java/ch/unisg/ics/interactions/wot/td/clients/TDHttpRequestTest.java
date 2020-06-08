@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
@@ -83,7 +84,7 @@ public class TDHttpRequestTest {
   
   @Before
   public void init() {
-    td = TDGraphReader.readFromString(FORKLIFT_ROBOT_TD);
+    td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, FORKLIFT_ROBOT_TD);
   }
   
   @Test
@@ -115,7 +116,7 @@ public class TDHttpRequestTest {
     JsonElement payload = JsonParser.parseString(writer.toString());
     
     assertTrue(payload.isJsonPrimitive());
-    assertEquals(true, payload.getAsBoolean());
+    assertTrue(payload.getAsBoolean());
   }
   
   @Test

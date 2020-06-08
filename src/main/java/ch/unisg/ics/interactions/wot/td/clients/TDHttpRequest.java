@@ -166,13 +166,7 @@ public class TDHttpRequest {
         IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
         builder.append(", Payload: " + writer.toString());
       }
-    } catch (UnsupportedOperationException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    } catch (ProtocolException e) {
+    } catch (UnsupportedOperationException | IOException | URISyntaxException | ProtocolException e) {
       e.printStackTrace();
     }
     

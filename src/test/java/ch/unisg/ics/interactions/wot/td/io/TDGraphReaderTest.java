@@ -13,6 +13,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
@@ -411,7 +412,7 @@ public class TDGraphReaderTest {
   
   @Test
   public void testReadSimpleFullTD() {
-    ThingDescription td = TDGraphReader.readFromString(TEST_SIMPLE_TD);
+    ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TEST_SIMPLE_TD);
     
     // Check metadata
     assertEquals("My Thing", td.getTitle());

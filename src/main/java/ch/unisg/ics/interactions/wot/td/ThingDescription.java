@@ -34,6 +34,11 @@ public class ThingDescription {
   private final List<PropertyAffordance> properties;
   private final List<ActionAffordance> actions;
   
+  public enum TDFormat {
+    RDF_TURTLE,
+    RDF_JSONLD
+  };
+  
   protected ThingDescription(String title, Set<IRI> security, Optional<String> uri, Set<String> types, 
       Optional<String> baseURI, List<PropertyAffordance> properties, List<ActionAffordance> actions) {
     

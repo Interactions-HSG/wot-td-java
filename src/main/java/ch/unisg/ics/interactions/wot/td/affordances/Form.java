@@ -17,15 +17,15 @@ public class Form {
   }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
   
   private Optional<String> methodName;
-  private String target;
-  private String mediaType;
-  private Set<String> operationTypes;
+  private final String target;
+  private final String contentType;
+  private final Set<String> operationTypes;
   
   private Form(String href, Optional<String> methodName, String mediaType, 
       Set<String> operationTypes) {
     this.methodName = methodName;
     this.target = href;
-    this.mediaType = mediaType;
+    this.contentType = mediaType;
     this.operationTypes = operationTypes;
   }
 
@@ -54,7 +54,7 @@ public class Form {
   }
 
   public String getContentType() {
-    return mediaType;
+    return contentType;
   }
   
   public boolean hasOperationType(String type) {
@@ -79,7 +79,7 @@ public class Form {
     private final String target;
     private Optional<String> methodName;
     private String contentType;
-    private Set<String> operationTypes;
+    private final Set<String> operationTypes;
     
     public Builder(String target) {
       this.target = target;
