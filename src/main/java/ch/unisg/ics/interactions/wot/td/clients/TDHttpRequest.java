@@ -11,9 +11,10 @@ import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
@@ -44,16 +45,10 @@ public class TDHttpRequest {
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
   }
   
-  public int execute() {
+  public TDHttpResponse execute() throws IOException {
     HttpClient client = HttpClients.createDefault();
-    
-    try {
-      return client.execute(request).getCode();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    
-    return HttpStatus.SC_BAD_REQUEST;
+    HttpResponse response = client.execute(request);
+    return new TDHttpResponse((ClassicHttpResponse) response);
   }
   
 //  static HttpRequest buildHttpRequest(Form form, Optional<DataSchema> uriSchema, 

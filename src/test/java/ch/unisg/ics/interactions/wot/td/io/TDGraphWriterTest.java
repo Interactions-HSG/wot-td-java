@@ -240,18 +240,6 @@ public class TDGraphWriterTest {
         .build();
     
     assertIsomorphicGraphs(testTD, td);
-    
-    String description = new TDGraphWriter(td)
-        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
-        .setNamespace("htv", "http://www.w3.org/2011/http#")
-        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
-        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
-        .setNamespace("dct", "http://purl.org/dc/terms/")
-        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("saref", "https://w3id.org/saref#")
-        .write();
-    
-    System.out.println(description);
   }
   
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException, 

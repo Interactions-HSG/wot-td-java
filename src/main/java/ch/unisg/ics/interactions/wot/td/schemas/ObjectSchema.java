@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 
 public class ObjectSchema extends DataSchema {
@@ -25,6 +28,39 @@ public class ObjectSchema extends DataSchema {
   public boolean validate(Map<String, Object> values) {
     // TODO
     return true;
+  }
+  
+  @Override
+  public Object parseJson(JsonElement element) {
+    if (!element.isJsonObject()) {
+      throw new IllegalArgumentException("The payload is not an object.");
+    }
+    
+    JsonObject objPayload = element.getAsJsonObject();
+    Map<String, Object> data = new HashMap<String, Object>();
+    
+    for (String propName : properties.keySet()) {
+      JsonElement prop = objPayload.get(propName);
+      if (prop == null) {
+        if (hasRequiredProperty(propName)) {
+          throw new IllegalArgumentException("Missing required property: " + propName);
+        }
+        
+        continue;
+      }
+      
+      DataSchema propSchema = properties.get(propName);
+      
+      if (propSchema.getSemanticTypes().isEmpty()) {
+        data.put(propName, properties.get(propName).parseJson(prop));
+      } else {
+        // Currently returns one semantic tag; TODO: handle multiple semantic tags
+        String semanticType = propSchema.getSemanticTypes().iterator().next();
+        data.put(semanticType, properties.get(propName).parseJson(prop));
+      }
+    }
+    
+    return data;
   }
   
   public Map<String, Object> instantiate(Map<String, Object> values) {
@@ -65,6 +101,10 @@ public class ObjectSchema extends DataSchema {
 
   public List<String> getRequiredProperties() {
     return required;
+  }
+  
+  public boolean hasRequiredProperty(String propName) {
+    return required.contains(propName);
   }
 
   public static class Builder extends DataSchema.Builder<ObjectSchema, ObjectSchema.Builder> {
