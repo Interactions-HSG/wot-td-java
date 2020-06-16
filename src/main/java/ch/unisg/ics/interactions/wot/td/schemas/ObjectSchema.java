@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 public class ObjectSchema extends DataSchema {
   final private Map<String, DataSchema> properties;
@@ -51,11 +53,15 @@ public class ObjectSchema extends DataSchema {
       
       DataSchema propSchema = properties.get(propName);
       
-      if (propSchema.getSemanticTypes().isEmpty()) {
+      // Filter out data schema tags, if any
+      List<String> tags = propSchema.getSemanticTypes().stream().filter(tag -> 
+          !tag.startsWith(JSONSchema.PREFIX)).collect(Collectors.toList());
+      
+      if (tags.isEmpty()) {
         data.put(propName, properties.get(propName).parseJson(prop));
       } else {
         // Currently returns one semantic tag; TODO: handle multiple semantic tags
-        String semanticType = propSchema.getSemanticTypes().iterator().next();
+        String semanticType = tags.get(0);
         data.put(semanticType, properties.get(propName).parseJson(prop));
       }
     }

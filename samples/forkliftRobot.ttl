@@ -15,6 +15,39 @@ ex:forkliftRobot a td:Thing ;
             hctl:hasTarget <https://b5a16c91-0520-4d35-b14c-1aacab422ef3.mock.pstmn.io/forklift-robot/busy> ; 
         ] ; 
     ] ;
+    td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ArraySchema, ex:Position, ex:3DCoordinates ; 
+        td:hasForm [
+            hctl:hasTarget <https://b5a16c91-0520-4d35-b14c-1aacab422ef3.mock.pstmn.io/forklift-robot/position> ; 
+        ] ; 
+        js:items [
+            a js:NumberSchema ;
+        ] ;
+    ] ;
+    td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:LastCarry ; 
+        td:hasForm [
+            hctl:hasTarget <https://b5a16c91-0520-4d35-b14c-1aacab422ef3.mock.pstmn.io/forklift-robot/lastCarry> ; 
+        ] ; 
+        js:properties [ 
+            a js:ArraySchema, ex:SourcePosition ;
+            js:propertyName "sourcePosition";
+            js:minItems 3 ;
+            js:maxItems 3 ;
+            js:items [
+                a js:NumberSchema ;
+            ] ;
+        ] ;
+        js:properties [
+            a js:ArraySchema, ex:TargetPosition ;
+            js:propertyName "targetPosition";
+            js:minItems 3 ;
+            js:maxItems 3 ;
+            js:items [
+                a js:NumberSchema ;
+            ] ;
+        ] ;
+    ] ;
     td:hasActionAffordance [
         a td:ActionAffordance, ex:CarryFromTo ;
         dct:title "carry" ; 

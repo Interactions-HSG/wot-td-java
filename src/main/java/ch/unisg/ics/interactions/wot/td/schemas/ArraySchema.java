@@ -73,6 +73,7 @@ public class ArraySchema extends DataSchema {
     List<Object> data = new ArrayList<Object>();
     
     for (JsonElement elem : arrayPayload) {
+      // TODO: handle array schemas without items
       Optional<DataSchema> itemSchema = getItemSchema(elem);
       if (itemSchema.isPresent()) {
         data.add(itemSchema.get().parseJson(elem));
