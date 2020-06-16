@@ -12,14 +12,14 @@ ex:forkliftRobot a td:Thing ;
     td:hasPropertyAffordance [
         a td:PropertyAffordance, js:BooleanSchema, ex:Status ; 
         td:hasForm [
-            hctl:hasTarget <http://example.org/forkliftRobot/busy> ; 
+            hctl:hasTarget <https://b5a16c91-0520-4d35-b14c-1aacab422ef3.mock.pstmn.io/forklift-robot/busy> ; 
         ] ; 
     ] ;
     td:hasActionAffordance [
         a td:ActionAffordance, ex:CarryFromTo ;
         dct:title "carry" ; 
         td:hasForm [
-            hctl:hasTarget <http://example.org/forkliftRobot/carry> ; 
+            hctl:hasTarget <https://b5a16c91-0520-4d35-b14c-1aacab422ef3.mock.pstmn.io/forklift-robot/carry> ; 
         ] ; 
         td:hasInputSchema [ 
             a js:ObjectSchema ;
@@ -48,7 +48,7 @@ ex:forkliftRobot a td:Thing ;
         a td:ActionAffordance, ex:MoveTo ;
         dct:title "moveTo" ; 
         td:hasForm [
-            hctl:hasTarget <http://example.org/forkliftRobot/moveTo> ; 
+            hctl:hasTarget <https://b5a16c91-0520-4d35-b14c-1aacab422ef3.mock.pstmn.io/forklift-robot/moveTo> ; 
         ] ; 
         td:hasInputSchema [ 
             a js:ArraySchema, ex:3DCordinates ;
