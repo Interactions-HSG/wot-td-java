@@ -7,12 +7,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 
 /**
  * TODO: add javadoc
@@ -25,7 +23,7 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
  */
 public class ThingDescription {
   private final String title;
-  private final Set<IRI> security;
+  private final List<SecurityScheme> security;
   
   private final Optional<String> uri;
   private final Set<String> types;
@@ -39,13 +37,14 @@ public class ThingDescription {
     RDF_JSONLD
   };
   
-  protected ThingDescription(String title, Set<IRI> security, Optional<String> uri, Set<String> types, 
-      Optional<String> baseURI, List<PropertyAffordance> properties, List<ActionAffordance> actions) {
+  protected ThingDescription(String title, List<SecurityScheme> security, Optional<String> uri, 
+      Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties, 
+      List<ActionAffordance> actions) {
     
     this.title = title;
     
     if (security.isEmpty()) {
-      security.add(SimpleValueFactory.getInstance().createIRI(WoTSec.NoSecurityScheme));
+      security.add(new NoSecurityScheme());
     }
     this.security = security;
 
@@ -61,7 +60,7 @@ public class ThingDescription {
     return title;
   }
   
-  public Set<IRI> getSecurity() {
+  public List<SecurityScheme> getSecurity() {
     return security;
   }
   
@@ -127,7 +126,7 @@ public class ThingDescription {
   
   public static class Builder {
     private final String title;
-    private final Set<IRI> security;
+    private final List<SecurityScheme> security;
     
     private Optional<String> uri;
     private Optional<String> baseURI;
@@ -138,7 +137,7 @@ public class ThingDescription {
     
     public Builder(String title) {
       this.title = title;
-      this.security = new HashSet<IRI>();
+      this.security = new ArrayList<SecurityScheme>();
       
       this.uri = Optional.empty();
       this.baseURI = Optional.empty();
@@ -148,12 +147,12 @@ public class ThingDescription {
       this.actions = new ArrayList<ActionAffordance>();
     }
     
-    public Builder addSecurity(IRI security) {
+    public Builder addSecurityScheme(SecurityScheme security) {
       this.security.add(security);
       return this;
     }
     
-    public Builder addSecurity(Set<IRI> security) {
+    public Builder addSecuritySchemes(List<SecurityScheme> security) {
       this.security.addAll(security);
       return this;
     }

@@ -3,7 +3,7 @@ package ch.unisg.ics.interactions.wot.td.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Set;
+import java.util.List;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -23,6 +23,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -72,12 +73,13 @@ public class TDGraphWriter {
   }
   
   private TDGraphWriter addSecurity() {
-    Set<IRI> securitySchemas = td.getSecurity();
+    List<SecurityScheme> securitySchemas = td.getSecurity();
     
-    for (IRI schema : securitySchemas) {
+    for (SecurityScheme schema : securitySchemas) {
       BNode schemaId = rdf.createBNode();
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemaId);
-      graphBuilder.add(schemaId, RDF.TYPE, schema);
+      // TODO: complete serialization of security schemes (not just the type)
+      graphBuilder.add(schemaId, RDF.TYPE, rdf.createIRI(schema.getSchemaType()));
     }
     
     return this;
