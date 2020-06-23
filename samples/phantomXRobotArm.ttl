@@ -1,0 +1,110 @@
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org/> .
+@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
+@prefix htv: <http://www.w3.org/2011/http#> .
+@prefix js: <https://www.w3.org/2019/wot/json-schema#> .
+@prefix td: <https://www.w3.org/2019/wot/td#> .
+@prefix wotsec: <https://www.w3.org/2019/wot/security#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://api.interactions.ics.unisg.ch/v1.2/leubot> a ex:PhantomX, td:Thing;
+  dct:title "Leubot";
+  td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
+      dct:title "Set Elbow";
+      td:hasForm [
+          htv:methodName "POST";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/elbow>
+        ];
+      td:hasInputSchema [ a ex:ElbowJoint, js:ObjectSchema;
+          js:properties [ a js:IntegerSchema;
+              js:maximum "900"^^xsd:int;
+              js:minimum "210"^^xsd:int;
+              js:propertyName "value"
+            ];
+          js:required "value"
+        ]
+    ], [ a ex:SetWristAngle, td:ActionAffordance;
+      dct:title "Set Wrist Angle";
+      td:hasForm [
+          htv:methodName "POST";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/angle>
+        ];
+      td:hasInputSchema [ a ex:WristAngleJoint, js:ObjectSchema;
+          js:properties [ a js:IntegerSchema;
+              js:maximum "830"^^xsd:int;
+              js:minimum "200"^^xsd:int;
+              js:propertyName "value"
+            ];
+          js:required "value"
+        ]
+    ], [ a ex:SetWristRotation, td:ActionAffordance;
+      dct:title "Set Wrist Rotation";
+      td:hasForm [
+          htv:methodName "POST";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/rotation>
+        ];
+      td:hasInputSchema [ a ex:WristRotateJoint, js:ObjectSchema;
+          js:properties [ a js:IntegerSchema;
+              js:maximum "1023"^^xsd:int;
+              js:minimum "0"^^xsd:int;
+              js:propertyName "value"
+            ];
+          js:required "value"
+        ]
+    ], [ a ex:SetBase, td:ActionAffordance;
+      dct:title "Set Base";
+      td:hasForm [
+          htv:methodName "POST";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/base>
+        ];
+      td:hasInputSchema [ a ex:BaseJoint, js:ObjectSchema;
+          js:properties [ a js:IntegerSchema;
+              js:maximum "1023"^^xsd:int;
+              js:minimum "0"^^xsd:int;
+              js:propertyName "value"
+            ];
+          js:required "value"
+        ]
+    ], [ a ex:SetGripper, td:ActionAffordance;
+      dct:title "Set Gripper";
+      td:hasForm [
+          htv:methodName "POST";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/gripper>
+        ];
+      td:hasInputSchema [ a ex:GripperJoint, js:ObjectSchema;
+          js:properties [ a js:IntegerSchema;
+              js:maximum "512"^^xsd:int;
+              js:minimum "0"^^xsd:int;
+              js:propertyName "value"
+            ];
+          js:required "value"
+        ]
+    ], [ a ex:SetShoulder, td:ActionAffordance;
+      dct:title "Set Shoulder";
+      td:hasForm [
+          htv:methodName "POST";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/shoulder>
+        ];
+      td:hasInputSchema [ a ex:ShoulderJoint, js:ObjectSchema;
+          js:properties [ a js:IntegerSchema;
+              js:maximum "810"^^xsd:int;
+              js:minimum "205"^^xsd:int;
+              js:propertyName "value"
+            ];
+          js:required "value"
+        ]
+    ];
+  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme
+    ] .
