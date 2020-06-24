@@ -8,7 +8,9 @@
 
 ex:forkliftRobot a td:Thing ; 
     dct:title "forkliftRobot" ;
-    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;
+    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;
+        wotsec:name "X-API-Key" ;
+    ] ;
     td:hasPropertyAffordance [
         a td:PropertyAffordance, js:BooleanSchema, ex:Status ; 
         td:hasForm [

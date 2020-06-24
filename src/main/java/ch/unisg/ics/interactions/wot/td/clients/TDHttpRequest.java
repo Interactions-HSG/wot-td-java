@@ -14,9 +14,9 @@ import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 
@@ -148,14 +148,17 @@ public class TDHttpRequest {
     
     try {
       builder.append(", Target: " + request.getUri().toString());
-      builder.append(", Content-Type: " + request.getHeader(HttpHeaders.CONTENT_TYPE).getValue());
+      
+      for (Header header : request.getHeaders()) {
+        builder.append(", " + header.getName() + ": " + header.getValue());
+      }
       
       if (request.getEntity() != null) {
         StringWriter writer = new StringWriter();
         IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
         builder.append(", Payload: " + writer.toString());
       }
-    } catch (UnsupportedOperationException | IOException | URISyntaxException | ProtocolException e) {
+    } catch (UnsupportedOperationException | IOException | URISyntaxException e) {
       e.printStackTrace();
     }
     
