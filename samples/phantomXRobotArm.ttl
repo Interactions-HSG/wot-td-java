@@ -13,7 +13,7 @@
       wotsec:in "header" ;
       wotsec:name "X-API-Key" ;
   ] ;
-  td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
+td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
           htv:methodName "PUT";
@@ -22,7 +22,7 @@
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/elbow>
         ];
       td:hasInputSchema [ a ex:ElbowJoint, js:ObjectSchema;
-          js:properties [ a ex:JointValue, js:IntegerSchema;
+          js:properties [ a js:IntegerSchema;
               js:maximum "900"^^xsd:int;
               js:minimum "210"^^xsd:int;
               js:propertyName "value"
@@ -38,7 +38,7 @@
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/angle>
         ];
       td:hasInputSchema [ a ex:WristAngleJoint, js:ObjectSchema;
-          js:properties [ a ex:JointValue, js:IntegerSchema;
+          js:properties [ a js:IntegerSchema;
               js:maximum "830"^^xsd:int;
               js:minimum "200"^^xsd:int;
               js:propertyName "value"
@@ -54,7 +54,7 @@
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/rotation>
         ];
       td:hasInputSchema [ a ex:WristRotateJoint, js:ObjectSchema;
-          js:properties [ a ex:JointValue, js:IntegerSchema;
+          js:properties [ a js:IntegerSchema;
               js:maximum "1023"^^xsd:int;
               js:minimum "0"^^xsd:int;
               js:propertyName "value"
@@ -70,9 +70,9 @@
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/base>
         ];
       td:hasInputSchema [ a ex:BaseJoint, js:ObjectSchema;
-          js:properties [ a ex:JointValue, js:IntegerSchema;
+          js:properties [ a js:IntegerSchema;
               js:maximum "1023"^^xsd:int;
-              js:minimum "0"^^xsd:int;
+              js:minimum "512"^^xsd:int;
               js:propertyName "value"
             ];
           js:required "value"
@@ -86,7 +86,7 @@
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/gripper>
         ];
       td:hasInputSchema [ a ex:GripperJoint, js:ObjectSchema;
-          js:properties [ a ex:JointValue, js:IntegerSchema;
+          js:properties [ a js:IntegerSchema;
               js:maximum "512"^^xsd:int;
               js:minimum "0"^^xsd:int;
               js:propertyName "value"
@@ -102,7 +102,7 @@
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/shoulder>
         ];
       td:hasInputSchema [ a ex:ShoulderJoint, js:ObjectSchema;
-          js:properties [ a ex:JointValue, js:IntegerSchema;
+          js:properties [ a js:IntegerSchema;
               js:maximum "810"^^xsd:int;
               js:minimum "205"^^xsd:int;
               js:propertyName "value"
