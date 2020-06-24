@@ -9,6 +9,10 @@
 
 <https://api.interactions.ics.unisg.ch/v1.2/leubot> a ex:PhantomX, td:Thing;
   dct:title "Leubot";
+  td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;
+      wotsec:in "header" ;
+      wotsec:name "X-API-Key" ;
+  ] ;
   td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
