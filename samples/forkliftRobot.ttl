@@ -9,6 +9,7 @@
 ex:forkliftRobot a td:Thing ; 
     dct:title "forkliftRobot" ;
     td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;
+        wotsec:in "header" ;
         wotsec:name "X-API-Key" ;
     ] ;
     td:hasPropertyAffordance [
