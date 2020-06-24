@@ -16,7 +16,7 @@
   td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
-          htv:methodName "POST";
+          htv:methodName "PUT";
           hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/elbow>
@@ -32,7 +32,7 @@
     ], [ a ex:SetWristAngle, td:ActionAffordance;
       dct:title "Set Wrist Angle";
       td:hasForm [
-          htv:methodName "POST";
+          htv:methodName "PUT";
           hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/angle>
@@ -48,7 +48,7 @@
     ], [ a ex:SetWristRotation, td:ActionAffordance;
       dct:title "Set Wrist Rotation";
       td:hasForm [
-          htv:methodName "POST";
+          htv:methodName "PUT";
           hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/rotation>
@@ -64,7 +64,7 @@
     ], [ a ex:SetBase, td:ActionAffordance;
       dct:title "Set Base";
       td:hasForm [
-          htv:methodName "POST";
+          htv:methodName "PUT";
           hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/base>
@@ -80,7 +80,7 @@
     ], [ a ex:SetGripper, td:ActionAffordance;
       dct:title "Set Gripper";
       td:hasForm [
-          htv:methodName "POST";
+          htv:methodName "PUT";
           hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/gripper>
@@ -96,7 +96,7 @@
     ], [ a ex:SetShoulder, td:ActionAffordance;
       dct:title "Set Shoulder";
       td:hasForm [
-          htv:methodName "POST";
+          htv:methodName "PUT";
           hctl:forContentType "application/json";
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/shoulder>
@@ -109,6 +109,4 @@
             ];
           js:required "value"
         ]
-    ];
-  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme
-    ] .
+    ].
