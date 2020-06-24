@@ -17,6 +17,8 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 
@@ -73,8 +75,8 @@ public class TDHttpRequest {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
-      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
-          + dataSchema.getDatatype());
+      throw new IllegalArgumentException("The payload's datatype does not match BooleanSchema "
+          + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
     
     return this;
@@ -85,8 +87,8 @@ public class TDHttpRequest {
     if (dataSchema.getDatatype() == DataSchema.STRING) {
       request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
     } else {
-      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
-          + dataSchema.getDatatype());
+      throw new IllegalArgumentException("The payload's datatype does not match StringSchema "
+          + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
     
     return this;
@@ -98,8 +100,8 @@ public class TDHttpRequest {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
-      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
-          + dataSchema.getDatatype());
+      throw new IllegalArgumentException("The payload's datatype does not match IntegerSchema "
+          + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
     
     return this;
@@ -111,8 +113,8 @@ public class TDHttpRequest {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
-      throw new IllegalArgumentException("The expected datatype is not a boolean value (datatype: " 
-          + dataSchema.getDatatype());
+      throw new IllegalArgumentException("The payload's datatype does not match NumberSchema "
+          + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
     
     return this;
@@ -137,8 +139,8 @@ public class TDHttpRequest {
     return this;
   }
   
-  BasicClassicHttpRequest getRequest() {
-    return this.request;
+  public String getPayload() throws ParseException, IOException {
+    return EntityUtils.toString(request.getEntity());
   }
   
   @Override
@@ -165,4 +167,7 @@ public class TDHttpRequest {
     return builder.toString();
   }
   
+  BasicClassicHttpRequest getRequest() {
+    return this.request;
+  }
 }
