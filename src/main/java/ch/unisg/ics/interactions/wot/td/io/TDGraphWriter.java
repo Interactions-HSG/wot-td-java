@@ -73,7 +73,7 @@ public class TDGraphWriter {
   }
   
   private TDGraphWriter addSecurity() {
-    List<SecurityScheme> securitySchemas = td.getSecurity();
+    List<SecurityScheme> securitySchemas = td.getSecuritySchemes();
     
     for (SecurityScheme schema : securitySchemas) {
       BNode schemaId = rdf.createBNode();

@@ -477,7 +477,7 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecurity().stream().anyMatch(scheme -> scheme.getSchemaType()
+    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
         .equals(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
     

@@ -60,8 +60,12 @@ public class ThingDescription {
     return title;
   }
   
-  public List<SecurityScheme> getSecurity() {
+  public List<SecurityScheme> getSecuritySchemes() {
     return security;
+  }
+  
+  public Optional<SecurityScheme> getSecuritySchemeByType(String type) {
+    return security.stream().filter(security -> security.getSchemaType().equals(type)).findFirst();
   }
   
   public Optional<String> getThingURI() {
