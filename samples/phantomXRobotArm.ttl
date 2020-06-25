@@ -109,7 +109,17 @@ td:hasPropertyAffordance [
             hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/shoulder> ; 
         ] ; 
     ] ;
-td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
+td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
+      dct:title "Reset";
+      td:hasForm [
+          htv:methodName "PUT";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/reset>
+        ];
+      td:hasInputSchema [ a ex:NullSchema
+        ]
+    ], [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
           htv:methodName "PUT";
