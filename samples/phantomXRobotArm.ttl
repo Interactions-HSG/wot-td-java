@@ -25,6 +25,66 @@ td:hasPropertyAffordance [
             hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/gripper> ; 
         ] ; 
     ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Elbow ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/elbow> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Base ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/base> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:WristAngle ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/angle> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:WristRotation ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/rotation> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Shoulder ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/shoulder> ; 
+        ] ; 
+    ] ;
 td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
