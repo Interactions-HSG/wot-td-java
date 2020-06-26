@@ -7,13 +7,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
@@ -24,8 +26,11 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 
 public class TDHttpRequest {
+  private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
+
   private final Form form;
   private BasicClassicHttpRequest request;
 
@@ -44,39 +49,23 @@ public class TDHttpRequest {
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
   }
 
-  public int execute() {
+  public TDHttpResponse execute() throws IOException {
     HttpClient client = HttpClients.createDefault();
-
-    try {
-      return client.execute(request).getCode();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    return HttpStatus.SC_BAD_REQUEST;
+    HttpResponse response = client.execute(request);
+    return new TDHttpResponse((ClassicHttpResponse) response);
   }
 
-//  static HttpRequest buildHttpRequest(Form form, Optional<DataSchema> uriSchema,
-//      Map<String, Object> uriVariables, Optional<DataSchema> payloadSchema,
-//      Map<String, Object> payload) {
-//    // TODO: add query parameters
-//    SimpleHttpRequest request = SimpleHttpRequests.create(form.getMethodName(), form.getHref());
-//
-//    if (payloadSchema.isPresent() && !payload.isEmpty()) {
-//      DataSchema schema = payloadSchema.get();
-//
-//      if (schema instanceof ObjectSchema) {
-//        Map<String, Object> instance = ((ObjectSchema) schema).instantiate(payload);
-//
-//        String body = new Gson().toJson(instance);
-//
-//        request.setBody(body, ContentType.create(form.getContentType()));
-//        request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
-//      }
-//    }
-//
-//    return request;
-//  }
+  public TDHttpRequest setAPIKey(APIKeySecurityScheme scheme, String token) {
+    switch (scheme.getIn()) {
+      case HEADER:
+        this.request.setHeader(scheme.getName().get(), token);
+        break;
+      default:
+        LOGGER.info("API key could not be added in " + scheme.getIn().name());
+    }
+
+    return this;
+  }
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value)
       throws IllegalArgumentException {

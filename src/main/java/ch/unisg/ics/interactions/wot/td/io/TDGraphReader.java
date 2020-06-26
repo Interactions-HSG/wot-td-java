@@ -3,7 +3,6 @@ package ch.unisg.ics.interactions.wot.td.io;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -34,6 +33,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -60,7 +60,7 @@ public class TDGraphReader {
     
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
         .addSemanticTypes(reader.readThingTypes())
-        .addSecurity(reader.readSecuritySchemas())
+        .addSecuritySchemes(reader.readSecuritySchemes())
         .addProperties(reader.readProperties())
         .addActions(reader.readActions());
     
@@ -143,17 +143,22 @@ public class TDGraphReader {
     return Optional.empty();
   }
   
-  Set<IRI> readSecuritySchemas() {
+  List<SecurityScheme> readSecuritySchemes() {
     Set<Resource> nodeIds = Models.objectResources(model.filter(thingId, 
         rdf.createIRI(TD.hasSecurityConfiguration), null));
     
-    Set<IRI> schemes = new HashSet<IRI>();
+    List<SecurityScheme> schemes = new ArrayList<SecurityScheme>();
     
     for (Resource node : nodeIds) {
       Optional<IRI> securityScheme = Models.objectIRI(model.filter(node, RDF.TYPE, null));
       
       if (securityScheme.isPresent()) {
-        schemes.add(securityScheme.get());
+        Optional<SecurityScheme> scheme = SecurityScheme.readScheme(securityScheme.get().stringValue(), 
+            model, node);
+        
+        if (scheme.isPresent()) {
+          schemes.add(scheme.get());
+        }
       }
     }
     

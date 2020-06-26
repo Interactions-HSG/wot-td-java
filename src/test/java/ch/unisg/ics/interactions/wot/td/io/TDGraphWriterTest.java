@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -19,13 +17,12 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 
 public class TDGraphWriterTest {
   private static final String THING_TITLE = "My Thing";
   private static final String THING_IRI = "http://example.org/#thing";
   private static final String IO_BASE_IRI = "http://example.org/";
-  private static final ValueFactory rdf = SimpleValueFactory.getInstance();
   
   private static final String PREFIXES =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
@@ -47,7 +44,7 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
+        .addSecurityScheme(new NoSecurityScheme())
         .build();
     
     assertIsomorphicGraphs(testTD, td);
@@ -64,7 +61,7 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
+        .addSecurityScheme(new NoSecurityScheme())
         .build();
     
     assertIsomorphicGraphs(testTD, td);
@@ -85,7 +82,7 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iotschema.org/Light")
-        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
+        .addSecurityScheme(new NoSecurityScheme())
         .build();
     
     assertIsomorphicGraphs(testTD, td);
@@ -107,7 +104,7 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
+        .addSecurityScheme(new NoSecurityScheme())
         .build();
     
     assertIsomorphicGraphs(testTD, td);
@@ -186,7 +183,7 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
         .addThingURI(THING_IRI)
-        .addSecurity(rdf.createIRI(WoTSec.NoSecurityScheme))
+        .addSecurityScheme(new NoSecurityScheme())
         .addBaseURI("http://example.org/")
         .addAction(simpleAction)
         .build();
@@ -240,18 +237,6 @@ public class TDGraphWriterTest {
         .build();
     
     assertIsomorphicGraphs(testTD, td);
-    
-    String description = new TDGraphWriter(td)
-        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
-        .setNamespace("htv", "http://www.w3.org/2011/http#")
-        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
-        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
-        .setNamespace("dct", "http://purl.org/dc/terms/")
-        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("saref", "https://w3id.org/saref#")
-        .write();
-    
-    System.out.println(description);
   }
   
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException, 

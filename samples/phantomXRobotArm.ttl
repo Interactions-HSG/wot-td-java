@@ -13,7 +13,113 @@
       wotsec:in "header" ;
       wotsec:name "X-API-Key" ;
   ] ;
-td:hasActionAffordance [ a ex:SetElbow, td:ActionAffordance;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Posture ; 
+		js:properties [ a js:IntegerSchema, ex:BaseJointValue;
+              js:propertyName "Base"
+            ],
+			[ a js:IntegerSchema, ex:ShoulderJointValue;
+              js:propertyName "Shoulder"
+            ],
+			[ a js:IntegerSchema, ex:ElbowJointValue;
+              js:propertyName "Elbow"
+            ],
+			[ a js:IntegerSchema, ex:WristAngleJointValue;
+              js:propertyName "WristAngle"
+            ],
+			[ a js:IntegerSchema, ex:WristRotationJointValue;
+              js:propertyName "WristRotation"
+            ],
+			[ a js:IntegerSchema, ex:GripperJointValue;
+              js:propertyName "Gripper"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/posture> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Gripper ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/gripper> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Elbow ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/elbow> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Base ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/base> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:WristAngle ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/angle> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:WristRotation ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/wrist/rotation> ; 
+        ] ; 
+    ] ;
+td:hasPropertyAffordance [
+        a td:PropertyAffordance, js:ObjectSchema, ex:Shoulder ; 
+		js:properties [ a js:StringSchema, ex:JointName;
+              js:propertyName "name"
+            ],
+			[ a js:IntegerSchema, ex:JointValue;
+              js:propertyName "value"
+            ] ;
+        td:hasForm [
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/shoulder> ; 
+        ] ; 
+    ] ;
+td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
+      dct:title "Reset";
+      td:hasForm [
+          htv:methodName "PUT";
+          hctl:forContentType "application/json";
+          hctl:hasOperationType td:invokeAction;
+          hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/reset>
+        ];
+      td:hasInputSchema [ a ex:NullSchema
+        ]
+    ], [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
           htv:methodName "PUT";

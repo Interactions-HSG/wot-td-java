@@ -98,7 +98,7 @@ public class TDHttpRequestTest {
   }
   
   @Test
-  public void testReadProperty() throws UnsupportedOperationException, IOException {
+  public void testWriteProperty() throws UnsupportedOperationException, IOException {
     assertEquals(1, td.getProperties().size());
     Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
     assertTrue(property.isPresent());
