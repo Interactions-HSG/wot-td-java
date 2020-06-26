@@ -117,8 +117,6 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot/v1.2/reset>
         ];
-      td:hasInputSchema [ a ex:NullSchema
-        ]
     ], [ a ex:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
