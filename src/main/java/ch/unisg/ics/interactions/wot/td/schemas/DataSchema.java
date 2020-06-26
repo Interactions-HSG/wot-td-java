@@ -3,7 +3,9 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import java.util.HashSet;
 import java.util.Set;
 
-public class DataSchema {
+import com.google.gson.JsonElement;
+
+public abstract class DataSchema {
   public static final String OBJECT = "object";
   public static final String ARRAY = "array";
   
@@ -20,6 +22,8 @@ public class DataSchema {
     this.datatype = datatype;
     this.semanticTypes = semanticTypes;
   }
+  
+  public abstract Object parseJson(JsonElement element);
   
   public String getDatatype() {
     return datatype;
