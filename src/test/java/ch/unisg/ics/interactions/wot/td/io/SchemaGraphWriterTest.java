@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Literal;
@@ -102,27 +104,35 @@ public class SchemaGraphWriterTest {
         .build();
   }
   
+  @Test
+  public void testWriteEnumeration() throws RDFParseException, RDFHandlerException, IOException {
+    String expectedSchema = TEST_SCHEMA_PREFIXES + "[ a js:StringSchema ;\n" + 
+        "        js:enum \"label1\", <http://example.org/label2>, \"label3\";\n" +
+        "    ] .\n";
+    
+    Set<String> enumeration = new HashSet<String>();
+    enumeration.add("label1");
+    enumeration.add("http://example.org/label2");
+    enumeration.add("label3");
+    
+    DataSchema schema = new StringSchema.Builder()
+        .addEnum(enumeration)
+        .build();
+    
+    assertModel(expectedSchema, schema);
+  }
+  
   // Serialization of decimal values requires specific testing (not considered in this test)
   @Test
   public void testWriteSemanticObjectNoDecimals() throws RDFParseException, 
       RDFHandlerException, IOException {
-    
-    String testSchema = TEST_SCHEMA_PREFIXES + SEMANTIC_OBJECT + " .\n"; 
-    
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, 
-        IO_BASE_IRI);
-    
-    String description = getTestModelDescription(semanticObjectSchema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, schemaModel));
+    String expectedSchema = TEST_SCHEMA_PREFIXES + SEMANTIC_OBJECT + " .\n"; 
+    assertModel(expectedSchema, semanticObjectSchema);
   }
   
   @Test
   public void testWriteSemanticObjectWithDecimals() throws RDFParseException, 
       RDFHandlerException, IOException {
-    
     DataSchema schema = new ObjectSchema.Builder()
         .addSemanticType(PREFIX + "SemObject")
         .addProperty("number_value", (new NumberSchema.Builder()
@@ -150,8 +160,7 @@ public class SchemaGraphWriterTest {
   @Test
   public void testWriteNestedSemanticObject() throws RDFParseException, RDFHandlerException, 
       IOException {
-    
-    String testSchema = TEST_SCHEMA_PREFIXES +
+    String expectedSchema = TEST_SCHEMA_PREFIXES +
         "[\n" + 
         "    a js:ObjectSchema, ex:SemObject ;\n" +
         "    js:properties [\n" + 
@@ -170,9 +179,6 @@ public class SchemaGraphWriterTest {
         "    js:required \"string_value\" ;\n" +
         "] ." ;
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, 
-        IO_BASE_IRI);
-    
     DataSchema schema = new ObjectSchema.Builder()
         .addSemanticType(PREFIX + "SemObject")
         .addProperty("string_value", (new StringSchema.Builder()
@@ -188,18 +194,13 @@ public class SchemaGraphWriterTest {
         .addRequiredProperties("string_value")
         .build();
     
-    String description = getTestModelDescription(schema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, schemaModel));
+    assertModel(expectedSchema, schema);
   }
   
   @Test
   public void testWriteObjectWithArray() throws RDFParseException, RDFHandlerException, 
       IOException {
-    
-    String testSchema = TEST_SCHEMA_PREFIXES +
+    String expectedSchema = TEST_SCHEMA_PREFIXES +
         "[\n" + 
         "    a js:ObjectSchema, ex:UserDB ;\n" +
         "    js:properties [\n" + 
@@ -215,9 +216,6 @@ public class SchemaGraphWriterTest {
         "    ] ;\n" +
         "    js:required \"count\" ;\n" +
         "] .\n";
-    
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, 
-        IO_BASE_IRI);
     
     ObjectSchema schema = new ObjectSchema.Builder()
         .addSemanticType(PREFIX + "UserDB")
@@ -239,18 +237,13 @@ public class SchemaGraphWriterTest {
         .addRequiredProperties("count")
         .build();
     
-    String description = getTestModelDescription(schema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, schemaModel));
+    assertModel(expectedSchema, schema);
   }
   
   @Test
   public void testWriteArrayOneObject() throws RDFParseException, RDFHandlerException, 
       IOException {
-    
-    String testSchema = TEST_SCHEMA_PREFIXES +
+    String expectedSchema = TEST_SCHEMA_PREFIXES +
         "[\n" + 
         "    a js:ArraySchema, ex:UserAccountList ;\n" + 
         "    js:minItems \"0\"^^xsd:int ;\n" +
@@ -258,10 +251,7 @@ public class SchemaGraphWriterTest {
         "    js:items " + USER_ACCOUNT_OBJECT + ";\n" + 
         "] ." ;
     
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, IO_BASE_IRI);
-    
     ObjectSchema userAccount = getUserAccountSchema();
-    
     ArraySchema schema = new ArraySchema.Builder()
         .addSemanticType(PREFIX + "UserAccountList")
         .addMaxItems(100)
@@ -269,18 +259,13 @@ public class SchemaGraphWriterTest {
         .addItem(userAccount)
         .build();
     
-    String description = getTestModelDescription(schema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, schemaModel));
+    assertModel(expectedSchema, schema);
   }
   
   @Test
   public void testWriteArrayMultipleObjects() throws RDFParseException, RDFHandlerException, 
       IOException {
-    
-    String testSchema = TEST_SCHEMA_PREFIXES +
+    String expectedSchema = TEST_SCHEMA_PREFIXES +
         "[\n" + 
         "    a js:ArraySchema, ex:UserAccountList ;\n" + 
         "    js:items " + USER_ACCOUNT_OBJECT + ";\n" + 
@@ -295,13 +280,7 @@ public class SchemaGraphWriterTest {
         .addItem(userAccount)
         .build();
     
-    String description = getTestModelDescription(schema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
-        IO_BASE_IRI);
-    
-    Model testModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, testSchema, IO_BASE_IRI);
-    
-    assertTrue(Models.isomorphic(testModel, schemaModel));
+    assertModel(expectedSchema, schema);
   }
   
   private ObjectSchema getUserAccountSchema() {
@@ -320,5 +299,17 @@ public class SchemaGraphWriterTest {
     SchemaGraphWriter.write(builder, nodeId, testSchema);
     
     return ReadWriteTestUtils.writeToString(RDFFormat.TURTLE, builder.build());
+  }
+  
+  private void assertModel(String expectedSchema, DataSchema schema) throws RDFParseException, 
+      RDFHandlerException, IOException {
+    Model expectedModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, expectedSchema, 
+        IO_BASE_IRI);
+    
+    String description = getTestModelDescription(schema);
+    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+        IO_BASE_IRI);
+    
+    assertTrue(Models.isomorphic(expectedModel, schemaModel));
   }
 }

@@ -9,9 +9,9 @@ public class IntegerSchema extends DataSchema {
   final private Optional<Integer> minimum;
   final private Optional<Integer> maximum;
   
-  protected IntegerSchema(Set<String> semanticTypes, Optional<Integer> minimum,
+  protected IntegerSchema(Set<String> semanticTypes, Set<String> enumeration, Optional<Integer> minimum,
       Optional<Integer> maximum) {
-    super(DataSchema.INTEGER, semanticTypes);
+    super(DataSchema.INTEGER, semanticTypes, enumeration);
     
     this.minimum = minimum;
     this.maximum = maximum;
@@ -54,7 +54,7 @@ public class IntegerSchema extends DataSchema {
     }
     
     public IntegerSchema build() {
-      return new IntegerSchema(semanticTypes, minimum, maximum);
+      return new IntegerSchema(semanticTypes, enumeration, minimum, maximum);
     }
   }
 }

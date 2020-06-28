@@ -9,9 +9,9 @@ public class NumberSchema extends DataSchema {
   final private Optional<Double> minimum;
   final private Optional<Double> maximum;
   
-  protected NumberSchema(Set<String> semanticTypes, Optional<Double> minimum, 
+  protected NumberSchema(Set<String> semanticTypes, Set<String> enumeration, Optional<Double> minimum, 
       Optional<Double> maximum) {
-    super(DataSchema.NUMBER, semanticTypes);
+    super(DataSchema.NUMBER, semanticTypes, enumeration);
     
     this.minimum = minimum;
     this.maximum = maximum;
@@ -54,7 +54,7 @@ public class NumberSchema extends DataSchema {
     }
     
     public NumberSchema build() {
-      return new NumberSchema(semanticTypes, minimum, maximum);
+      return new NumberSchema(semanticTypes, enumeration, minimum, maximum);
     }
   }
 }

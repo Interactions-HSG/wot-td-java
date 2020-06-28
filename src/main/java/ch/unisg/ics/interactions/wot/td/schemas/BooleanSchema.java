@@ -6,8 +6,8 @@ import com.google.gson.JsonElement;
 
 public class BooleanSchema extends DataSchema {
 
-  private BooleanSchema(Set<String> semanticTypes) {
-    super(DataSchema.BOOLEAN, semanticTypes);
+  private BooleanSchema(Set<String> semanticTypes, Set<String> enumeration) {
+    super(DataSchema.BOOLEAN, semanticTypes, enumeration);
   }
   
   @Override
@@ -23,7 +23,7 @@ public class BooleanSchema extends DataSchema {
 
     @Override
     public BooleanSchema build() {
-      return new BooleanSchema(semanticTypes);
+      return new BooleanSchema(semanticTypes, enumeration);
     }
   }
 }

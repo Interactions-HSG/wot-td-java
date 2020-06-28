@@ -86,7 +86,6 @@ public class TDGraphWriter {
   }
   
   private TDGraphWriter addTypes() {
-    // TODO: To be considered: always add td:Thing as a type?
     graphBuilder.add(thingId, RDF.TYPE, rdf.createIRI(TD.Thing));
     
     for (String type : td.getSemanticTypes()) {

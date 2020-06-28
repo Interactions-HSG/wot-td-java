@@ -6,8 +6,8 @@ import com.google.gson.JsonElement;
 
 public class StringSchema extends DataSchema {
 
-  private StringSchema(Set<String> semanticTypes) {
-    super(DataSchema.STRING, semanticTypes);
+  private StringSchema(Set<String> semanticTypes, Set<String> enumeration) {
+    super(DataSchema.STRING, semanticTypes, enumeration);
   }
   
   @Override
@@ -23,7 +23,7 @@ public class StringSchema extends DataSchema {
 
     @Override
     public StringSchema build() {
-      return new StringSchema(this.semanticTypes);
+      return new StringSchema(semanticTypes, enumeration);
     }
   }
 }

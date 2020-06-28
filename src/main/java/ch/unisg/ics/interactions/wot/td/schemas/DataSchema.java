@@ -17,10 +17,12 @@ public abstract class DataSchema {
   
   final private String datatype;
   final private Set<String> semanticTypes;
+  final private Set<String> enumeration;
   
-  protected DataSchema(String datatype, Set<String> semanticTypes) {
+  protected DataSchema(String datatype, Set<String> semanticTypes, Set<String> enumeration) {
     this.datatype = datatype;
     this.semanticTypes = semanticTypes;
+    this.enumeration = enumeration;
   }
   
   public abstract Object parseJson(JsonElement element);
@@ -33,15 +35,21 @@ public abstract class DataSchema {
     return semanticTypes;
   }
   
+  public Set<String> getEnumeration() {
+    return enumeration;
+  }
+  
   public boolean isA(String type) {
     return semanticTypes.contains(type);
   }
   
   public static abstract class Builder<T extends DataSchema, S extends Builder<T,S>> {
     protected Set<String> semanticTypes;
+    protected Set<String> enumeration;
     
     protected Builder() {
       this.semanticTypes = new HashSet<String>();
+      this.enumeration = new HashSet<String>();
     }
     
     @SuppressWarnings("unchecked")
@@ -53,6 +61,12 @@ public abstract class DataSchema {
     @SuppressWarnings("unchecked")
     public S addSemanticTypes(Set<String> type) {
       this.semanticTypes.addAll(type);
+      return (S) this;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public S addEnum(Set<String> values) {
+      this.enumeration.addAll(values);
       return (S) this;
     }
     

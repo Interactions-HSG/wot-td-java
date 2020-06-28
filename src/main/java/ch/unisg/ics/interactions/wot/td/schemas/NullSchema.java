@@ -6,8 +6,8 @@ import com.google.gson.JsonElement;
 
 public class NullSchema extends DataSchema {
 
-  private NullSchema(Set<String> semanticTypes) {
-    super(DataSchema.NULL, semanticTypes);
+  private NullSchema(Set<String> semanticTypes, Set<String> enumeration) {
+    super(DataSchema.NULL, semanticTypes, enumeration);
   }
   
   @Override
@@ -23,7 +23,7 @@ public class NullSchema extends DataSchema {
 
     @Override
     public NullSchema build() {
-      return new NullSchema(semanticTypes);
+      return new NullSchema(semanticTypes, enumeration);
     }
   }
 }

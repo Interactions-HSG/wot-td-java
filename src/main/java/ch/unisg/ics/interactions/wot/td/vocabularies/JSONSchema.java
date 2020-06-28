@@ -26,7 +26,7 @@ public final class JSONSchema {
   
   /* Datatype properties */
   public static final String constant = PREFIX + "constant";
-  public static final String enumeration = PREFIX + "enumeration";
+  public static final String enumeration = PREFIX + "enum";
   public static final String format = PREFIX + "format";
   public static final String maxItems = PREFIX + "maxItems";
   public static final String maximum = PREFIX + "maximum";
