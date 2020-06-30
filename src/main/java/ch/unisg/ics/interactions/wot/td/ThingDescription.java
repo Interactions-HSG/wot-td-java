@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.rdf4j.model.Model;
+
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
@@ -32,6 +34,10 @@ public class ThingDescription {
   private final List<PropertyAffordance> properties;
   private final List<ActionAffordance> actions;
   
+  // Present if the TD was created with the TDGraphReader. The graph may contain RDF triples in
+  // addition to the ones representation on the object model.
+  private Optional<Model> graph;
+  
   public enum TDFormat {
     RDF_TURTLE,
     RDF_JSONLD
@@ -39,7 +45,7 @@ public class ThingDescription {
   
   protected ThingDescription(String title, List<SecurityScheme> security, Optional<String> uri, 
       Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties, 
-      List<ActionAffordance> actions) {
+      List<ActionAffordance> actions, Optional<Model> graph) {
     
     this.title = title;
     
@@ -54,6 +60,8 @@ public class ThingDescription {
     
     this.properties = properties;
     this.actions = actions;
+    
+    this.graph = graph;
   }
   
   public String getTitle() {
@@ -128,6 +136,10 @@ public class ThingDescription {
     return this.actions;
   }
   
+  public Optional<Model> getGraph() {
+    return graph;
+  }
+  
   public static class Builder {
     private final String title;
     private final List<SecurityScheme> security;
@@ -139,6 +151,8 @@ public class ThingDescription {
     private final List<PropertyAffordance> properties;
     private final List<ActionAffordance> actions;
     
+    private Optional<Model> graph;
+    
     public Builder(String title) {
       this.title = title;
       this.security = new ArrayList<SecurityScheme>();
@@ -149,6 +163,8 @@ public class ThingDescription {
       
       this.properties = new ArrayList<PropertyAffordance>();
       this.actions = new ArrayList<ActionAffordance>();
+      
+      this.graph = Optional.empty();
     }
     
     public Builder addSecurityScheme(SecurityScheme security) {
@@ -201,8 +217,13 @@ public class ThingDescription {
       return this;
     }
     
+    public Builder addGraph(Model graph) {
+      this.graph = Optional.of(graph);
+      return this;
+    }
+    
     public ThingDescription build() {
-      return new ThingDescription(title, security, uri, types, baseURI, properties, actions);
+      return new ThingDescription(title, security, uri, types, baseURI, properties, actions, graph);
     }
   }
 }

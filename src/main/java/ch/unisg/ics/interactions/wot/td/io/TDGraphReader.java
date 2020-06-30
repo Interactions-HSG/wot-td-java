@@ -62,7 +62,8 @@ public class TDGraphReader {
         .addSemanticTypes(reader.readThingTypes())
         .addSecuritySchemes(reader.readSecuritySchemes())
         .addProperties(reader.readProperties())
-        .addActions(reader.readActions());
+        .addActions(reader.readActions())
+        .addGraph(reader.getGraph());
     
     Optional<String> thingURI = reader.getThingURI();
     if (thingURI.isPresent()) {
@@ -108,6 +109,10 @@ public class TDGraphReader {
     } finally {
       stringReader.close();
     }
+  }
+  
+  Model getGraph() {
+    return model;
   }
   
   Optional<String> getThingURI() {
