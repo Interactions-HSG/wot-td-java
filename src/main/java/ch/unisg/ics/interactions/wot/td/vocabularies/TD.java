@@ -9,6 +9,7 @@ public final class TD {
   /* Classes */
   public static final String Thing = PREFIX + "Thing";
   public static final String ActionAffordance = PREFIX + "ActionAffordance";
+  public static final String PropertyAffordance = PREFIX + "PropertyAffordance";
   
   /* Object properties */
   public static final String hasBase = PREFIX + "hasBase";
