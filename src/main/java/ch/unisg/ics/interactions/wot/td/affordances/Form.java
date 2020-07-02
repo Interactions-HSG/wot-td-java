@@ -21,12 +21,15 @@ public class Form {
   private final String contentType;
   private final Set<String> operationTypes;
   
-  private Form(String href, Optional<String> methodName, String mediaType, 
-      Set<String> operationTypes) {
+  private final Optional<String> subprotocol;
+  
+  private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
+      Optional<String> subprotocol) {
     this.methodName = methodName;
     this.target = href;
     this.contentType = mediaType;
     this.operationTypes = operationTypes;
+    this.subprotocol = subprotocol;
   }
 
   public Optional<String> getMethodName() {
@@ -65,6 +68,10 @@ public class Form {
     return operationTypes;
   }
   
+  public Optional<String> getSubProtocol() {
+    return this.subprotocol;
+  }
+  
   // Package-level access, used for setting affordance-specific default values after instantiation
   void setMethodName(String methodName) {
     this.methodName = Optional.of(methodName);
@@ -81,11 +88,14 @@ public class Form {
     private String contentType;
     private final Set<String> operationTypes;
     
+    private Optional<String> subprotocol;
+    
     public Builder(String target) {
       this.target = target;
       this.methodName = Optional.empty();
       this.contentType = "application/json";
       this.operationTypes = new HashSet<String>();
+      this.subprotocol = Optional.empty();
     }
     
     public Builder addOperationType(String operationType) {
@@ -108,8 +118,14 @@ public class Form {
       return this;
     }
     
+    public Builder addSubProtocol(String subprotocol) {
+      this.subprotocol = Optional.of(subprotocol);
+      return this;
+    }
+    
     public Form build() {
-      return new Form(this.target, this.methodName, this.contentType, this.operationTypes);
+      return new Form(this.target, this.methodName, this.contentType, this.operationTypes, 
+          this.subprotocol);
     }
     
   }

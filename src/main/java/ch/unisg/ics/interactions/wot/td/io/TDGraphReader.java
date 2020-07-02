@@ -297,6 +297,9 @@ public class TDGraphReader {
       String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
           : "application/json";
       
+      Optional<Literal> subprotocolOpt = Models.objectLiteral(model.filter(formId, 
+          rdf.createIRI(HCTL.forSubProtocol), null));
+      
       Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType), 
           null));
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
@@ -309,6 +312,10 @@ public class TDGraphReader {
       
       if (methodNameOpt.isPresent()) {
         builder.setMethodName(methodNameOpt.get().stringValue());
+      }
+      
+      if (subprotocolOpt.isPresent()) {
+        builder.addSubProtocol(subprotocolOpt.get().stringValue());
       }
       
       forms.add(builder.build());

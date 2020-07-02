@@ -165,6 +165,41 @@ public class TDGraphWriterTest {
   }
   
   @Test
+  public void testWritePropertySubprotocol() throws RDFParseException, RDFHandlerException,
+      IOException {
+    String testTD = PREFIXES +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" + 
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" + 
+        "            hctl:hasTarget <http://example.org/count> ;\n" + 
+        "            hctl:forContentType \"application/json\";\n" + 
+        "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
+        "            hctl:forSubProtocol \"websub\";\n" +
+        "        ] ;\n" + 
+        "    ] ." ;
+    
+    
+    PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(), 
+            new Form.Builder("http://example.org/count")
+                .addSubProtocol("websub")
+                .build())
+        .addObserve()
+        .build();
+    
+    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+        .addThingURI(THING_IRI)
+        .addSecurityScheme(new NoSecurityScheme())
+        .addProperty(property)
+        .build();
+    
+    assertIsomorphicGraphs(testTD, td);
+  }
+  
+  @Test
   public void testWriteOneAction() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
         "@prefix iot: <http://iotschema.org/> .\n" +

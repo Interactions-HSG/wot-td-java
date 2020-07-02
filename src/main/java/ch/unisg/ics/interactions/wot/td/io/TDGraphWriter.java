@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -45,14 +46,7 @@ public class TDGraphWriter {
   }
   
   public static String write(ThingDescription td) {
-    TDGraphWriter tdWriter = new TDGraphWriter(td)
-        .addTypes()
-        .addTitle()
-        .addSecurity()
-        .addBaseURI()
-        .addActions();
-    
-    return tdWriter.write(RDFFormat.TURTLE);
+    return new TDGraphWriter(td).write();
   }
   
   public TDGraphWriter setNamespace(String prefix, String namespace) {
@@ -188,6 +182,11 @@ public class TDGraphWriter {
         } catch (IllegalArgumentException e) {
           graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opType);
         }
+      }
+      
+      Optional<String> subprotocol = form.getSubProtocol();
+      if (subprotocol.isPresent()) {
+        graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subprotocol.get());
       }
     }
   }
