@@ -69,6 +69,11 @@ public class TDHttpRequest {
     return this;
   }
   
+  public TDHttpRequest addHeader(String key, String value) {
+    this.request.addHeader(key, value);
+    return this;
+  }
+  
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value) 
       throws IllegalArgumentException {
     if (dataSchema.getDatatype() == DataSchema.BOOLEAN) {
