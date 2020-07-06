@@ -48,13 +48,14 @@ public class TDGraphReaderTest {
       "            htv:methodName \"PUT\" ;\n" + 
       "            hctl:hasTarget <http://example.org/property> ;\n" + 
       "            hctl:forContentType \"application/json\";\n" + 
-      "            hctl:hasOperationType td:writeProperty;\n" + 
+      "            hctl:hasOperationType td:writeProperty;\n" +
       "        ] ;\n" + 
       "        td:hasForm [\n" + 
       "            htv:methodName \"GET\" ;\n" + 
       "            hctl:hasTarget <http://example.org/property> ;\n" + 
       "            hctl:forContentType \"application/json\";\n" + 
-      "            hctl:hasOperationType td:readProperty;\n" + 
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "            hctl:forSubProtocol \"websub\";\n" +
       "        ] ;\n" + 
       "    ] ;\n" + 
       "    td:hasActionAffordance [\n" + 
@@ -324,6 +325,10 @@ public class TDGraphReaderTest {
     assertTrue(property.isObservable());
     assertEquals(2, property.getSemanticTypes().size());
     assertEquals(2, property.getForms().size());
+    
+    Optional<Form> form = property.getFirstFormForOperationType(TD.readProperty);
+    assertTrue(form.isPresent());
+    assertEquals("websub", form.get().getSubProtocol().get());
   }
   
   @Test

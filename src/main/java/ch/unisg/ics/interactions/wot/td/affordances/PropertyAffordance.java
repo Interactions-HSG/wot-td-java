@@ -37,8 +37,10 @@ public class PropertyAffordance extends InteractionAffordance {
       super(forms);
       
       for (Form form : this.forms) {
-        form.addOperationType(TD.readProperty);
-        form.addOperationType(TD.writeProperty);
+        if (form.getOperationTypes().isEmpty()) {
+          form.addOperationType(TD.readProperty);
+          form.addOperationType(TD.writeProperty);
+        }
       }
       
       this.schema = schema;
