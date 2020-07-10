@@ -64,6 +64,7 @@ public class SchemaGraphReaderTest {
         "    js:properties [\n" + 
         "        a js:StringSchema, <http://example.org/#SemString> ;\n" +
         "        js:propertyName \"string_value\";\n" +
+        "		 js:enum \"label1\", <http://example.org/label2>, \"label3\" ;\n" +
         "    ] ;\n" +
         "    js:properties [\n" + 
         "        a js:NullSchema, <http://example.org/#SemNull> ;\n" +
@@ -89,6 +90,9 @@ public class SchemaGraphReaderTest {
     DataSchema stringProperty = object.getProperties().get("string_value");
     assertEquals(DataSchema.STRING, stringProperty.getDatatype());
     assertTrue(stringProperty.getSemanticTypes().contains(PREFIX + "SemString"));
+    assertEquals(3,stringProperty.getEnumeration().size());
+    assertTrue(stringProperty.getEnumeration().contains("label1"));
+    assertTrue(stringProperty.getEnumeration().contains("http://example.org/label2"));
     
     DataSchema nullProperty = object.getProperties().get("null_value");
     assertEquals(DataSchema.NULL, nullProperty.getDatatype());
@@ -270,6 +274,7 @@ public class SchemaGraphReaderTest {
     assertEquals(DataSchema.OBJECT, array.getItems().get(0).getDatatype());
     assertEquals(DataSchema.OBJECT, array.getItems().get(1).getDatatype());
   }
+  
   
   private ObjectSchema assertObjectMetadata(String testSemObject, String semType, int props, int req) 
       throws RDFParseException, RDFHandlerException, IOException {
