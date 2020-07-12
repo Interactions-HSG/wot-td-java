@@ -234,7 +234,7 @@ public class ThingDescription {
       return this;
     }
     
-    public Builder addStatement(Resource subject, IRI predicate, Value object) {
+    public Builder addTriple(Resource subject, IRI predicate, Value object) {
       if (this.graph.isPresent()) {
       	this.graph.get().add(subject, predicate, object);
       }

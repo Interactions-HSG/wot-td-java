@@ -11,7 +11,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -299,13 +298,13 @@ public class TDGraphWriterTest {
   	ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
   	    .addThingURI("http://example.org/lamp123")
   	    .addSemanticType("https://w3id.org/saref#LightSwitch")
-  	    .addStatement(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
-  	    .addStatement(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
+  	    .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
+  	    .addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
   	    .addGraph(metadata)
   	    .addGraph(new ModelBuilder()
   	    				.add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
   	    				.build())  	    
-  	    .addStatement(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
+  	    .addTriple(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
   	    .build();
         
     assertIsomorphicGraphs(testTD, td);    
