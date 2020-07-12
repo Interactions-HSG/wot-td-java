@@ -308,8 +308,7 @@ public class TDGraphWriterTest {
   	    .addStatement(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
   	    .build();
         
-        assertIsomorphicGraphs(testTD, td);
-      
+    assertIsomorphicGraphs(testTD, td);    
   }
   
   @Test
@@ -376,11 +375,7 @@ public class TDGraphWriterTest {
     Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
     
-    System.out.println(expectedModel);
-    System.out.println("\n");
-    System.out.println(tdModel);
-    
     assertTrue(Models.isomorphic(expectedModel, tdModel));
-    
+   
   }
 }
