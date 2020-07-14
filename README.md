@@ -12,7 +12,7 @@ This library is a work-in-progress. What you can do with the current version:
 - use property and action affordances with the data schemas defined by the [W3C Recommendation](https://www.w3.org/TR/wot-thing-description/#sec-data-schema-vocabulary-definition)
     - JSON Schema keywords are mapped to IRIs using the [JSON Schema in RDF vocabulary](https://www.w3.org/2019/wot/json-schema)
     - not all terms (and not all default values) are currently supported
-- use composite data schemas (e.g., arrays of nested objects with semantic annotations) 
+- use composite data schemas (e.g., arrays of nested objects with semantic annotations)
 
 Coming soon:
 - an HTTP client able to compose HTTP requests based on TDs
@@ -24,7 +24,7 @@ Coming soon:
 
 ## Reading TDs
 
-We can parse a TD from a string like so: 
+We can parse a TD from a string like so:
 
 ```java
 ThingDescription td = TDGraphReader.readFromString(description);
@@ -54,6 +54,7 @@ The above code snippet creates a `ThingDescription` for a lamp with the title `M
 
 ```java
 ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
+    .addName("toggle")
     .addTitle("Toggle")
     .addSemanticType("https://w3id.org/saref#ToggleCommand")
     .addInputSchema(new ObjectSchema.Builder()
@@ -73,7 +74,7 @@ The `toggle` action is exposed via a [Form](https://www.w3.org/TR/wot-thing-desc
 Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
 ```
 
-We can serialize our TD in Turtle like so (support for other formats is to be added): 
+We can serialize our TD in Turtle like so (support for other formats is to be added):
 
 ```java
 String description = new TDGraphWriter(td)
@@ -103,6 +104,7 @@ The generated TD is:
   dct:title "My Lamp Thing";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
+      td:name "toggle" ;
       dct:title "Toggle";
       td:hasForm [
           htv:methodName "PUT";
@@ -119,5 +121,5 @@ The generated TD is:
     ].
 ```
 
-In the above listing, notice the `TDGraphWriter` added for us a number of default values specified by the W3C WoT TD recommendation (e.g., `application/json` for our form's content type). 
+In the above listing, notice the `TDGraphWriter` added for us a number of default values specified by the W3C WoT TD recommendation (e.g., `application/json` for our form's content type).
 

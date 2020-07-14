@@ -34,31 +34,32 @@ public class TDGraphWriter {
   private final ThingDescription td;
   private final ModelBuilder graphBuilder;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
-  
+
   public TDGraphWriter(ThingDescription td) {
     this.thingId = td.getThingURI().isPresent() ? rdf.createIRI(td.getThingURI().get())
         : rdf.createBNode();
-    
+
     this.td = td;
     this.graphBuilder = new ModelBuilder();
   }
-  
+
   public static String write(ThingDescription td) {
+    // TODO duplicated code
     TDGraphWriter tdWriter = new TDGraphWriter(td)
         .addTypes()
         .addTitle()
         .addSecurity()
         .addBaseURI()
         .addActions();
-    
+
     return tdWriter.write(RDFFormat.TURTLE);
   }
-  
+
   public TDGraphWriter setNamespace(String prefix, String namespace) {
     this.graphBuilder.setNamespace(prefix, namespace);
     return this;
   }
-  
+
   public String write() {
     return this.addTypes()
         .addTitle()
@@ -67,98 +68,99 @@ public class TDGraphWriter {
         .addActions()
         .write(RDFFormat.TURTLE);
   }
-  
+
   private Model getModel() {
     return graphBuilder.build();
   }
-  
+
   private TDGraphWriter addSecurity() {
     List<SecurityScheme> securitySchemas = td.getSecurity();
-    
+
     for (SecurityScheme schema : securitySchemas) {
       BNode schemaId = rdf.createBNode();
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemaId);
       // TODO: complete serialization of security schemes (not just the type)
       graphBuilder.add(schemaId, RDF.TYPE, rdf.createIRI(schema.getSchemaType()));
     }
-    
+
     return this;
   }
-  
+
   private TDGraphWriter addTypes() {
     // TODO: To be considered: always add td:Thing as a type?
     graphBuilder.add(thingId, RDF.TYPE, rdf.createIRI(TD.Thing));
-    
+
     for (String type : td.getSemanticTypes()) {
       graphBuilder.add(thingId, RDF.TYPE, rdf.createIRI(type));
     }
-    
+
     return this;
   }
-  
+
   private TDGraphWriter addTitle() {
     graphBuilder.add(thingId, rdf.createIRI(DCT.title), td.getTitle());
     return this;
   }
-    
+
   private TDGraphWriter addBaseURI() {
     if (td.getBaseURI().isPresent()) {
-      graphBuilder.add(thingId, rdf.createIRI(TD.hasBase), 
+      graphBuilder.add(thingId, rdf.createIRI(TD.hasBase),
           rdf.createIRI(td.getBaseURI().get()));
     }
-    
+
     return this;
   }
-    
+
   private TDGraphWriter addActions() {
     for (ActionAffordance action : td.getActions()) {
       BNode actionId = rdf.createBNode();
-      
+
       graphBuilder.add(thingId, rdf.createIRI(TD.hasActionAffordance), actionId);
       graphBuilder.add(actionId, RDF.TYPE, rdf.createIRI(TD.ActionAffordance));
-      
+      graphBuilder.add(actionId, rdf.createIRI(TD.name), rdf.createLiteral(action.getName()));
+
       for (String type : action.getSemanticTypes()) {
         graphBuilder.add(actionId, RDF.TYPE, rdf.createIRI(type));
       }
-      
+
       if (action.getTitle().isPresent()) {
         graphBuilder.add(actionId, rdf.createIRI(DCT.title), action.getTitle().get());
       }
-      
+
       addFormsForInteraction(actionId, action);
-      
+
       if (action.getInputSchema().isPresent()) {
         DataSchema schema = action.getInputSchema().get();
-        
+
         Resource inputId = rdf.createBNode();
         graphBuilder.add(actionId, rdf.createIRI(TD.hasInputSchema), inputId);
-        
+
         SchemaGraphWriter.write(graphBuilder, inputId, schema);
       }
-      
+
       if (action.getOutputSchema().isPresent()) {
         DataSchema schema = action.getOutputSchema().get();
-        
+
         Resource outputId = rdf.createBNode();
         graphBuilder.add(actionId, rdf.createIRI(TD.hasOutputSchema), outputId);
-        
+
         SchemaGraphWriter.write(graphBuilder, outputId, schema);
       }
     }
-    
+
     return this;
   }
-    
+
   private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
     for (Form form : interaction.getForms()) {
       BNode formId = rdf.createBNode();
-      
+
       graphBuilder.add(interactionId, rdf.createIRI(TD.hasForm), formId);
-      
+
       graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
       graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
       graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
-      
+
       for (String opType : form.getOperationTypes()) {
         try {
           IRI opTypeIri = rdf.createIRI(opType);
@@ -169,12 +171,12 @@ public class TDGraphWriter {
       }
     }
   }
-  
+
   private String write(RDFFormat format) {
     OutputStream out = new ByteArrayOutputStream();
-    
+
     try {
-      Rio.write(getModel(), out, format, 
+      Rio.write(getModel(), out, format,
           new WriterConfig().set(BasicWriterSettings.INLINE_BLANK_NODES, true));
     } finally {
       try {
@@ -183,7 +185,7 @@ public class TDGraphWriter {
         e.printStackTrace();
       }
     }
-    
+
     return out.toString();
   }
 }
