@@ -100,7 +100,8 @@ public class InteractionAffordance {
       this(new ArrayList<Form>(Arrays.asList(form)));
     }
 
-    protected String generateName() {
+    private String generateName() {
+      // FIXME specialized builders should be able to override name generation
       UUID uuid = UUID.randomUUID();
       long lsb = uuid.getLeastSignificantBits();
       long msb = uuid.getMostSignificantBits();
