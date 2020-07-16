@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.NoSuchElementException;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.junit.Test;
@@ -44,6 +43,7 @@ public class TDGraphReaderTest {
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" + 
       "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
       "        dct:title \"My Property\" ;\n" +
       "        td:isObservable true ;\n" +
       "        td:hasForm [\n" + 
@@ -62,6 +62,7 @@ public class TDGraphReaderTest {
       "    ] ;\n" + 
       "    td:hasActionAffordance [\n" + 
       "        a td:ActionAffordance ;\n" + 
+      "        td:name \"my_action\" ;\n" +
       "        dct:title \"My Action\" ;\n" + 
       "        td:hasForm [\n" + 
       "            htv:methodName \"PUT\" ;\n" + 
@@ -323,6 +324,7 @@ public class TDGraphReaderTest {
     assertEquals(1, properties.size());
     
     PropertyAffordance property = properties.get(0);
+    assertEquals("my_property", property.getName().get());
     assertEquals("My Property", property.getTitle().get());
     assertTrue(property.isObservable());
     assertEquals(2, property.getSemanticTypes().size());
@@ -340,6 +342,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readActions().size());
     ActionAffordance action = reader.readActions().get(0);
     
+    assertEquals("my_action", action.getName().get());
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getSemanticTypes().size());
     assertEquals(TD.ActionAffordance, action.getSemanticTypes().get(0));

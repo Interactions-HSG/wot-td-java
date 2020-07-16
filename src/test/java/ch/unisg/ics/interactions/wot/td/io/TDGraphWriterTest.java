@@ -147,6 +147,7 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" + 
         "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
+        "        td:name \"my_property\" ;\n" +
         "        td:isObservable true ;\n" +
         "        td:hasForm [\n" + 
         "            hctl:hasTarget <http://example.org/count> ;\n" + 
@@ -159,6 +160,7 @@ public class TDGraphWriterTest {
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(), 
             new Form.Builder("http://example.org/count").build())
         .addSemanticType("http://iotschema.org/MyProperty")
+        .addName("my_property")
         .addObserve()
         .build();
     
@@ -216,7 +218,8 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> ;\n" + 
         "    td:hasActionAffordance [\n" + 
-        "        a td:ActionAffordance, iot:MyAction ;\n" + 
+        "        a td:ActionAffordance, iot:MyAction ;\n" +
+        "        td:name \"my_action\" ;\n" + 
         "        dct:title \"My Action\" ;\n" + 
         "        td:hasForm [\n" + 
         "            htv:methodName \"PUT\" ;\n" + 
@@ -246,6 +249,7 @@ public class TDGraphWriterTest {
             new Form.Builder( "http://example.org/action")
               .setMethodName("PUT")
               .build())
+        .addName("my_action")
         .addTitle("My Action")
         .addSemanticType("http://iotschema.org/MyAction")
         .addInputSchema(new ObjectSchema.Builder()

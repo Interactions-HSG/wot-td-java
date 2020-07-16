@@ -189,8 +189,7 @@ public class TDGraphReader {
           List<Form> forms = readForms(propertyId, InteractionAffordance.PROPERTY);
           PropertyAffordance.Builder builder = new PropertyAffordance.Builder(schema.get(), forms);
           
-          readAffordanceTitle(builder, propertyId);
-          readAffordanceSemanticTypes(builder, propertyId);
+          readAffordanceMetadata(builder, propertyId);
           
           Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId, 
               rdf.createIRI(TD.isObservable), null));
@@ -230,8 +229,7 @@ public class TDGraphReader {
     List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
     ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
     
-    readAffordanceTitle(actionBuilder, affordanceId);
-    readAffordanceSemanticTypes(actionBuilder, affordanceId);
+    readAffordanceMetadata(actionBuilder, affordanceId);
     
     try {
       Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
@@ -262,17 +260,21 @@ public class TDGraphReader {
     return actionBuilder.build();
   }
   
-  private void readAffordanceSemanticTypes(InteractionAffordance
+  private void readAffordanceMetadata(InteractionAffordance
       .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
-    
+    /* Read semantic types */
     Set<IRI> types = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
     builder.addSemanticTypes(types.stream().map(type -> type.stringValue())
         .collect(Collectors.toList()));
-  }
-  
-  private void readAffordanceTitle(InteractionAffordance
-      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
     
+    /* Read name */
+    Optional<Literal> name = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name), 
+        null));
+    if (name.isPresent()) {
+      builder.addName(name.get().stringValue());
+    }
+    
+    /* Read title */
     Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId, 
         rdf.createIRI(DCT.title), null));
     if (title.isPresent()) {

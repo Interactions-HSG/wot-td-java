@@ -102,6 +102,16 @@ public class ThingDescription {
     return supportedActionTypes;
   }
   
+  public Optional<PropertyAffordance> getProperty(String name) {
+    for (PropertyAffordance property : properties) {
+      if (property.getName().equals(name)) {
+        return Optional.of(property);
+      }
+    }
+
+    return Optional.empty();
+  }
+  
   public List<PropertyAffordance> getPropertiesByOperationType(String operationType) {
     return properties.stream().filter(property -> property.hasFormWithOperationType(operationType))
         .collect(Collectors.toList());

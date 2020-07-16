@@ -17,14 +17,21 @@ public class InteractionAffordance {
   public static final String EVENT = "event";
   public static final String ACTION = "action";
   
+  protected Optional<String> name;
   protected Optional<String> title;
   protected List<String> types;
   protected List<Form> forms;
   
-  protected InteractionAffordance(Optional<String> title, List<String> types, List<Form> forms) {
+  protected InteractionAffordance(Optional<String> name, Optional<String> title, List<String> types, 
+      List<Form> forms) {
+    this.name = name;
     this.title = title;
     this.types = types;
     this.forms = forms;
+  }
+  
+  public Optional<String> getName() {
+    return name;
   }
   
   public Optional<String> getTitle() {
@@ -81,18 +88,26 @@ public class InteractionAffordance {
   
   /** Abstract builder for interaction affordances. */
   public static abstract class Builder<T extends InteractionAffordance, S extends Builder<T,S>> {
+    protected Optional<String> name;
     protected Optional<String> title;
     protected List<String> types;
     protected List<Form> forms;
     
+    protected Builder(Form form) {
+      this(new ArrayList<Form>(Arrays.asList(form)));
+    }
+    
     protected Builder(List<Form> forms) {
+      this.name = Optional.empty();
       this.title = Optional.empty();
       this.types = new ArrayList<String>();
       this.forms = forms;
     }
     
-    protected Builder(Form form) {
-      this(new ArrayList<Form>(Arrays.asList(form)));
+    @SuppressWarnings("unchecked")
+    public S addName(String name) {
+      this.name = Optional.of(name);
+      return (S) this;
     }
     
     @SuppressWarnings("unchecked")

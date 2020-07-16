@@ -165,6 +165,11 @@ public class TDGraphWriter {
       graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(type));
     }
     
+    if (affordance.getName().isPresent()) {
+      graphBuilder.add(affordanceId, rdf.createIRI(TD.name), 
+          rdf.createLiteral(affordance.getName().get()));
+    }
+    
     if (affordance.getTitle().isPresent()) {
       graphBuilder.add(affordanceId, rdf.createIRI(DCT.title), affordance.getTitle().get());
     }

@@ -25,8 +25,9 @@ public class InteractionAffordanceTest {
         .addOperationType(TD.writeProperty)
         .build();
     
-    test_affordance = new InteractionAffordance(Optional.of("My Affordance"), 
-        Arrays.asList(prefix + "Type1", prefix + "Type2"), Arrays.asList(form1, form2));
+    test_affordance = new InteractionAffordance(Optional.of("my_affordance"), 
+        Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), 
+        Arrays.asList(form1, form2));
   }
   
   @Test
