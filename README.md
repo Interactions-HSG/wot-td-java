@@ -45,19 +45,19 @@ For instance, we can construct a TD for a lamp as follows:
 ```java
 ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
     .addThingURI("http://example.org/lamp123")
-    .addSemanticType("https://w3id.org/saref#LightSwitch")
+    .addSemanticType("https://saref.etsi.org/core/LightSwitch")
     .addAction(toggle)
     .build();
 ```
 
-The above code snippet creates a `ThingDescription` for a lamp with the title `My Lamp Thing` ([mandatory property](https://www.w3.org/TR/wot-thing-description/#thing)) and the semantic type `saref:LightSwitch` (see [SAREF ontology](https://sites.google.com/site/smartappliancesproject/ontologies/reference-ontology)). The lamp exposes a `toggle` action, which can be defined in a similar manner:
+The above code snippet creates a `ThingDescription` for a lamp with the title `My Lamp Thing` ([mandatory property](https://www.w3.org/TR/wot-thing-description/#thing)) and the semantic type `saref:LightSwitch` (see [SAREF ontology](https://saref.etsi.org/)). The lamp exposes a `toggle` action, which can be defined in a similar manner:
 
 ```java
 ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
     .addTitle("Toggle")
-    .addSemanticType("https://w3id.org/saref#ToggleCommand")
+    .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
     .addInputSchema(new ObjectSchema.Builder()
-        .addSemanticType("https://w3id.org/saref#OnOffState")
+        .addSemanticType("https://saref.etsi.org/core/OnOffState")
         .addProperty("status", new BooleanSchema.Builder()
             .build())
         .addRequiredProperties("status")
@@ -83,7 +83,7 @@ String description = new TDGraphWriter(td)
         .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
         .setNamespace("dct", "http://purl.org/dc/terms/")
         .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("saref", "https://w3id.org/saref#")
+        .setNamespace("saref", "https://saref.etsi.org/core/")
         .write();
 ```
 
@@ -97,7 +97,7 @@ The generated TD is:
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dct: <http://purl.org/dc/terms/> .
-@prefix saref: <https://w3id.org/saref#> .
+@prefix saref: <https://saref.etsi.org/core/> .
 
 <http://example.org/lamp123> a td:Thing, saref:LightSwitch;
   dct:title "My Lamp Thing";
