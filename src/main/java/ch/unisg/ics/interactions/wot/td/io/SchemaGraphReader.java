@@ -166,7 +166,7 @@ class SchemaGraphReader {
     
     return Optional.of(builder.build());
   }
-    
+  
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void readDataSchemaMetadata(DataSchema.Builder builder, Resource schemaId) {
     /* Read semantic types (IRIs) */
@@ -179,7 +179,8 @@ class SchemaGraphReader {
     builder.addSemanticTypes(semTags);
     
     /* Read enumeration */
-    Set<String> enumeration = Models.objectStrings(model.filter(schemaId, rdf.createIRI(JSONSchema.enumeration), null));
+    Set<String> enumeration = Models.objectStrings(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.enumeration), null));
     builder.addEnum(enumeration);
   }
   

@@ -10,11 +10,8 @@ import java.util.stream.Collectors;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.util.Models;
 
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
@@ -225,22 +222,22 @@ public class ThingDescription {
     }
     
     public Builder addGraph(Model graph) {
-    	if (this.graph.isPresent()) {
-    		this.graph.get().addAll(graph);
-    	}
-    	else {
-    		this.graph = Optional.of(graph);
-    	}
+      if (this.graph.isPresent()) {
+        this.graph.get().addAll(graph);
+      } else {
+        this.graph = Optional.of(graph);
+      }
+      
       return this;
     }
     
     public Builder addTriple(Resource subject, IRI predicate, Value object) {
       if (this.graph.isPresent()) {
-      	this.graph.get().add(subject, predicate, object);
+        this.graph.get().add(subject, predicate, object);
+      } else {
+        this.graph = Optional.of(new ModelBuilder().add(subject, predicate, object).build());
       }
-      else {
-    	  this.graph = Optional.of(new ModelBuilder().add(subject, predicate, object).build());
-      }
+      
       return this;
     }
     

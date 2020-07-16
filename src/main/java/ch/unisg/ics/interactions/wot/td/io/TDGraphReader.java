@@ -127,9 +127,9 @@ public class TDGraphReader {
   	Literal thingTitle;
   	
     try {
-    	thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();    	
+      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();    	
     } catch (NoSuchElementException e) {
-    	throw new InvalidTDException("Missing mandatory title.", e);
+      throw new InvalidTDException("Missing mandatory title.", e);
     }
     
     return thingTitle.stringValue();
