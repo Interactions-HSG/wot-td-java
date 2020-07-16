@@ -104,7 +104,8 @@ public class ThingDescription {
   
   public Optional<PropertyAffordance> getPropertyByName(String name) {
     for (PropertyAffordance property : properties) {
-      if (property.getName().equals(name)) {
+      Optional<String> propertyName = property.getName();
+      if (propertyName.isPresent() && propertyName.get().equals(name)) {
         return Optional.of(property);
       }
     }
@@ -129,7 +130,8 @@ public class ThingDescription {
   
   public Optional<ActionAffordance> getActionByName(String name) {
     for (ActionAffordance action : actions) {
-      if (action.getName().equals(name)) {
+      Optional<String> actionName = action.getName();
+      if (actionName.isPresent() && actionName.get().equals(name)) {
         return Optional.of(action);
       }
     }
