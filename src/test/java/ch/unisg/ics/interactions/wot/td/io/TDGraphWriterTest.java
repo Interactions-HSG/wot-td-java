@@ -40,7 +40,7 @@ public class TDGraphWriterTest {
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" + 
-      "@prefix saref: <https://w3id.org/saref#> .\n" + 
+      "@prefix saref: <https://saref.etsi.org/core/> .\n" + 
       "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
   
   @Test
@@ -301,7 +301,7 @@ public class TDGraphWriterTest {
   	  	
   	ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
   	    .addThingURI("http://example.org/lamp123")
-  	    .addSemanticType("https://w3id.org/saref#LightSwitch")
+  	    .addSemanticType("https://saref.etsi.org/core/LightSwitch")
   	    .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
   	    .addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
   	    .addGraph(metadata)
@@ -342,9 +342,9 @@ public class TDGraphWriterTest {
     
     ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
         .addTitle("Toggle")
-        .addSemanticType("https://w3id.org/saref#ToggleCommand")
+        .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
         .addInputSchema(new ObjectSchema.Builder()
-            .addSemanticType("https://w3id.org/saref#OnOffState")
+            .addSemanticType("https://saref.etsi.org/core/OnOffState")
             .addProperty("status", new BooleanSchema.Builder()
                 .build())
             .addRequiredProperties("status")
@@ -353,7 +353,7 @@ public class TDGraphWriterTest {
     
     ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
         .addThingURI("http://example.org/lamp123")
-        .addSemanticType("https://w3id.org/saref#LightSwitch")
+        .addSemanticType("https://saref.etsi.org/core/LightSwitch")
         .addAction(toggle)
         .build();
     
@@ -372,7 +372,7 @@ public class TDGraphWriterTest {
         .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
         .setNamespace("dct", "http://purl.org/dc/terms/")
         .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("saref", "https://w3id.org/saref#")
+        .setNamespace("saref", "https://saref.etsi.org/core/")
         .write();
     
     Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
