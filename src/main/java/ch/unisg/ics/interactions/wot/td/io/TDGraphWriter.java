@@ -61,6 +61,7 @@ public class TDGraphWriter {
         .addBaseURI()
         .addProperties()
         .addActions()
+        .addGraph()
         .write(RDFFormat.TURTLE);
   }
   
@@ -140,6 +141,17 @@ public class TDGraphWriter {
     }
     
     return this;
+  }
+  
+  private TDGraphWriter addGraph() {
+  	if(td.getGraph().isPresent()) {
+  		getModel().addAll(td.getGraph().get());
+  		
+  		td.getGraph().get().getNamespaces().stream()
+  		    .filter(ns -> !getModel().getNamespace(ns.getPrefix()).isPresent())
+          .forEach(graphBuilder::setNamespace);
+  	}
+  	return this;
   }
   
   private Resource addAffordance(InteractionAffordance affordance, String affordanceProp, 

@@ -4,8 +4,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -262,6 +269,48 @@ public class TDGraphWriterTest {
   }
   
   @Test
+  public void testWriteAdditionalMetadata() throws RDFParseException, RDFHandlerException, IOException {
+  	String testTD = PREFIXES +
+  	    "@prefix eve: <http://w3id.org/eve#> .\n" +
+  	    "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" + 
+  	    "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" + 
+  	    "    dct:title \"My Lamp Thing\" ;\n" +
+  	    "    eve:hasManual [ a eve:Manual;\n" +
+  	    "        dct:title \"My Lamp Manual\";\n" +
+  	    "        eve:hasUsageProtocol [ a eve:UsageProtocol;\n" +
+  	    "            dct:title \"Party Light\";\n" +
+  	    "            eve:hasLanguage <http://jason.sourceforge.net/wp/description/>\n" +
+  	    "        ]\n" +
+  	    "    ].\n" ;
+  	    
+  	ValueFactory rdf = SimpleValueFactory.getInstance();
+  	Model metadata = new LinkedHashModel();
+  	
+  	final String NS = "http://w3id.org/eve#";
+  	metadata.setNamespace("eve", NS);
+  	  	
+    BNode manualId = rdf.createBNode();
+  	BNode protocolId = rdf.createBNode();
+  	metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS,"hasManual"), manualId);
+  	metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
+  	metadata.add(manualId, DCTERMS.TITLE, rdf.createLiteral("My Lamp Manual"));
+  	  	
+  	ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
+  	    .addThingURI("http://example.org/lamp123")
+  	    .addSemanticType("https://w3id.org/saref#LightSwitch")
+  	    .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
+  	    .addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
+  	    .addGraph(metadata)
+  	    .addGraph(new ModelBuilder()
+  	    				.add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
+  	    				.build())  	    
+  	    .addTriple(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
+  	    .build();
+        
+    assertIsomorphicGraphs(testTD, td);    
+  }
+  
+  @Test
   public void testWriteReadmeExample() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
         "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" + 
@@ -326,6 +375,6 @@ public class TDGraphWriterTest {
         IO_BASE_IRI);
     
     assertTrue(Models.isomorphic(expectedModel, tdModel));
-    
+   
   }
 }

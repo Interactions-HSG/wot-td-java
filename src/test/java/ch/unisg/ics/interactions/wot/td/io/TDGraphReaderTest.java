@@ -2,11 +2,13 @@ package ch.unisg.ics.interactions.wot.td.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.junit.Test;
@@ -512,6 +514,26 @@ public class TDGraphReaderTest {
     
     assertEquals(DataSchema.BOOLEAN, output.getProperties().get("boolean_value").getDatatype());
     assertTrue(output.getRequiredProperties().contains("boolean_value"));
+  }
+  
+  @Test
+  public void testMissingMandatoryTitle() {
+  	String testTDWithMissingTitle =
+  	    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+  			"@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+  			"\n" +
+  			"<http://example.org/#thing> a td:Thing ;\n" + 
+  			"    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+  			"    td:hasBase <http://example.org/> .\n" ;
+  	
+  	Exception exception = assertThrows(InvalidTDException.class, () -> {
+  		TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
+    });
+  	
+  	String expectedMessage = "Missing mandatory title.";
+    String actualMessage = exception.getMessage();
+ 
+    assertTrue(actualMessage.contains(expectedMessage));	
   }
   
   private void assertForm(Form form, String methodName, String target, 
