@@ -14,12 +14,14 @@ ex:forkliftRobot a td:Thing ;
     ] ;
     td:hasPropertyAffordance [
         a td:PropertyAffordance, js:BooleanSchema, ex:Status ; 
+        td:name "status" ;
         td:hasForm [
             hctl:hasTarget <http://localhost:1080/forklift-robot/busy> ; 
         ] ; 
     ] ;
     td:hasPropertyAffordance [
         a td:PropertyAffordance, js:ArraySchema, ex:Position, ex:3DCoordinates ; 
+        td:name "position" ;
         td:hasForm [
             hctl:hasTarget <http://localhost:1080/forklift-robot/position> ; 
         ] ; 
@@ -29,6 +31,7 @@ ex:forkliftRobot a td:Thing ;
     ] ;
     td:hasPropertyAffordance [
         a td:PropertyAffordance, js:ObjectSchema, ex:LastCarry ; 
+        td:name "last_carry" ;
         td:hasForm [
             hctl:hasTarget <http://localhost:1080/forklift-robot/lastCarry> ; 
         ] ; 
@@ -53,7 +56,7 @@ ex:forkliftRobot a td:Thing ;
     ] ;
     td:hasActionAffordance [
         a td:ActionAffordance, ex:CarryFromTo ;
-        dct:title "carry" ; 
+        td:name "carry" ;
         td:hasForm [
             hctl:hasTarget <http://localhost:1080/forklift-robot/carry> ; 
         ] ; 
@@ -82,7 +85,7 @@ ex:forkliftRobot a td:Thing ;
     ] ;
     td:hasActionAffordance [
         a td:ActionAffordance, ex:MoveTo ;
-        dct:title "moveTo" ; 
+        td:name "moveTo" ;
         td:hasForm [
             hctl:hasTarget <http://localhost:1080/forklift-robot/moveTo> ; 
         ] ; 

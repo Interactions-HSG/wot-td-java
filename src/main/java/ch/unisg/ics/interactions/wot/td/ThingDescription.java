@@ -102,7 +102,7 @@ public class ThingDescription {
     return supportedActionTypes;
   }
   
-  public Optional<PropertyAffordance> getProperty(String name) {
+  public Optional<PropertyAffordance> getPropertyByName(String name) {
     for (PropertyAffordance property : properties) {
       if (property.getName().equals(name)) {
         return Optional.of(property);
@@ -121,6 +121,16 @@ public class ThingDescription {
     for (PropertyAffordance property : properties) {
       if (property.getSemanticTypes().contains(propertyType)) {
         return Optional.of(property);
+      }
+    }
+    
+    return Optional.empty();
+  }
+  
+  public Optional<ActionAffordance> getActionByName(String name) {
+    for (ActionAffordance action : actions) {
+      if (action.getName().equals(name)) {
+        return Optional.of(action);
       }
     }
     
