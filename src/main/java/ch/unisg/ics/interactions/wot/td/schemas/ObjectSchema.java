@@ -75,11 +75,13 @@ public class ObjectSchema extends DataSchema {
     // TODO: handle semantic arrays
     // TODO: handle semantic arrays with semantic elements
     
-    for (String type : values.keySet()) {
-      Optional<String> propertyName = getFirstPropertyNameBySemnaticType(type);
+    for (String tag : values.keySet()) {
+      Optional<String> propertyName = getFirstPropertyNameBySemnaticType(tag);
       
       if (propertyName.isPresent()) {
-        instance.put(propertyName.get(), values.get(type));
+        instance.put(propertyName.get(), values.get(tag));
+      } else if (properties.containsKey(tag)) {
+        instance.put(tag, values.get(tag));
       }
     }
     

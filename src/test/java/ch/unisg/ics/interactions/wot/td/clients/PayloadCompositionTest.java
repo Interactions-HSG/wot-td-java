@@ -50,9 +50,34 @@ public class PayloadCompositionTest {
   }
   
   @Test
-  public void testSemanticObjectWithFieldsPayload() throws ProtocolException, URISyntaxException, 
+  public void testSimpleObjectPayload() throws ProtocolException, URISyntaxException, 
       JsonSyntaxException, ParseException, IOException {
+    ObjectSchema payloadSchema = new ObjectSchema.Builder()
+        .addProperty("first_name", new StringSchema.Builder().build())
+        .addProperty("last_name", new StringSchema.Builder().build())
+        .build();
     
+    Map<String, Object> payloadVariables = new HashMap<String, Object>();
+    payloadVariables.put("first_name", "Andrei");
+    payloadVariables.put("last_name", "Ciortea");
+    
+    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
+        .setObjectPayload(payloadSchema, payloadVariables)
+        .getRequest();
+    
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
+    
+    assertEquals("application/json", request.getHeader(HttpHeaders.CONTENT_TYPE).getValue());
+    
+    JsonObject payload = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    assertEquals("Andrei", payload.get("first_name").getAsString());
+    assertEquals("Ciortea", payload.get("last_name").getAsString());
+  }
+  
+  @Test
+  public void testSimpleSemanticObjectPayload() throws ProtocolException, URISyntaxException, 
+      JsonSyntaxException, ParseException, IOException {
     ObjectSchema payloadSchema = new ObjectSchema.Builder()
         .addProperty("first_name", new StringSchema.Builder()
             .addSemanticType(PREFIX + "FirstName")
