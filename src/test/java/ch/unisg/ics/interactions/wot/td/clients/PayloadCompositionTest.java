@@ -122,13 +122,6 @@ public class PayloadCompositionTest {
   }
   
   @Test(expected = IllegalArgumentException.class)
-  public void testInvalidNumberPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
-    .setPrimitivePayload(new NumberSchema.Builder().build(), 1)
-    .getRequest();
-  }
-  
-  @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
     new TDHttpRequest(FORM, TD.invokeAction)
     .setPrimitivePayload(new StringSchema.Builder().build(), true)

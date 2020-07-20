@@ -6,17 +6,21 @@ import java.util.Set;
 import com.google.gson.JsonElement;
 
 public class NumberSchema extends DataSchema {
-  final private Optional<Double> minimum;
-  final private Optional<Double> maximum;
+  final protected Optional<Double> minimum;
+  final protected Optional<Double> maximum;
   
   protected NumberSchema(Set<String> semanticTypes, Set<String> enumeration, Optional<Double> minimum, 
       Optional<Double> maximum) {
-    super(DataSchema.NUMBER, semanticTypes, enumeration);
-    
+    this(DataSchema.NUMBER, semanticTypes, enumeration, minimum, maximum);
+  }
+  
+  protected NumberSchema(String numberType, Set<String> semanticTypes, Set<String> enumeration, 
+      Optional<Double> minimum, Optional<Double> maximum) {
+    super(numberType, semanticTypes, enumeration);
     this.minimum = minimum;
     this.maximum = maximum;
   }
-
+  
   public Optional<Double> getMinimum() {
     return minimum;
   }

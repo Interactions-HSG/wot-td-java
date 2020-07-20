@@ -47,8 +47,6 @@ class SchemaGraphWriter {
         addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.BooleanSchema));
         break;
       case DataSchema.INTEGER:
-        addIntegerSchema(nodeId, (IntegerSchema) schema);
-        break;
       case DataSchema.NUMBER:
         addNumberSchema(nodeId, (NumberSchema) schema);
         break;
@@ -117,42 +115,32 @@ class SchemaGraphWriter {
     addDataSchemaMetadata(nodeId, schema);
   }
   
-  private void addIntegerSchema(Resource nodeId, IntegerSchema integerSchema) {
-    graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.IntegerSchema));
-    addDataSchemaMetadata(nodeId, integerSchema);
-    
-    if (integerSchema.getMinimum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), integerSchema.getMinimum().get());
-    }
-    
-    if (integerSchema.getMaximum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), integerSchema.getMaximum().get());
-    }
-  }
-  
   private void addNumberSchema(Resource nodeId, NumberSchema numberSchema) {
-    graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.NumberSchema));
+    if (numberSchema.getDatatype().equals(DataSchema.INTEGER)) {
+      graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.IntegerSchema));
+    } else {
+      graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.NumberSchema));
+    }
     addDataSchemaMetadata(nodeId, numberSchema);
     
     if (numberSchema.getMinimum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), numberSchema.getMinimum().get());
+      if (numberSchema.getDatatype().equals(DataSchema.INTEGER)) {
+        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), 
+            ((IntegerSchema) numberSchema).getMinimumAsInteger().get());
+      } else {
+        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), numberSchema.getMinimum().get());
+      }
     }
     
     if (numberSchema.getMaximum().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), numberSchema.getMaximum().get());
+      if (numberSchema.getDatatype().equals(DataSchema.INTEGER)) {
+        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), 
+            ((IntegerSchema) numberSchema).getMaximumAsInteger().get());
+      } else {
+        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), numberSchema.getMaximum().get());
+      }
     }
   }
-  
-//  private void addSemanticTypesforDataSchema(Resource nodeId, DataSchema schema) {
-//    for (String type : schema.getSemanticTypes()) {
-//      try {
-//        graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(type));
-//      } catch (IllegalArgumentException e) {
-//        // The semantic type is not an URI, but a string label
-//        graphBuilder.add(nodeId, RDF.TYPE, type);
-//      }
-//    }
-//  }
   
   private void addObjectIRIs(Resource nodeId, IRI property, Set<String> objects) {
     for (String type : objects) {

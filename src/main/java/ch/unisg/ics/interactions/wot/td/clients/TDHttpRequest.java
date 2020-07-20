@@ -76,7 +76,7 @@ public class TDHttpRequest {
   
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value) 
       throws IllegalArgumentException {
-    if (dataSchema.getDatatype() == DataSchema.BOOLEAN) {
+    if (dataSchema.getDatatype().equals(DataSchema.BOOLEAN)) {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
@@ -89,7 +89,7 @@ public class TDHttpRequest {
   
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, String value) 
       throws IllegalArgumentException {
-    if (dataSchema.getDatatype() == DataSchema.STRING) {
+    if (dataSchema.getDatatype().equals(DataSchema.STRING)) {
       request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
     } else {
       throw new IllegalArgumentException("The payload's datatype does not match StringSchema "
@@ -101,12 +101,13 @@ public class TDHttpRequest {
   
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, long value) 
       throws IllegalArgumentException {
-    if (dataSchema.getDatatype() == DataSchema.INTEGER) {
+    if (dataSchema.getDatatype().equals(DataSchema.INTEGER) 
+        || dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {
-      throw new IllegalArgumentException("The payload's datatype does not match IntegerSchema "
-          + "(payload datatype: " + dataSchema.getDatatype() + ")");
+      throw new IllegalArgumentException("The payload's datatype does not match IntegerSchema or "
+          + "NumberSchema (payload datatype: " + dataSchema.getDatatype() + ")");
     }
     
     return this;
@@ -114,7 +115,7 @@ public class TDHttpRequest {
   
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, double value) 
       throws IllegalArgumentException {
-    if (dataSchema.getDatatype() == DataSchema.NUMBER) {
+    if (dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
       request.setEntity(new StringEntity(String.valueOf(value), 
           ContentType.create(form.getContentType())));
     } else {

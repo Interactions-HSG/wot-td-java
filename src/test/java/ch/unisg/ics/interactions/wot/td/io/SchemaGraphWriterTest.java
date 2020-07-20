@@ -310,6 +310,8 @@ public class SchemaGraphWriterTest {
     Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
     
+    System.out.println(description);
+    
     assertTrue(Models.isomorphic(expectedModel, schemaModel));
   }
 }
