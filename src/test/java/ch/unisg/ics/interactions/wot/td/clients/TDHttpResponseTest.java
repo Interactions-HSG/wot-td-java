@@ -23,8 +23,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 
 public class TDHttpResponseTest {
-  private final String PREFIX = "http://example.org/";
-  private final String USER_PAYLOAD = "{\"first_name\" : \"Andrei\", \"last_name\" : \"Ciortea\"}";
+  private static final String PREFIX = "http://example.org/";
+  private static final String USER_PAYLOAD = "{\"first_name\" : \"Andrei\", \"last_name\" : \"Ciortea\"}";
   
   @Test
   public void testNoPayload() {

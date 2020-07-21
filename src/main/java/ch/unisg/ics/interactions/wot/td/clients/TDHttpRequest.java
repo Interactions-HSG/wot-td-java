@@ -30,6 +30,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 
 public class TDHttpRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
@@ -59,12 +60,10 @@ public class TDHttpRequest {
   }
   
   public TDHttpRequest setAPIKey(APIKeySecurityScheme scheme, String token) {
-    switch (scheme.getIn()) {
-      case HEADER:
-        this.request.setHeader(scheme.getName().get(), token);
-        break;
-      default:
-        LOGGER.info("API key could not be added in " + scheme.getIn().name());
+    if (scheme.getIn() == TokenLocation.HEADER) {
+      this.request.setHeader(scheme.getName().get(), token);
+    } else {
+      LOGGER.info("API key could not be added in " + scheme.getIn().name());
     }
     
     return this;

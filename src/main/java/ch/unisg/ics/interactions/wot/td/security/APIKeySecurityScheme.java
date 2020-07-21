@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.eclipse.rdf4j.model.Literal;
@@ -27,7 +28,7 @@ public class APIKeySecurityScheme extends SecurityScheme {
         null));
     if (in.isPresent()) {
       try {
-        this.in = TokenLocation.valueOf(in.get().stringValue().toUpperCase());
+        this.in = TokenLocation.valueOf(in.get().stringValue().toUpperCase(Locale.ENGLISH));
       } catch (IllegalArgumentException e) {
         throw new InvalidTDException("Invalid token location", e);
       }

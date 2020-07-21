@@ -40,7 +40,7 @@ public class ThingDescription {
   
   // Present if the TD was created with the TDGraphReader. The graph may contain RDF triples in
   // addition to the ones representation on the object model.
-  private Optional<Model> graph;
+  private final Optional<Model> graph;
   
   public enum TDFormat {
     RDF_TURTLE,
