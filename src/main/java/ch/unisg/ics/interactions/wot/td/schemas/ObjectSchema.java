@@ -7,16 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 public class ObjectSchema extends DataSchema {
   final private Map<String, DataSchema> properties;
   final private List<String> required;
   
-  protected ObjectSchema(Set<String> semanticTypes, Map<String, DataSchema> properties, 
-      List<String> required) {
-    super(DataSchema.OBJECT, semanticTypes);
+  protected ObjectSchema(Set<String> semanticTypes, Set<String> enumeration, 
+      Map<String, DataSchema> properties, List<String> required) {
+    super(DataSchema.OBJECT, semanticTypes, enumeration);
     
     this.properties = properties;
     this.required = required;
@@ -27,17 +32,56 @@ public class ObjectSchema extends DataSchema {
     return true;
   }
   
+  @Override
+  public Object parseJson(JsonElement element) {
+    if (!element.isJsonObject()) {
+      throw new IllegalArgumentException("The payload is not an object.");
+    }
+    
+    JsonObject objPayload = element.getAsJsonObject();
+    Map<String, Object> data = new HashMap<String, Object>();
+    
+    for (String propName : properties.keySet()) {
+      JsonElement prop = objPayload.get(propName);
+      if (prop == null) {
+        if (hasRequiredProperty(propName)) {
+          throw new IllegalArgumentException("Missing required property: " + propName);
+        }
+        
+        continue;
+      }
+      
+      DataSchema propSchema = properties.get(propName);
+      
+      // Filter out data schema tags, if any
+      List<String> tags = propSchema.getSemanticTypes().stream().filter(tag -> 
+          !tag.startsWith(JSONSchema.PREFIX)).collect(Collectors.toList());
+      
+      if (tags.isEmpty()) {
+        data.put(propName, properties.get(propName).parseJson(prop));
+      } else {
+        // Currently returns one semantic tag; TODO: handle multiple semantic tags
+        String semanticType = tags.get(0);
+        data.put(semanticType, properties.get(propName).parseJson(prop));
+      }
+    }
+    
+    return data;
+  }
+  
   public Map<String, Object> instantiate(Map<String, Object> values) {
     Map<String, Object> instance = new HashMap<String, Object>();
     
     // TODO: handle semantic arrays
     // TODO: handle semantic arrays with semantic elements
     
-    for (String type : values.keySet()) {
-      Optional<String> propertyName = getFirstPropertyNameBySemnaticType(type);
+    for (String tag : values.keySet()) {
+      Optional<String> propertyName = getFirstPropertyNameBySemnaticType(tag);
       
       if (propertyName.isPresent()) {
-        instance.put(propertyName.get(), values.get(type));
+        instance.put(propertyName.get(), values.get(tag));
+      } else if (properties.containsKey(tag)) {
+        instance.put(tag, values.get(tag));
       }
     }
     
@@ -65,6 +109,10 @@ public class ObjectSchema extends DataSchema {
 
   public List<String> getRequiredProperties() {
     return required;
+  }
+  
+  public boolean hasRequiredProperty(String propName) {
+    return required.contains(propName);
   }
 
   public static class Builder extends DataSchema.Builder<ObjectSchema, ObjectSchema.Builder> {
@@ -94,7 +142,7 @@ public class ObjectSchema extends DataSchema {
         }
       }
       
-      return new ObjectSchema(semanticTypes, properties, required);
+      return new ObjectSchema(semanticTypes, enumeration, properties, required);
     }
   }
 }

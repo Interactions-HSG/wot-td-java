@@ -46,7 +46,7 @@ class SchemaGraphReader {
         return readArraySchema(schemaId);
       } else if (types.contains(rdf.createIRI(JSONSchema.BooleanSchema))) {
         BooleanSchema.Builder builder = new BooleanSchema.Builder();
-        readSemanticTypesForDataSchema(builder, schemaId);
+        readDataSchemaMetadata(builder, schemaId);
         return Optional.of(builder.build());
       } else if (types.contains(rdf.createIRI(JSONSchema.NumberSchema))) {
         return readNumberSchema(schemaId);
@@ -54,11 +54,11 @@ class SchemaGraphReader {
         return readIntegerSchema(schemaId);
       } else if (types.contains(rdf.createIRI(JSONSchema.StringSchema))) {
         StringSchema.Builder builder = new StringSchema.Builder();
-        readSemanticTypesForDataSchema(builder, schemaId);
+        readDataSchemaMetadata(builder, schemaId);
         return Optional.of(builder.build());
       } else if (types.contains(rdf.createIRI(JSONSchema.NullSchema))) {
         NullSchema.Builder builder = new NullSchema.Builder();
-        readSemanticTypesForDataSchema(builder, schemaId);
+        readDataSchemaMetadata(builder, schemaId);
         return Optional.of(builder.build());
       }
     }
@@ -68,7 +68,7 @@ class SchemaGraphReader {
   
   private Optional<DataSchema> readObjectSchema(Resource schemaId) {
     ObjectSchema.Builder builder = new ObjectSchema.Builder();
-    readSemanticTypesForDataSchema(builder, schemaId);
+    readDataSchemaMetadata(builder, schemaId);
     
     /* Read properties */
     Set<Resource> propertyIds = Models.objectResources(model.filter(schemaId, 
@@ -98,7 +98,7 @@ class SchemaGraphReader {
   
   private Optional<DataSchema> readArraySchema(Resource schemaId) {
     ArraySchema.Builder builder = new ArraySchema.Builder();
-    readSemanticTypesForDataSchema(builder, schemaId);
+    readDataSchemaMetadata(builder, schemaId);
     
     /* Read minItems */
     Optional<Literal> minItems = Models.objectLiteral(model.filter(schemaId, 
@@ -130,7 +130,7 @@ class SchemaGraphReader {
   private Optional<DataSchema> readIntegerSchema(Resource schemaId) {
     IntegerSchema.Builder builder = new IntegerSchema.Builder();
     
-    readSemanticTypesForDataSchema(builder, schemaId);
+    readDataSchemaMetadata(builder, schemaId);
     
     Optional<Literal> maximum = Models.objectLiteral(model.filter(schemaId, 
         rdf.createIRI(JSONSchema.maximum), null));
@@ -150,7 +150,7 @@ class SchemaGraphReader {
   private Optional<DataSchema> readNumberSchema(Resource schemaId) {
     NumberSchema.Builder builder = new NumberSchema.Builder();
     
-    readSemanticTypesForDataSchema(builder, schemaId);
+    readDataSchemaMetadata(builder, schemaId);
     
     Optional<Literal> maximum = Models.objectLiteral(model.filter(schemaId, 
         rdf.createIRI(JSONSchema.maximum), null));
@@ -168,7 +168,7 @@ class SchemaGraphReader {
   }
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private void readSemanticTypesForDataSchema(DataSchema.Builder builder, Resource schemaId) {
+  private void readDataSchemaMetadata(DataSchema.Builder builder, Resource schemaId) {
     /* Read semantic types (IRIs) */
     Set<IRI> semIRIs = Models.objectIRIs(model.filter(schemaId, RDF.TYPE, null));
     builder.addSemanticTypes(semIRIs.stream().map(iri -> iri.stringValue())
@@ -177,5 +177,11 @@ class SchemaGraphReader {
     /* Read semantic types (strings) */
     Set<String> semTags = Models.objectStrings(model.filter(schemaId, RDF.TYPE, null));
     builder.addSemanticTypes(semTags);
+    
+    /* Read enumeration */
+    Set<String> enumeration = Models.objectStrings(model.filter(schemaId, 
+        rdf.createIRI(JSONSchema.enumeration), null));
+    builder.addEnum(enumeration);
   }
+  
 }

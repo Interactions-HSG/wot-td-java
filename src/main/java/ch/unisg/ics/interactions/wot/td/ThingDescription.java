@@ -8,11 +8,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 
 /**
  * TODO: add javadoc
@@ -25,7 +29,7 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
  */
 public class ThingDescription {
   private final String title;
-  private final Set<IRI> security;
+  private final List<SecurityScheme> security;
   
   private final Optional<String> uri;
   private final Set<String> types;
@@ -34,18 +38,23 @@ public class ThingDescription {
   private final List<PropertyAffordance> properties;
   private final List<ActionAffordance> actions;
   
+  // Present if the TD was created with the TDGraphReader. The graph may contain RDF triples in
+  // addition to the ones representation on the object model.
+  private Optional<Model> graph;
+  
   public enum TDFormat {
     RDF_TURTLE,
     RDF_JSONLD
   };
   
-  protected ThingDescription(String title, Set<IRI> security, Optional<String> uri, Set<String> types, 
-      Optional<String> baseURI, List<PropertyAffordance> properties, List<ActionAffordance> actions) {
+  protected ThingDescription(String title, List<SecurityScheme> security, Optional<String> uri, 
+      Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties, 
+      List<ActionAffordance> actions, Optional<Model> graph) {
     
     this.title = title;
     
     if (security.isEmpty()) {
-      security.add(SimpleValueFactory.getInstance().createIRI(WoTSec.NoSecurityScheme));
+      security.add(new NoSecurityScheme());
     }
     this.security = security;
 
@@ -55,14 +64,20 @@ public class ThingDescription {
     
     this.properties = properties;
     this.actions = actions;
+    
+    this.graph = graph;
   }
   
   public String getTitle() {
     return title;
   }
   
-  public Set<IRI> getSecurity() {
+  public List<SecurityScheme> getSecuritySchemes() {
     return security;
+  }
+  
+  public Optional<SecurityScheme> getSecuritySchemeByType(String type) {
+    return security.stream().filter(security -> security.getSchemaType().equals(type)).findFirst();
   }
   
   public Optional<String> getThingURI() {
@@ -87,6 +102,17 @@ public class ThingDescription {
     return supportedActionTypes;
   }
   
+  public Optional<PropertyAffordance> getPropertyByName(String name) {
+    for (PropertyAffordance property : properties) {
+      Optional<String> propertyName = property.getName();
+      if (propertyName.isPresent() && propertyName.get().equals(name)) {
+        return Optional.of(property);
+      }
+    }
+
+    return Optional.empty();
+  }
+  
   public List<PropertyAffordance> getPropertiesByOperationType(String operationType) {
     return properties.stream().filter(property -> property.hasFormWithOperationType(operationType))
         .collect(Collectors.toList());
@@ -96,6 +122,17 @@ public class ThingDescription {
     for (PropertyAffordance property : properties) {
       if (property.getSemanticTypes().contains(propertyType)) {
         return Optional.of(property);
+      }
+    }
+    
+    return Optional.empty();
+  }
+  
+  public Optional<ActionAffordance> getActionByName(String name) {
+    for (ActionAffordance action : actions) {
+      Optional<String> actionName = action.getName();
+      if (actionName.isPresent() && actionName.get().equals(name)) {
+        return Optional.of(action);
       }
     }
     
@@ -125,9 +162,13 @@ public class ThingDescription {
     return this.actions;
   }
   
+  public Optional<Model> getGraph() {
+    return graph;
+  }
+  
   public static class Builder {
     private final String title;
-    private final Set<IRI> security;
+    private final List<SecurityScheme> security;
     
     private Optional<String> uri;
     private Optional<String> baseURI;
@@ -136,9 +177,11 @@ public class ThingDescription {
     private final List<PropertyAffordance> properties;
     private final List<ActionAffordance> actions;
     
+    private Optional<Model> graph;
+    
     public Builder(String title) {
       this.title = title;
-      this.security = new HashSet<IRI>();
+      this.security = new ArrayList<SecurityScheme>();
       
       this.uri = Optional.empty();
       this.baseURI = Optional.empty();
@@ -146,14 +189,16 @@ public class ThingDescription {
       
       this.properties = new ArrayList<PropertyAffordance>();
       this.actions = new ArrayList<ActionAffordance>();
+      
+      this.graph = Optional.empty();
     }
     
-    public Builder addSecurity(IRI security) {
+    public Builder addSecurityScheme(SecurityScheme security) {
       this.security.add(security);
       return this;
     }
     
-    public Builder addSecurity(Set<IRI> security) {
+    public Builder addSecuritySchemes(List<SecurityScheme> security) {
       this.security.addAll(security);
       return this;
     }
@@ -198,8 +243,28 @@ public class ThingDescription {
       return this;
     }
     
+    public Builder addGraph(Model graph) {
+      if (this.graph.isPresent()) {
+        this.graph.get().addAll(graph);
+      } else {
+        this.graph = Optional.of(graph);
+      }
+      
+      return this;
+    }
+    
+    public Builder addTriple(Resource subject, IRI predicate, Value object) {
+      if (this.graph.isPresent()) {
+        this.graph.get().add(subject, predicate, object);
+      } else {
+        this.graph = Optional.of(new ModelBuilder().add(subject, predicate, object).build());
+      }
+      
+      return this;
+    }
+    
     public ThingDescription build() {
-      return new ThingDescription(title, security, uri, types, baseURI, properties, actions);
+      return new ThingDescription(title, security, uri, types, baseURI, properties, actions, graph);
     }
   }
 }

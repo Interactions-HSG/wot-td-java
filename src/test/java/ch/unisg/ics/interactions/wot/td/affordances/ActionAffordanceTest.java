@@ -70,12 +70,14 @@ public class ActionAffordanceTest {
     Form form = new Form.Builder("http://example.org").setMethodName("GET").build();
     
     ActionAffordance action = (new ActionAffordance.Builder(form))
+        .addName("turn_on")
         .addTitle("Turn on")
         .addSemanticType("iot:TurnOn")
         // TODO: add schema as well
         //.addInputSchema(inputSchema)
         .build();
     
+    assertEquals("turn_on", action.getName().get());
     assertEquals("Turn on", action.getTitle().get());
     assertEquals(1, action.getSemanticTypes().size());
     assertEquals("iot:TurnOn", action.getSemanticTypes().get(0));

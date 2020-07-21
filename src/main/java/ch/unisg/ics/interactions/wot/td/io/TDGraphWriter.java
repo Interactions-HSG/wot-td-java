@@ -1,9 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
@@ -14,15 +12,14 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.WriterConfig;
-import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -43,14 +40,7 @@ public class TDGraphWriter {
   }
   
   public static String write(ThingDescription td) {
-    TDGraphWriter tdWriter = new TDGraphWriter(td)
-        .addTypes()
-        .addTitle()
-        .addSecurity()
-        .addBaseURI()
-        .addActions();
-    
-    return tdWriter.write(RDFFormat.TURTLE);
+    return new TDGraphWriter(td).write();
   }
   
   public TDGraphWriter setNamespace(String prefix, String namespace) {
@@ -63,7 +53,9 @@ public class TDGraphWriter {
         .addTitle()
         .addSecurity()
         .addBaseURI()
+        .addProperties()
         .addActions()
+        .addGraph()
         .write(RDFFormat.TURTLE);
   }
   
@@ -72,19 +64,19 @@ public class TDGraphWriter {
   }
   
   private TDGraphWriter addSecurity() {
-    Set<IRI> securitySchemas = td.getSecurity();
+    List<SecurityScheme> securitySchemas = td.getSecuritySchemes();
     
-    for (IRI schema : securitySchemas) {
+    for (SecurityScheme schema : securitySchemas) {
       BNode schemaId = rdf.createBNode();
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemaId);
-      graphBuilder.add(schemaId, RDF.TYPE, schema);
+      // TODO: complete serialization of security schemes (not just the type)
+      graphBuilder.add(schemaId, RDF.TYPE, rdf.createIRI(schema.getSchemaType()));
     }
     
     return this;
   }
   
   private TDGraphWriter addTypes() {
-    // TODO: To be considered: always add td:Thing as a type?
     graphBuilder.add(thingId, RDF.TYPE, rdf.createIRI(TD.Thing));
     
     for (String type : td.getSemanticTypes()) {
@@ -107,23 +99,21 @@ public class TDGraphWriter {
     
     return this;
   }
+  
+  private TDGraphWriter addProperties() {
+    for (PropertyAffordance property : td.getProperties()) {
+      Resource propertyId = addAffordance(property, TD.hasPropertyAffordance, TD.PropertyAffordance);
+      graphBuilder.add(propertyId, rdf.createIRI(TD.isObservable), property.isObservable());
+      
+      SchemaGraphWriter.write(graphBuilder, propertyId, property.getDataSchema());
+    }
     
+    return this;
+  }
+  
   private TDGraphWriter addActions() {
     for (ActionAffordance action : td.getActions()) {
-      BNode actionId = rdf.createBNode();
-      
-      graphBuilder.add(thingId, rdf.createIRI(TD.hasActionAffordance), actionId);
-      graphBuilder.add(actionId, RDF.TYPE, rdf.createIRI(TD.ActionAffordance));
-      
-      for (String type : action.getSemanticTypes()) {
-        graphBuilder.add(actionId, RDF.TYPE, rdf.createIRI(type));
-      }
-      
-      if (action.getTitle().isPresent()) {
-        graphBuilder.add(actionId, rdf.createIRI(DCT.title), action.getTitle().get());
-      }
-      
-      addFormsForInteraction(actionId, action);
+      Resource actionId = addAffordance(action, TD.hasActionAffordance, TD.ActionAffordance);
       
       if (action.getInputSchema().isPresent()) {
         DataSchema schema = action.getInputSchema().get();
@@ -146,14 +136,53 @@ public class TDGraphWriter {
     
     return this;
   }
+  
+  private TDGraphWriter addGraph() {
+  	if(td.getGraph().isPresent()) {
+  		getModel().addAll(td.getGraph().get());
+  		
+  		td.getGraph().get().getNamespaces().stream()
+  		    .filter(ns -> !getModel().getNamespace(ns.getPrefix()).isPresent())
+          .forEach(graphBuilder::setNamespace);
+  	}
+  	return this;
+  }
+  
+  private Resource addAffordance(InteractionAffordance affordance, String affordanceProp, 
+      String affordanceClass) {
+    BNode affordanceId = rdf.createBNode();
     
-  private void addFormsForInteraction(BNode interactionId, InteractionAffordance interaction) {
+    graphBuilder.add(thingId, rdf.createIRI(affordanceProp), affordanceId);
+    graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(affordanceClass));
+    
+    for (String type : affordance.getSemanticTypes()) {
+      graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(type));
+    }
+    
+    if (affordance.getName().isPresent()) {
+      graphBuilder.add(affordanceId, rdf.createIRI(TD.name), 
+          rdf.createLiteral(affordance.getName().get()));
+    }
+    
+    if (affordance.getTitle().isPresent()) {
+      graphBuilder.add(affordanceId, rdf.createIRI(DCT.title), affordance.getTitle().get());
+    }
+    
+    addFormsForInteraction(affordanceId, affordance);
+    
+    return affordanceId;
+  }
+    
+  private void addFormsForInteraction(Resource interactionId, InteractionAffordance interaction) {
     for (Form form : interaction.getForms()) {
       BNode formId = rdf.createBNode();
       
       graphBuilder.add(interactionId, rdf.createIRI(TD.hasForm), formId);
       
-      graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
+      // Only writes the method name for forms with one operation type (to avoid ambiguity)  
+      if (form.getMethodName().isPresent() && form.getOperationTypes().size() == 1) {
+        graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
+      }
       graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
       graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
       
@@ -165,23 +194,15 @@ public class TDGraphWriter {
           graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opType);
         }
       }
+      
+      Optional<String> subprotocol = form.getSubProtocol();
+      if (subprotocol.isPresent()) {
+        graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subprotocol.get());
+      }
     }
   }
   
   private String write(RDFFormat format) {
-    OutputStream out = new ByteArrayOutputStream();
-    
-    try {
-      Rio.write(getModel(), out, format, 
-          new WriterConfig().set(BasicWriterSettings.INLINE_BLANK_NODES, true));
-    } finally {
-      try {
-        out.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    
-    return out.toString();
+    return ReadWriteUtils.writeToString(format, getModel());
   }
 }

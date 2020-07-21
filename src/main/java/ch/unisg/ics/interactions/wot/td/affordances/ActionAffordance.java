@@ -20,9 +20,9 @@ public class ActionAffordance extends InteractionAffordance {
   
   // TODO: add safe, idempotent
   
-  private ActionAffordance(Optional<String> title, List<String> types, List<Form> forms, 
-      Optional<DataSchema> input, Optional<DataSchema> output) {
-    super(title, types, forms);
+  private ActionAffordance(Optional<String> name, Optional<String> title, List<String> types, 
+      List<Form> forms, Optional<DataSchema> input, Optional<DataSchema> output) {
+    super(name, title, types, forms);
     this.input = input;
     this.output = output;
   }
@@ -75,7 +75,7 @@ public class ActionAffordance extends InteractionAffordance {
     }
     
     public ActionAffordance build() {
-      return new ActionAffordance(this.title, this.types, this.forms, inputSchema, outputSchema);
+      return new ActionAffordance(name, title, types, forms, inputSchema, outputSchema);
     }
   }
 }

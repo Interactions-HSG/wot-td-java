@@ -3,24 +3,39 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import java.util.Optional;
 import java.util.Set;
 
+import com.google.gson.JsonElement;
+
 public class NumberSchema extends DataSchema {
-  final private Optional<Double> minimum;
-  final private Optional<Double> maximum;
+  final protected Optional<Double> minimum;
+  final protected Optional<Double> maximum;
   
-  protected NumberSchema(Set<String> semanticTypes, Optional<Double> minimum, 
+  protected NumberSchema(Set<String> semanticTypes, Set<String> enumeration, Optional<Double> minimum, 
       Optional<Double> maximum) {
-    super(DataSchema.NUMBER, semanticTypes);
-    
+    this(DataSchema.NUMBER, semanticTypes, enumeration, minimum, maximum);
+  }
+  
+  protected NumberSchema(String numberType, Set<String> semanticTypes, Set<String> enumeration, 
+      Optional<Double> minimum, Optional<Double> maximum) {
+    super(numberType, semanticTypes, enumeration);
     this.minimum = minimum;
     this.maximum = maximum;
   }
-
+  
   public Optional<Double> getMinimum() {
     return minimum;
   }
 
   public Optional<Double> getMaximum() {
     return maximum;
+  }
+  
+  @Override
+  public Object parseJson(JsonElement element) {
+    if (element == null || !element.isJsonPrimitive()) {
+      throw new IllegalArgumentException("JSON element is not a primitive type.");
+    }
+    
+    return element.getAsDouble();
   }
   
   public static class Builder extends DataSchema.Builder<NumberSchema, NumberSchema.Builder> {
@@ -43,7 +58,7 @@ public class NumberSchema extends DataSchema {
     }
     
     public NumberSchema build() {
-      return new NumberSchema(semanticTypes, minimum, maximum);
+      return new NumberSchema(semanticTypes, enumeration, minimum, maximum);
     }
   }
 }

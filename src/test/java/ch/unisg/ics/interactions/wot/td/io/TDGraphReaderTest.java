@@ -1,14 +1,14 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.junit.Test;
 
@@ -21,6 +21,9 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
@@ -40,23 +43,26 @@ public class TDGraphReaderTest {
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" + 
       "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
       "        dct:title \"My Property\" ;\n" +
       "        td:isObservable true ;\n" +
       "        td:hasForm [\n" + 
       "            htv:methodName \"PUT\" ;\n" + 
       "            hctl:hasTarget <http://example.org/property> ;\n" + 
       "            hctl:forContentType \"application/json\";\n" + 
-      "            hctl:hasOperationType td:writeProperty;\n" + 
+      "            hctl:hasOperationType td:writeProperty;\n" +
       "        ] ;\n" + 
       "        td:hasForm [\n" + 
       "            htv:methodName \"GET\" ;\n" + 
       "            hctl:hasTarget <http://example.org/property> ;\n" + 
       "            hctl:forContentType \"application/json\";\n" + 
-      "            hctl:hasOperationType td:readProperty;\n" + 
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "            hctl:forSubProtocol \"websub\";\n" +
       "        ] ;\n" + 
       "    ] ;\n" + 
       "    td:hasActionAffordance [\n" + 
       "        a td:ActionAffordance ;\n" + 
+      "        td:name \"my_action\" ;\n" +
       "        dct:title \"My Action\" ;\n" + 
       "        td:hasForm [\n" + 
       "            htv:methodName \"PUT\" ;\n" + 
@@ -195,8 +201,6 @@ public class TDGraphReaderTest {
       
   private static final String TEST_IO_TAIL = "    ] ." ;
   
-  private static final ValueFactory rdf = SimpleValueFactory.getInstance();
-  
   @Test
   public void testReadTitle() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.JSONLD, TEST_SIMPLE_TD_JSONLD);
@@ -220,38 +224,96 @@ public class TDGraphReaderTest {
   }
   
   @Test
-  public void testReadOneSecuritySchema() {
+  public void testReadOneSecurityScheme() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
     
-    assertEquals(1, reader.readSecuritySchemas().size());
-    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(WoTSec.NoSecurityScheme)));
+    assertEquals(1, reader.readSecuritySchemes().size());
+    
+    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> 
+        scheme.getSchemaType().equals(WoTSec.NoSecurityScheme)));
   }
   
   @Test
-  public void testReadMultipleSecuritySchemas() {
-    String prefix = "https://example.org#";
+  public void testReadAPIKeySecurityScheme() {
+    String testTD =
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+        "        wotsec:in \"header\" ;\n" +
+        "        wotsec:name \"X-API-Key\" ;\n" +
+        "  ] .";
+    
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    
+    assertEquals(1, reader.readSecuritySchemes().size());
+    
+    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
+    assertTrue(scheme instanceof APIKeySecurityScheme);
+    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemaType());
+    assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getIn());
+    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getName().get());
+  }
+  
+  @Test
+  public void testAPIKeySecuritySchemeDefaultValues() {
+    String testTD =
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] .";
+    
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
+    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemaType());
+    assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getIn());
+    assertFalse(((APIKeySecurityScheme) scheme).getName().isPresent());
+  }
+  
+  @Test(expected = InvalidTDException.class)
+  public void testAPIKeySecuritySchemeInvalidTokenLocation() {
+    String testTD =
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+        "        wotsec:in \"bla\" ;\n" +
+        "  ] .";
+    
+    new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+  }
+  
+  @Test
+  public void testReadMultipleSecuritySchemes() {
     String testTD =
         "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
-        "@prefix ex: <" + prefix + "> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" + 
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasSecurityConfiguration [ a ex:MySecurityScheme ] ;\n" +
-        "    td:hasSecurityConfiguration [ a ex:YourSecurityScheme ] ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> .";
     
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     
-    ValueFactory rdf = SimpleValueFactory.getInstance();
-    
-    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(WoTSec.NoSecurityScheme)));
-    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(prefix + "MySecurityScheme")));
-    assertTrue(reader.readSecuritySchemas().contains(rdf.createIRI(prefix + "YourSecurityScheme")));
+    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
+        .equals(WoTSec.NoSecurityScheme)));
+    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
+        .equals(WoTSec.APIKeySecurityScheme)));
   }
   
   @Test
@@ -262,10 +324,15 @@ public class TDGraphReaderTest {
     assertEquals(1, properties.size());
     
     PropertyAffordance property = properties.get(0);
+    assertEquals("my_property", property.getName().get());
     assertEquals("My Property", property.getTitle().get());
     assertTrue(property.isObservable());
     assertEquals(2, property.getSemanticTypes().size());
     assertEquals(2, property.getForms().size());
+    
+    Optional<Form> form = property.getFirstFormForOperationType(TD.readProperty);
+    assertTrue(form.isPresent());
+    assertEquals("websub", form.get().getSubProtocol().get());
   }
   
   @Test
@@ -275,6 +342,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readActions().size());
     ActionAffordance action = reader.readActions().get(0);
     
+    assertEquals("my_action", action.getName().get());
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getSemanticTypes().size());
     assertEquals(TD.ActionAffordance, action.getSemanticTypes().get(0));
@@ -419,7 +487,8 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecurity().contains(rdf.createIRI(WoTSec.NoSecurityScheme)));
+    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
+        .equals(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
     
     // Check action metadata
@@ -448,6 +517,26 @@ public class TDGraphReaderTest {
     
     assertEquals(DataSchema.BOOLEAN, output.getProperties().get("boolean_value").getDatatype());
     assertTrue(output.getRequiredProperties().contains("boolean_value"));
+  }
+  
+  @Test
+  public void testMissingMandatoryTitle() {
+  	String testTDWithMissingTitle =
+  	    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+  			"@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+  			"\n" +
+  			"<http://example.org/#thing> a td:Thing ;\n" + 
+  			"    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+  			"    td:hasBase <http://example.org/> .\n" ;
+  	
+  	Exception exception = assertThrows(InvalidTDException.class, () -> {
+  		TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
+    });
+  	
+  	String expectedMessage = "Missing mandatory title.";
+    String actualMessage = exception.getMessage();
+ 
+    assertTrue(actualMessage.contains(expectedMessage));	
   }
   
   private void assertForm(Form form, String methodName, String target, 

@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -16,7 +18,8 @@ import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-public final class ReadWriteTestUtils {
+final class ReadWriteUtils {
+  private final static Logger LOGGER = Logger.getLogger(ReadWriteUtils.class.getCanonicalName());
 
   static Model readModelFromString(RDFFormat format, String description, String baseURI) 
       throws RDFParseException, RDFHandlerException, IOException {
@@ -41,12 +44,12 @@ public final class ReadWriteTestUtils {
       try {
         out.close();
       } catch (IOException e) {
-        e.printStackTrace();
+        LOGGER.log(Level.WARNING, e.getMessage());
       }
     }
     
     return out.toString();
   }
   
-  private ReadWriteTestUtils() { }
+  private ReadWriteUtils() { }
 }

@@ -3,7 +3,6 @@ package ch.unisg.ics.interactions.wot.td.io;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -34,6 +33,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
@@ -60,9 +60,10 @@ public class TDGraphReader {
     
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
         .addSemanticTypes(reader.readThingTypes())
-        .addSecurity(reader.readSecuritySchemas())
+        .addSecuritySchemes(reader.readSecuritySchemes())
         .addProperties(reader.readProperties())
-        .addActions(reader.readActions());
+        .addActions(reader.readActions())
+        .addGraph(reader.getGraph());
     
     Optional<String> thingURI = reader.getThingURI();
     if (thingURI.isPresent()) {
@@ -110,6 +111,10 @@ public class TDGraphReader {
     }
   }
   
+  Model getGraph() {
+    return model;
+  }
+  
   Optional<String> getThingURI() {
     if (thingId instanceof IRI) {
       return Optional.of(thingId.stringValue());
@@ -119,10 +124,15 @@ public class TDGraphReader {
   }
   
   String readThingTitle() {
-    Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, 
-        rdf.createIRI(DCT.title), null));
+  	Literal thingTitle;
+  	
+    try {
+      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();    	
+    } catch (NoSuchElementException e) {
+      throw new InvalidTDException("Missing mandatory title.", e);
+    }
     
-    return thingTitle.get().stringValue();
+    return thingTitle.stringValue();
   }
   
   Set<String> readThingTypes() {
@@ -143,17 +153,22 @@ public class TDGraphReader {
     return Optional.empty();
   }
   
-  Set<IRI> readSecuritySchemas() {
+  List<SecurityScheme> readSecuritySchemes() {
     Set<Resource> nodeIds = Models.objectResources(model.filter(thingId, 
         rdf.createIRI(TD.hasSecurityConfiguration), null));
     
-    Set<IRI> schemes = new HashSet<IRI>();
+    List<SecurityScheme> schemes = new ArrayList<SecurityScheme>();
     
     for (Resource node : nodeIds) {
       Optional<IRI> securityScheme = Models.objectIRI(model.filter(node, RDF.TYPE, null));
       
       if (securityScheme.isPresent()) {
-        schemes.add(securityScheme.get());
+        Optional<SecurityScheme> scheme = SecurityScheme.readScheme(securityScheme.get().stringValue(), 
+            model, node);
+        
+        if (scheme.isPresent()) {
+          schemes.add(scheme.get());
+        }
       }
     }
     
@@ -174,8 +189,7 @@ public class TDGraphReader {
           List<Form> forms = readForms(propertyId, InteractionAffordance.PROPERTY);
           PropertyAffordance.Builder builder = new PropertyAffordance.Builder(schema.get(), forms);
           
-          readAffordanceTitle(builder, propertyId);
-          readAffordanceSemanticTypes(builder, propertyId);
+          readAffordanceMetadata(builder, propertyId);
           
           Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId, 
               rdf.createIRI(TD.isObservable), null));
@@ -215,8 +229,7 @@ public class TDGraphReader {
     List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
     ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
     
-    readAffordanceTitle(actionBuilder, affordanceId);
-    readAffordanceSemanticTypes(actionBuilder, affordanceId);
+    readAffordanceMetadata(actionBuilder, affordanceId);
     
     try {
       Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
@@ -247,17 +260,21 @@ public class TDGraphReader {
     return actionBuilder.build();
   }
   
-  private void readAffordanceSemanticTypes(InteractionAffordance
+  private void readAffordanceMetadata(InteractionAffordance
       .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
-    
+    /* Read semantic types */
     Set<IRI> types = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
     builder.addSemanticTypes(types.stream().map(type -> type.stringValue())
         .collect(Collectors.toList()));
-  }
-  
-  private void readAffordanceTitle(InteractionAffordance
-      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
     
+    /* Read name */
+    Optional<Literal> name = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name), 
+        null));
+    if (name.isPresent()) {
+      builder.addName(name.get().stringValue());
+    }
+    
+    /* Read title */
     Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId, 
         rdf.createIRI(DCT.title), null));
     if (title.isPresent()) {
@@ -287,6 +304,9 @@ public class TDGraphReader {
       String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
           : "application/json";
       
+      Optional<Literal> subprotocolOpt = Models.objectLiteral(model.filter(formId, 
+          rdf.createIRI(HCTL.forSubProtocol), null));
+      
       Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType), 
           null));
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
@@ -299,6 +319,10 @@ public class TDGraphReader {
       
       if (methodNameOpt.isPresent()) {
         builder.setMethodName(methodNameOpt.get().stringValue());
+      }
+      
+      if (subprotocolOpt.isPresent()) {
+        builder.addSubProtocol(subprotocolOpt.get().stringValue());
       }
       
       forms.add(builder.build());
