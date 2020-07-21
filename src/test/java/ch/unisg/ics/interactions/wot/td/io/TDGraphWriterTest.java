@@ -3,6 +3,9 @@ package ch.unisg.ics.interactions.wot.td.io;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -52,7 +55,7 @@ public class TDGraphWriterTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addSecurityScheme(new NoSecurityScheme())
         .build();
     
@@ -68,7 +71,7 @@ public class TDGraphWriterTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n" ;
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addSecurityScheme(new NoSecurityScheme())
         .build();
@@ -87,7 +90,7 @@ public class TDGraphWriterTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iotschema.org/Light")
@@ -109,7 +112,7 @@ public class TDGraphWriterTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://w3id.org/eve#Artifact")
@@ -129,7 +132,7 @@ public class TDGraphWriterTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasBase <http://example.org/> .\n";
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addBaseURI("http://example.org/")
         .build();
@@ -164,7 +167,7 @@ public class TDGraphWriterTest {
         .addObserve()
         .build();
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addSecurityScheme(new NoSecurityScheme())
         .addProperty(property)
@@ -180,6 +183,7 @@ public class TDGraphWriterTest {
         "<http://example.org/#thing> a td:Thing ;\n" + 
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasBase <http://example.org/> ;\n" + 
         "    td:hasPropertyAffordance [\n" + 
         "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
         "        td:isObservable true ;\n" +
@@ -199,11 +203,8 @@ public class TDGraphWriterTest {
         .addObserve()
         .build();
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
-        .addProperty(property)
-        .build();
+    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(Arrays.asList(property)), 
+        new ArrayList<ActionAffordance>(Arrays.asList()));
     
     assertIsomorphicGraphs(testTD, td);
   }
@@ -262,12 +263,8 @@ public class TDGraphWriterTest {
             .build())
         .build();
     
-    ThingDescription td = (new ThingDescription.Builder(THING_TITLE))
-        .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
-        .addBaseURI("http://example.org/")
-        .addAction(simpleAction)
-        .build();
+    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(), 
+        new ArrayList<ActionAffordance>(Arrays.asList(simpleAction)));
     
     assertIsomorphicGraphs(testTD, td);
   }
@@ -299,18 +296,18 @@ public class TDGraphWriterTest {
   	metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
   	metadata.add(manualId, DCTERMS.TITLE, rdf.createLiteral("My Lamp Manual"));
   	  	
-  	ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
+  	ThingDescription td = new ThingDescription.Builder("My Lamp Thing")
   	    .addThingURI("http://example.org/lamp123")
   	    .addSemanticType("https://saref.etsi.org/core/LightSwitch")
   	    .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
   	    .addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
   	    .addGraph(metadata)
   	    .addGraph(new ModelBuilder()
-  	    				.add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
-  	    				.build())  	    
+  	        .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
+  	        .build())  	    
   	    .addTriple(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
   	    .build();
-        
+  	
     assertIsomorphicGraphs(testTD, td);    
   }
   
@@ -351,7 +348,7 @@ public class TDGraphWriterTest {
             .build())
         .build();
     
-    ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
+    ThingDescription td = new ThingDescription.Builder("My Lamp Thing")
         .addThingURI("http://example.org/lamp123")
         .addSemanticType("https://saref.etsi.org/core/LightSwitch")
         .addAction(toggle)
@@ -362,7 +359,7 @@ public class TDGraphWriterTest {
   
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException, 
       RDFHandlerException, IOException {
-    Model expectedModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, 
+    Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, 
         IO_BASE_IRI);
     
     String description = new TDGraphWriter(td)
@@ -375,10 +372,28 @@ public class TDGraphWriterTest {
         .setNamespace("saref", "https://saref.etsi.org/core/")
         .write();
     
-    Model tdModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+    Model tdModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
     
     assertTrue(Models.isomorphic(expectedModel, tdModel));
    
+  }
+  
+  private ThingDescription constructThingDescription(List<PropertyAffordance> properties, 
+      List<ActionAffordance> actions) {
+    ThingDescription.Builder builder = new ThingDescription.Builder(THING_TITLE)
+        .addThingURI(THING_IRI)
+        .addBaseURI("http://example.org/")
+        .addSecurityScheme(new NoSecurityScheme());
+    
+    for (PropertyAffordance property : properties) {
+      builder.addProperty(property);
+    }
+    
+    for (ActionAffordance action : actions) {
+      builder.addAction(action);
+    }
+    
+    return builder.build();
   }
 }

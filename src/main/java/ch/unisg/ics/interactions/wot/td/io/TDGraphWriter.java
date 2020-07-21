@@ -1,8 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,9 +12,6 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.WriterConfig;
-import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
@@ -209,19 +203,6 @@ public class TDGraphWriter {
   }
   
   private String write(RDFFormat format) {
-    OutputStream out = new ByteArrayOutputStream();
-    
-    try {
-      Rio.write(getModel(), out, format, 
-          new WriterConfig().set(BasicWriterSettings.INLINE_BLANK_NODES, true));
-    } finally {
-      try {
-        out.close();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    
-    return out.toString();
+    return ReadWriteUtils.writeToString(format, getModel());
   }
 }

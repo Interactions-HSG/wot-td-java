@@ -83,23 +83,23 @@ public class SchemaGraphWriterTest {
   public void init() {
     semanticObjectSchema = new ObjectSchema.Builder()
         .addSemanticType(PREFIX + "SemObject")
-        .addProperty("boolean_value", (new BooleanSchema.Builder()
+        .addProperty("boolean_value", new BooleanSchema.Builder()
             .addSemanticType(PREFIX + "SemBoolean")
-            .build()))
-        .addProperty("integer_value", (new IntegerSchema.Builder()
+            .build())
+        .addProperty("integer_value", new IntegerSchema.Builder()
             .addSemanticType(PREFIX + "SemInteger")
             .addMinimum(-1000)
             .addMaximum(1000)
-            .build()))
-        .addProperty("number_value", (new NumberSchema.Builder()
+            .build())
+        .addProperty("number_value", new NumberSchema.Builder()
             .addSemanticType(PREFIX + "SemNumber")
-            .build()))
-        .addProperty("string_value", (new StringSchema.Builder()
+            .build())
+        .addProperty("string_value", new StringSchema.Builder()
             .addSemanticType(PREFIX + "SemString")
-            .build()))
-        .addProperty("null_value", (new NullSchema.Builder()
+            .build())
+        .addProperty("null_value", new NullSchema.Builder()
             .addSemanticType(PREFIX + "SemNull")
-            .build()))
+            .build())
         .addRequiredProperties("string_value")
         .build();
   }
@@ -135,15 +135,15 @@ public class SchemaGraphWriterTest {
       RDFHandlerException, IOException {
     DataSchema schema = new ObjectSchema.Builder()
         .addSemanticType(PREFIX + "SemObject")
-        .addProperty("number_value", (new NumberSchema.Builder()
+        .addProperty("number_value", new NumberSchema.Builder()
             .addSemanticType(PREFIX + "SemNumber")
             .addMinimum(-1000.005)
             .addMaximum(1000.005)
-            .build()))
+            .build())
         .build();
     
     String description = getTestModelDescription(schema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+    Model schemaModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
     
     Optional<Literal> minimum = Models.objectLiteral(schemaModel.filter(null, 
@@ -181,16 +181,16 @@ public class SchemaGraphWriterTest {
     
     DataSchema schema = new ObjectSchema.Builder()
         .addSemanticType(PREFIX + "SemObject")
-        .addProperty("string_value", (new StringSchema.Builder()
+        .addProperty("string_value", new StringSchema.Builder()
             .addSemanticType(PREFIX + "SemString")
-            .build()))
-        .addProperty("inner_object", (new ObjectSchema.Builder()
+            .build())
+        .addProperty("inner_object", new ObjectSchema.Builder()
             .addSemanticType(PREFIX + "AnotherSemObject")
-            .addProperty("integer_value", (new IntegerSchema.Builder()
+            .addProperty("integer_value", new IntegerSchema.Builder()
                 .addSemanticType(PREFIX + "SemInteger")
-                .build()))
+                .build())
             .addRequiredProperties("integer_value")
-            .build()))
+            .build())
         .addRequiredProperties("string_value")
         .build();
     
@@ -298,19 +298,17 @@ public class SchemaGraphWriterTest {
     BNode nodeId = SimpleValueFactory.getInstance().createBNode();
     SchemaGraphWriter.write(builder, nodeId, testSchema);
     
-    return ReadWriteTestUtils.writeToString(RDFFormat.TURTLE, builder.build());
+    return ReadWriteUtils.writeToString(RDFFormat.TURTLE, builder.build());
   }
   
   private void assertModel(String expectedSchema, DataSchema schema) throws RDFParseException, 
       RDFHandlerException, IOException {
-    Model expectedModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, expectedSchema, 
+    Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedSchema, 
         IO_BASE_IRI);
     
     String description = getTestModelDescription(schema);
-    Model schemaModel = ReadWriteTestUtils.readModelFromString(RDFFormat.TURTLE, description, 
+    Model schemaModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);
-    
-    System.out.println(description);
     
     assertTrue(Models.isomorphic(expectedModel, schemaModel));
   }

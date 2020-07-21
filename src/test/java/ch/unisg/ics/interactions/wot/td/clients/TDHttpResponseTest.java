@@ -23,7 +23,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 
 public class TDHttpResponseTest {
-  
+  private final String PREFIX = "http://example.org/";
   private final String USER_PAYLOAD = "{\"first_name\" : \"Andrei\", \"last_name\" : \"Ciortea\"}";
   
   @Test
@@ -61,35 +61,18 @@ public class TDHttpResponseTest {
   public void testObjectPayload() {
     ClassicHttpResponse response = constructHttpResponse(USER_PAYLOAD);
     
-    String prefix = "http://example.org/";
-    ObjectSchema schema = new ObjectSchema.Builder()
-        .addProperty("first_name", new StringSchema.Builder()
-            .addSemanticType(prefix + "FirstName")
-            .build())
-        .addProperty("last_name", new StringSchema.Builder()
-            .addSemanticType(prefix + "LastName")
-            .build())
-        .build();
-    
+    ObjectSchema schema = TDHttpRequestTest.USER_SCHEMA;
     Map<String, Object> payload = new TDHttpResponse(response).getPayloadAsObject(schema);
     
     assertEquals(2, payload.size());
-    assertEquals("Andrei", payload.get(prefix + "FirstName"));
-    assertEquals("Ciortea", payload.get(prefix + "LastName"));
+    assertEquals("Andrei", payload.get(PREFIX + "FirstName"));
+    assertEquals("Ciortea", payload.get(PREFIX + "LastName"));
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testObjectRequiredPayload() {
     ClassicHttpResponse response = constructHttpResponse("{\"first_name\" : \"Andrei\"}");
-    
-    ObjectSchema schema = new ObjectSchema.Builder()
-        .addProperty("first_name", new StringSchema.Builder()
-            .build())
-        .addProperty("last_name", new StringSchema.Builder()
-            .build())
-        .addRequiredProperties("last_name")
-        .build();
-    
+    ObjectSchema schema = TDHttpRequestTest.USER_SCHEMA;
     new TDHttpResponse(response).getPayloadAsObject(schema);
   }
   
@@ -105,15 +88,7 @@ public class TDHttpResponseTest {
         .addProperty("count", new IntegerSchema.Builder()
             .addSemanticType(prefix + "Count")
             .build())
-        .addProperty("user", new ObjectSchema.Builder()
-            .addSemanticType(prefix + "User")
-            .addProperty("first_name", new StringSchema.Builder()
-                .addSemanticType(prefix + "FirstName")
-                .build())
-            .addProperty("last_name", new StringSchema.Builder()
-                .addSemanticType(prefix + "LastName")
-                .build())
-            .build())
+        .addProperty("user", TDHttpRequestTest.USER_SCHEMA)
         .build();
     
     Map<String, Object> payload = new TDHttpResponse(response).getPayloadAsObject(schema);
@@ -169,14 +144,7 @@ public class TDHttpResponseTest {
     
     String prefix = "http://example.org/";
     ArraySchema schema = new ArraySchema.Builder()
-        .addItem(new ObjectSchema.Builder()
-            .addProperty("first_name", new StringSchema.Builder()
-                .addSemanticType(prefix + "FirstName")
-                .build())
-            .addProperty("last_name", new StringSchema.Builder()
-                .addSemanticType(prefix + "LastName")
-                .build())
-            .build())
+        .addItem(TDHttpRequestTest.USER_SCHEMA)
         .build();
     
     List<Object> payload = new TDHttpResponse(response).getPayloadAsArray(schema);
@@ -217,4 +185,5 @@ public class TDHttpResponseTest {
     response.setEntity(new StringEntity(String.valueOf(payload)));
     return response;
   }
+  
 }

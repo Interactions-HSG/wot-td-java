@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
@@ -19,6 +21,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 
 public class TDHttpResponse {
+  private final static Logger LOGGER = Logger.getLogger(TDHttpResponse.class.getCanonicalName());
+  
   private final ClassicHttpResponse response;
   private Optional<String> payload;
   
@@ -36,10 +40,8 @@ public class TDHttpResponse {
       try {
         this.payload = Optional.of(IOUtils.toString(entity.getContent(), encoding));
         EntityUtils.consume(entity);
-      } catch (UnsupportedOperationException e) {
-        e.printStackTrace();
       } catch (IOException e) {
-        e.printStackTrace();
+        LOGGER.log(Level.WARNING, e.getMessage());
       }
     }
   }
