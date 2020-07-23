@@ -19,13 +19,12 @@ import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 
 /**
- * TODO: add javadoc
- * ThingDescription is immutable (hence the builder pattern)
- * can be extended
- * fields follow the W3C WoT spec: https://www.w3.org/TR/wot-thing-description/#thing
+ * An immutable representation of a <a href="https://www.w3.org/TR/wot-thing-description/">W3C Web of 
+ * Things Thing Description (TD)</a>. A <code>ThingDescription</code> is instantiated using a 
+ * <code>ThingDescription.Builder</code>.
  * 
- * @author Andrei Ciortea
- *
+ * The current version does not yet implement all the core vocabulary terms defined by the 
+ * W3C Recommendation.
  */
 public class ThingDescription {
   private final String title;
@@ -38,10 +37,12 @@ public class ThingDescription {
   private final List<PropertyAffordance> properties;
   private final List<ActionAffordance> actions;
   
-  // Present if the TD was created with the TDGraphReader. The graph may contain RDF triples in
-  // addition to the ones representation on the object model.
   private final Optional<Model> graph;
   
+  /**
+   * Supported serialization formats -- currently only RDF serialization formats, namely Turtle and 
+   * JSON-LD 1.0. The version of JSON-LD currently supported is the one provided by RDF4J.
+   */
   public enum TDFormat {
     RDF_TURTLE,
     RDF_JSONLD
@@ -76,7 +77,13 @@ public class ThingDescription {
     return security;
   }
   
-  public Optional<SecurityScheme> getSecuritySchemeByType(String type) {
+  /**
+   * Gets the first {@link SecurityScheme} that matches a given semantic type.
+   * 
+   * @param type the type of the security scheme
+   * @return an <code>Optional</code> with the security scheme (empty if not found)
+   */
+  public Optional<SecurityScheme> getFirstSecuritySchemeByType(String type) {
     return security.stream().filter(security -> security.getSchemaType().equals(type)).findFirst();
   }
   
@@ -92,6 +99,12 @@ public class ThingDescription {
     return baseURI;
   }
   
+  /**
+   * Gets a set with all the semantic types of the action affordances provided by the described 
+   * thing.
+   * 
+   * @return The set of semantic types, can be empty.
+   */
   public Set<String> getSupportedActionTypes() {
     Set<String> supportedActionTypes = new HashSet<String>();
     
@@ -102,6 +115,14 @@ public class ThingDescription {
     return supportedActionTypes;
   }
   
+  /**
+   * Gets a property affordance by name, which is specified using the <code>td:name</code> data 
+   * property defined by the TD vocabulary. Names are mandatory in JSON-based representations. If a
+   * name is present, it is unique within the scope of a TD. 
+   * 
+   * @param name the name of the property affordance 
+   * @return an <code>Optional</code> with the property affordance (empty if not found) 
+   */
   public Optional<PropertyAffordance> getPropertyByName(String name) {
     for (PropertyAffordance property : properties) {
       Optional<String> propertyName = property.getName();
@@ -113,11 +134,27 @@ public class ThingDescription {
     return Optional.empty();
   }
   
+  /**
+   * Gets a list of property affordances that have a {@link ch.unisg.ics.interactions.wot.td.affordances.Form} 
+   * hypermedia control for the given operation type.
+   * 
+   * The current implementation supports two operation types for properties: <code>td:readProperty</code>
+   * and <code>td:writeProperty</code>.
+   * 
+   * @param operationType a string that captures the operation type
+   * @return the list of property affordances
+   */
   public List<PropertyAffordance> getPropertiesByOperationType(String operationType) {
     return properties.stream().filter(property -> property.hasFormWithOperationType(operationType))
         .collect(Collectors.toList());
   }
   
+  /**
+   * Gets the first {@link PropertyAffordance} annotated with a given semantic type.
+   * 
+   * @param propertyType the semantic type, typically and IRI defined in some ontology
+   * @return an <code>Optional</code> with the property affordance (empty if not found)
+   */
   public Optional<PropertyAffordance> getFirstPropertyBySemanticType(String propertyType) {
     for (PropertyAffordance property : properties) {
       if (property.getSemanticTypes().contains(propertyType)) {
@@ -128,6 +165,14 @@ public class ThingDescription {
     return Optional.empty();
   }
   
+  /**
+   * Gets an action affordance by name, which is specified using the <code>td:name</code> data 
+   * property defined by the TD vocabulary. Names are mandatory in JSON-based representations. If a
+   * name is present, it is unique within the scope of a TD. 
+   * 
+   * @param name the name of the action affordance 
+   * @return an <code>Optional</code> with the action affordance (empty if not found) 
+   */
   public Optional<ActionAffordance> getActionByName(String name) {
     for (ActionAffordance action : actions) {
       Optional<String> actionName = action.getName();
@@ -139,11 +184,27 @@ public class ThingDescription {
     return Optional.empty();
   }
   
+  /**
+   * Gets a list of action affordances that have a {@link ch.unisg.ics.interactions.wot.td.affordances.Form} 
+   * hypermedia control for the given operation type.
+   * 
+   * There is one operation type available actions: <code>td:invokeAction</code>. The API will be 
+   * simplified in future iterations.
+   * 
+   * @param operationType a string that captures the operation type
+   * @return the list of property affordances
+   */
   public List<ActionAffordance> getActionsByOperationType(String operationType) {
     return actions.stream().filter(action -> action.hasFormWithOperationType(operationType))
         .collect(Collectors.toList());
   }
   
+  /**
+   * Gets the first {@link ActionAffordance} annotated with a given semantic type.
+   * 
+   * @param actionType the semantic type, typically and IRI defined in some ontology
+   * @return an <code>Optional</code> with the action affordance (empty if not found)
+   */
   public Optional<ActionAffordance> getFirstActionBySemanticType(String actionType) {
     for (ActionAffordance action : actions) {
       if (action.getSemanticTypes().contains(actionType)) {
@@ -166,6 +227,13 @@ public class ThingDescription {
     return graph;
   }
   
+  /**
+   * Helper class used to construct a <code>ThingDescription</code>. All TDs should have a mandatory
+   * <code>title</code> field. In addition to the optional fields defined by the W3C Recommendation, 
+   * the <code>addGraph</code> method allows to add any other metadata as an RDF graph.
+   * 
+   * Implements a fluent API.
+   */
   public static class Builder {
     private final String title;
     private final List<SecurityScheme> security;
@@ -243,6 +311,12 @@ public class ThingDescription {
       return this;
     }
     
+    /**
+     * Adds an RDF graph. If an RDF graph is already present, it will be merged with the new graph. 
+     * 
+     * @param graph the RDF graph to be added
+     * @return this <code>Builder</code>
+     */
     public Builder addGraph(Model graph) {
       if (this.graph.isPresent()) {
         this.graph.get().addAll(graph);
@@ -253,6 +327,15 @@ public class ThingDescription {
       return this;
     }
     
+    /**
+     * Convenience method used to add a single triple. If an RDF graph is already present, the triple
+     * will be added to the existing graph.
+     * 
+     * @param subject the subject
+     * @param predicate the predicate
+     * @param object the object
+     * @return this <code>Builder</code>
+     */
     public Builder addTriple(Resource subject, IRI predicate, Value object) {
       if (this.graph.isPresent()) {
         this.graph.get().add(subject, predicate, object);
@@ -263,6 +346,11 @@ public class ThingDescription {
       return this;
     }
     
+    /**
+     * Constructs and returns a <code>ThingDescription</code>.
+     * 
+     * @return the constructed <code>ThingDescription</code>
+     */
     public ThingDescription build() {
       return new ThingDescription(title, security, uri, types, baseURI, properties, actions, graph);
     }

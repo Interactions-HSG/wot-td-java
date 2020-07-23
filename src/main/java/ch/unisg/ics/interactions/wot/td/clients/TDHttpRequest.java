@@ -32,6 +32,11 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 
+/**
+ * Wrapper for constructing and executing an HTTP request based on a given <code>ThingDescription</code>.
+ * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
+ * 
+ */
 public class TDHttpRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
   
@@ -126,6 +131,19 @@ public class TDHttpRequest {
     return this;
   }
   
+  /**
+   * Sets a payload of type <code>ObjectSchema</code>. The object payload is given as a map where:
+   * <ul>
+   * <li>a key is a string that represents either a semantic type or an object property name</li>
+   * <li>a value can be a primitive, an object represented as a <code>Map&lt;String,Object&gt;</code>
+   * (that is, a nested object), or an ordered list of values of type <code>List&lt;Object&gt;</code></li>
+   * </ul>
+   * 
+   * @param objectSchema schema to be used for validating the payload and constructing the body of 
+   * the request
+   * @param payload the actual payload
+   * @return this <code>TDHttpRequest</code>
+   */
   public TDHttpRequest setObjectPayload(ObjectSchema objectSchema, Map<String, Object> payload) {
     if (objectSchema.validate(payload)) {
       Map<String, Object> instance = objectSchema.instantiate(payload);
@@ -136,6 +154,16 @@ public class TDHttpRequest {
     return this;
   }
   
+  /**
+   * Sets a payload of type <code>ArraySchema</code>. The payload is given as an ordered list of 
+   * values of type <code>List&lt;Object&gt;</code>. Values can be primitives, objects represented
+   * as <code>Map&lt;String,Object&gt;</code>, or lists of values (that is, nested lists). 
+   * 
+   * @param arraySchema schema used for validating the payload and constructing the body of 
+   * the request
+   * @param payload the actual payload
+   * @return this <code>TDHttpRequest</code>
+   */
   public TDHttpRequest setArrayPayload(ArraySchema arraySchema, List<Object> payload) {
     if (arraySchema.validate(payload)) {
       String body = new Gson().toJson(payload);
@@ -145,7 +173,7 @@ public class TDHttpRequest {
     return this;
   }
   
-  public String getPayload() throws ParseException, IOException {
+  public String getPayloadAsString() throws ParseException, IOException {
     return EntityUtils.toString(request.getEntity());
   }
   

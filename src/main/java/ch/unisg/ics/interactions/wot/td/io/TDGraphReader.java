@@ -39,6 +39,12 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
+/**
+ * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
+ * maintains the full RDF graph read as input, which can be retrieved with the <code>getGraph</code> 
+ * method.
+ *
+ */
 public class TDGraphReader {
   private final Resource thingId;
   private Model model;

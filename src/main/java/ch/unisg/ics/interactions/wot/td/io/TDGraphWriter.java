@@ -25,6 +25,11 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
+/**
+ * A writer for serializing TDs as RDF graphs. Provides a fluent API for adding prefix bindings to be
+ * used in the serialization.
+ * 
+ */
 public class TDGraphWriter {
   private final Resource thingId;
   private final ThingDescription td;
@@ -43,6 +48,13 @@ public class TDGraphWriter {
     return new TDGraphWriter(td).write();
   }
   
+  /**
+   * Sets a prefix binding for a given namespace.
+   * 
+   * @param prefix the prefix to be used in the serialized representation
+   * @param namespace the given namespace
+   * @return this <code>TDGraphWriter</code>
+   */
   public TDGraphWriter setNamespace(String prefix, String namespace) {
     this.graphBuilder.setNamespace(prefix, namespace);
     return this;

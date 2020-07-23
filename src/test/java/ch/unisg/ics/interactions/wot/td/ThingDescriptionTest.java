@@ -71,7 +71,7 @@ public class ThingDescriptionTest {
         .addSecurityScheme(new APIKeySecurityScheme())
         .build();
     
-    Optional<SecurityScheme> scheme = td.getSecuritySchemeByType(WoTSec.APIKeySecurityScheme);
+    Optional<SecurityScheme> scheme = td.getFirstSecuritySchemeByType(WoTSec.APIKeySecurityScheme);
     assertTrue(scheme.isPresent());
     assertEquals(WoTSec.APIKeySecurityScheme, scheme.get().getSchemaType());
   }
