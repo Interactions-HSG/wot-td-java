@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
@@ -76,13 +77,16 @@ public class TDGraphWriter {
   }
   
   private TDGraphWriter addSecurity() {
-    List<SecurityScheme> securitySchemas = td.getSecuritySchemes();
+    List<SecurityScheme> securitySchemes = td.getSecuritySchemes();
     
-    for (SecurityScheme schema : securitySchemas) {
-      BNode schemaId = rdf.createBNode();
-      graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemaId);
-      // TODO: complete serialization of security schemes (not just the type)
-      graphBuilder.add(schemaId, RDF.TYPE, rdf.createIRI(schema.getSchemaType()));
+    for (SecurityScheme scheme : securitySchemes) {
+      BNode schemeId = rdf.createBNode();
+      graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemeId);
+      
+      Model schemeGraph = scheme.toRDF(schemeId);
+      for (Statement s : schemeGraph) {
+        graphBuilder.add(s.getSubject(), s.getPredicate(), s.getObject());
+      }
     }
     
     return this;

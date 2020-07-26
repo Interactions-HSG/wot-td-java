@@ -230,7 +230,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
     
     assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> 
-        scheme.getSchemaType().equals(WoTSec.NoSecurityScheme)));
+        scheme.getSchemeType().equals(WoTSec.NoSecurityScheme)));
   }
   
   @Test
@@ -253,7 +253,7 @@ public class TDGraphReaderTest {
     
     SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
     assertTrue(scheme instanceof APIKeySecurityScheme);
-    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemaType());
+    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemeType());
     assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getIn());
     assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getName().get());
   }
@@ -272,7 +272,7 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
-    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemaType());
+    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemeType());
     assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getIn());
     assertFalse(((APIKeySecurityScheme) scheme).getName().isPresent());
   }
@@ -310,9 +310,9 @@ public class TDGraphReaderTest {
     
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
+    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
         .equals(WoTSec.NoSecurityScheme)));
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
+    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
         .equals(WoTSec.APIKeySecurityScheme)));
   }
   
@@ -487,7 +487,7 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemaType()
+    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
         .equals(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
     

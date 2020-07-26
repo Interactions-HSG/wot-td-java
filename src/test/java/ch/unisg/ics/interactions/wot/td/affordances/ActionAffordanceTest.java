@@ -49,7 +49,7 @@ public class ActionAffordanceTest {
     
     List<Form> formList = new ArrayList<Form>(Arrays.asList(form1, form2, form3));
     
-    ActionAffordance action = (new ActionAffordance.Builder(formList)).build();
+    ActionAffordance action = new ActionAffordance.Builder(formList).build();
     List<Form> forms = action.getForms();
     
     assertEquals(3, forms.size());
@@ -69,7 +69,7 @@ public class ActionAffordanceTest {
   public void testFullOptionAction() {
     Form form = new Form.Builder("http://example.org").setMethodName("GET").build();
     
-    ActionAffordance action = (new ActionAffordance.Builder(form))
+    ActionAffordance action = new ActionAffordance.Builder(form)
         .addName("turn_on")
         .addTitle("Turn on")
         .addSemanticType("iot:TurnOn")

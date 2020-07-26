@@ -72,7 +72,21 @@ public class APIKeySecurityScheme extends SecurityScheme {
   }
 
   @Override
-  public String getSchemaType() {
+  public String getSchemeType() {
     return WoTSec.APIKeySecurityScheme;
+  }
+  
+  @Override
+  public Model toRDF(Resource schemeId) {
+    Model model = super.toRDF(schemeId);
+    
+    ValueFactory rdf = SimpleValueFactory.getInstance(); 
+    model.add(schemeId, rdf.createIRI(WoTSec.in), rdf.createLiteral(this.in.name()));
+    
+    if (this.name.isPresent()) {
+      model.add(schemeId, rdf.createIRI(WoTSec.name), rdf.createLiteral(this.name.get()));
+    }
+    
+    return model;
   }
 }

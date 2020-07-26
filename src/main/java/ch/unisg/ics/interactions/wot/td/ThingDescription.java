@@ -84,7 +84,7 @@ public class ThingDescription {
    * @return an <code>Optional</code> with the security scheme (empty if not found)
    */
   public Optional<SecurityScheme> getFirstSecuritySchemeByType(String type) {
-    return security.stream().filter(security -> security.getSchemaType().equals(type)).findFirst();
+    return security.stream().filter(security -> security.getSchemeType().equals(type)).findFirst();
   }
   
   public Optional<String> getThingURI() {

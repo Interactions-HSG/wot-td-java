@@ -29,6 +29,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 
 public class TDGraphWriterTest {
@@ -64,9 +66,7 @@ public class TDGraphWriterTest {
   
   @Test
   public void testWriteTitle() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = 
-        PREFIXES +
-        "\n" +
+    String testTD = PREFIXES +
         "<http://example.org/#thing> a td:Thing ;\n" + 
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n" ;
@@ -74,6 +74,24 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addSecurityScheme(new NoSecurityScheme())
+        .build();
+    
+    assertIsomorphicGraphs(testTD, td);
+  }
+  
+  @Test
+  public void testWriteAPIKeySecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+        "<http://example.org/#thing> a td:Thing ;\n" + 
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+        "        wotsec:in \"HEADER\" ;\n" +
+        "        wotsec:name \"X-API-Key\" ;\n" +
+        "    ] .\n";
+    
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+        .addThingURI(THING_IRI)
+        .addSecurityScheme(new APIKeySecurityScheme(TokenLocation.HEADER, "X-API-Key"))
         .build();
     
     assertIsomorphicGraphs(testTD, td);
@@ -371,6 +389,8 @@ public class TDGraphWriterTest {
         .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
         .setNamespace("saref", "https://saref.etsi.org/core/")
         .write();
+    
+    System.out.println(description);
     
     Model tdModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description, 
         IO_BASE_IRI);

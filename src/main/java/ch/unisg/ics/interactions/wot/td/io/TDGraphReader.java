@@ -169,7 +169,7 @@ public class TDGraphReader {
       Optional<IRI> securityScheme = Models.objectIRI(model.filter(node, RDF.TYPE, null));
       
       if (securityScheme.isPresent()) {
-        Optional<SecurityScheme> scheme = SecurityScheme.readScheme(securityScheme.get().stringValue(), 
+        Optional<SecurityScheme> scheme = SecurityScheme.fromRDF(securityScheme.get().stringValue(), 
             model, node);
         
         if (scheme.isPresent()) {
