@@ -1,9 +1,13 @@
 apply plugin: 'java-library'
 apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
 
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
   targetCompatibility = JavaVersion.VERSION_1_8
+  
+  withJavadocJar()
+  withSourcesJar()
 }
 
 version '0.0.1'
@@ -13,21 +17,44 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.0.1'
-    implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1'
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'org.eclipse.rdf4j:rdf4j-runtime:3.2.2'
-    implementation 'org.slf4j:slf4j-api:2.0.0-alpha1'
+  implementation 'org.apache.httpcomponents.client5:httpclient5:5.0.1'
+  implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.0.1'
+  implementation 'com.google.code.gson:gson:2.8.6'
+  implementation 'org.eclipse.rdf4j:rdf4j-runtime:3.2.2'
+  implementation 'org.slf4j:slf4j-api:2.0.0-alpha1'
 
-    // Use JUnit test framework
-    testImplementation 'junit:junit:4.13'
+  // Use JUnit test framework
+  testImplementation 'junit:junit:4.13'
 
-    runtime 'org.slf4j:slf4j-log4j12:2.0.0-alpha1'
+  runtime 'org.slf4j:slf4j-log4j12:2.0.0-alpha1'
 }
 
 jacocoTestReport {
-    reports {
-        xml.enabled true
-        html.enabled false
+  reports {
+    xml.enabled true
+    html.enabled false
+  }
+}
+
+publishing {
+  publications {
+    ai4industry(MavenPublication) {
+      from components.java
+      groupId 'ch.unisg.ics.interactions'
+      artifactId 'wot-td-java'
+      version '0.0.1'
     }
+  }
+
+  repositories {
+    maven {
+      url = "file://${buildDir}/repo"
+    }
+  }
+}
+
+javadoc {
+  if(JavaVersion.current().isJava9Compatible()) {
+    options.addBooleanOption('html5', true)
+  }
 }
