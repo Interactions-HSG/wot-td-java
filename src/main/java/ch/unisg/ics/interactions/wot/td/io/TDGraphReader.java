@@ -66,7 +66,7 @@ public class TDGraphReader {
    * @return	the thing description
    */
   public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
-    String content = Files.readString(Paths.get(path));
+    String content = new String(Files.readAllBytes(Paths.get(path)));
     return readFromString(format, content);
   }
   
