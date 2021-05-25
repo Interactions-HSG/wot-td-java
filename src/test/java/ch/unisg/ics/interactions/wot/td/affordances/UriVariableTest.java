@@ -50,5 +50,6 @@ public class UriVariableTest {
     affordance=new ActionAffordance.Builder(form)
       .addUriVariables(variables)
       .build();
+    assertEquals(newUriVariable,affordance.getUriVariables().get(1));
   }
 }
