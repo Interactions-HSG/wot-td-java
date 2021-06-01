@@ -5,6 +5,7 @@ bin/
 .DS_Store
 .classpath
 .project
+.idea/
 
 # Ignore Gradle GUI config
 gradle-app.setting
