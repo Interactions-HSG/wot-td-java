@@ -582,4 +582,104 @@ public class TDGraphReaderTest {
 
 
   }
+
+  @Test
+  public void testUriVariableObjectSchema(){
+    String TDDescription="\n" +
+      "<http://example.org/lamp123> a <https://www.w3.org/2019/wot/td#Thing>, <https://saref.etsi.org/core/LightSwitch>;\n" +
+      "  <http://purl.org/dc/terms/title> \"My Lamp Thing\";\n" +
+      "  <https://www.w3.org/2019/wot/td#hasSecurityConfiguration> [ a <https://www.w3.org/2019/wot/security#NoSecurityScheme>\n" +
+      "    ];\n" +
+      "  <https://www.w3.org/2019/wot/td#hasActionAffordance> [ a <https://www.w3.org/2019/wot/td#ActionAffordance>,\n" +
+      "        <https://saref.etsi.org/core/ToggleCommand>;\n" +
+      "      <https://www.w3.org/2019/wot/td#hasUriTemplateSchema> [ a <https://www.w3.org/2019/wot/json-schema#ObjectSchema>; <https://www.w3.org/2019/wot/json-schema#properties> [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>; <https://www.w3.org/2019/wot/json-schema#propertyName> \"name\" ]; <https://www.w3.org/2019/wot/json-schema#required> \"name\" ];\n" +
+      "      <http://purl.org/dc/terms/title> \"Toggle\";\n" +
+      "      <https://www.w3.org/2019/wot/td#hasForm> [\n" +
+      "          <http://www.w3.org/2011/http#methodName> \"PUT\";\n" +
+      "          <https://www.w3.org/2019/wot/hypermedia#hasTarget> <http://mylamp.example.org/toggle>;\n" +
+      "          <https://www.w3.org/2019/wot/hypermedia#forContentType> \"application/json\";\n" +
+      "          <https://www.w3.org/2019/wot/hypermedia#hasOperationType> <https://www.w3.org/2019/wot/td#invokeAction>\n" +
+      "        ];\n" +
+      "      <https://www.w3.org/2019/wot/td#hasInputSchema> [ a <https://www.w3.org/2019/wot/json-schema#ObjectSchema>,\n" +
+      "            <https://saref.etsi.org/core/OnOffState>;\n" +
+      "          <https://www.w3.org/2019/wot/json-schema#properties> [ a <https://www.w3.org/2019/wot/json-schema#BooleanSchema>;\n" +
+      "              <https://www.w3.org/2019/wot/json-schema#propertyName> \"status\"\n" +
+      "            ];\n" +
+      "          <https://www.w3.org/2019/wot/json-schema#required> \"status\"\n" +
+      "        ]\n" +
+      "    ] .\n";
+    ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
+    String s=td.getActions().get(0).getUriVariables().get(0).getDatatype();
+    assertEquals(s,DataSchema.OBJECT);
+
+
+  }
+
+  @Test
+  public void testUriVariablePropertyAffordance(){
+    String TDDescription =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasBase <http://example.org/> ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        dct:title \"My Property\" ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"PUT\" ;\n" +
+        "            hctl:hasTarget <http://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:writeProperty;\n" +
+        "        ] ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <http://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "            hctl:forSubProtocol \"websub\";\n" +
+        "        ] ;\n" +
+        "      <https://www.w3.org/2019/wot/td#hasUriTemplateSchema> [ a <https://www.w3.org/2019/wot/json-schema#ObjectSchema>; <https://www.w3.org/2019/wot/json-schema#properties> [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>; <https://www.w3.org/2019/wot/json-schema#propertyName> \"name\" ]; <https://www.w3.org/2019/wot/json-schema#required> \"name\" ];\n" +
+        "    ] ;\n" +
+        "    td:hasActionAffordance [\n" +
+        "        a td:ActionAffordance ;\n" +
+        "        td:name \"my_action\" ;\n" +
+        "        dct:title \"My Action\" ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"PUT\" ;\n" +
+        "            hctl:hasTarget <http://example.org/action> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:invokeAction;\n" +
+        "        ] ;\n" +
+        "        td:hasInputSchema [\n" +
+        "            a js:ObjectSchema ;\n" +
+        "            js:properties [\n" +
+        "                a js:NumberSchema ;\n" +
+        "                js:propertyName \"number_value\";\n" +
+        "                js:maximum 100.05 ;\n" +
+        "                js:minimum -100.05 ;\n" +
+        "            ] ;\n" +
+        "            js:required \"number_value\" ;\n" +
+        "        ] ;\n" +
+        "        td:hasOutputSchema [\n" +
+        "            a js:ObjectSchema ;\n" +
+        "            js:properties [\n" +
+        "                a js:BooleanSchema ;\n" +
+        "                js:propertyName \"boolean_value\";\n" +
+        "            ] ;\n" +
+        "            js:required \"boolean_value\" ;\n" +
+        "        ]\n" +
+        "    ] ." ;
+    ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
+    String s=td.getProperties().get(0).getUriVariables().get(0).getDatatype();
+    assertEquals(s,DataSchema.OBJECT);
+  }
 }
