@@ -1,5 +1,5 @@
 @prefix dct: <http://purl.org/dc/terms/> .
-@prefix ex: <http://example.org/> .
+@prefix onto: <https://ci.mines-stetienne.fr/kg/ontology#> .
 @prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
 @prefix htv: <http://www.w3.org/2011/http#> .
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
@@ -7,109 +7,109 @@
 @prefix wotsec: <https://www.w3.org/2019/wot/security#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://api.interactions.ics.unisg.ch/v1.2/leubot> a ex:PhantomX, td:Thing;
-  dct:title "Leubot";
+<https://api.interactions.ics.unisg.ch/v1.2/leubot> a onto:PhantomX, td:Thing;
+  dct:title "leubot1";
   td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;
       wotsec:in "header" ;
       wotsec:name "X-API-Key" ;
   ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:Posture ; 
-		js:properties [ a js:IntegerSchema, ex:BaseJointValue;
+        a td:PropertyAffordance, js:ObjectSchema, onto:Posture ;
+    js:properties [ a js:IntegerSchema, onto:BaseJointValue;
               js:propertyName "Base"
             ],
-			[ a js:IntegerSchema, ex:ShoulderJointValue;
+      [ a js:IntegerSchema, onto:ShoulderJointValue;
               js:propertyName "Shoulder"
             ],
-			[ a js:IntegerSchema, ex:ElbowJointValue;
+      [ a js:IntegerSchema, onto:ElbowJointValue;
               js:propertyName "Elbow"
             ],
-			[ a js:IntegerSchema, ex:WristAngleJointValue;
+      [ a js:IntegerSchema, onto:WristAngleJointValue;
               js:propertyName "WristAngle"
             ],
-			[ a js:IntegerSchema, ex:WristRotationJointValue;
+      [ a js:IntegerSchema, onto:WristRotationJointValue;
               js:propertyName "WristRotation"
             ],
-			[ a js:IntegerSchema, ex:GripperJointValue;
+      [ a js:IntegerSchema, onto:GripperJointValue;
               js:propertyName "Gripper"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/posture> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/posture> ;
+        ] ;
     ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:Gripper ; 
-		js:properties [ a js:StringSchema, ex:JointName;
+        a td:PropertyAffordance, js:ObjectSchema, onto:Gripper ;
+    js:properties [ a js:StringSchema, onto:JointName;
               js:propertyName "name"
             ],
-			[ a js:IntegerSchema, ex:JointValue;
+      [ a js:IntegerSchema, onto:JointValue;
               js:propertyName "value"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/gripper> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/gripper> ;
+        ] ;
     ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:Elbow ; 
-		js:properties [ a js:StringSchema, ex:JointName;
+        a td:PropertyAffordance, js:ObjectSchema, onto:Elbow ;
+    js:properties [ a js:StringSchema, onto:JointName;
               js:propertyName "name"
             ],
-			[ a js:IntegerSchema, ex:JointValue;
+      [ a js:IntegerSchema, onto:JointValue;
               js:propertyName "value"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/elbow> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/elbow> ;
+        ] ;
     ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:Base ; 
-		js:properties [ a js:StringSchema, ex:JointName;
+        a td:PropertyAffordance, js:ObjectSchema, onto:Base ;
+    js:properties [ a js:StringSchema, onto:JointName;
               js:propertyName "name"
             ],
-			[ a js:IntegerSchema, ex:JointValue;
+      [ a js:IntegerSchema, onto:JointValue;
               js:propertyName "value"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/base> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/base> ;
+        ] ;
     ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:WristAngle ; 
-		js:properties [ a js:StringSchema, ex:JointName;
+        a td:PropertyAffordance, js:ObjectSchema, onto:WristAngle ;
+    js:properties [ a js:StringSchema, onto:JointName;
               js:propertyName "name"
             ],
-			[ a js:IntegerSchema, ex:JointValue;
+      [ a js:IntegerSchema, onto:JointValue;
               js:propertyName "value"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/wrist/angle> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/wrist/angle> ;
+        ] ;
     ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:WristRotation ; 
-		js:properties [ a js:StringSchema, ex:JointName;
+        a td:PropertyAffordance, js:ObjectSchema, onto:WristRotation ;
+    js:properties [ a js:StringSchema, onto:JointName;
               js:propertyName "name"
             ],
-			[ a js:IntegerSchema, ex:JointValue;
+      [ a js:IntegerSchema, onto:JointValue;
               js:propertyName "value"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/wrist/rotation> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/wrist/rotation> ;
+        ] ;
     ] ;
 td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:Shoulder ; 
-		js:properties [ a js:StringSchema, ex:JointName;
+        a td:PropertyAffordance, js:ObjectSchema, onto:Shoulder ;
+    js:properties [ a js:StringSchema, onto:JointName;
               js:propertyName "name"
             ],
-			[ a js:IntegerSchema, ex:JointValue;
+      [ a js:IntegerSchema, onto:JointValue;
               js:propertyName "value"
             ] ;
         td:hasForm [
-            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/shoulder> ; 
-        ] ; 
+            hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/shoulder> ;
+        ] ;
     ] ;
-td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
+td:hasActionAffordance [ a onto:Reset, td:ActionAffordance;
       dct:title "Reset";
       td:hasForm [
           htv:methodName "PUT";
@@ -117,7 +117,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/reset>
         ];
-    ], [ a ex:SetElbow, td:ActionAffordance;
+    ], [ a onto:SetElbow, td:ActionAffordance;
       dct:title "Set Elbow";
       td:hasForm [
           htv:methodName "PUT";
@@ -125,7 +125,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/elbow>
         ];
-      td:hasInputSchema [ a ex:ElbowJoint, js:ObjectSchema;
+      td:hasInputSchema [ a onto:ElbowJoint, js:ObjectSchema;
           js:properties [ a js:IntegerSchema;
               js:maximum "900"^^xsd:int;
               js:minimum "210"^^xsd:int;
@@ -133,7 +133,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
             ];
           js:required "value"
         ]
-    ], [ a ex:SetWristAngle, td:ActionAffordance;
+    ], [ a onto:SetWristAngle, td:ActionAffordance;
       dct:title "Set Wrist Angle";
       td:hasForm [
           htv:methodName "PUT";
@@ -141,7 +141,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/wrist/angle>
         ];
-      td:hasInputSchema [ a ex:WristAngleJoint, js:ObjectSchema;
+      td:hasInputSchema [ a onto:WristAngleJoint, js:ObjectSchema;
           js:properties [ a js:IntegerSchema;
               js:maximum "830"^^xsd:int;
               js:minimum "200"^^xsd:int;
@@ -149,7 +149,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
             ];
           js:required "value"
         ]
-    ], [ a ex:SetWristRotation, td:ActionAffordance;
+    ], [ a onto:SetWristRotation, td:ActionAffordance;
       dct:title "Set Wrist Rotation";
       td:hasForm [
           htv:methodName "PUT";
@@ -157,7 +157,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/wrist/rotation>
         ];
-      td:hasInputSchema [ a ex:WristRotateJoint, js:ObjectSchema;
+      td:hasInputSchema [ a onto:WristRotateJoint, js:ObjectSchema;
           js:properties [ a js:IntegerSchema;
               js:maximum "1023"^^xsd:int;
               js:minimum "0"^^xsd:int;
@@ -165,7 +165,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
             ];
           js:required "value"
         ]
-    ], [ a ex:SetBase, td:ActionAffordance;
+    ], [ a onto:SetBase, td:ActionAffordance;
       dct:title "Set Base";
       td:hasForm [
           htv:methodName "PUT";
@@ -173,7 +173,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/base>
         ];
-      td:hasInputSchema [ a ex:BaseJoint, js:ObjectSchema;
+      td:hasInputSchema [ a onto:BaseJoint, js:ObjectSchema;
           js:properties [ a js:IntegerSchema;
               js:maximum "1023"^^xsd:int;
               js:minimum "512"^^xsd:int;
@@ -181,7 +181,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
             ];
           js:required "value"
         ]
-    ], [ a ex:SetGripper, td:ActionAffordance;
+    ], [ a onto:SetGripper, td:ActionAffordance;
       dct:title "Set Gripper";
       td:hasForm [
           htv:methodName "PUT";
@@ -189,7 +189,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/gripper>
         ];
-      td:hasInputSchema [ a ex:GripperJoint, js:ObjectSchema;
+      td:hasInputSchema [ a onto:GripperJoint, js:ObjectSchema;
           js:properties [ a js:IntegerSchema;
               js:maximum "512"^^xsd:int;
               js:minimum "0"^^xsd:int;
@@ -197,7 +197,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
             ];
           js:required "value"
         ]
-    ], [ a ex:SetShoulder, td:ActionAffordance;
+    ], [ a onto:SetShoulder, td:ActionAffordance;
       dct:title "Set Shoulder";
       td:hasForm [
           htv:methodName "PUT";
@@ -205,7 +205,7 @@ td:hasActionAffordance [ a ex:Reset, td:ActionAffordance;
           hctl:hasOperationType td:invokeAction;
           hctl:hasTarget <https://api.interactions.ics.unisg.ch/leubot1/v1.2/shoulder>
         ];
-      td:hasInputSchema [ a ex:ShoulderJoint, js:ObjectSchema;
+      td:hasInputSchema [ a onto:ShoulderJoint, js:ObjectSchema;
           js:properties [ a js:IntegerSchema;
               js:maximum "810"^^xsd:int;
               js:minimum "205"^^xsd:int;
