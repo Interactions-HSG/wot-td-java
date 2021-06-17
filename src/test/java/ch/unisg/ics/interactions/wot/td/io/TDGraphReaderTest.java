@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -476,6 +478,17 @@ public class TDGraphReaderTest {
     assertEquals(2, schema.getRequiredProperties().size());
     assertTrue(schema.getRequiredProperties().contains("integer_value"));
     assertTrue(schema.getRequiredProperties().contains("number_value"));
+  }
+  
+  @Test
+  public void testReadTDFromFile() throws IOException {
+	  // Read a TD from a File by passing its path as parameter
+	  ThingDescription simple = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/simple_td.ttl");
+	  ThingDescription forklift = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/forkliftRobot.ttl");
+	  
+	  // Check if a TD was created from the file by checking its title
+	  assertEquals("My Thing", simple.getTitle());
+	  assertEquals("forkliftRobot", forklift.getTitle());
   }
   
   @Test

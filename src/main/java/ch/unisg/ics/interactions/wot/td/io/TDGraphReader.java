@@ -2,6 +2,8 @@ package ch.unisg.ics.interactions.wot.td.io;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -53,6 +55,19 @@ public class TDGraphReader {
   public static ThingDescription readFromURL(TDFormat format, String url) throws IOException {
     String representation = Request.get(url).execute().returnContent().asString();
     return readFromString(format, representation);
+  }
+  
+  /**
+   * Returns a ThingDescription object based on the path parameter that points to a file. Should the path be invalid
+   * or if the file does not exist, an IOException is thrown.
+   * 
+   * @param	format	the file's thing description
+   * @param path	the location of the file that contains the thing description
+   * @return	the thing description
+   */
+  public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
+    String content = new String(Files.readAllBytes(Paths.get(path)));
+    return readFromString(format, content);
   }
   
   public static ThingDescription readFromString(TDFormat format, String representation) {
