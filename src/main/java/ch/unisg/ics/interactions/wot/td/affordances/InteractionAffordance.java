@@ -26,12 +26,12 @@ public class InteractionAffordance {
   protected List<DataSchema> uriVariables;
 
   protected InteractionAffordance(Optional<String> name, Optional<String> title, List<String> types,
-      List<Form> forms,List<DataSchema> uriVariables) {
+      List<Form> forms, List<DataSchema> uriVariables) {
     this.name = name;
     this.title = title;
     this.types = types;
     this.forms = forms;
-    this.uriVariables=uriVariables;
+    this.uriVariables = uriVariables;
   }
 
   public Optional<String> getName() {
@@ -50,7 +50,7 @@ public class InteractionAffordance {
     return forms;
   }
 
-  public List<DataSchema> getUriVariables(){return uriVariables;}
+  public List<DataSchema> getUriVariables() { return uriVariables; }
 
   public boolean hasFormWithOperationType(String operationType) {
     return !forms.stream().filter(form -> form.hasOperationType(operationType))

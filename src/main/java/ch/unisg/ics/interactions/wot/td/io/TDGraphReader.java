@@ -269,7 +269,7 @@ public class TDGraphReader {
   }
 
   private void readAffordanceMetadata(InteractionAffordance
-                                        .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
+      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
     /* Read semantic types */
     Set<IRI> types = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
     builder.addSemanticTypes(types.stream().map(type -> type.stringValue())
@@ -345,7 +345,7 @@ public class TDGraphReader {
   }
 
   private void readUriVariables(InteractionAffordance
-                                              .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
+      .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
     Set<Resource> uriVariableIds = Models.objectResources(model.filter(affordanceId,
       rdf.createIRI(TD.hasUriTemplateSchema), null));
     for (Resource uriVariable : uriVariableIds) {

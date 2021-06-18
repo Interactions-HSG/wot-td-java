@@ -10,11 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class UriVariableTest {
 
-  //private InteractionAffordance testInteraction;
   private Form form;
   private DataSchema uriVariable;
   private InteractionAffordance affordance;
@@ -22,20 +20,20 @@ public class UriVariableTest {
   @Before
   public void init() {
     form = new Form.Builder("http://example.org/action").build();
-    uriVariable=new StringSchema.Builder().build();
-    affordance=new ActionAffordance.Builder(form).build();
+    uriVariable = new StringSchema.Builder().build();
+    affordance = new ActionAffordance.Builder(form).build();
   }
 
   @Test
   public void createUriVariableAffordance(){
-    affordance=new ActionAffordance.Builder(form)
+    affordance = new ActionAffordance.Builder(form)
       .addUriVariable(uriVariable)
       .build();
   }
 
   @Test
   public void getUriVariable(){
-    affordance=new ActionAffordance.Builder(form)
+    affordance = new ActionAffordance.Builder(form)
       .addUriVariable(uriVariable)
       .build();
     assertEquals(uriVariable,affordance.getUriVariables().get(0));
