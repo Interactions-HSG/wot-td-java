@@ -4,13 +4,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -36,93 +33,91 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
- * maintains the full RDF graph read as input, which can be retrieved with the <code>getGraph</code> 
+ * maintains the full RDF graph read as input, which can be retrieved with the <code>getGraph</code>
  * method.
- *
  */
 public class TDGraphReader {
+  private static final String[] HTTP_URI_SCHEMES = new String[]{"http", "https"};
+  private static final String[] COAP_URI_SCHEMES = new String[]{"coap", "coaps"};
+
   private final Resource thingId;
   private Model model;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
-  
+
   public static ThingDescription readFromURL(TDFormat format, String url) throws IOException {
     String representation = Request.get(url).execute().returnContent().asString();
     return readFromString(format, representation);
   }
-  
+
   /**
    * Returns a ThingDescription object based on the path parameter that points to a file. Should the path be invalid
    * or if the file does not exist, an IOException is thrown.
-   * 
-   * @param	format	the file's thing description
-   * @param path	the location of the file that contains the thing description
-   * @return	the thing description
+   *
+   * @param path the location of the file that contains the thing description
+   * @param  format  the file's thing description
+   * @return the thing description
    */
   public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
     String content = new String(Files.readAllBytes(Paths.get(path)));
     return readFromString(format, content);
   }
-  
+
   public static ThingDescription readFromString(TDFormat format, String representation) {
     TDGraphReader reader;
-    
+
     if (format == TDFormat.RDF_TURTLE) {
       reader = new TDGraphReader(RDFFormat.TURTLE, representation);
     } else {
       reader = new TDGraphReader(RDFFormat.JSONLD, representation);
     }
-    
+
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
-        .addSemanticTypes(reader.readThingTypes())
-        .addSecuritySchemes(reader.readSecuritySchemes())
-        .addProperties(reader.readProperties())
-        .addActions(reader.readActions())
-        .addGraph(reader.getGraph());
-    
+      .addSemanticTypes(reader.readThingTypes())
+      .addSecuritySchemes(reader.readSecuritySchemes())
+      .addProperties(reader.readProperties())
+      .addActions(reader.readActions())
+      .addGraph(reader.getGraph());
+
     Optional<String> thingURI = reader.getThingURI();
     if (thingURI.isPresent()) {
       tdBuilder.addThingURI(thingURI.get());
     }
-    
+
     Optional<String> base = reader.readBaseURI();
     if (base.isPresent()) {
       tdBuilder.addBaseURI(base.get());
     }
-    
+
     return tdBuilder.build();
   }
-  
+
   TDGraphReader(RDFFormat format, String representation) {
     loadModel(format, representation, "");
-    
+
     Optional<String> baseURI = readBaseURI();
     if (baseURI.isPresent()) {
       loadModel(format, representation, baseURI.get());
     }
-    
+
     try {
-      thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration), 
-          null)).get();
+      thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration),
+        null)).get();
     } catch (NoSuchElementException e) {
       throw new InvalidTDException("Missing mandatory security definitions.", e);
     }
   }
-  
+
   private void loadModel(RDFFormat format, String representation, String baseURI) {
     this.model = new LinkedHashModel();
-    
+
     RDFParser parser = Rio.createParser(format);
     parser.setRDFHandler(new StatementCollector(model));
 
     StringReader stringReader = new StringReader(representation);
-    
+
     try {
       parser.parse(stringReader, baseURI);
     } catch (RDFParseException | RDFHandlerException | IOException e) {
@@ -131,130 +126,130 @@ public class TDGraphReader {
       stringReader.close();
     }
   }
-  
+
   Model getGraph() {
     return model;
   }
-  
+
   Optional<String> getThingURI() {
     if (thingId instanceof IRI) {
       return Optional.of(thingId.stringValue());
     }
-    
+
     return Optional.empty();
   }
-  
+
   String readThingTitle() {
-  	Literal thingTitle;
-  	
+    Literal thingTitle;
+
     try {
-      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();    	
+      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();
     } catch (NoSuchElementException e) {
       throw new InvalidTDException("Missing mandatory title.", e);
     }
-    
+
     return thingTitle.stringValue();
   }
-  
+
   Set<String> readThingTypes() {
     Set<IRI> thingTypes = Models.objectIRIs(model.filter(thingId, RDF.TYPE, null));
-    
+
     return thingTypes.stream()
-        .map(iri -> iri.stringValue())
-        .collect(Collectors.toSet());
+      .map(iri -> iri.stringValue())
+      .collect(Collectors.toSet());
   }
-  
+
   final Optional<String> readBaseURI() {
     Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, rdf.createIRI(TD.hasBase), null));
-    
+
     if (baseURI.isPresent()) {
       return Optional.of(baseURI.get().stringValue());
     }
-    
+
     return Optional.empty();
   }
-  
+
   List<SecurityScheme> readSecuritySchemes() {
-    Set<Resource> nodeIds = Models.objectResources(model.filter(thingId, 
-        rdf.createIRI(TD.hasSecurityConfiguration), null));
-    
+    Set<Resource> nodeIds = Models.objectResources(model.filter(thingId,
+      rdf.createIRI(TD.hasSecurityConfiguration), null));
+
     List<SecurityScheme> schemes = new ArrayList<SecurityScheme>();
-    
+
     for (Resource node : nodeIds) {
       Optional<IRI> securityScheme = Models.objectIRI(model.filter(node, RDF.TYPE, null));
-      
+
       if (securityScheme.isPresent()) {
-        Optional<SecurityScheme> scheme = SecurityScheme.fromRDF(securityScheme.get().stringValue(), 
-            model, node);
-        
+        Optional<SecurityScheme> scheme = SecurityScheme.fromRDF(securityScheme.get().stringValue(),
+          model, node);
+
         if (scheme.isPresent()) {
           schemes.add(scheme.get());
         }
       }
     }
-    
+
     return schemes;
   }
-  
+
   List<PropertyAffordance> readProperties() {
     List<PropertyAffordance> properties = new ArrayList<PropertyAffordance>();
-    
-    Set<Resource> propertyIds = Models.objectResources(model.filter(thingId, 
-        rdf.createIRI(TD.hasPropertyAffordance), null));
-    
+
+    Set<Resource> propertyIds = Models.objectResources(model.filter(thingId,
+      rdf.createIRI(TD.hasPropertyAffordance), null));
+
     for (Resource propertyId : propertyIds) {
       try {
         Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(propertyId, model);
-        
+
         if (schema.isPresent()) {
           List<Form> forms = readForms(propertyId, InteractionAffordance.PROPERTY);
           PropertyAffordance.Builder builder = new PropertyAffordance.Builder(schema.get(), forms);
-          
+
           readAffordanceMetadata(builder, propertyId);
-          
-          Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId, 
-              rdf.createIRI(TD.isObservable), null));
+
+          Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId,
+            rdf.createIRI(TD.isObservable), null));
           if (observable.isPresent() && observable.get().booleanValue()) {
             builder.addObserve();
           }
-          
+
           properties.add(builder.build());
         }
       } catch (InvalidTDException e) {
         throw new InvalidTDException("Invalid property definition.", e);
       }
     }
-    
+
     return properties;
   }
-  
+
   List<ActionAffordance> readActions() {
     List<ActionAffordance> actions = new ArrayList<ActionAffordance>();
-    
-    Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId, 
-        rdf.createIRI(TD.hasActionAffordance), null));
-    
+
+    Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId,
+      rdf.createIRI(TD.hasActionAffordance), null));
+
     for (Resource affordanceId : affordanceIds) {
       if (!model.contains(affordanceId, RDF.TYPE, rdf.createIRI(TD.ActionAffordance))) {
         continue;
       }
-      
+
       ActionAffordance action = readAction(affordanceId);
       actions.add(action);
     }
-    
+
     return actions;
   }
-  
+
   private ActionAffordance readAction(Resource affordanceId) {
     List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
     ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
-    
+
     readAffordanceMetadata(actionBuilder, affordanceId);
-    
+
     try {
-      Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId, 
-          rdf.createIRI(TD.hasInputSchema), null));
+      Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId,
+        rdf.createIRI(TD.hasInputSchema), null));
       if (inputSchemaId.isPresent()) {
         try {
           Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
@@ -265,95 +260,106 @@ public class TDGraphReader {
           throw new InvalidTDException("Invalid action definition.", e);
         }
       }
-      
-      Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId, 
-          rdf.createIRI(TD.hasOutputSchema), null));
+
+      Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId,
+        rdf.createIRI(TD.hasOutputSchema), null));
       if (outSchemaId.isPresent()) {
-          Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
-          if (output.isPresent()) {
-            actionBuilder.addOutputSchema(output.get());
-          }
+        Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
+        if (output.isPresent()) {
+          actionBuilder.addOutputSchema(output.get());
+        }
       }
     } catch (InvalidTDException e) {
       throw new InvalidTDException("Invalid action definition.", e);
     }
-    
+
     return actionBuilder.build();
   }
-  
+
   private void readAffordanceMetadata(InteractionAffordance
-      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
+                                        .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
     /* Read semantic types */
     Set<IRI> types = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
     builder.addSemanticTypes(types.stream().map(type -> type.stringValue())
-        .collect(Collectors.toList()));
-    
+      .collect(Collectors.toList()));
+
     /* Read name */
-    Optional<Literal> name = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name), 
-        null));
+    Optional<Literal> name = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name),
+      null));
     if (name.isPresent()) {
       builder.addName(name.get().stringValue());
     }
-    
+
     /* Read title */
-    Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId, 
-        rdf.createIRI(DCT.title), null));
+    Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId,
+      rdf.createIRI(DCT.title), null));
     if (title.isPresent()) {
       builder.addTitle(title.get().stringValue());
     }
   }
-  
+
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
     List<Form> forms = new ArrayList<Form>();
-    
-    Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId, 
-        rdf.createIRI(TD.hasForm), null));
-    
+
+    Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId,
+      rdf.createIRI(TD.hasForm), null));
+
     for (Resource formId : formIdSet) {
-      Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, rdf.createIRI(HCTL.hasTarget), 
-          null));
-      
+      Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, rdf.createIRI(HCTL.hasTarget),
+        null));
+
       if (!targetOpt.isPresent()) {
         continue;
       }
-      
-      Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId, 
+
+      Optional<Literal> methodNameOpt = Optional.empty();
+      if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
+        System.out.println(targetOpt.toString());
+        methodNameOpt = Models.objectLiteral(model.filter(formId,
           rdf.createIRI(HTV.methodName), null));
-      
-      Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId, 
-          rdf.createIRI(HCTL.forContentType), null));
-      String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue() 
-          : "application/json";
-      
-      Optional<Literal> subprotocolOpt = Models.objectLiteral(model.filter(formId, 
-          rdf.createIRI(HCTL.forSubProtocol), null));
-      
-      Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType), 
-          null));
+      } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
+        System.out.println(targetOpt.toString());
+        methodNameOpt = Models.objectLiteral(model.filter(formId,
+          rdf.createIRI(COV.methodName), null));
+      } else {
+        throw new InvalidTDException("[" + affordanceType + "] Every form must follow the requirements of "
+          + "the Protocol Binding indicated by the URI scheme of its href member.");
+      }
+
+      Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId,
+        rdf.createIRI(HCTL.forContentType), null));
+      String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue()
+        : "application/json";
+
+      Optional<Literal> subprotocolOpt = Models.objectLiteral(model.filter(formId,
+        rdf.createIRI(HCTL.forSubProtocol), null));
+
+      Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType),
+        null));
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
-      
+
       String target = targetOpt.get().stringValue();
-      
+
       Form.Builder builder = new Form.Builder(target)
-          .setContentType(contentType)
-          .addOperationTypes(ops); 
-      
+        .setContentType(contentType)
+        .addOperationTypes(ops);
+
       if (methodNameOpt.isPresent()) {
         builder.setMethodName(methodNameOpt.get().stringValue());
       }
-      
+
       if (subprotocolOpt.isPresent()) {
         builder.addSubProtocol(subprotocolOpt.get().stringValue());
       }
-      
+
       forms.add(builder.build());
     }
-    
+
     if (forms.isEmpty()) {
       throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have "
-          + "at least one valid.");
+        + "at least one valid.");
     }
-    
+
     return forms;
   }
 }
