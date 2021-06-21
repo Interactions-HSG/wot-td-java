@@ -56,8 +56,8 @@ public class TDGraphReader {
    * Returns a ThingDescription object based on the path parameter that points to a file. Should the path be invalid
    * or if the file does not exist, an IOException is thrown.
    *
-   * @param path the location of the file that contains the thing description
-   * @param  format  the file's thing description
+   * @param path   the location of the file that contains the thing description
+   * @param format the file's thing description
    * @return the thing description
    */
   public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
