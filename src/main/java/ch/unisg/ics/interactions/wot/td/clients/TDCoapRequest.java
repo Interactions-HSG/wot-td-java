@@ -5,7 +5,6 @@ import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import com.google.gson.Gson;
-import org.apache.hc.core5.http.ParseException;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
@@ -20,6 +19,11 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Wrapper for constructing and executing a CoAP request based on a given <code>ThingDescription</code>.
+ * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
+ *
+ */
 public class TDCoapRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
@@ -133,7 +137,7 @@ public class TDCoapRequest {
    * @param arraySchema schema used for validating the payload and constructing the body of
    *                    the request
    * @param payload     the actual payload
-   * @return this <code>TDHttpRequest</code>
+   * @return this <code>TDCoapRequest</code>
    */
   public TDCoapRequest setArrayPayload(ArraySchema arraySchema, List<Object> payload) {
     if (arraySchema.validate(payload)) {
@@ -144,7 +148,7 @@ public class TDCoapRequest {
     return this;
   }
 
-  public String getPayloadAsString() throws ParseException, IOException {
+  public String getPayloadAsString()  {
     return request.getPayloadString();
   }
 
