@@ -23,32 +23,39 @@ public class TDCoapResponseTest {
   private static final String PREFIX = "coap://example.org/";
   private static final String USER_PAYLOAD = "{\"first_name\" : \"Andrei\", \"last_name\" : \"Ciortea\"}";
 
-  private CoapServer coapServer;
-  private int port;
+  private final CoapClient client = new CoapClient();
+
   private static String BASE_URL;
-  private static boolean serverRequested = false;
-  private static String requestPayload = null;
-  private static boolean returnErrorResponse = false;
-  private static String resourceURl = null;
+  private CoapServer server;
+
 
   @Before
   public void setUp() throws Exception {
-    this.port =  getFreePort();
-    this.coapServer = new CoapServer(NetworkConfig.createStandardWithoutFile(), port);
-    this.coapServer.add(new CoapResource("testNoResponsePayload") {
+    int port = getFreePort();
+    server = new CoapServer(NetworkConfig.createStandardWithoutFile(), port);
+    server.add(new CoapResource("testNoResponsePayload") {
 
       @Override
       public void handleGET(CoapExchange exchange) {
         exchange.respond(CoAP.ResponseCode.VALID);
       }
     });
+
+    server.add(new CoapResource("testBooleanResponsePayload") {
+
+      @Override
+      public void handleGET(CoapExchange exchange) {
+        exchange.respond(CoAP.ResponseCode.VALID, String.valueOf(false));
+      }
+    });
+
     BASE_URL = "coap://localhost:" + port;
-    coapServer.start();
+    server.start();
   }
 
   @After
   public void tearDown() throws Exception {
-    coapServer.stop();
+    server.stop();
   }
 
   @Test
@@ -57,13 +64,22 @@ public class TDCoapResponseTest {
     Request request = new Request(CoAP.Code.GET);
     request.setURI(BASE_URL + "/testNoResponsePayload");
 
-    CoapClient client = new CoapClient();
-    CoapResponse coapResponse = client.advanced(request);
-    Optional<String> payload = new TDCoapResponse(coapResponse).getPayload();
+    CoapResponse response = client.advanced(request);
+    Optional<String> payload = new TDCoapResponse(response).getPayload();
 
     assertFalse(payload.isPresent());
   }
 
+  @Test
+  public void testBooleanPayload() throws ConnectorException, IOException {
+    Request request = new Request(CoAP.Code.GET);
+    request.setURI(BASE_URL + "/testBooleanResponsePayload");
+
+    CoapResponse coapResponse = client.advanced(request);
+    Optional<String> payload = new TDCoapResponse(coapResponse).getPayload();
+
+    assertFalse(new TDCoapResponse(coapResponse).getPayloadAsBoolean());
+  }
 
   public static int getFreePort() throws IOException {
     ServerSocket serverSocket = new ServerSocket(0);
