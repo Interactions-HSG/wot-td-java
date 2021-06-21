@@ -93,13 +93,19 @@ public class TDCoapRequestTest {
     td = TDGraphReader.readFromString(ThingDescription.TDFormat.RDF_TURTLE, FORKLIFT_ROBOT_TD);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testNoDefaultMethodName(){
+    TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .addOperationType("http:/example.org#observeProperty").build(),
+      TD.invokeAction);
+  }
   @Test
   public void testToStringNoPayload() {
     TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")
       .addOperationType("POST")
       .addOperationType(TD.invokeAction).build(),
       TD.invokeAction);
-    System.out.println(request.toString());
+
     assertEquals("[TDCoapRequest] Method: POST, Target: coap://example.org/action, "
         + "{\"Uri-Host\":\"example.org\", \"Uri-Path\":\"action\", \"Content-Format\":\"application/json\"}"
       , request.toString());
