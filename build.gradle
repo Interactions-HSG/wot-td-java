@@ -1,11 +1,12 @@
 apply plugin: 'java-library'
 apply plugin: 'jacoco'
 apply plugin: 'maven-publish'
+apply plugin: 'idea'
 
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
   targetCompatibility = JavaVersion.VERSION_1_8
-  
+
   withJavadocJar()
   withSourcesJar()
 }
@@ -19,6 +20,7 @@ repositories {
 dependencies {
   implementation 'org.apache.httpcomponents.client5:httpclient5:5.1'
   implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.1'
+  implementation 'org.eclipse.californium:californium-core:2.6.3'
   implementation 'com.google.code.gson:gson:2.8.7'
   implementation 'org.eclipse.rdf4j:rdf4j-runtime:3.7.0'
   implementation 'org.slf4j:slf4j-api:2.0.0-alpha1'
