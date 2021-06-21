@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -196,7 +197,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testWriteOnePropertyCoapBinding() throws RDFParseException, RDFHandlerException,
+  public void testWriteOnePropertyWithCoapBinding() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
@@ -219,7 +220,7 @@ public class TDGraphWriterTest {
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
       new Form.Builder("coap://example.org/count")
         .setMethodName("GET")
-        .addOperationType("https://www.w3.org/2019/wot/td#readProperty")
+        .addOperationType(TD.readProperty)
         .build())
       .addSemanticType("http://iotschema.org/MyProperty")
       .addName("my_property")
