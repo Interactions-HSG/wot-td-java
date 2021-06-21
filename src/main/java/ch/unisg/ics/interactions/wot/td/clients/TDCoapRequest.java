@@ -49,7 +49,7 @@ public class TDCoapRequest {
   public TDCoapResponse execute() throws IOException, ConnectorException {
     CoapClient client = new CoapClient();
     CoapResponse response = client.advanced(request);
-    return new TDCoapResponse((CoapResponse) response);
+    return new TDCoapResponse(response);
   }
 
   public TDCoapRequest addOption(String key, String value) {
