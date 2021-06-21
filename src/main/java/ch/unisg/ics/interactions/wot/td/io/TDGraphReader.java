@@ -314,16 +314,14 @@ public class TDGraphReader {
 
       Optional<Literal> methodNameOpt = Optional.empty();
       if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
-        System.out.println(targetOpt.toString());
         methodNameOpt = Models.objectLiteral(model.filter(formId,
           rdf.createIRI(HTV.methodName), null));
       } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
-        System.out.println(targetOpt.toString());
         methodNameOpt = Models.objectLiteral(model.filter(formId,
           rdf.createIRI(COV.methodName), null));
       } else {
-        throw new InvalidTDException("[" + affordanceType + "] Every form must follow the requirements of "
-          + "the Protocol Binding indicated by the URI scheme of its href member.");
+        throw new InvalidTDException("[" + affordanceType + "] Invalid or unsupported protocol "
+          + "binding for the URI scheme of href member.");
       }
 
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId,

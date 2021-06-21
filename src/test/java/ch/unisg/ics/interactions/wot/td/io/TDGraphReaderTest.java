@@ -338,7 +338,7 @@ public class TDGraphReaderTest {
   }
 
   @Test
-  public void testReadPropertyWithHttpAndCoapBindings() {
+  public void testReadFormWithHttpAndCoapBindings() {
     String testTD =
         "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
@@ -380,13 +380,42 @@ public class TDGraphReaderTest {
 
     Form formHTTP = property.getFirstFormForOperationType(TD.readProperty).get();
     Form formCoAP = property.getFirstFormForOperationType(TD.writeProperty).get();
-    System.out.println(formHTTP.getTarget());
 
     assertEquals("GET", formHTTP.getMethodName().get());
     assertEquals("http://example.org/property", formHTTP.getTarget());
 
     assertEquals("PUT", formCoAP.getMethodName().get());
     assertEquals("coap://example.org/property", formCoAP.getTarget());
+  }
+
+  @Test(expected = InvalidTDException.class)
+  public void testFormWithInvalidProtocolBinding() {
+    String testTD =
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <mqtt://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    new TDGraphReader(RDFFormat.TURTLE, testTD).readProperties();
+
   }
 
   @Test
