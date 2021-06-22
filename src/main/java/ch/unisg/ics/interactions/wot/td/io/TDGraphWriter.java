@@ -1,21 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import ch.unisg.ics.interactions.wot.td.vocabularies.*;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.rio.RDFFormat;
-
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
@@ -23,6 +7,16 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.*;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.rio.RDFFormat;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A writer for serializing TDs as RDF graphs. Provides a fluent API for adding prefix bindings to be
@@ -215,9 +209,14 @@ public class TDGraphWriter {
         }
       }
 
-      Optional<String> subprotocol = form.getSubProtocol();
-      if (subprotocol.isPresent()) {
-        graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subprotocol.get());
+      Optional<String> subProt = form.getSubProtocol();
+      if (subProt.isPresent()) {
+        try {
+          IRI subProtIri = rdf.createIRI(subProt.get());
+          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtIri);
+        } catch (IllegalArgumentException e) {
+          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProt.get());
+        }
       }
     }
   }

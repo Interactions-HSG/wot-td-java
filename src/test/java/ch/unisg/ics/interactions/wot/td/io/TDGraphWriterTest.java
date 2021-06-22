@@ -1,12 +1,17 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -22,17 +27,12 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 public class TDGraphWriterTest {
   private static final String THING_TITLE = "My Thing";
@@ -259,6 +259,42 @@ public class TDGraphWriterTest {
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
       new Form.Builder("http://example.org/count")
         .addSubProtocol("websub")
+        .build())
+      .addObserve()
+      .build();
+
+    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(Arrays.asList(property)),
+      new ArrayList<ActionAffordance>(Arrays.asList()));
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWritePropertySubprotocolIRI() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            cov:methodName \"GET\" ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:observeProperty;\n" +
+      "            hctl:forSubProtocol cov:observe;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+
+    PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
+      new Form.Builder("coap://example.org/count")
+        .addSubProtocol(COV.observe)
+        .setMethodName("GET")
+        .addOperationType(TD.observeProperty)
         .build())
       .addObserve()
       .build();
