@@ -17,6 +17,10 @@ gradle-app.setting
 
 # Covers JetBrains IDEs
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+.idea/**/misc.xml
+.idea/**/vcs.xml
+.idea/**/encodings.xml
+
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
@@ -46,6 +50,7 @@ gradle-app.setting
 .idea/modules.xml
 .idea/*.iml
 .idea/modules
+.idea/gradle.xml
 *.iml
 *.ipr
 
