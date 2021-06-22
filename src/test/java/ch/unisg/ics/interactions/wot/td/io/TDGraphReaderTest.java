@@ -1,19 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.junit.Test;
-
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
@@ -26,8 +12,18 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
 
 public class TDGraphReaderTest {
 
@@ -369,7 +365,6 @@ public class TDGraphReaderTest {
         "        ] ;\n" +
         "    ] .";
 
-    System.out.println(testTD);
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
     List<PropertyAffordance> properties = reader.readProperties();
@@ -415,6 +410,50 @@ public class TDGraphReaderTest {
         "    ] .";
 
     new TDGraphReader(RDFFormat.TURTLE, testTD).readProperties();
+
+  }
+
+  @Test
+  public void testReadSubProtocolStringAndIRI() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <http://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "            hctl:forSubProtocol \"websub\";\n" +
+        "        ] ;\n" +
+        "        td:hasForm [\n" +
+        "            cov:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <coap://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:observeProperty;\n" +
+        "            hctl:forSubProtocol cov:observe;\n" +
+        "        ] ;\n" +
+        "    ] .";
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    PropertyAffordance property = reader.readProperties().get(0);
+    Form formHTTP = property.getFirstFormForOperationType(TD.readProperty).get();
+    Form formCoAP = property.getFirstFormForOperationType(TD.observeProperty).get();
+
+    assertEquals(COV.observe, formCoAP.getSubProtocol().get());
+    assertEquals("websub", formHTTP.getSubProtocol().get());
 
   }
 

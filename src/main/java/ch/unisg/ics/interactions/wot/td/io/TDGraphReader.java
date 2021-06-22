@@ -1,30 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import ch.unisg.ics.interactions.wot.td.vocabularies.*;
-import org.apache.hc.client5.http.fluent.Request;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
@@ -33,6 +8,22 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.*;
+import org.apache.hc.client5.http.fluent.Request;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
@@ -329,7 +320,7 @@ public class TDGraphReader {
       String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue()
         : "application/json";
 
-      Optional<Literal> subprotocolOpt = Models.objectLiteral(model.filter(formId,
+      Optional<String> subprotocolOpt = Models.objectString(model.filter(formId,
         rdf.createIRI(HCTL.forSubProtocol), null));
 
       Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType),
@@ -347,7 +338,7 @@ public class TDGraphReader {
       }
 
       if (subprotocolOpt.isPresent()) {
-        builder.addSubProtocol(subprotocolOpt.get().stringValue());
+        builder.addSubProtocol(subprotocolOpt.get());
       }
 
       forms.add(builder.build());
