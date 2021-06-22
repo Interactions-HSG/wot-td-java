@@ -51,9 +51,14 @@ public class TDCoapRequest {
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
   }
 
-  public TDCoapResponse execute() throws IOException, ConnectorException {
+  public TDCoapResponse execute() throws IOException {
     CoapClient client = new CoapClient();
-    CoapResponse response = client.advanced(request);
+    CoapResponse response = null;
+    try {
+      response = client.advanced(request);
+    } catch (ConnectorException e) {
+      throw new IOException(e.getMessage());
+    }
     return new TDCoapResponse(response);
   }
 
