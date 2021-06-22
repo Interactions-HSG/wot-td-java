@@ -184,7 +184,7 @@ public class TDCoapRequest {
     return builder.toString();
   }
 
-  Request getRequest() {
+  public Request getRequest() {
     return this.request;
   }
 
