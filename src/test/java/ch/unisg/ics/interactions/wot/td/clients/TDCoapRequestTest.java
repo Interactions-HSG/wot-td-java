@@ -6,6 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.*;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
@@ -95,10 +96,22 @@ public class TDCoapRequestTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNoDefaultMethodName(){
-    TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .addOperationType("http:/example.org#observeProperty").build(),
+    new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .addOperationType("http://example.org#observeProperty").build(),
       TD.invokeAction);
   }
+
+  @Test
+  public void testObserveOption(){
+    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .setMethodName("GET")
+      .addOperationType(TD.observeProperty)
+      .addSubProtocol(COV.observe).build(),
+      TD.observeProperty);
+
+    assertTrue(coapRequest.getRequest().getOptions().hasObserve());
+  }
+
   @Test
   public void testToStringNoPayload() {
     TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")

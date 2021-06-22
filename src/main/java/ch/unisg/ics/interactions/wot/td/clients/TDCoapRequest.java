@@ -4,6 +4,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import com.google.gson.Gson;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -41,6 +42,10 @@ public class TDCoapRequest {
     } else {
       throw new IllegalArgumentException("No default binding for the given operation type: "
         + operationType);
+    }
+
+    if (form.getSubProtocol().isPresent() && form.getSubProtocol().get().equals(COV.observe)){
+      this.request.getOptions().setObserve(1);
     }
 
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));

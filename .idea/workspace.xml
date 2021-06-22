@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:feature" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:dependabot" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:gradle" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:feature" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:feature" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="41a84ea3-1a77-4f95-aed0-14a730325967" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/ch/unisg/ics/interactions/wot/td/clients/TDCoapRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ch/unisg/ics/interactions/wot/td/clients/TDCoapRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ch/unisg/ics/interactions/wot/td/vocabularies/COV.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ch/unisg/ics/interactions/wot/td/vocabularies/COV.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ch/unisg/ics/interactions/wot/td/vocabularies/TD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ch/unisg/ics/interactions/wot/td/vocabularies/TD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ch/unisg/ics/interactions/wot/td/clients/TDCoapRequestTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ch/unisg/ics/interactions/wot/td/clients/TDCoapRequestTest.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
+  <component name="EditorConfigPreviewManager">
+    <editorConfig file="$PROJECT_DIR$/.editorconfig" previewFile="$PROJECT_DIR$/src/test/java/ch/unisg/ics/interactions/wot/td/io/TDGraphReaderTest.java" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="wot-td-java" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1u1SKOxuA8XmsZPpooPelIzwJw3" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../example-tds" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
+    <property name="show.unlinked.gradle.project.popup" value="true" />
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="gradle --rerun-tasks" />
+      <command value="gradle --refresh-dependencies" />
+      <command value="gradle idea" />
+    </option>
+  </component>
+  <component name="RunManager" selected="Gradle.TDCoapRequestTest.testObserveOption">
+    <configuration name="TDCoapRequestTest.testObserveOption" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;ch.unisg.ics.interactions.wot.td.clients.TDCoapRequestTest.testObserveOption&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="TDCoapResponseTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;ch.unisg.ics.interactions.wot.td.clients.TDCoapResponseTest&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="TDCoapResponseTest.testNoPayload" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;ch.unisg.ics.interactions.wot.td.clients.TDCoapResponseTest.testNoPayload&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Tests in 'ch.unisg.ics.interactions.wot.td'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;ch.unisg.ics.interactions.wot.td.*&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Tests in 'wot-td-java.test'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests *" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>false</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.TDCoapRequestTest.testObserveOption" />
+        <item itemvalue="Gradle.Tests in 'ch.unisg.ics.interactions.wot.td'" />
+        <item itemvalue="Gradle.TDCoapResponseTest.testNoPayload" />
+        <item itemvalue="Gradle.Tests in 'wot-td-java.test'" />
+        <item itemvalue="Gradle.TDCoapResponseTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="41a84ea3-1a77-4f95-aed0-14a730325967" name="Default Changelist" comment="" />
+      <created>1623831537440</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1623831537440</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="2656" y="463" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog" timestamp="1624282354462">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="2656" y="463" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624282354462" />
+    <state x="2013" y="100" width="1534" height="1217" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1624277561630">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="2013" y="100" width="1534" height="1217" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624277561630" />
+    <state x="3291" y="211" key="#com.intellij.ide.util.MemberChooser" timestamp="1624288399000">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="-1155" y="231" key="#com.intellij.ide.util.MemberChooser/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1623858845649" />
+    <state x="3291" y="211" key="#com.intellij.ide.util.MemberChooser/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624288399000" />
+    <state x="510" y="103" key="#com.intellij.ide.util.MemberChooser/0.0.1280.689@0.0.1280.689" timestamp="1623869441575" />
+    <state x="-1191" y="394" width="462" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes" timestamp="1624344354591">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state x="-1191" y="394" width="462" height="268" key="#com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesDialog.classes/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624344354591" />
+    <state x="2663" y="452" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1624288649229">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="2663" y="452" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624288649229" />
+    <state x="-1563" y="343" width="728" height="490" key="FileChooserDialogImpl" timestamp="1624346922692">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state x="-1563" y="343" width="728" height="490" key="FileChooserDialogImpl/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624346922692" />
+    <state x="2560" y="460" key="FileChooserDialogImpl/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624283497699" />
+    <state width="1877" height="336" key="GridCell.Tab.0.bottom" timestamp="1624349973768">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state width="1877" height="336" key="GridCell.Tab.0.bottom/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624349973768" />
+    <state width="1960" height="398" key="GridCell.Tab.0.bottom/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624298259698" />
+    <state width="1222" height="195" key="GridCell.Tab.0.bottom/0.0.1280.689@0.0.1280.689" timestamp="1624308774422" />
+    <state width="1877" height="336" key="GridCell.Tab.0.center" timestamp="1624349973768">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state width="1877" height="336" key="GridCell.Tab.0.center/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624349973768" />
+    <state width="1960" height="398" key="GridCell.Tab.0.center/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624298259698" />
+    <state width="1222" height="195" key="GridCell.Tab.0.center/0.0.1280.689@0.0.1280.689" timestamp="1624308774422" />
+    <state width="1877" height="336" key="GridCell.Tab.0.left" timestamp="1624349973767">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state width="1877" height="336" key="GridCell.Tab.0.left/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624349973767" />
+    <state width="1960" height="398" key="GridCell.Tab.0.left/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624298259698" />
+    <state width="1222" height="195" key="GridCell.Tab.0.left/0.0.1280.689@0.0.1280.689" timestamp="1624308774422" />
+    <state width="1877" height="336" key="GridCell.Tab.0.right" timestamp="1624349973768">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state width="1877" height="336" key="GridCell.Tab.0.right/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624349973768" />
+    <state width="1960" height="398" key="GridCell.Tab.0.right/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624298259698" />
+    <state width="1222" height="195" key="GridCell.Tab.0.right/0.0.1280.689@0.0.1280.689" timestamp="1624308774422" />
+    <state width="1674" height="495" key="GridCell.Tab.1.bottom" timestamp="1624283247585">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state width="1674" height="495" key="GridCell.Tab.1.bottom/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624283247585" />
+    <state width="1674" height="495" key="GridCell.Tab.1.center" timestamp="1624283247585">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state width="1674" height="495" key="GridCell.Tab.1.center/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624283247585" />
+    <state width="1674" height="495" key="GridCell.Tab.1.left" timestamp="1624283247585">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state width="1674" height="495" key="GridCell.Tab.1.left/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624283247585" />
+    <state width="1674" height="495" key="GridCell.Tab.1.right" timestamp="1624283247585">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state width="1674" height="495" key="GridCell.Tab.1.right/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624283247585" />
+    <state x="2746" y="228" key="SettingsEditor" timestamp="1624282710105">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="-1459" y="170" key="SettingsEditor/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1623832972788" />
+    <state x="2746" y="228" key="SettingsEditor/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624282710105" />
+    <state x="2589" y="622" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1624274648832">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="2589" y="622" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624274648832" />
+    <state x="-1141" y="350" key="export.test.results" timestamp="1623833079405">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state x="-1141" y="350" key="export.test.results/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1623833079405" />
+    <state x="3113" y="346" width="1052" height="718" key="find.popup" timestamp="1624297402359">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="-1254" y="258" width="587" height="534" key="find.popup/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1623841774883" />
+    <state x="3113" y="346" width="1052" height="718" key="find.popup/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624297402359" />
+    <state x="535" y="185" key="refactoring.ChangeSignatureDialog" timestamp="1624303099039">
+      <screen x="0" y="0" width="1280" height="689" />
+    </state>
+    <state x="-1117" y="282" key="refactoring.ChangeSignatureDialog/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1623841405234" />
+    <state x="535" y="185" key="refactoring.ChangeSignatureDialog/0.0.1280.689@0.0.1280.689" timestamp="1624303099039" />
+    <state x="-1551" y="251" width="672" height="505" key="run.anything.popup" timestamp="1624349774209">
+      <screen x="-1920" y="0" width="1920" height="1050" />
+    </state>
+    <state x="-1551" y="251" width="672" height="505" key="run.anything.popup/0.0.1280.689/-1920.0.1920.1050@-1920.0.1920.1050" timestamp="1624349774209" />
+    <state x="2582" y="337" width="672" height="677" key="run.anything.popup/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624284250551" />
+    <state x="2443" y="323" width="672" height="678" key="search.everywhere.popup" timestamp="1624289739745">
+      <screen x="1920" y="0" width="3440" height="1410" />
+    </state>
+    <state x="2443" y="323" width="672" height="678" key="search.everywhere.popup/0.0.1280.689/1920.0.3440.1410@1920.0.3440.1410" timestamp="1624289739745" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/wot_td_java$TDGraphWriterTest.ic" NAME="TDGraphWriterTest Coverage Results" MODIFIED="1624269549318" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/wot_td_java$TDCoapRequestTest.ic" NAME="TDCoapRequestTest Coverage Results" MODIFIED="1624295718923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/wot_td_java$Tests_in__ch_unisg_ics_interactions_wot_td_.ic" NAME="Tests in 'ch.unisg.ics.interactions.wot.td' Coverage Results" MODIFIED="1624344707418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/wot_td_java$TDHttpRequestTest.ic" NAME="TDHttpRequestTest Coverage Results" MODIFIED="1624292195223" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/wot_td_java$Tests_in__wot_td_java_test_.ic" NAME="Tests in 'wot-td-java.test' Coverage Results" MODIFIED="1624344340753" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/wot_td_java$TDCoapResponseTest.ic" NAME="TDCoapResponseTest Coverage Results" MODIFIED="1624344318425" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
+</project>

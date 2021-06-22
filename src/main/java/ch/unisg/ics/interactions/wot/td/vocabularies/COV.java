@@ -7,6 +7,7 @@ public final class COV {
   public static final String PREFIX = "http://www.example.org/coap-binding#";
 
   public static final String methodName = PREFIX + "methodName";
+  public static final String observe = PREFIX + "observe";
 
   public static IRI createIRI(String fragment) {
     return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
