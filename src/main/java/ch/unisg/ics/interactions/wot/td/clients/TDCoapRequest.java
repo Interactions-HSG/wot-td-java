@@ -7,6 +7,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import com.google.gson.Gson;
 import org.eclipse.californium.core.CoapClient;
+import org.eclipse.californium.core.CoapHandler;
+import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
@@ -23,7 +25,6 @@ import java.util.logging.Logger;
 /**
  * Wrapper for constructing and executing a CoAP request based on a given <code>ThingDescription</code>.
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
- *
  */
 public class TDCoapRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
@@ -44,7 +45,7 @@ public class TDCoapRequest {
         + operationType);
     }
 
-    if (form.getSubProtocol().isPresent() && form.getSubProtocol().get().equals(COV.observe)){
+    if (form.getSubProtocol().isPresent() && form.getSubProtocol().get().equals(COV.observe)) {
       this.request.getOptions().setObserve(1);
     }
 
@@ -54,12 +55,28 @@ public class TDCoapRequest {
   public TDCoapResponse execute() throws IOException {
     CoapClient client = new CoapClient();
     CoapResponse response = null;
+
     try {
       response = client.advanced(request);
     } catch (ConnectorException e) {
       throw new IOException(e.getMessage());
     }
     return new TDCoapResponse(response);
+  }
+
+  public void execute(TDCoAPHandler handler) throws IOException {
+    CoapClient client = new CoapClient();
+    client.advanced(handler, request);
+  }
+
+  public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
+    if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe);
+    }
+
+    CoapClient client = new CoapClient(form.getTarget());
+    CoapObserveRelation relation = client.observe((CoapHandler) handler);
+    return new TDCoapObserveRelation(relation);
   }
 
   public TDCoapRequest addOption(String key, String value) {
@@ -158,7 +175,7 @@ public class TDCoapRequest {
     return this;
   }
 
-  public String getPayloadAsString()  {
+  public String getPayloadAsString() {
     return request.getPayloadString();
   }
 

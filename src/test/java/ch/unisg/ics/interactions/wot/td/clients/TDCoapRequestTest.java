@@ -95,14 +95,14 @@ public class TDCoapRequestTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testNoDefaultMethodName(){
+  public void testNoDefaultMethodName() {
     new TDCoapRequest(new Form.Builder("coap://example.org/action")
       .addOperationType("http://example.org#observeProperty").build(),
       TD.invokeAction);
   }
 
   @Test
-  public void testObserveOption(){
+  public void testObserveOption() {
     TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
       .setMethodName("GET")
       .addOperationType(TD.observeProperty)
