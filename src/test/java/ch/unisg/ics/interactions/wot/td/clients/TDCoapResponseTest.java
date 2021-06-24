@@ -25,12 +25,17 @@ import static org.junit.Assert.*;
 public class TDCoapResponseTest {
   private static final String PREFIX = "http://example.org/";
   private static final String USER_PAYLOAD = "{\"first_name\" : \"Andrei\", \"last_name\" : \"Ciortea\"}";
+  private static String BASE_URL;
 
   private final CoapClient client = new CoapClient();
-
-  private static String BASE_URL;
   private CoapServer server;
 
+  static int getFreePort() throws IOException {
+    ServerSocket serverSocket = new ServerSocket(0);
+    int port = serverSocket.getLocalPort();
+    serverSocket.close();
+    return port;
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -296,12 +301,4 @@ public class TDCoapResponseTest {
     request.setURI(BASE_URL + resourceUrl);
     return client.advanced(request);
   }
-
-  private static int getFreePort() throws IOException {
-    ServerSocket serverSocket = new ServerSocket(0);
-    int port = serverSocket.getLocalPort();
-    serverSocket.close();
-    return port;
-  }
-
 }
