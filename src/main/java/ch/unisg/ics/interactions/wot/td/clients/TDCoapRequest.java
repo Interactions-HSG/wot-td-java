@@ -7,7 +7,6 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import com.google.gson.Gson;
 import org.eclipse.californium.core.CoapClient;
-import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
@@ -66,7 +65,7 @@ public class TDCoapRequest {
 
   public void execute(TDCoAPHandler handler) throws IOException {
     CoapClient client = new CoapClient();
-    client.advanced(handler, request);
+    client.advanced(handler.getCoapHandler(), request);
   }
 
   public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
@@ -75,7 +74,7 @@ public class TDCoapRequest {
     }
 
     CoapClient client = new CoapClient(form.getTarget());
-    CoapObserveRelation relation = client.observe((CoapHandler) handler);
+    CoapObserveRelation relation = client.observe(handler.getCoapHandler());
     return new TDCoapObserveRelation(relation);
   }
 
