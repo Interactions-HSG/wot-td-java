@@ -6,15 +6,10 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import com.google.gson.Gson;
-import org.eclipse.californium.core.CoapClient;
-import org.eclipse.californium.core.CoapObserveRelation;
-import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
-import org.eclipse.californium.elements.exception.ConnectorException;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +24,7 @@ public class TDCoapRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
   private final Form form;
-  private Request request;
+  private final Request request;
 
   public TDCoapRequest(Form form, String operationType) {
     this.form = form;
@@ -52,80 +47,47 @@ public class TDCoapRequest {
   }
 
   /**
-   * Sends an advanced synchronous CoAP request.
+   * Executes a synchronous CoAP request.
    *
-   * @return a {@link ch.unisg.ics.interactions.wot.td.clients.TDCoapResponse}
-   * @throws IOException if any issue occurred
+   * @return the CoAP response to the request
+   * @throws InterruptedException if any issue occurred
    */
-  public TDCoapResponse execute() throws IOException {
-    CoapClient client = new CoapClient();
-    CoapResponse response = null;
-
-    try {
-      response = client.advanced(request);
-    } catch (ConnectorException e) {
-      throw new IOException(e.getMessage());
-    }
-    return new TDCoapResponse(response);
+  public TDCoapResponse executeSync() throws InterruptedException {
+    Request coapRequest = request.send();
+    return new TDCoapResponse(coapRequest.waitForResponse());
   }
 
   /**
-   * Sends an advanced asynchronous CoAP request and invokes the specified
-   * <code>TDCoAPHandler</code> each time a notification arrives.
+   * Executes an asynchronous CoAP request and invokes the specified
+   * observer {@link TDCoapObserver} each time a notification arrives.
    *
-   * @param handler the Response handler
+   * @throws RuntimeException if the list of observers for the request is empty
    */
-  public void execute(TDCoAPHandler handler) {
-    CoapClient client = new CoapClient();
-    client.advanced(handler.getCoapHandler(), request);
+  public void executeAsync() {
+    if (request.getMessageObservers().isEmpty()) {
+      throw new RuntimeException("No observer found for the asynchronous request.");
+    }
+    request.send();
   }
 
   /**
-   * Sends an asynchronous observe CoAP request and invokes the specified
-   * <code>TDCoAPHandler</code> each time a notification arrives.
+   * Adds the specified observer. If an asynchronous request is executed with
+   * {@link #executeAsync()}, the observer is invoked each time a notification
+   * arrives.
    *
-   * @param handler the CoAP Response handler
-   * @return the CoAP observe relation
-   * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
+   * @param observer the observer
    */
-  public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
-    // Exception needs be removed if it imposes an additional constraint
-    // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
-    if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
-    }
-
-    CoapClient client = new CoapClient(form.getTarget());
-    request.setObserve();
-    CoapObserveRelation relation = client.observe(request, handler.getCoapHandler());
-    return new TDCoapObserveRelation(relation);
+  public void addObserver(TDCoapObserver observer) {
+    request.addMessageObserver(observer.getMessageObserverAdapter());
   }
 
   /**
-   * Sends a synchronous observe request and waits until it has been established
-   * whereupon the specified CoAP handler is invoked when a notification arrives.
+   * Removes the specified observer.
    *
-   * @param handler the CoAP Response handler
-   * @return the CoAP observe relation
-   * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
-   * @throws IOException              if any other issue occurred
+   * @param observer the observer
    */
-  public TDCoapObserveRelation establishRelationAndWait(TDCoAPHandler handler) throws IOException {
-    // Exception needs be removed if it imposes an additional constraint
-    // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
-    if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
-    }
-
-    CoapClient client = new CoapClient(form.getTarget());
-    request.setObserve();
-    CoapObserveRelation relation = null;
-    try {
-      relation = client.observeAndWait(request, handler.getCoapHandler());
-    } catch (ConnectorException e) {
-      throw new IOException(e.getMessage());
-    }
-    return new TDCoapObserveRelation(relation);
+  public void removeObserver(TDCoapObserver observer) {
+    request.removeMessageObserver(observer.getMessageObserverAdapter());
   }
 
   public TDCoapRequest addOption(String key, String value) {
