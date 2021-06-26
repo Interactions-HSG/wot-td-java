@@ -145,7 +145,7 @@ public class TDCoapResponseTest {
   @Test
   public void testNoPayload() throws ConnectorException, IOException {
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testNoResponsePayload");
-    TDCoapResponse coapResponse = new TDCoapResponse(response.advanced());
+    TDCoapResponse coapResponse = new TDCoapResponse(response);
     Optional<String> payload = coapResponse.getPayload();
 
     assertEquals("VALID", coapResponse.getResponseCode());
@@ -156,32 +156,32 @@ public class TDCoapResponseTest {
   @Test
   public void testBooleanPayload() throws ConnectorException, IOException {
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testBooleanResponsePayload");
-    assertFalse(new TDCoapResponse(response.advanced()).getPayloadAsBoolean());
+    assertFalse(new TDCoapResponse(response).getPayloadAsBoolean());
   }
 
   @Test
   public void testStringPayload() throws ConnectorException, IOException {
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testStringResponsePayload");
-    assertEquals("test", new TDCoapResponse(response.advanced()).getPayloadAsString());
+    assertEquals("test", new TDCoapResponse(response).getPayloadAsString());
   }
 
   @Test
   public void testIntegerPayload() throws ConnectorException, IOException {
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testIntegerResponsePayload");
-    assertEquals(101, new TDCoapResponse(response.advanced()).getPayloadAsInteger().intValue());
+    assertEquals(101, new TDCoapResponse(response).getPayloadAsInteger().intValue());
   }
 
   @Test
   public void testDoublePayload() throws ConnectorException, IOException {
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testDoubleResponsePayload");
-    assertEquals(101.005, new TDCoapResponse(response.advanced()).getPayloadAsDouble().doubleValue(), 0.001);
+    assertEquals(101.005, new TDCoapResponse(response).getPayloadAsDouble().doubleValue(), 0.001);
   }
 
   @Test
   public void testObjectPayload() throws ConnectorException, IOException {
     ObjectSchema schema = TDCoapRequestTest.USER_SCHEMA;
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testObjectResponsePayload");
-    Map<String, Object> payload = new TDCoapResponse(response.advanced()).getPayloadAsObject(schema);
+    Map<String, Object> payload = new TDCoapResponse(response).getPayloadAsObject(schema);
 
     assertEquals(2, payload.size());
     assertEquals("Andrei", payload.get(PREFIX + "FirstName"));
@@ -192,7 +192,7 @@ public class TDCoapResponseTest {
   public void testObjectRequiredPayload() throws ConnectorException, IOException {
     ObjectSchema schema = TDCoapRequestTest.USER_SCHEMA;
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testObjectRequiredResponsePayload");
-    new TDCoapResponse(response.advanced()).getPayloadAsObject(schema);
+    new TDCoapResponse(response).getPayloadAsObject(schema);
   }
 
   @Test
@@ -207,7 +207,7 @@ public class TDCoapResponseTest {
       .build();
 
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testNestedObjectResponsePayload");
-    Map<String, Object> payload = new TDCoapResponse(response.advanced()).getPayloadAsObject(schema);
+    Map<String, Object> payload = new TDCoapResponse(response).getPayloadAsObject(schema);
     assertEquals(2, payload.size());
     assertEquals(1, payload.get(prefix + "Count"));
 
@@ -230,7 +230,7 @@ public class TDCoapResponseTest {
       .build();
 
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testArrayResponsePayload");
-    List<Object> payload = new TDCoapResponse(response.advanced()).getPayloadAsArray(schema);
+    List<Object> payload = new TDCoapResponse(response).getPayloadAsArray(schema);
     assertEquals(5, payload.size());
     assertTrue(payload.contains("my_string"));
     assertTrue(payload.contains(1.5));
@@ -247,7 +247,7 @@ public class TDCoapResponseTest {
       .build();
 
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testIntegerArrayResponsePayload");
-    List<Object> payload = new TDCoapResponse(response.advanced()).getPayloadAsArray(schema);
+    List<Object> payload = new TDCoapResponse(response).getPayloadAsArray(schema);
     assertEquals(3, payload.size());
     assertTrue(payload.contains(1));
     assertTrue(payload.contains(2));
@@ -263,7 +263,7 @@ public class TDCoapResponseTest {
       .build();
 
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testObjectArrayResponsePayload");
-    List<Object> payload = new TDCoapResponse(response.advanced()).getPayloadAsArray(schema);
+    List<Object> payload = new TDCoapResponse(response).getPayloadAsArray(schema);
     assertEquals(1, payload.size());
 
     @SuppressWarnings("unchecked")
@@ -281,7 +281,7 @@ public class TDCoapResponseTest {
       .build();
 
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testIntegerArrayResponsePayload");
-    new TDCoapResponse(response.advanced()).getPayloadAsArray(schema);
+    new TDCoapResponse(response).getPayloadAsArray(schema);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -293,7 +293,7 @@ public class TDCoapResponseTest {
       .build();
 
     CoapResponse response = makeRequest(CoAP.Code.GET, "/testIntegerArrayResponsePayload");
-    new TDCoapResponse(response.advanced()).getPayloadAsArray(schema);
+    new TDCoapResponse(response).getPayloadAsArray(schema);
   }
 
   private CoapResponse makeRequest(CoAP.Code code, String resourceUrl) throws ConnectorException, IOException {

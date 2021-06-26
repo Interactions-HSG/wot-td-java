@@ -6,7 +6,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.CoapResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -21,17 +21,17 @@ import java.util.logging.Logger;
 public class TDCoapResponse {
   private final static Logger LOGGER = Logger.getLogger(TDCoapResponse.class.getCanonicalName());
 
-  private final Response response;
-  private final Optional<String> payload;
+  private CoapResponse response;
+  private Optional<String> payload;
 
-  public TDCoapResponse(Response response) {
+  public TDCoapResponse(CoapResponse response) {
 
     this.response = response;
 
     if (response.getPayload() == null) {
       this.payload = Optional.empty();
     } else {
-      this.payload = Optional.ofNullable(response.getPayloadString());
+      this.payload = Optional.ofNullable(response.getResponseText());
     }
   }
 
