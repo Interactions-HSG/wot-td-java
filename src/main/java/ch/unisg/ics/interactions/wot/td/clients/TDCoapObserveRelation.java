@@ -21,4 +21,8 @@ public class TDCoapObserveRelation {
   public void proactiveCancel() {
     observeRelation.proactiveCancel();
   }
+
+  public void reactiveCancel() {
+    observeRelation.reactiveCancel();
+  }
 }
