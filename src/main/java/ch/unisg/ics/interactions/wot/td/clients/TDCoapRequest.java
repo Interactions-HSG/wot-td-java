@@ -45,12 +45,18 @@ public class TDCoapRequest {
     }
 
     if (form.getSubProtocol().isPresent() && form.getSubProtocol().get().equals(COV.observe)) {
-      this.request.getOptions().setObserve(1);
+      this.request.setObserve();
     }
 
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
   }
 
+  /**
+   * Sends an advanced synchronous CoAP request.
+   *
+   * @return a {@link ch.unisg.ics.interactions.wot.td.clients.TDCoapResponse}
+   * @throws IOException if any issue occurred
+   */
   public TDCoapResponse execute() throws IOException {
     CoapClient client = new CoapClient();
     CoapResponse response = null;
@@ -63,18 +69,62 @@ public class TDCoapRequest {
     return new TDCoapResponse(response);
   }
 
-  public void execute(TDCoAPHandler handler) throws IOException {
+  /**
+   * Sends an advanced asynchronous CoAP request and invokes the specified
+   * <code>TDCoAPHandler</code> each time a notification arrives.
+   *
+   * @param handler the Response handler
+   */
+  public void execute(TDCoAPHandler handler) {
     CoapClient client = new CoapClient();
     client.advanced(handler.getCoapHandler(), request);
   }
 
+  /**
+   * Sends an asynchronous observe CoAP request and invokes the specified
+   * <code>TDCoAPHandler</code> each time a notification arrives.
+   *
+   * @param handler the CoAP Response handler
+   * @return the CoAP observe relation
+   * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
+   */
   public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
+    // Exception needs be removed if it imposes an additional constraint
+    // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
     if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe);
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
     }
 
     CoapClient client = new CoapClient(form.getTarget());
-    CoapObserveRelation relation = client.observe(handler.getCoapHandler());
+    request.setObserve();
+    CoapObserveRelation relation = client.observe(request, handler.getCoapHandler());
+    return new TDCoapObserveRelation(relation);
+  }
+
+  /**
+   * Sends a synchronous observe request and waits until it has been established
+   * whereupon the specified CoAP handler is invoked when a notification arrives.
+   *
+   * @param handler the CoAP Response handler
+   * @return the CoAP observe relation
+   * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
+   * @throws IOException              if any other issue occurred
+   */
+  public TDCoapObserveRelation establishRelationAndWait(TDCoAPHandler handler) throws IOException {
+    // Exception needs be removed if it imposes an additional constraint
+    // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
+    if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
+    }
+
+    CoapClient client = new CoapClient(form.getTarget());
+    request.setObserve();
+    CoapObserveRelation relation = null;
+    try {
+      relation = client.observeAndWait(request, handler.getCoapHandler());
+    } catch (ConnectorException e) {
+      throw new IOException(e.getMessage());
+    }
     return new TDCoapObserveRelation(relation);
   }
 

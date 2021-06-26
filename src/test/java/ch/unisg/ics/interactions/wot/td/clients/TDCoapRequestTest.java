@@ -14,6 +14,7 @@ import org.eclipse.californium.core.coap.Request;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -89,6 +90,20 @@ public class TDCoapRequestTest {
 
   private ThingDescription td;
 
+  static TDCoAPHandler getEmptyTDCoAPHandler() {
+    return new TDCoAPHandler() {
+      @Override
+      public void onResponse(TDCoapResponse response) {
+
+      }
+
+      @Override
+      public void onFail() {
+
+      }
+    };
+  }
+
   @Before
   public void init() {
     td = TDGraphReader.readFromString(ThingDescription.TDFormat.RDF_TURTLE, FORKLIFT_ROBOT_TD);
@@ -122,6 +137,32 @@ public class TDCoapRequestTest {
     assertEquals("[TDCoapRequest] Method: POST, Target: coap://example.org/action, "
         + "{\"Uri-Host\":\"example.org\", \"Uri-Path\":\"action\", \"Content-Format\":\"application/json\"}"
       , request.toString());
+  }
+
+  // Need to be removed if it imposes an additional constraint
+  // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
+  @Test(expected = IllegalArgumentException.class)
+  public void testAsyncObserveRelationWithNoSubprotocol() {
+    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .setMethodName("PUT")
+      .addOperationType(TD.writeProperty)
+      .build(),
+      TD.writeProperty);
+
+    coapRequest.establishRelation(getEmptyTDCoAPHandler());
+  }
+
+  // Need to be removed if it imposes an additional constraint
+  // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
+  @Test(expected = IllegalArgumentException.class)
+  public void testSyncObserveRelationWithNoSubprotocol() throws IOException {
+    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .setMethodName("PUT")
+      .addOperationType(TD.writeProperty)
+      .build(),
+      TD.writeProperty);
+
+    coapRequest.establishRelationAndWait(getEmptyTDCoAPHandler());
   }
 
   @Test
