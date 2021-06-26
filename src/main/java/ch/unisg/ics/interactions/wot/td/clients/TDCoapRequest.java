@@ -15,9 +15,8 @@ import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.elements.exception.ConnectorException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +28,10 @@ public class TDCoapRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
   private final Form form;
-  private Request request;
+  private final Request request;
+
+  private final HashMap<TDCoapObserveRelation, CoapClient> connectedClients = new HashMap<>();
+  private final ReentrantLock connectedClientsLock = new ReentrantLock();
 
   public TDCoapRequest(Form form, String operationType) {
     this.form = form;
@@ -66,6 +68,7 @@ public class TDCoapRequest {
     } catch (ConnectorException e) {
       throw new IOException(e.getMessage());
     }
+    client.shutdown();
     return new TDCoapResponse(response);
   }
 
@@ -98,7 +101,9 @@ public class TDCoapRequest {
     CoapClient client = new CoapClient(form.getTarget());
     request.setObserve();
     CoapObserveRelation relation = client.observe(request, handler.getCoapHandler());
-    return new TDCoapObserveRelation(relation);
+    TDCoapObserveRelation establishedRelation = new TDCoapObserveRelation(relation);
+    addConnectedClient(establishedRelation, client);
+    return establishedRelation;
   }
 
   /**
@@ -125,7 +130,14 @@ public class TDCoapRequest {
     } catch (ConnectorException e) {
       throw new IOException(e.getMessage());
     }
-    return new TDCoapObserveRelation(relation);
+    TDCoapObserveRelation establishedRelation = new TDCoapObserveRelation(relation);
+    addConnectedClient(establishedRelation, client);
+    return establishedRelation;
+  }
+
+  public void shutdownClientForRelation(TDCoapObserveRelation relation) {
+    removeConnectedClient(relation);
+    connectedClients.get(relation).shutdown();
   }
 
   public TDCoapRequest addOption(String key, String value) {
@@ -252,6 +264,32 @@ public class TDCoapRequest {
 
   Request getRequest() {
     return this.request;
+  }
+
+  private void addConnectedClient(TDCoapObserveRelation relation, CoapClient client) {
+    try {
+      connectedClientsLock.lock();
+      if (relation != null) {
+        connectedClients.put(relation, client);
+      }
+    } finally {
+      connectedClientsLock.unlock();
+    }
+  }
+
+  private void removeConnectedClient(TDCoapObserveRelation relation) {
+    try {
+      connectedClientsLock.lock();
+      if (relation == null) {
+        throw new NullPointerException();
+      }
+      if (!connectedClients.containsKey(relation)) {
+        throw new NoSuchElementException();
+      }
+      connectedClients.remove(relation);
+    } finally {
+      connectedClientsLock.unlock();
+    }
   }
 
 }
