@@ -6,7 +6,7 @@ public class TDCoapObserveRelation {
 
   private final CoapObserveRelation observeRelation;
 
-  public TDCoapObserveRelation(CoapObserveRelation observeRelation) {
+  protected TDCoapObserveRelation(CoapObserveRelation observeRelation) {
     this.observeRelation = observeRelation;
   }
 
