@@ -139,8 +139,6 @@ public class TDCoapRequestTest {
       , request.toString());
   }
 
-  // Need to be removed if it imposes an additional constraint
-  // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
   @Test(expected = IllegalArgumentException.class)
   public void testAsyncObserveRelationWithNoSubprotocol() {
     TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
@@ -152,8 +150,6 @@ public class TDCoapRequestTest {
     coapRequest.establishRelation(getEmptyTDCoAPHandler());
   }
 
-  // Need to be removed if it imposes an additional constraint
-  // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
   @Test(expected = IllegalArgumentException.class)
   public void testSyncObserveRelationWithNoSubprotocol() throws IOException {
     TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
