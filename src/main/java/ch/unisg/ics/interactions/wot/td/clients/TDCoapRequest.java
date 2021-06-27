@@ -136,8 +136,16 @@ public class TDCoapRequest {
   }
 
   public void shutdownClientForRelation(TDCoapObserveRelation relation) {
-    removeConnectedClient(relation);
-    connectedClients.get(relation).shutdown();
+    try {
+      connectedClientsLock.lock();
+      if (connectedClients.containsKey(relation)) {
+        connectedClients.get(relation).shutdown();
+        removeConnectedClient(relation);
+      }
+    } finally {
+      connectedClientsLock.unlock();
+    }
+
   }
 
   public TDCoapRequest addOption(String key, String value) {
