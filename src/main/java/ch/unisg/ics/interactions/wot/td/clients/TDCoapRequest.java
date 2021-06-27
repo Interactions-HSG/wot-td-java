@@ -15,7 +15,10 @@ import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.elements.exception.ConnectorException;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,8 +33,8 @@ public class TDCoapRequest {
   private final Form form;
   private final Request request;
 
-  private final HashMap<TDCoapObserveRelation, CoapClient> connectedClients = new HashMap<>();
-  private final ReentrantLock connectedClientsLock = new ReentrantLock();
+  private final List<CoapClient> executors = new ArrayList<CoapClient>();
+  private final ReentrantLock executorsLock = new ReentrantLock();
 
   public TDCoapRequest(Form form, String operationType) {
     this.form = form;
@@ -50,13 +53,14 @@ public class TDCoapRequest {
       this.request.setObserve();
     }
 
+
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
   }
 
   /**
-   * Sends an advanced synchronous CoAP request.
+   * Sends a synchronous CoAP request.
    *
-   * @return a {@link ch.unisg.ics.interactions.wot.td.clients.TDCoapResponse}
+   * @return the CoAP response
    * @throws IOException if any issue occurred
    */
   public TDCoapResponse execute() throws IOException {
@@ -68,12 +72,12 @@ public class TDCoapRequest {
     } catch (ConnectorException e) {
       throw new IOException(e.getMessage());
     }
-    client.shutdown();
+    addExecutor(client);
     return new TDCoapResponse(response);
   }
 
   /**
-   * Sends an advanced asynchronous CoAP request and invokes the specified
+   * Sends an asynchronous CoAP request and invokes the specified
    * <code>TDCoAPHandler</code> each time a notification arrives.
    *
    * @param handler the Response handler
@@ -81,6 +85,7 @@ public class TDCoapRequest {
   public void execute(TDCoAPHandler handler) {
     CoapClient client = new CoapClient();
     client.advanced(handler.getCoapHandler(), request);
+    addExecutor(client);
   }
 
   /**
@@ -92,17 +97,18 @@ public class TDCoapRequest {
    * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
    */
   public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
-    // Exception needs be removed if it imposes an additional constraint
-    // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
     if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
       throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
     }
 
+    if (!request.getOptions().hasObserve()) {
+      request.setObserve();
+    }
+
     CoapClient client = new CoapClient(form.getTarget());
-    request.setObserve();
     CoapObserveRelation relation = client.observe(request, handler.getCoapHandler());
     TDCoapObserveRelation establishedRelation = new TDCoapObserveRelation(relation);
-    addConnectedClient(establishedRelation, client);
+    addExecutor(client);
     return establishedRelation;
   }
 
@@ -116,34 +122,36 @@ public class TDCoapRequest {
    * @throws IOException              if any other issue occurred
    */
   public TDCoapObserveRelation establishRelationAndWait(TDCoAPHandler handler) throws IOException {
-    // Exception needs be removed if it imposes an additional constraint
-    // See editor`s note: https://www.w3.org/TR/wot-binding-templates/#coap-default-vocabulary-terms
     if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
       throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
     }
 
+    if (!request.getOptions().hasObserve()) {
+      request.setObserve();
+    }
+
+    CoapObserveRelation relation;
     CoapClient client = new CoapClient(form.getTarget());
-    request.setObserve();
-    CoapObserveRelation relation = null;
     try {
       relation = client.observeAndWait(request, handler.getCoapHandler());
     } catch (ConnectorException e) {
       throw new IOException(e.getMessage());
     }
-    TDCoapObserveRelation establishedRelation = new TDCoapObserveRelation(relation);
-    addConnectedClient(establishedRelation, client);
-    return establishedRelation;
+    addExecutor(client);
+    return new TDCoapObserveRelation(relation);
   }
 
-  public void shutdownClientForRelation(TDCoapObserveRelation relation) {
+  public void shutdownExecutors() {
     try {
-      connectedClientsLock.lock();
-      if (connectedClients.containsKey(relation)) {
-        connectedClients.get(relation).shutdown();
-        removeConnectedClient(relation);
+      executorsLock.lock();
+      if (!executors.isEmpty()) {
+        for (CoapClient client : executors) {
+          client.shutdown();
+        }
+        executors.clear();
       }
     } finally {
-      connectedClientsLock.unlock();
+      executorsLock.unlock();
     }
 
   }
@@ -274,29 +282,25 @@ public class TDCoapRequest {
     return this.request;
   }
 
-  private void addConnectedClient(TDCoapObserveRelation relation, CoapClient client) {
+  private void addExecutor(CoapClient client) {
     try {
-      connectedClientsLock.lock();
-      if (relation != null) {
-        connectedClients.put(relation, client);
+      executorsLock.lock();
+      if (client != null && !executors.contains(client)) {
+        executors.add(client);
       }
     } finally {
-      connectedClientsLock.unlock();
+      executorsLock.unlock();
     }
   }
 
-  private void removeConnectedClient(TDCoapObserveRelation relation) {
+  private void removeExecutor(CoapClient client) {
     try {
-      connectedClientsLock.lock();
-      if (relation == null) {
-        throw new NullPointerException();
+      executorsLock.lock();
+      if (client != null) {
+        executors.remove(client);
       }
-      if (!connectedClients.containsKey(relation)) {
-        throw new NoSuchElementException();
-      }
-      connectedClients.remove(relation);
     } finally {
-      connectedClientsLock.unlock();
+      executorsLock.unlock();
     }
   }
 
