@@ -28,7 +28,7 @@ public class InteractionAffordanceTest {
 
     test_affordance = new InteractionAffordance(Optional.of("my_affordance"),
         Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"),
-        Arrays.asList(form1, form2),new ArrayList<>());
+        Arrays.asList(form1, form2), Optional.empty());
   }
 
   @Test

@@ -2,13 +2,10 @@ package ch.unisg.ics.interactions.wot.td.io;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
@@ -346,16 +343,19 @@ public class TDGraphReader {
 
   private void readUriVariables(InteractionAffordance
       .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
-    Set<Resource> uriVariableIds = Models.objectResources(model.filter(affordanceId,
+    Optional<Resource> uriVariableId = Models.objectResource(model.filter(affordanceId,
       rdf.createIRI(TD.hasUriTemplateSchema), null));
-    for (Resource uriVariable : uriVariableIds) {
-      Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(uriVariable, model);
-      if (schema.isPresent()) {
-        DataSchema dataSchema = schema.get();
-        builder.addUriVariable(dataSchema);
+    if (uriVariableId.isPresent()){
+      Resource uriVariable=uriVariableId.get();
+      Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(uriVariable,model);
+      if (schema.isPresent()){
+        ObjectSchema objectSchema = (ObjectSchema) schema.get();
+        Map<String,DataSchema> map = objectSchema.getProperties();
+        builder.addUriVariables(map);
       }
     }
-  }
+    }
+
 
 
 }

@@ -1,8 +1,10 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -175,11 +177,17 @@ public class TDGraphWriter {
       graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(type));
     }
 
-    for (DataSchema uriVariable : affordance.getUriVariables()){
+    Optional<Map<String,DataSchema>> uriVariable = affordance.getUriVariables();
+    if (uriVariable.isPresent()){
+      Map<String,DataSchema> map=uriVariable.get();
       Resource inputId = rdf.createBNode();
+      ObjectSchema.Builder builder = new ObjectSchema.Builder();
+      for (String s : map.keySet()){
+        builder.addProperty(s,map.get(s));
+      }
+      DataSchema schema = builder.build();
       graphBuilder.add(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), inputId);
-
-      SchemaGraphWriter.write(graphBuilder, inputId, uriVariable);
+      SchemaGraphWriter.write(graphBuilder, inputId, schema);
 
     }
 

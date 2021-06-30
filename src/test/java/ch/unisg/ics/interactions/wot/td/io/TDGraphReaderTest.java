@@ -564,8 +564,12 @@ public class TDGraphReaderTest {
       "    ];\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
       "        <https://saref.etsi.org/core/ToggleCommand>;\n" +
-      "      td:hasUriTemplateSchema [ a js:StringSchema\n" +
-      "        ];\n" +
+      "      td:hasUriTemplateSchema [ a js:ObjectSchema;\n"+
+      "      js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"name\";\n" +
+      "            ];\n" +
+      "       ];       \n"+
       "      dct:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
@@ -582,12 +586,12 @@ public class TDGraphReaderTest {
       "        ]\n" +
       "    ] .\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
-    String s = td.getActions().get(0).getUriVariables().get(0).getDatatype();
+    String s = td.getActions().get(0).getUriVariables().get().get("name").getDatatype();
     assertEquals(DataSchema.STRING,s);
   }
 
   @Test
-  public void testUriVariableObjectSchema(){
+  public void testManyUriVariables(){
     String TDDescription = "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
@@ -600,13 +604,13 @@ public class TDGraphReaderTest {
       "    ];\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
       "        <https://saref.etsi.org/core/ToggleCommand>;\n" +
-      "      td:hasUriTemplateSchema [ a js:ObjectSchema; " +
-      "           js:properties [ " +
-      "               a js:StringSchema; " +
-      "               js:propertyName \"name\" " +
-      "           ]; " +
-      "           js:required \"name\" " +
-      "      ];\n" +
+      "      td:hasUriTemplateSchema [ a js:ObjectSchema;\n"+
+      "      js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"name\";\n" +
+      "            ],\n" +
+      "         [a js:NumberSchema; js:propertyName \"number\" ]; "+
+      "       ];       \n"+
       "      dct:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
@@ -623,11 +627,10 @@ public class TDGraphReaderTest {
       "        ]\n" +
       "    ] .\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
-    DataSchema uriVariable = td.getActions().get(0).getUriVariables().get(0);
-    assertEquals(DataSchema.OBJECT,uriVariable.getDatatype());
-    ObjectSchema schema = (ObjectSchema) uriVariable;
-    assertEquals(DataSchema.STRING,schema.getProperties().get("name").getDatatype());
-    assertEquals(true,schema.hasRequiredProperty("name"));
+    DataSchema uriVariableSchema1 = td.getActions().get(0).getUriVariables().get().get("name");
+    assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
+    DataSchema uriVariableSchema2=td.getActions().get(0).getUriVariables().get().get("number");
+    assertEquals(DataSchema.NUMBER,uriVariableSchema2.getDatatype());
   }
 
   @Test
@@ -662,13 +665,13 @@ public class TDGraphReaderTest {
         "            hctl:hasOperationType td:readProperty;\n" +
         "            hctl:forSubProtocol \"websub\";\n" +
         "        ] ;\n" +
-        "      td:hasUriTemplateSchema [ a js:ObjectSchema; " +
-        "            js:properties [" +
-        "                 a js:StringSchema; " +
-        "                 js:propertyName \"name\" " +
-        "             ]; " +
-        "      js:required \"name\" " +
-        "      ];\n" +
+        "      td:hasUriTemplateSchema [ a js:ObjectSchema;\n"+
+        "      js:properties [\n" +
+        "                a js:StringSchema ;\n" +
+        "                js:propertyName \"name\";\n" +
+        "            ],\n" +
+        "         [a js:NumberSchema; js:propertyName \"number\" ]; "+
+        "       ];       \n"+
         "    ] ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
@@ -700,10 +703,9 @@ public class TDGraphReaderTest {
         "        ]\n" +
         "    ] ." ;
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
-    DataSchema  uriVariable = td.getProperties().get(0).getUriVariables().get(0);
-    assertEquals(uriVariable.getDatatype(),DataSchema.OBJECT);
-    ObjectSchema schema = (ObjectSchema) uriVariable;
-    assertEquals(DataSchema.STRING,schema.getProperties().get("name").getDatatype());
-    assertEquals(schema.hasRequiredProperty("name"),true);
+    DataSchema uriVariableSchema1 = td.getProperties().get(0).getUriVariables().get().get("name");
+    assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
+    DataSchema uriVariableSchema2=td.getProperties().get(0).getUriVariables().get().get("number");
+    assertEquals(DataSchema.NUMBER,uriVariableSchema2.getDatatype());
   }
 }

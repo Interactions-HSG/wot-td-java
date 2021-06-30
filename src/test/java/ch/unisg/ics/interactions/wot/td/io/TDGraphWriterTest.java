@@ -3,9 +3,7 @@ package ch.unisg.ics.interactions.wot.td.io;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -30,6 +28,8 @@ import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+
+import javax.xml.crypto.Data;
 
 public class TDGraphWriterTest {
   private static final String THING_TITLE = "My Thing";
@@ -393,9 +393,14 @@ public class TDGraphWriterTest {
       "            ];\n" +
       "          js:required \"status\"\n" +
       "        ];\n" +
-      "     td:hasUriTemplateSchema [ a js:StringSchema ];\n"+
+      "      td:hasUriTemplateSchema [ a js:ObjectSchema;\n"+
+      "      js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"name\";\n" +
+      "            ];\n" +
+      "       ];       \n"+
       "    ].";
-    DataSchema uriVariable=new StringSchema.Builder().build();
+    DataSchema uriVariable = new StringSchema.Builder().build();
     Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
       .setMethodName("PUT")
       .build();
@@ -403,7 +408,7 @@ public class TDGraphWriterTest {
     ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
       .addTitle("Toggle")
       .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
-      .addUriVariable(uriVariable)
+      .addUriVariable("name",uriVariable)
       .addInputSchema(new ObjectSchema.Builder()
         .addSemanticType("https://saref.etsi.org/core/OnOffState")
         .addProperty("status", new BooleanSchema.Builder()
@@ -420,7 +425,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void writeURIVariableObjectSchema() throws IOException {
+  public void writeManyUriVariables() throws IOException {
      String testTD = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
@@ -439,12 +444,16 @@ public class TDGraphWriterTest {
       "            ];\n" +
       "          js:required \"status\"\n" +
       "        ];\n" +
-      "     td:hasUriTemplateSchema [ a js:ObjectSchema; js:properties [ a js:StringSchema; js:propertyName \"name\" ]; js:required \"name\" ];\n"+
+       "      td:hasUriTemplateSchema [ a js:ObjectSchema;\n"+
+       "      js:properties [\n" +
+       "                a js:StringSchema ;\n" +
+       "                js:propertyName \"name\";\n" +
+       "            ],\n" +
+       "         [a js:NumberSchema; js:propertyName \"number\" ]; "+
+       "       ];       \n"+
       "    ].";
-    DataSchema uriVariable=new ObjectSchema.Builder()
-      .addProperty("name", new StringSchema.Builder().build())
-      .addRequiredProperties("name")
-      .build();
+    DataSchema uriVariable1 = new StringSchema.Builder().build();
+    DataSchema uriVariable2 = new NumberSchema.Builder().build();
     Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
       .setMethodName("PUT")
       .build();
@@ -452,7 +461,8 @@ public class TDGraphWriterTest {
     ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
       .addTitle("Toggle")
       .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
-      .addUriVariable(uriVariable)
+      .addUriVariable("name", uriVariable1)
+      .addUriVariable("number", uriVariable2)
       .addInputSchema(new ObjectSchema.Builder()
         .addSemanticType("https://saref.etsi.org/core/OnOffState")
         .addProperty("status", new BooleanSchema.Builder()
@@ -484,12 +494,16 @@ public class TDGraphWriterTest {
       "          hctl:hasTarget <http://mylamp.example.org/light>;\n" +
       "          hctl:hasOperationType td:readProperty\n" +
       "        ];\n" +
-      "     td:hasUriTemplateSchema [ a js:ObjectSchema; js:properties [ a js:StringSchema; js:propertyName \"name\" ]; js:required \"name\" ];\n"+
+      "      td:hasUriTemplateSchema [ a js:ObjectSchema;\n"+
+      "      js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"name\";\n" +
+      "            ],\n" +
+      "         [a js:NumberSchema; js:propertyName \"number\" ]; "+
+      "       ];       \n"+
       "    ].";
-    DataSchema uriVariable=new ObjectSchema.Builder()
-      .addProperty("name", new StringSchema.Builder().build())
-      .addRequiredProperties("name")
-      .build();
+    DataSchema uriVariable1 = new StringSchema.Builder().build();
+    DataSchema uriVariable2 = new NumberSchema.Builder().build();
     Form lightForm = new Form.Builder("http://mylamp.example.org/light")
       .setMethodName("GET")
       .addOperationType(TD.readProperty)
@@ -497,7 +511,8 @@ public class TDGraphWriterTest {
     DataSchema property=new StringSchema.Builder().build();
     PropertyAffordance light = new PropertyAffordance.Builder(property,lightForm)
       .addTitle("Light")
-      .addUriVariable(uriVariable)
+      .addUriVariable("name",uriVariable1)
+      .addUriVariable("number", uriVariable2)
       .build();
     ThingDescription td=new ThingDescription.Builder("My Lamp Thing")
       .addThingURI("http://example.org/lamp123")

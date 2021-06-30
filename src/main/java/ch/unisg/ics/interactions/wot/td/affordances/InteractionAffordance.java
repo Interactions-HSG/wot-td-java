@@ -2,10 +2,8 @@ package ch.unisg.ics.interactions.wot.td.affordances;
 
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import javax.xml.crypto.Data;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,10 +21,10 @@ public class InteractionAffordance {
   protected Optional<String> title;
   protected List<String> types;
   protected List<Form> forms;
-  protected List<DataSchema> uriVariables;
+  protected Optional<Map<String,DataSchema>> uriVariables;
 
   protected InteractionAffordance(Optional<String> name, Optional<String> title, List<String> types,
-      List<Form> forms, List<DataSchema> uriVariables) {
+      List<Form> forms, Optional<Map<String,DataSchema>> uriVariables) {
     this.name = name;
     this.title = title;
     this.types = types;
@@ -50,7 +48,7 @@ public class InteractionAffordance {
     return forms;
   }
 
-  public List<DataSchema> getUriVariables() { return uriVariables; }
+  public Optional<Map<String, DataSchema>> getUriVariables() { return uriVariables; }
 
   public boolean hasFormWithOperationType(String operationType) {
     return !forms.stream().filter(form -> form.hasOperationType(operationType))
@@ -98,7 +96,7 @@ public class InteractionAffordance {
     protected Optional<String> title;
     protected List<String> types;
     protected List<Form> forms;
-    protected List<DataSchema> uriVariables;
+    protected Optional<Map<String,DataSchema>> uriVariables;
 
     protected Builder(Form form) {
       this(new ArrayList<Form>(Arrays.asList(form)));
@@ -109,7 +107,7 @@ public class InteractionAffordance {
       this.title = Optional.empty();
       this.types = new ArrayList<String>();
       this.forms = forms;
-      this.uriVariables=new ArrayList<DataSchema>();
+      this.uriVariables = Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -148,16 +146,40 @@ public class InteractionAffordance {
       return (S) this;
     }
     @SuppressWarnings("unchecked")
-    public S addUriVariable(DataSchema uriVariable){
-      this.uriVariables.add(uriVariable);
-      return (S) this;
+    public S addUriVariable(String name,DataSchema dataSchema) throws IllegalArgumentException{
+      if (dataSchema.getDatatype().equals(DataSchema.OBJECT) || dataSchema.getDatatype().equals(DataSchema.ARRAY)) {
+        throw new IllegalArgumentException();
+      } else {
+        if (this.uriVariables.isPresent()) {
+          this.uriVariables.get().put(name, dataSchema);
+        } else {
+          Map<String, DataSchema> map = new HashMap<>();
+          this.uriVariables = Optional.of(map);
+          this.uriVariables.get().put(name, dataSchema);
+        }
+        return (S) this;
+      }
     }
 
     @SuppressWarnings("unchecked")
-    public S addUriVariables(List<DataSchema> variables){
-      this.uriVariables.addAll(variables);
+    public S addUriVariables(Map<String,DataSchema> variables) throws IllegalArgumentException{
+      for (String key : variables.keySet()){
+        addUriVariable(key,variables.get(key));
+
+      }
       return (S) this;
     }
+
+    /*
+    if (this.uriVariables.isPresent()) {
+        this.uriVariables.get().putAll(variables);
+      }
+      else {
+        this.uriVariables = Optional.of(variables);
+      }
+      return (S) this;
+    }
+     */
 
     public abstract T build();
   }
