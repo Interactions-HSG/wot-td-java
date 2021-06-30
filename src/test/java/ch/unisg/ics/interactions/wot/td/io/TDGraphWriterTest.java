@@ -197,7 +197,17 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testWriteOnePropertyWithCoapBinding() throws RDFParseException, RDFHandlerException,
+  public void testWriteReadPropertyDefaultValues(){
+
+  }
+
+  @Test
+  public void testWriteWritePropertyDefaultValues(){
+
+  }
+
+  @Test
+  public void testWriteReadPropertyCoapBinding() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
@@ -207,7 +217,7 @@ public class TDGraphWriterTest {
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
       "        td:name \"my_property\" ;\n" +
-      "        td:isObservable true ;\n" +
+      "        td:isObservable false ;\n" +
       "        td:hasForm [\n" +
       "            hctl:hasTarget <coap://example.org/count> ;\n" +
       "            cov:methodName \"GET\";\n" +
@@ -224,7 +234,57 @@ public class TDGraphWriterTest {
         .build())
       .addSemanticType("http://iotschema.org/MyProperty")
       .addName("my_property")
-      .addObserve()
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addProperty(property)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteReadPropertyCoapDefaultValues(){
+
+  }
+
+  @Test
+  public void testWriteWritePropertyCoapDefaultValues(){
+
+  }
+
+  @Test
+  public void testWriteObservePropertyDefaultValues(){
+
+  }
+
+  @Test
+  public void testWriteOnePropertyCoapDefaultValues() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable false ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            cov:methodName \"GET\";\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
+      new Form.Builder("coap://example.org/count")
+        .addOperationType(TD.readProperty)
+        .build())
+      .addSemanticType("http://iotschema.org/MyProperty")
+      .addName("my_property")
       .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -303,6 +363,16 @@ public class TDGraphWriterTest {
       new ArrayList<ActionAffordance>(Arrays.asList()));
 
     assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteActionDefaultValues(){
+
+  }
+
+  @Test
+  public void testWriteActionCoapDefaultValues(){
+
   }
 
   @Test

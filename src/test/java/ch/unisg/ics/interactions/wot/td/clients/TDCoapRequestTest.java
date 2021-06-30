@@ -130,7 +130,7 @@ public class TDCoapRequestTest {
   @Test
   public void testToStringNoPayload() {
     TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .addOperationType("POST")
+      .setMethodName("POST")
       .addOperationType(TD.invokeAction).build(),
       TD.invokeAction);
 
