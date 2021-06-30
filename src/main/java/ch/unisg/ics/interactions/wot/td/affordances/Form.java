@@ -18,7 +18,8 @@ public class Form {
     DEFAULT_BINDING.put("COAP", TD.readProperty, "GET");
     DEFAULT_BINDING.put("COAP", TD.writeProperty, "PUT");
     DEFAULT_BINDING.put("COAP", TD.invokeAction, "POST");
-    DEFAULT_BINDING.put("COAP", TD.observeProperty, "POST");
+    DEFAULT_BINDING.put("COAP", TD.observeProperty, "GET");
+    DEFAULT_BINDING.put("COAP", TD.unobserveProperty, "GET");
   }
 
   private final String target;
@@ -90,8 +91,8 @@ public class Form {
       return subprotocol;
     }
 
-    if (operationTypes.contains(TD.observeProperty)){
-      if (target.startsWith("<coap:") || target.startsWith("<coaps:")){
+    if (operationTypes.contains(TD.observeProperty) || operationTypes.contains(TD.unobserveProperty)){
+      if (target.contains("coap:") || target.contains("coaps:")){
         return Optional.of(COV.observe);
       }
     }

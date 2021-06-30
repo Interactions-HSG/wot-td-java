@@ -33,6 +33,7 @@ public final class TD {
   public static final String writeProperty = PREFIX + "writeProperty";
   public static final String invokeAction = PREFIX + "invokeAction";
   public static final String observeProperty = PREFIX + "observeProperty";
+  public static final String unobserveProperty = PREFIX + "unobserveProperty";
 
   public static IRI createIRI(String fragment) {
     return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
