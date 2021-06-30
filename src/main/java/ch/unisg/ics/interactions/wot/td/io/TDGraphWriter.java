@@ -23,8 +23,8 @@ import java.util.Optional;
  * used in the serialization.
  */
 public class TDGraphWriter {
-  private static final String[] HTTP_URI_SCHEMES = new String[]{"http", "https"};
-  private static final String[] COAP_URI_SCHEMES = new String[]{"coap", "coaps"};
+  private static final String[] HTTP_URI_SCHEMES = new String[]{"http://", "https://"};
+  private static final String[] COAP_URI_SCHEMES = new String[]{"coap://", "coaps://"};
 
   private final Resource thingId;
   private final ThingDescription td;
@@ -190,11 +190,12 @@ public class TDGraphWriter {
       graphBuilder.add(interactionId, rdf.createIRI(TD.hasForm), formId);
 
       // Only writes the method name for forms with one operation type (to avoid ambiguity)
-      if (form.getMethodName().isPresent() && form.getOperationTypes().size() == 1) {
+      if (form.getOperationTypes().size() == 1) {
+        String opType = form.getOperationTypes().stream().findFirst().get();
         if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
-          graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
+          graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName(opType).get());
         } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
-          graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName().get());
+          graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName(opType).get());
         }
       }
       graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
