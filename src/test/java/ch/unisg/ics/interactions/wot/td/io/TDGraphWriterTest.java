@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -184,6 +185,42 @@ public class TDGraphWriterTest {
         .addSemanticType("http://iotschema.org/MyProperty")
         .addName("my_property")
         .addObserve()
+        .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+        .addThingURI(THING_IRI)
+        .addSecurityScheme(new NoSecurityScheme())
+        .addProperty(property)
+        .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteOnePropertyNoSchema() throws IOException {
+    String testTD = PREFIXES +
+        "@prefix iot: <http://iotschema.org/> .\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, iot:MyProperty ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable false ;\n" +
+        "        td:hasForm [\n" +
+        "            hctl:hasTarget <http://example.org/count> ;\n" +
+        "            hctl:forContentType \"video/mpeg\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    PropertyAffordance property = new PropertyAffordance.Builder(
+            new Form.Builder("http://example.org/count")
+                .setContentType("video/mpeg")
+                .addOperationType(TD.readProperty)
+                .build())
+        .addSemanticType("http://iotschema.org/MyProperty")
+        .addName("my_property")
         .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
