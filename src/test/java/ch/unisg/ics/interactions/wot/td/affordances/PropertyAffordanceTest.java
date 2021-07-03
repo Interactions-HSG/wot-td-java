@@ -13,20 +13,21 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 public class PropertyAffordanceTest {
 
   private PropertyAffordance testProperty;
-  
+
   @Before
   public void init() {
     DataSchema schema = new NumberSchema.Builder().build();
     Form form = new Form.Builder("http://example.org/action1")
         .build();
-    
-    testProperty = new PropertyAffordance.Builder(schema, form)
+
+    testProperty = new PropertyAffordance.Builder(form)
         .addTitle("My Property")
+        .addDataSchema(schema)
         .addSemanticType("sem_type")
         .addObserve()
         .build();
   }
-  
+
   @Test
   public void testProperty() {
     assertEquals("My Property", testProperty.getTitle().get());
@@ -35,12 +36,12 @@ public class PropertyAffordanceTest {
     assertEquals(1, testProperty.getForms().size());
     assertTrue(testProperty.isObservable());
   }
-  
+
   @Test
   public void testDefaultOperationTypes() {
     assertTrue(testProperty.hasFormWithOperationType(TD.readProperty));
     assertTrue(testProperty.hasFormWithOperationType(TD.writeProperty));
-    
+
     Form form = testProperty.getForms().get(0);
     assertEquals("GET", form.getMethodName(TD.readProperty).get());
     assertEquals("PUT", form.getMethodName(TD.writeProperty).get());
