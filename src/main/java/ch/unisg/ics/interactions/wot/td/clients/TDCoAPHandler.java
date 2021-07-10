@@ -2,6 +2,7 @@ package ch.unisg.ics.interactions.wot.td.clients;
 
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
+
 /**
  * An abstract class for reacting to responses from
  * asynchronous CoAP requests. A concrete <code>TDCoAPHandler</code>
@@ -35,7 +36,7 @@ public abstract class TDCoAPHandler {
    */
   public abstract void handleError();
 
-  CoapHandler getCoapHandler(){
+  CoapHandler getCoapHandler() {
     return this.coapHandler;
   }
 
