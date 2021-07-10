@@ -5,6 +5,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.Gson;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapObserveRelation;
@@ -50,10 +51,13 @@ public class TDCoapRequest {
     }
 
     if (form.getSubProtocol().isPresent() && form.getSubProtocol().get().equals(COV.observe)) {
-      this.request.setObserve();
+      if (operationType.equals(TD.observeProperty)) {
+        this.request.setObserve();
+      }
+      if (operationType.equals(TD.unobserveProperty)) {
+        this.request.setObserveCancel();
+      }
     }
-
-
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
   }
 
