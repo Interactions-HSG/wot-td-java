@@ -197,18 +197,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testWriteReadPropertyDefaultValues(){
-
-  }
-
-  @Test
-  public void testWriteWritePropertyDefaultValues(){
-
-  }
-
-  @Test
-  public void testWriteReadPropertyCoapBinding() throws RDFParseException, RDFHandlerException,
-    IOException {
+  public void testWriteReadPropertyDefaultMethodValues() throws IOException {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -217,23 +206,34 @@ public class TDGraphWriterTest {
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
       "        td:name \"my_property\" ;\n" +
-      "        td:isObservable false ;\n" +
+      "        td:isObservable true ;\n" +
       "        td:hasForm [\n" +
-      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            htv:methodName \"GET\";\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] , [\n" +
       "            cov:methodName \"GET\";\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
       "            hctl:forContentType \"application/json\";\n" +
       "            hctl:hasOperationType td:readProperty;\n" +
       "        ] ;\n" +
       "    ] .";
 
 
+    Form httpForm = new Form.Builder("http://example.org/count")
+      .addOperationType(TD.readProperty)
+      .build();
+
+    Form coapFrom = new Form.Builder("coap://example.org/count")
+      .addOperationType(TD.readProperty)
+      .build();
+
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
-      new Form.Builder("coap://example.org/count")
-        .setMethodName("GET")
-        .addOperationType(TD.readProperty)
-        .build())
+      Arrays.asList(httpForm, coapFrom))
       .addSemanticType("http://iotschema.org/MyProperty")
       .addName("my_property")
+      .addObserve()
       .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -246,22 +246,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testWriteReadPropertyCoapDefaultValues(){
-
-  }
-
-  @Test
-  public void testWriteWritePropertyCoapDefaultValues(){
-
-  }
-
-  @Test
-  public void testWriteObservePropertyDefaultValues(){
-
-  }
-
-  @Test
-  public void testWriteOnePropertyCoapDefaultValues() throws IOException {
+  public void testWriteWritePropertyDefaultMethodValues() throws IOException {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -270,21 +255,111 @@ public class TDGraphWriterTest {
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
       "        td:name \"my_property\" ;\n" +
-      "        td:isObservable false ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\";\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ,[\n" +
+      "            cov:methodName \"PUT\";\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    Form httpForm = new Form.Builder("http://example.org/count")
+      .addOperationType(TD.writeProperty)
+      .build();
+
+    Form coapForm = new Form.Builder("coap://example.org/count")
+      .addOperationType(TD.writeProperty)
+      .build();
+
+    PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
+      Arrays.asList(httpForm, coapForm))
+      .addSemanticType("http://iotschema.org/MyProperty")
+      .addName("my_property")
+      .addObserve()
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addProperty(property)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteObservePropertyDefaultValues() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
       "        td:hasForm [\n" +
       "            hctl:hasTarget <coap://example.org/count> ;\n" +
       "            cov:methodName \"GET\";\n" +
       "            hctl:forContentType \"application/json\";\n" +
-      "            hctl:hasOperationType td:readProperty;\n" +
+      "            hctl:hasOperationType td:observeProperty;\n" +
+      "            hctl:forSubProtocol cov:observe;\n" +
       "        ] ;\n" +
       "    ] .";
 
+
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
       new Form.Builder("coap://example.org/count")
-        .addOperationType(TD.readProperty)
+        .addOperationType(TD.observeProperty)
         .build())
       .addSemanticType("http://iotschema.org/MyProperty")
       .addName("my_property")
+      .addObserve()
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addProperty(property)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteUnobservePropertyDefaultValues() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            cov:methodName \"GET\";\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:unobserveProperty;\n" +
+      "            hctl:forSubProtocol cov:observe;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+
+    PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
+      new Form.Builder("coap://example.org/count")
+        .addOperationType(TD.unobserveProperty)
+        .build())
+      .addSemanticType("http://iotschema.org/MyProperty")
+      .addName("my_property")
+      .addObserve()
       .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -366,13 +441,48 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testWriteActionDefaultValues(){
+  public void testWriteActionDefaultMethodValues() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance, iot:MyAction ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"POST\";\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ,[\n" +
+      "            cov:methodName \"POST\";\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
-  }
+    Form httpForm = new Form.Builder("http://example.org/count")
+      .addOperationType(TD.invokeAction)
+      .build();
 
-  @Test
-  public void testWriteActionCoapDefaultValues(){
+    Form coapForm = new Form.Builder("coap://example.org/count")
+      .addOperationType(TD.invokeAction)
+      .build();
 
+    ActionAffordance action = new ActionAffordance.Builder(Arrays.asList(httpForm, coapForm))
+      .addSemanticType("http://iotschema.org/MyAction")
+      .addName("my_action")
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addAction(action)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
   }
 
   @Test
