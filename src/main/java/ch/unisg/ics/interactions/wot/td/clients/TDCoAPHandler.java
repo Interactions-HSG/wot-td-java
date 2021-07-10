@@ -4,11 +4,12 @@ import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
 
 /**
- * An abstract class for reacting to responses from
- * asynchronous CoAP requests. A concrete <code>TDCoAPHandler</code>
- * instance needs to be used when using the methods
- * {@link TDCoapRequest#execute(TDCoAPHandler)} and
- * {@link TDCoapRequest#establishRelation(TDCoAPHandler)}.
+ * An abstract class for reacting to notifications from asynchronous
+ * CoAP requests and established CoAP observe relations. A concrete
+ * <code>TDCoAPHandler</code> instance is needed when using the methods
+ * {@link TDCoapRequest#execute(TDCoAPHandler)},
+ * {@link TDCoapRequest#establishRelation(TDCoAPHandler)}, and
+ * {@link TDCoapRequest#establishRelationAndWait(TDCoAPHandler)}.
  */
 public abstract class TDCoAPHandler {
 
