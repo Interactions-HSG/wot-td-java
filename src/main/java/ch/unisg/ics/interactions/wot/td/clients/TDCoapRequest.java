@@ -78,7 +78,7 @@ public class TDCoapRequest {
       throw new IOException(e.getMessage());
     }
     addExecutor(client);
-    return new TDCoapResponse(response);
+    return new TDCoapResponse(response.advanced());
   }
 
   /**

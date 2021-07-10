@@ -35,7 +35,7 @@ public class TDCoapObserveRelation {
    * @return the current notification wrapped in a <code>TDCoapResponse</code>
    */
   public TDCoapResponse getCurrent() {
-    return new TDCoapResponse(observeRelation.getCurrent());
+    return new TDCoapResponse(observeRelation.getCurrentResponse());
   }
 
   /**

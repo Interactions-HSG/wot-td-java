@@ -16,7 +16,7 @@ public abstract class TDCoAPHandler {
   private final CoapHandler coapHandler = new CoapHandler() {
     @Override
     public void onLoad(CoapResponse response) {
-      handleLoad(new TDCoapResponse(response));
+      handleLoad(new TDCoapResponse(response.advanced()));
     }
 
     @Override

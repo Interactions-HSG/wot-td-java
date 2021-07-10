@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.coap.Response;
 
 import java.util.List;
 import java.util.Map;
@@ -21,17 +22,17 @@ import java.util.logging.Logger;
 public class TDCoapResponse {
   private final static Logger LOGGER = Logger.getLogger(TDCoapResponse.class.getCanonicalName());
 
-  private CoapResponse response;
+  private Response response;
   private Optional<String> payload;
 
-  public TDCoapResponse(CoapResponse response) {
+  public TDCoapResponse(Response response) {
 
     this.response = response;
 
     if (response.getPayload() == null) {
       this.payload = Optional.empty();
     } else {
-      this.payload = Optional.ofNullable(response.getResponseText());
+      this.payload = Optional.ofNullable(response.getPayloadString());
     }
   }
 
