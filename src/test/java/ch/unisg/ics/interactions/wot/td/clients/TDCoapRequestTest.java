@@ -9,6 +9,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.*;
+import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
 import org.junit.Before;
@@ -124,6 +125,16 @@ public class TDCoapRequestTest {
       .addSubProtocol(COV.observe).build(),
       TD.observeProperty);
 
+    assertTrue(coapRequest.getRequest().getOptions().hasObserve());
+  }
+
+  @Test
+  public void testObserveWithDefaultBinding() {
+    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .addOperationType(TD.observeProperty).build(),
+      TD.observeProperty);
+
+    assertTrue(coapRequest.getRequest().getCode().equals(CoAP.Code.valueOf("GET")));
     assertTrue(coapRequest.getRequest().getOptions().hasObserve());
   }
 

@@ -41,6 +41,7 @@ public class TDCoapRequest {
     this.form = form;
 
     Optional<String> methodName = form.getMethodName(operationType);
+    Optional<String> subprotocol = form.getSubProtocol(operationType);
 
     if (methodName.isPresent()) {
       this.request = new Request(CoAP.Code.valueOf(methodName.get()));
@@ -50,7 +51,7 @@ public class TDCoapRequest {
         + operationType);
     }
 
-    if (form.getSubProtocol().isPresent() && form.getSubProtocol().get().equals(COV.observe)) {
+    if (subprotocol.isPresent() && subprotocol.get().equals(COV.observe)) {
       if (operationType.equals(TD.observeProperty)) {
         this.request.setObserve();
       }
@@ -101,12 +102,9 @@ public class TDCoapRequest {
    * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
    */
   public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
-    if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
-    }
 
     if (!request.getOptions().hasObserve()) {
-      request.setObserve();
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
     }
 
     CoapClient client = new CoapClient(form.getTarget());
@@ -126,12 +124,8 @@ public class TDCoapRequest {
    * @throws IOException              if any other issue occurred
    */
   public TDCoapObserveRelation establishRelationAndWait(TDCoAPHandler handler) throws IOException {
-    if (!form.getSubProtocol().isPresent() || !form.getSubProtocol().get().equals(COV.observe)) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
-    }
-
     if (!request.getOptions().hasObserve()) {
-      request.setObserve();
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
     }
 
     CoapObserveRelation relation;
