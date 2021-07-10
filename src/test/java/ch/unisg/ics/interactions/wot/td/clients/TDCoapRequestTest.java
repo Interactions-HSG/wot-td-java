@@ -93,12 +93,12 @@ public class TDCoapRequestTest {
   static TDCoAPHandler getEmptyTDCoAPHandler() {
     return new TDCoAPHandler() {
       @Override
-      public void onResponse(TDCoapResponse response) {
+      public void handleLoad(TDCoapResponse response) {
 
       }
 
       @Override
-      public void onFail() {
+      public void handleError() {
 
       }
     };
