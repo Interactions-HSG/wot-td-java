@@ -87,7 +87,7 @@ public class TDCoapRequest {
    *
    * @param handler the Response handler
    */
-  public void execute(TDCoAPHandler handler) {
+  public void execute(TDCoapHandler handler) {
     CoapClient client = new CoapClient();
     client.advanced(handler.getCoapHandler(), request);
     addExecutor(client);
@@ -101,7 +101,7 @@ public class TDCoapRequest {
    * @return the CoAP observe relation
    * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
    */
-  public TDCoapObserveRelation establishRelation(TDCoAPHandler handler) {
+  public TDCoapObserveRelation establishRelation(TDCoapHandler handler) {
 
     if (!request.getOptions().hasObserve()) {
       throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
@@ -123,7 +123,7 @@ public class TDCoapRequest {
    * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
    * @throws IOException              if any other issue occurred
    */
-  public TDCoapObserveRelation establishRelationAndWait(TDCoAPHandler handler) throws IOException {
+  public TDCoapObserveRelation establishRelationAndWait(TDCoapHandler handler) throws IOException {
     if (!request.getOptions().hasObserve()) {
       throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
     }

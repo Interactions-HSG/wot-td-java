@@ -7,8 +7,8 @@ import org.eclipse.californium.core.CoapObserveRelation;
  * <p>
  * An observe relation is established when sending
  * an asynchronous CoAP observe request, by using
- * {@link TDCoapRequest#establishRelation(TDCoAPHandler)} and
- * {@link TDCoapRequest#establishRelationAndWait(TDCoAPHandler)}.
+ * {@link TDCoapRequest#establishRelation(TDCoapHandler)} and
+ * {@link TDCoapRequest#establishRelationAndWait(TDCoapHandler)}.
  * The <code>TDCoapRequest</code> instance needs to use
  * a form for the sub-protocol "cov:observe".
  * </p>

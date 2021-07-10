@@ -91,8 +91,8 @@ public class TDCoapRequestTest {
 
   private ThingDescription td;
 
-  static TDCoAPHandler getEmptyTDCoAPHandler() {
-    return new TDCoAPHandler() {
+  static TDCoapHandler getEmptyTDCoAPHandler() {
+    return new TDCoapHandler() {
       @Override
       public void handleLoad(TDCoapResponse response) {
 

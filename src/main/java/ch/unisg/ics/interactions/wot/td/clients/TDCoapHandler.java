@@ -7,11 +7,11 @@ import org.eclipse.californium.core.CoapResponse;
  * An abstract class for reacting to notifications from asynchronous
  * CoAP requests and established CoAP observe relations. A concrete
  * <code>TDCoAPHandler</code> instance is needed when using the methods
- * {@link TDCoapRequest#execute(TDCoAPHandler)},
- * {@link TDCoapRequest#establishRelation(TDCoAPHandler)}, and
- * {@link TDCoapRequest#establishRelationAndWait(TDCoAPHandler)}.
+ * {@link TDCoapRequest#execute(TDCoapHandler)},
+ * {@link TDCoapRequest#establishRelation(TDCoapHandler)}, and
+ * {@link TDCoapRequest#establishRelationAndWait(TDCoapHandler)}.
  */
-public abstract class TDCoAPHandler {
+public abstract class TDCoapHandler {
 
   private final CoapHandler coapHandler = new CoapHandler() {
     @Override
