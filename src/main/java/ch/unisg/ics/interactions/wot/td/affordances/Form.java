@@ -10,16 +10,21 @@ import java.util.Set;
 
 public class Form {
 
-  private static final MultiKeyMap DEFAULT_BINDING = new MultiKeyMap();
+  private static final MultiKeyMap DEFAULT_METHOD_BINDING = new MultiKeyMap();
+  private static final MultiKeyMap DEFAULT_SUBPROTOCOL_BINDING = new MultiKeyMap();
+
   static {
-    DEFAULT_BINDING.put("HTTP", TD.readProperty, "GET");
-    DEFAULT_BINDING.put("HTTP", TD.writeProperty, "PUT");
-    DEFAULT_BINDING.put("HTTP", TD.invokeAction, "POST");
-    DEFAULT_BINDING.put("COAP", TD.readProperty, "GET");
-    DEFAULT_BINDING.put("COAP", TD.writeProperty, "PUT");
-    DEFAULT_BINDING.put("COAP", TD.invokeAction, "POST");
-    DEFAULT_BINDING.put("COAP", TD.observeProperty, "GET");
-    DEFAULT_BINDING.put("COAP", TD.unobserveProperty, "GET");
+    DEFAULT_METHOD_BINDING.put("HTTP", TD.readProperty, "GET");
+    DEFAULT_METHOD_BINDING.put("HTTP", TD.writeProperty, "PUT");
+    DEFAULT_METHOD_BINDING.put("HTTP", TD.invokeAction, "POST");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.readProperty, "GET");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.writeProperty, "PUT");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.invokeAction, "POST");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.observeProperty, "GET");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.unobserveProperty, "GET");
+
+    DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.observeProperty, COV.observe);
+    DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.unobserveProperty, COV.observe);
   }
 
   private final String target;
@@ -55,15 +60,15 @@ public class Form {
       return methodName;
     }
 
-    if (target.contains("http:") || target.contains("https:")){
-      if (DEFAULT_BINDING.containsKey("HTTP", operationType)) {
-        return Optional.of((String) DEFAULT_BINDING.get("HTTP", operationType));
+    if (target.contains("http:") || target.contains("https:")) {
+      if (DEFAULT_METHOD_BINDING.containsKey("HTTP", operationType)) {
+        return Optional.of((String) DEFAULT_METHOD_BINDING.get("HTTP", operationType));
       }
     }
 
-    if (target.contains("coap:") || target.contains("coaps:")){
-      if (DEFAULT_BINDING.containsKey("COAP", operationType)) {
-        return Optional.of((String) DEFAULT_BINDING.get("COAP", operationType));
+    if (target.contains("coap:") || target.contains("coaps:")) {
+      if (DEFAULT_METHOD_BINDING.containsKey("CoAP", operationType)) {
+        return Optional.of((String) DEFAULT_METHOD_BINDING.get("CoAP", operationType));
       }
     }
 
@@ -87,13 +92,21 @@ public class Form {
   }
 
   public Optional<String> getSubProtocol() {
+    return subprotocol;
+  }
+
+  public Optional<String> getSubProtocol(String operationType) {
+    if (!operationTypes.contains(operationType)) {
+      throw new IllegalArgumentException("Unknown operation type: " + operationType);
+    }
+
     if (subprotocol.isPresent()) {
       return subprotocol;
     }
 
-    if (operationTypes.contains(TD.observeProperty) || operationTypes.contains(TD.unobserveProperty)){
-      if (target.contains("coap:") || target.contains("coaps:")){
-        return Optional.of(COV.observe);
+    if (target.contains("coap:") || target.contains("coaps:")) {
+      if (DEFAULT_SUBPROTOCOL_BINDING.containsKey("CoAP", operationType)) {
+        return Optional.of((String) DEFAULT_SUBPROTOCOL_BINDING.get("CoAP", operationType));
       }
     }
 
