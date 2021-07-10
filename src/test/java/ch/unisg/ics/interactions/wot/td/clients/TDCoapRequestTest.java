@@ -134,7 +134,7 @@ public class TDCoapRequestTest {
       .addOperationType(TD.observeProperty).build(),
       TD.observeProperty);
 
-    assertTrue(coapRequest.getRequest().getCode().equals(CoAP.Code.valueOf("GET")));
+    assertEquals(coapRequest.getRequest().getCode(), CoAP.Code.valueOf("GET"));
     assertTrue(coapRequest.getRequest().getOptions().hasObserve());
   }
 
@@ -199,7 +199,7 @@ public class TDCoapRequestTest {
     Optional<Form> form = action.get().getFirstForm();
     assertTrue(form.isPresent());
 
-    Map<String, Object> payloadVariables = new HashMap<String, Object>();
+    Map<String, Object> payloadVariables = new HashMap<>();
     payloadVariables.put(PREFIX + "SourcePosition", Arrays.asList(30, 50, 70));
     payloadVariables.put(PREFIX + "TargetPosition", Arrays.asList(30, 60, 70));
 
@@ -236,7 +236,7 @@ public class TDCoapRequestTest {
       .addProperty("last_name", new StringSchema.Builder().build())
       .build();
 
-    Map<String, Object> payloadVariables = new HashMap<String, Object>();
+    Map<String, Object> payloadVariables = new HashMap<>();
     payloadVariables.put("first_name", "Andrei");
     payloadVariables.put("last_name", "Ciortea");
 
@@ -249,7 +249,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testSimpleSemanticObjectPayload() throws JsonSyntaxException {
-    Map<String, Object> payloadVariables = new HashMap<String, Object>();
+    Map<String, Object> payloadVariables = new HashMap<>();
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
 
@@ -317,12 +317,12 @@ public class TDCoapRequestTest {
         .build())
       .build();
 
-    List<Object> coordinates = new ArrayList<Object>();
+    List<Object> coordinates = new ArrayList<>();
     coordinates.add(30);
     coordinates.add(50);
     coordinates.add(70);
 
-    Map<String, Object> payloadVariables = new HashMap<String, Object>();
+    Map<String, Object> payloadVariables = new HashMap<>();
     payloadVariables.put(PREFIX + "Speed", 3.5);
     payloadVariables.put(PREFIX + "3DCoordinates", coordinates);
 
