@@ -193,9 +193,9 @@ public class TDGraphWriter {
       if (form.getOperationTypes().size() == 1) {
         String opType = form.getOperationTypes().stream().findFirst().get();
         if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
-          graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName(opType).get());
+          graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
         } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
-          graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName(opType).get());
+          graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName().get());
         }
       }
       graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
