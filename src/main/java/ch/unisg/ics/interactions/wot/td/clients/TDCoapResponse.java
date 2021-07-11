@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class TDCoapResponse {
   private final static Logger LOGGER = Logger.getLogger(TDCoapResponse.class.getCanonicalName());
 
-  private Response response;
+  private final Response response;
   private Optional<String> payload;
 
   public TDCoapResponse(Response response) {
