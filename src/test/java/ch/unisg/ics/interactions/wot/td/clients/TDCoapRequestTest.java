@@ -151,6 +151,15 @@ public class TDCoapRequestTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void testNoDefaultBindingForOperationType() {
+    new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      .setMethodName("POST")
+      .addOperationType(TD.invokeAction).build(),
+      TD.readProperty);
+  }
+
+
+  @Test(expected = IllegalArgumentException.class)
   public void testAsyncObserveRelationWithNoSubprotocol() {
     TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
       .setMethodName("PUT")
