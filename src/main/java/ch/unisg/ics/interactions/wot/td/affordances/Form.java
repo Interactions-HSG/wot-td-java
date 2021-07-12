@@ -4,16 +4,25 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.apache.commons.collections.map.MultiKeyMap;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 public class Form {
 
+  private static final HashMap<String, String> URI_SCHEMES;
   private static final MultiKeyMap DEFAULT_METHOD_BINDING = new MultiKeyMap();
   private static final MultiKeyMap DEFAULT_SUBPROTOCOL_BINDING = new MultiKeyMap();
 
+  //To be moved in a ProtocolBinding class
   static {
+    URI_SCHEMES = new HashMap<>();
+    URI_SCHEMES.put("http:", "HTTP");
+    URI_SCHEMES.put("https:", "HTTP");
+    URI_SCHEMES.put("coap:", "CoAP");
+    URI_SCHEMES.put("coaps:", "CoAP");
+
     DEFAULT_METHOD_BINDING.put("HTTP", TD.readProperty, "GET");
     DEFAULT_METHOD_BINDING.put("HTTP", TD.writeProperty, "PUT");
     DEFAULT_METHOD_BINDING.put("HTTP", TD.invokeAction, "POST");
@@ -60,15 +69,11 @@ public class Form {
       return methodName;
     }
 
-    if (target.contains("http:") || target.contains("https:")) {
-      if (DEFAULT_METHOD_BINDING.containsKey("HTTP", operationType)) {
-        return Optional.of((String) DEFAULT_METHOD_BINDING.get("HTTP", operationType));
-      }
-    }
+    if (getProtocol().isPresent()) {
+      String protocol = getProtocol().get();
 
-    if (target.contains("coap:") || target.contains("coaps:")) {
-      if (DEFAULT_METHOD_BINDING.containsKey("CoAP", operationType)) {
-        return Optional.of((String) DEFAULT_METHOD_BINDING.get("CoAP", operationType));
+      if (DEFAULT_METHOD_BINDING.containsKey(protocol, operationType)) {
+        return Optional.of((String) DEFAULT_METHOD_BINDING.get(protocol, operationType));
       }
     }
 
@@ -104,10 +109,25 @@ public class Form {
       return subprotocol;
     }
 
-    if (target.contains("coap:") || target.contains("coaps:")) {
-      if (DEFAULT_SUBPROTOCOL_BINDING.containsKey("CoAP", operationType)) {
-        return Optional.of((String) DEFAULT_SUBPROTOCOL_BINDING.get("CoAP", operationType));
+    if (getProtocol().isPresent()) {
+      String protocol = getProtocol().get();
+
+      if (DEFAULT_SUBPROTOCOL_BINDING.containsKey(protocol, operationType)) {
+        return Optional.of((String) DEFAULT_SUBPROTOCOL_BINDING.get(protocol, operationType));
       }
+    }
+
+    return Optional.empty();
+  }
+
+  private Optional<String> getProtocol() {
+    Optional<String> uriScheme = URI_SCHEMES.keySet()
+      .stream()
+      .filter(scheme -> getTarget().contains(scheme))
+      .findFirst();
+
+    if (uriScheme.isPresent()) {
+      return Optional.of(URI_SCHEMES.get(uriScheme.get()));
     }
 
     return Optional.empty();
