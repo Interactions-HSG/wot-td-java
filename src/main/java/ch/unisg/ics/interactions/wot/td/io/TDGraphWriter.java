@@ -23,8 +23,8 @@ import java.util.Optional;
  * used in the serialization.
  */
 public class TDGraphWriter {
-  private static final String[] HTTP_URI_SCHEMES = new String[]{"http://", "https://"};
-  private static final String[] COAP_URI_SCHEMES = new String[]{"coap://", "coaps://"};
+  private static final String[] HTTP_URI_SCHEMES = new String[]{"http:", "https:"};
+  private static final String[] COAP_URI_SCHEMES = new String[]{"coap:", "coaps:"};
 
   private final Resource thingId;
   private final ThingDescription td;
