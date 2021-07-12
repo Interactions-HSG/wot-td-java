@@ -75,7 +75,7 @@ public class TDCoapRequest {
     try {
       response = client.advanced(request);
     } catch (ConnectorException e) {
-      throw new IOException(e.getMessage());
+      throw new IOException(e);
     }
     addExecutor(client);
     return new TDCoapResponse(response.advanced());
@@ -133,7 +133,7 @@ public class TDCoapRequest {
     try {
       relation = client.observeAndWait(request, handler.getCoapHandler());
     } catch (ConnectorException e) {
-      throw new IOException(e.getMessage());
+      throw new IOException(e);
     }
     addExecutor(client);
     return new TDCoapObserveRelation(relation);
