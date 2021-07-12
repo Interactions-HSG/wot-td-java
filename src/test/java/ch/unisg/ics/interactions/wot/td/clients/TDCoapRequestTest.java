@@ -95,12 +95,12 @@ public class TDCoapRequestTest {
     return new TDCoapHandler() {
       @Override
       public void handleLoad(TDCoapResponse response) {
-
+        // empty load handle
       }
 
       @Override
       public void handleError() {
-
+        // empty error handle
       }
     };
   }
