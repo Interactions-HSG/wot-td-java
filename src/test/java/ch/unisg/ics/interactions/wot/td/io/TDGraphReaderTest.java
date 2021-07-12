@@ -433,6 +433,12 @@ public class TDGraphReaderTest {
 
     assertEquals("GET", forms.get(0).getMethodName(TD.readProperty).get());
     assertEquals("GET", forms.get(1).getMethodName(TD.readProperty).get());
+
+    assertFalse(forms.get(0).getSubProtocol().isPresent());
+    assertFalse(forms.get(1).getSubProtocol().isPresent());
+
+    assertFalse(forms.get(0).getSubProtocol(TD.readProperty).isPresent());
+    assertFalse(forms.get(1).getSubProtocol(TD.readProperty).isPresent());
   }
 
   @Test
@@ -474,6 +480,12 @@ public class TDGraphReaderTest {
 
     assertEquals("PUT", forms.get(0).getMethodName(TD.writeProperty).get());
     assertEquals("PUT", forms.get(1).getMethodName(TD.writeProperty).get());
+
+    assertFalse(forms.get(0).getSubProtocol().isPresent());
+    assertFalse(forms.get(1).getSubProtocol().isPresent());
+
+    assertFalse(forms.get(0).getSubProtocol(TD.writeProperty).isPresent());
+    assertFalse(forms.get(1).getSubProtocol(TD.writeProperty).isPresent());
   }
 
   @Test
@@ -623,7 +635,36 @@ public class TDGraphReaderTest {
 
     assertEquals(COV.observe, formCoAP.getSubProtocol().get());
     assertEquals("websub", formHTTP.getSubProtocol().get());
+  }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testReadSubProtocolUnknownOperationType() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+
+    Optional<Form> form = property.getFirstFormForOperationType(TD.writeProperty);
+    assertTrue(form.isPresent());
+
+    form.get().getSubProtocol(TD.observeProperty);
   }
 
   @Test
