@@ -96,11 +96,17 @@ public class Form {
     return operationTypes;
   }
 
-  public Optional<String> getSubProtocol() {
+  public Optional<String> getSubprotocol() {
     return subprotocol;
   }
 
-  public Optional<String> getSubProtocol(String operationType) {
+  // Package-level access, used for setting affordance-specific default values after instantiation
+  // Reserved for event affordances of op subscribeevent
+  void setSubprotocol(String subprotocol) {
+    this.subprotocol = Optional.of(subprotocol);
+  }
+
+  public Optional<String> getSubprotocol(String operationType) {
     if (!operationTypes.contains(operationType)) {
       throw new IllegalArgumentException("Unknown operation type: " + operationType);
     }
@@ -120,6 +126,7 @@ public class Form {
     return Optional.empty();
   }
 
+  // Might require changing scope to package level in the future
   private Optional<String> getProtocol() {
     Optional<String> uriScheme = URI_SCHEMES.keySet()
       .stream()

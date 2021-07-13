@@ -209,7 +209,7 @@ public class TDGraphWriter {
         }
       }
 
-      Optional<String> subProt = form.getSubProtocol();
+      Optional<String> subProt = form.getSubprotocol();
       if (subProt.isPresent()) {
         try {
           IRI subProtIri = rdf.createIRI(subProt.get());

@@ -341,7 +341,7 @@ public class TDGraphReaderTest {
 
     Optional<Form> form = property.getFirstFormForOperationType(TD.readProperty);
     assertTrue(form.isPresent());
-    assertEquals("websub", form.get().getSubProtocol().get());
+    assertEquals("websub", form.get().getSubprotocol().get());
   }
 
   @Test
@@ -434,11 +434,11 @@ public class TDGraphReaderTest {
     assertEquals("GET", forms.get(0).getMethodName(TD.readProperty).get());
     assertEquals("GET", forms.get(1).getMethodName(TD.readProperty).get());
 
-    assertFalse(forms.get(0).getSubProtocol().isPresent());
-    assertFalse(forms.get(1).getSubProtocol().isPresent());
+    assertFalse(forms.get(0).getSubprotocol().isPresent());
+    assertFalse(forms.get(1).getSubprotocol().isPresent());
 
-    assertFalse(forms.get(0).getSubProtocol(TD.readProperty).isPresent());
-    assertFalse(forms.get(1).getSubProtocol(TD.readProperty).isPresent());
+    assertFalse(forms.get(0).getSubprotocol(TD.readProperty).isPresent());
+    assertFalse(forms.get(1).getSubprotocol(TD.readProperty).isPresent());
   }
 
   @Test
@@ -481,11 +481,11 @@ public class TDGraphReaderTest {
     assertEquals("PUT", forms.get(0).getMethodName(TD.writeProperty).get());
     assertEquals("PUT", forms.get(1).getMethodName(TD.writeProperty).get());
 
-    assertFalse(forms.get(0).getSubProtocol().isPresent());
-    assertFalse(forms.get(1).getSubProtocol().isPresent());
+    assertFalse(forms.get(0).getSubprotocol().isPresent());
+    assertFalse(forms.get(1).getSubprotocol().isPresent());
 
-    assertFalse(forms.get(0).getSubProtocol(TD.writeProperty).isPresent());
-    assertFalse(forms.get(1).getSubProtocol(TD.writeProperty).isPresent());
+    assertFalse(forms.get(0).getSubprotocol(TD.writeProperty).isPresent());
+    assertFalse(forms.get(1).getSubprotocol(TD.writeProperty).isPresent());
   }
 
   @Test
@@ -521,9 +521,9 @@ public class TDGraphReaderTest {
     assertTrue(form.get().getMethodName(TD.observeProperty).isPresent());
     assertEquals("GET", form.get().getMethodName(TD.observeProperty).get());
 
-    assertFalse(form.get().getSubProtocol().isPresent());
-    assertTrue(form.get().getSubProtocol(TD.observeProperty).isPresent());
-    assertEquals(COV.observe, form.get().getSubProtocol(TD.observeProperty).get());
+    assertFalse(form.get().getSubprotocol().isPresent());
+    assertTrue(form.get().getSubprotocol(TD.observeProperty).isPresent());
+    assertEquals(COV.observe, form.get().getSubprotocol(TD.observeProperty).get());
   }
 
   @Test
@@ -559,9 +559,9 @@ public class TDGraphReaderTest {
     assertTrue(form.get().getMethodName(TD.unobserveProperty).isPresent());
     assertEquals("GET", form.get().getMethodName(TD.unobserveProperty).get());
 
-    assertFalse(form.get().getSubProtocol().isPresent());
-    assertTrue(form.get().getSubProtocol(TD.unobserveProperty).isPresent());
-    assertEquals(COV.observe, form.get().getSubProtocol(TD.unobserveProperty).get());
+    assertFalse(form.get().getSubprotocol().isPresent());
+    assertTrue(form.get().getSubprotocol(TD.unobserveProperty).isPresent());
+    assertEquals(COV.observe, form.get().getSubprotocol(TD.unobserveProperty).get());
   }
 
   @Test(expected = InvalidTDException.class)
@@ -591,7 +591,6 @@ public class TDGraphReaderTest {
         "    ] .";
 
     new TDGraphReader(RDFFormat.TURTLE, testTD).readProperties();
-
   }
 
   @Test
@@ -633,8 +632,8 @@ public class TDGraphReaderTest {
     Form formHTTP = property.getFirstFormForOperationType(TD.readProperty).get();
     Form formCoAP = property.getFirstFormForOperationType(TD.observeProperty).get();
 
-    assertEquals(COV.observe, formCoAP.getSubProtocol().get());
-    assertEquals("websub", formHTTP.getSubProtocol().get());
+    assertEquals(COV.observe, formCoAP.getSubprotocol().get());
+    assertEquals("websub", formHTTP.getSubprotocol().get());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -664,7 +663,7 @@ public class TDGraphReaderTest {
     Optional<Form> form = property.getFirstFormForOperationType(TD.writeProperty);
     assertTrue(form.isPresent());
 
-    form.get().getSubProtocol(TD.observeProperty);
+    form.get().getSubprotocol(TD.observeProperty);
   }
 
   @Test

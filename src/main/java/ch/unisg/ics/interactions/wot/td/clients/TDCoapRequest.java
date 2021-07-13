@@ -41,7 +41,7 @@ public class TDCoapRequest {
     this.form = form;
 
     Optional<String> methodName = form.getMethodName(operationType);
-    Optional<String> subprotocol = form.getSubProtocol(operationType);
+    Optional<String> subprotocol = form.getSubprotocol(operationType);
 
     if (methodName.isPresent()) {
       this.request = new Request(CoAP.Code.valueOf(methodName.get()));
