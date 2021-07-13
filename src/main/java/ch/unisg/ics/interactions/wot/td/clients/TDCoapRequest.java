@@ -104,7 +104,8 @@ public class TDCoapRequest {
   public TDCoapObserveRelation establishRelation(TDCoapHandler handler) {
 
     if (!request.getOptions().hasObserve()) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe
+        + "for the given operation type.");
     }
 
     CoapClient client = new CoapClient(form.getTarget());
@@ -261,10 +262,7 @@ public class TDCoapRequest {
 
     try {
       builder.append(", Target: " + request.getURI());
-
-
       builder.append(", " + request.getOptions().toString());
-
 
       if (request.getPayload() != null) {
         builder.append(", Payload: " + request.getPayloadString());

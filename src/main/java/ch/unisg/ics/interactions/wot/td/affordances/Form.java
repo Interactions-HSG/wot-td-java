@@ -39,7 +39,7 @@ public class Form {
   private final String target;
   private final String contentType;
   private final Set<String> operationTypes;
-  private final Optional<String> subprotocol;
+  private Optional<String> subprotocol;
   private Optional<String> methodName;
 
   private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
@@ -126,11 +126,7 @@ public class Form {
       .filter(scheme -> getTarget().contains(scheme))
       .findFirst();
 
-    if (uriScheme.isPresent()) {
-      return Optional.of(URI_SCHEMES.get(uriScheme.get()));
-    }
-
-    return Optional.empty();
+    return uriScheme.map(URI_SCHEMES::get);
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation

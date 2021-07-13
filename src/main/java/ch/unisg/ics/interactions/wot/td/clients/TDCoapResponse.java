@@ -94,8 +94,8 @@ public class TDCoapResponse {
    *
    * @param schema schema to be used for validating the payload and constructing the list
    * @return the constructed list
-   * @throws IllegalArgumentException if the payload of the response does not conform to the provided
-   *                                  schema
+   * @throws IllegalArgumentException if the payload of the response does not conform to the
+   * provided schema
    */
   @SuppressWarnings("unchecked")
   public List<Object> getPayloadAsArray(ArraySchema schema) throws IllegalArgumentException {

@@ -191,7 +191,6 @@ public class TDGraphWriter {
 
       // Only writes the method name for forms with one operation type (to avoid ambiguity)
       if (form.getOperationTypes().size() == 1) {
-        String opType = form.getOperationTypes().stream().findFirst().get();
         if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
           graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
         } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {

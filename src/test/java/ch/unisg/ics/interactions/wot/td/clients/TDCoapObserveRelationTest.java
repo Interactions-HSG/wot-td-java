@@ -7,8 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TDCoapObserveRelationTest {
@@ -50,7 +49,7 @@ public class TDCoapObserveRelationTest {
 
   @Test
   public void testIsCanceled() {
-    assertEquals(false, relation.isCanceled());
+    assertFalse(relation.isCanceled());
   }
 
   @Test
