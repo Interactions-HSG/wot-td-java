@@ -58,22 +58,22 @@ public class DataSchemaValidator {
   }
 
   public static boolean validate(StringSchema schema, String value) {
-    // TODO validate against enum
+    /* TODO validate against enum */
     return true;
   }
 
   public static boolean validate(NumberSchema schema, double value) {
-    // TODO validate against enum
+    /* TODO validate against enum */
     return true;
   }
 
   public static boolean validate(IntegerSchema schema, int value) {
-    // TODO validate against enum
+    /* TODO validate against enum */
     return true;
   }
 
   public static boolean validate(BooleanSchema schema, boolean value) {
-    // TODO validate against enum
+    /* TODO validate against enum */
     return true;
   }
 
@@ -101,7 +101,7 @@ public class DataSchemaValidator {
       }
     } else return items.isEmpty();
 
-    // TODO validate against enum
+    /* TODO validate against enum */
 
     return true;
   }
