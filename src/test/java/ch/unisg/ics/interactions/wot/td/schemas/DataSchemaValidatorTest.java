@@ -4,6 +4,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -96,6 +97,43 @@ public class DataSchemaValidatorTest {
     Map<String, Object> objectValue = new HashedMap<>();
     objectValue.put("name", "Rimuru");
     assertFalse(DataSchemaValidator.validate(booleanSchema, objectValue));
+  }
+
+  @Test
+  public void testValidateArraySchemaSize() {
+
+    DataSchema arraySchema = new ArraySchema.Builder()
+      .addMinItems(2)
+      .addMaxItems(2)
+      .build();
+
+    List<String> arrayValueEqualItems = new ArrayList<>(Arrays.asList("1","2"));
+    assertTrue(DataSchemaValidator.validate(arraySchema, arrayValueEqualItems));
+
+    List<String> arrayValueLessItems = new ArrayList<>(Arrays.asList("1"));
+    assertFalse(DataSchemaValidator.validate(arraySchema, arrayValueLessItems));
+
+    List<String> arrayValueMoreItems = new ArrayList<>(Arrays.asList("1", "2", "3"));
+    assertFalse(DataSchemaValidator.validate(arraySchema, arrayValueMoreItems));
+  }
+
+  @Test
+  public void testValidateArraySchema() {
+
+    DataSchema arraySchema = new ArraySchema.Builder().build();
+    List<String> arrayValue = new ArrayList<>();
+    arrayValue.add("1");
+    assertTrue(DataSchemaValidator.validate(arraySchema, arrayValue));
+
+    assertFalse(DataSchemaValidator.validate(arraySchema, 1));
+    assertFalse(DataSchemaValidator.validate(arraySchema, 1.5));
+    assertFalse(DataSchemaValidator.validate(arraySchema, "1"));
+    assertFalse(DataSchemaValidator.validate(arraySchema, true));
+    assertFalse(DataSchemaValidator.validate(arraySchema, null));
+
+    Map<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("name", "Rimuru");
+    assertFalse(DataSchemaValidator.validate(arraySchema, objectValue));
   }
 
   @Test

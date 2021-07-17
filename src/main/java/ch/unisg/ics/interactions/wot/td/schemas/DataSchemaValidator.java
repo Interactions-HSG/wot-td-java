@@ -1,6 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class DataSchemaValidator {
 
@@ -27,7 +29,14 @@ public class DataSchemaValidator {
         }
         break;
       case DataSchema.ARRAY:
-        return false;
+        if (value instanceof List) {
+          List<Object> values = ((List<?>) value)
+            .stream()
+            .map(Object.class::cast)
+            .collect(Collectors.toList());
+          return validate((ArraySchema) schema, values);
+        }
+        break;
       case DataSchema.OBJECT:
         return false;
       case DataSchema.NULL:
@@ -59,5 +68,14 @@ public class DataSchemaValidator {
   public static boolean validate(BooleanSchema schema, boolean value) {
     // TODO validate against enum
     return true;
+  }
+
+  public static boolean validate(ArraySchema schema, List<Object> value) {
+    /* Array size validation */
+    if (schema.getMinItems().isPresent() && value.size() < schema.getMinItems().get()) {
+      return false;
+    }
+    return !schema.getMaxItems().isPresent() || value.size() <= schema.getMaxItems().get();
+    // TODO validate against enum
   }
 }
