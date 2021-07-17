@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -80,13 +81,20 @@ public class DataSchemaValidator {
     }
 
     List<DataSchema> items = schema.getItems();
+
     if (items.size() == 1) {
       for (Object itemValue : values) {
         if (!validate(items.get(0), itemValue)) {
           return false;
         }
       }
-    }
+    } else if (items.size() == values.size()) {
+      for (int i=0 ; i<items.size(); i++) {
+        if (!validate(items.get(i), values.get(i))) {
+          return false;
+        }
+      }
+    } else return items.isEmpty();
 
     // TODO validate against enum
 

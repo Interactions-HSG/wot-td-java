@@ -101,6 +101,25 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateArraySchema() {
+
+    DataSchema arraySchema = new ArraySchema.Builder().build();
+    List<String> arrayValue = new ArrayList<>();
+    arrayValue.add("1");
+    assertTrue(validate(arraySchema, arrayValue));
+
+    assertFalse(validate(arraySchema, 1));
+    assertFalse(validate(arraySchema, 1.5));
+    assertFalse(validate(arraySchema, "1"));
+    assertFalse(validate(arraySchema, true));
+    assertFalse(validate(arraySchema, null));
+
+    Map<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("name", "Rimuru");
+    assertFalse(validate(arraySchema, objectValue));
+  }
+
+  @Test
   public void testValidateArraySchemaSize() {
 
     ArraySchema arraySchema = new ArraySchema.Builder()
@@ -135,22 +154,22 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
-  public void testValidateArraySchema() {
+  public void testValidateArraySchemaPrimitiveItems() {
 
-    DataSchema arraySchema = new ArraySchema.Builder().build();
-    List<String> arrayValue = new ArrayList<>();
-    arrayValue.add("1");
-    assertTrue(validate(arraySchema, arrayValue));
+    ArraySchema arraySchema = new ArraySchema.Builder()
+      .addItem(new StringSchema.Builder().build())
+      .addItem(new NumberSchema.Builder().build())
+      .addItem(new IntegerSchema.Builder().build())
+      .addItem(new BooleanSchema.Builder().build())
+      .addItem(new NullSchema.Builder().build())
+      .build();
 
-    assertFalse(validate(arraySchema, 1));
-    assertFalse(validate(arraySchema, 1.5));
-    assertFalse(validate(arraySchema, "1"));
-    assertFalse(validate(arraySchema, true));
-    assertFalse(validate(arraySchema, null));
+    assertTrue(validate(arraySchema, Arrays.asList("1", 1, 1, false, null)));
 
-    Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
-    assertFalse(validate(arraySchema, objectValue));
+    assertFalse(validate(arraySchema, Arrays.asList("1", 1, 1, false)));
+    assertFalse(validate(arraySchema, Arrays.asList("1", 1, 1, false, null, null)));
+
+    assertFalse(validate(arraySchema, Arrays.asList("1", "1", "1", "false", "null")));
   }
 
   @Test
