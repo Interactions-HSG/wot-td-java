@@ -189,6 +189,28 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateArraySchemaNestedObject() {
+    ArraySchema arraySchema = new ArraySchema.Builder()
+      .addItem(new ObjectSchema.Builder()
+        .addProperty("height", new IntegerSchema.Builder().build())
+        .addProperty("age", new IntegerSchema.Builder().build())
+        .build())
+      .build();
+
+    HashedMap<String, Integer> nestedObjectValue1 = new HashedMap<>();
+    HashedMap<String, Integer> nestedObjectValue2 = new HashedMap<>();
+
+    nestedObjectValue1.put("height", 20);
+    nestedObjectValue1.put("age", 2);
+    nestedObjectValue2.put("height", 120);
+    nestedObjectValue2.put("age", 39);
+
+    List<Object> objectValues = Arrays.asList(nestedObjectValue1, nestedObjectValue2);
+
+    assertTrue(validate(arraySchema, objectValues));
+  }
+
+  @Test
   public void testValidateObjectSchema() {
     DataSchema objectSchema = new ObjectSchema.Builder().build();
 
@@ -287,16 +309,16 @@ public class DataSchemaValidatorTest {
         .addProperty("height", new IntegerSchema.Builder().build())
         .addProperty("age", new IntegerSchema.Builder().build())
         .build())
-    .build();
+      .build();
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
     HashedMap<String, Integer> nestedObjectValue1 = new HashedMap<>();
     HashedMap<String, Integer> nestedObjectValue2 = new HashedMap<>();
 
-    nestedObjectValue1.put("height",20);
-    nestedObjectValue1.put("age",2);
-    nestedObjectValue2.put("height",120);
-    nestedObjectValue2.put("age",39);
+    nestedObjectValue1.put("height", 20);
+    nestedObjectValue1.put("age", 2);
+    nestedObjectValue2.put("height", 120);
+    nestedObjectValue2.put("age", 39);
     objectValue.put("slimeForm", nestedObjectValue1);
     objectValue.put("humanForm", nestedObjectValue2);
 
