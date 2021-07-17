@@ -31,7 +31,7 @@ public class DataSchemaValidatorTest {
     assertFalse(validate(stringSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
+    objectValue.put("firstName", "Rimuru");
     assertFalse(validate(stringSchema, objectValue));
   }
 
@@ -52,7 +52,7 @@ public class DataSchemaValidatorTest {
     assertFalse(validate(numberSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
+    objectValue.put("firstName", "Rimuru");
     assertFalse(validate(numberSchema, objectValue));
   }
 
@@ -73,7 +73,7 @@ public class DataSchemaValidatorTest {
     assertFalse(validate(integerSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
+    objectValue.put("firstName", "Rimuru");
     assertFalse(validate(integerSchema, objectValue));
   }
 
@@ -93,7 +93,7 @@ public class DataSchemaValidatorTest {
     assertFalse(validate(booleanSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
+    objectValue.put("firstName", "Rimuru");
     assertFalse(validate(booleanSchema, objectValue));
   }
 
@@ -111,7 +111,7 @@ public class DataSchemaValidatorTest {
     assertFalse(validate(arraySchema, null));
 
     Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
+    objectValue.put("firstName", "Rimuru");
     assertFalse(validate(arraySchema, objectValue));
   }
 
@@ -190,6 +190,31 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateObjectSchema() {
+    DataSchema objectSchema = new ObjectSchema.Builder().build();
+
+    Map<Object, Object> objectValue = new HashedMap<>();
+    objectValue.put("firstName", "Rimuru");
+    objectValue.put("lastName", "Tempest");
+    assertTrue(validate(objectSchema, objectValue));
+
+    Map<Object, Object> objectValueInvalidName = new HashedMap<>();
+    objectValueInvalidName.put("firstName", "Rimuru");
+    objectValueInvalidName.put(1, "Tempest");
+    assertFalse(validate(objectSchema, objectValueInvalidName));
+
+    assertFalse(validate(objectSchema, "1"));
+    assertFalse(validate(objectSchema, 1));
+    assertFalse(validate(objectSchema, 1.5));
+    assertFalse(validate(objectSchema, true));
+    assertFalse(validate(objectSchema, null));
+
+    List<String> arrayValue = new ArrayList<>();
+    arrayValue.add("1");
+    assertFalse(validate(objectSchema, arrayValue));
+  }
+
+  @Test
   public void testValidateNullSchema() {
     DataSchema nullSchema = new NullSchema.Builder().build();
 
@@ -205,7 +230,7 @@ public class DataSchemaValidatorTest {
     assertFalse(validate(nullSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("name", "Rimuru");
+    objectValue.put("firstName", "Rimuru");
     assertFalse(validate(nullSchema, objectValue));
   }
 }

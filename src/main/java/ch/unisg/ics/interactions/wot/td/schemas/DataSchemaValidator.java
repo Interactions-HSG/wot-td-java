@@ -1,8 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DataSchemaValidator {
@@ -30,16 +28,21 @@ public class DataSchemaValidator {
         }
         break;
       case DataSchema.ARRAY:
-        if (value instanceof List) {
-          List<Object> values = ((List<?>) value)
-            .stream()
-            .map(Object.class::cast)
-            .collect(Collectors.toList());
+        if (value instanceof List<?>) {
+          List<Object> values = getValidObjects((List<?>) value);
           return validate((ArraySchema) schema, values);
         }
         break;
       case DataSchema.OBJECT:
-        return false;
+        if (value instanceof Map<?, ?>) {
+          List<String> names = getValidNames((Map<?, ?>) value);
+          if (names.size() == ((Map<?, ?>) value).size()) {
+            Map<String, Object> values = new HashMap<>();
+            names.forEach(name -> values.put(name, ((Map<?, ?>) value).get(name)));
+            return validate((ObjectSchema) schema, values);
+          }
+        }
+        break;
       case DataSchema.NULL:
         if (Objects.isNull(value)) {
           return true;
@@ -71,8 +74,7 @@ public class DataSchemaValidator {
     return true;
   }
 
-  public static boolean validate(ArraySchema schema, List values) {
-    /* Array size validation */
+  public static boolean validate(ArraySchema schema, List<Object> values) {
     if (schema.getMinItems().isPresent() && values.size() < schema.getMinItems().get()) {
       return false;
     }
@@ -99,5 +101,26 @@ public class DataSchemaValidator {
     // TODO validate against enum
 
     return true;
+  }
+
+  public static boolean validate(ObjectSchema schema, Map<String,Object> values) {
+    // TODO validate against enum
+
+    return true;
+  }
+
+  private static List<String> getValidNames(Map<?, ?> value) {
+    return value.keySet()
+      .stream()
+      .filter(String.class::isInstance)
+      .map(String.class::cast)
+      .collect(Collectors.toList());
+  }
+
+  private static List<Object> getValidObjects(List<?> value) {
+    return ((List<?>) value)
+      .stream()
+      .map(Object.class::cast)
+      .collect(Collectors.toList());
   }
 }
