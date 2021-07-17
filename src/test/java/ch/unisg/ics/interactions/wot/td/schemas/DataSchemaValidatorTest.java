@@ -56,6 +56,28 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateIntegerSchema() {
+
+    DataSchema integerSchema = new IntegerSchema.Builder().build();
+
+    assertTrue(DataSchemaValidator.validate(integerSchema,1));
+
+    assertFalse(DataSchemaValidator.validate(integerSchema, (float) 1.5));
+    assertFalse(DataSchemaValidator.validate(integerSchema, (long) 1.5));
+    assertFalse(DataSchemaValidator.validate(integerSchema,"1"));
+    assertFalse(DataSchemaValidator.validate(integerSchema,true));
+    assertFalse(DataSchemaValidator.validate(integerSchema,null));
+
+    List<String> arrayValue = new ArrayList<>();
+    arrayValue.add("1");
+    assertFalse(DataSchemaValidator.validate(integerSchema,arrayValue));
+
+    Map<String,Object> objectValue = new HashedMap<>();
+    objectValue.put("name","Rimuru");
+    assertFalse(DataSchemaValidator.validate(integerSchema,objectValue));
+  }
+
+  @Test
   public void testValidateNullSchema() {
 
     DataSchema nullSchema = new NullSchema.Builder().build();

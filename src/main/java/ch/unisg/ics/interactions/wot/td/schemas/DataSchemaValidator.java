@@ -17,7 +17,10 @@ public class DataSchemaValidator {
         }
         break;
       case DataSchema.INTEGER:
-        return false;
+        if (value instanceof Integer) {
+          return validate((IntegerSchema) schema, ((Integer) value).intValue());
+        }
+        break;
       case DataSchema.BOOLEAN:
         return false;
       case DataSchema.ARRAY:
@@ -41,6 +44,11 @@ public class DataSchemaValidator {
   }
 
   public static boolean validate(NumberSchema schema, double value) {
+    // TODO validate against enum
+    return true;
+  }
+
+  public static boolean validate(IntegerSchema schema, int value) {
     // TODO validate against enum
     return true;
   }
