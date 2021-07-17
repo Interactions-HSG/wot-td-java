@@ -237,6 +237,29 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateObjectSchemaPropertiesSize() {
+    ObjectSchema objectSchemaNoProperties = new ObjectSchema.Builder().build();
+    ObjectSchema objectSchemaTwoProperties = new ObjectSchema.Builder()
+      .addProperty("firstName", new StringSchema.Builder().build())
+      .addProperty("lastName", new StringSchema.Builder().build())
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("firstName", "Rimuru");
+
+    assertTrue(validate(objectSchemaNoProperties, objectValue));
+    assertTrue(validate(objectSchemaTwoProperties, objectValue));
+
+    objectValue.put("lastName", "Tempest");
+    assertTrue(validate(objectSchemaNoProperties, objectValue));
+    assertTrue(validate(objectSchemaTwoProperties, objectValue));
+
+    objectValue.put("species", "Demon Slime");
+    assertTrue(validate(objectSchemaNoProperties, objectValue));
+    assertFalse(validate(objectSchemaTwoProperties, objectValue));
+  }
+
+  @Test
   public void testValidateNullSchema() {
     DataSchema nullSchema = new NullSchema.Builder().build();
 

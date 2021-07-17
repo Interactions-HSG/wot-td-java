@@ -110,12 +110,17 @@ public class DataSchemaValidator {
     Map<String, DataSchema> properties = schema.getProperties();
     List<String> requiredPropertyNames = schema.getRequiredProperties();
 
-    // if there are no defined properties, return true;
+    // if there are no defined properties, return true
     if (properties.isEmpty()) {
       return true;
     }
 
-    // if values does not contain name that is a required property name, return false;
+    // if there are properties missing from the object schema, return false
+    if (values.keySet().stream().anyMatch(name -> !properties.containsKey(name))) {
+      return false;
+    }
+
+    // if a required property is missing, return false
     if (requiredPropertyNames.stream().anyMatch(name -> !values.containsKey(name))) {
       return false;
     }
