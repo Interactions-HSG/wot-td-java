@@ -304,6 +304,29 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateObjectSchemaNestedArray() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("forms", new ArraySchema.Builder()
+        .addItem(new StringSchema.Builder().build())
+        .addMinItems(2)
+        .build())
+      .addProperty("ages", new ArraySchema.Builder()
+        .addItem(new IntegerSchema.Builder().build())
+        .addItem(new IntegerSchema.Builder().build())
+        .build())
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("forms", Arrays.asList("human"));
+    objectValue.put("ages", Arrays.asList(2, 39));
+
+    assertFalse(validate(objectSchema, objectValue));
+
+    objectValue.put("forms", Arrays.asList("human", "slime"));
+    assertTrue(validate(objectSchema, objectValue));
+  }
+
+  @Test
   public void testValidateNullSchema() {
     DataSchema nullSchema = new NullSchema.Builder().build();
 
