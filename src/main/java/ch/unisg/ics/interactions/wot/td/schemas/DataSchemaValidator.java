@@ -12,7 +12,10 @@ public class DataSchemaValidator {
         }
         break;
       case DataSchema.NUMBER:
-        return false;
+        if (value instanceof Number) {
+          return validate((NumberSchema) schema, ((Number) value).doubleValue());
+        }
+        break;
       case DataSchema.INTEGER:
         return false;
       case DataSchema.BOOLEAN:
@@ -33,6 +36,11 @@ public class DataSchemaValidator {
   }
 
   public static boolean validate(StringSchema schema, String value) {
+    // TODO validate against enum
+    return true;
+  }
+
+  public static boolean validate(NumberSchema schema, double value) {
     // TODO validate against enum
     return true;
   }
