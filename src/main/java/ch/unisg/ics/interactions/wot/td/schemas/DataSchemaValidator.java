@@ -1,6 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DataSchemaValidator {
@@ -91,7 +94,7 @@ public class DataSchemaValidator {
         }
       }
     } else if (items.size() == values.size()) {
-      for (int i=0 ; i<items.size(); i++) {
+      for (int i = 0; i < items.size(); i++) {
         if (!validate(items.get(i), values.get(i))) {
           return false;
         }
@@ -103,8 +106,26 @@ public class DataSchemaValidator {
     return true;
   }
 
-  public static boolean validate(ObjectSchema schema, Map<String,Object> values) {
-    // TODO validate against enum
+  public static boolean validate(ObjectSchema schema, Map<String, Object> values) {
+    Map<String, DataSchema> properties = schema.getProperties();
+    List<String> requiredPropertyNames = schema.getRequiredProperties();
+
+    // if there are no defined properties, return true;
+    if (properties.isEmpty()) {
+      return true;
+    }
+
+    // if values does not contain name that is a required property name, return false;
+    if (requiredPropertyNames.stream().anyMatch(name -> !values.containsKey(name))) {
+      return false;
+    }
+
+    for (String name : values.keySet()) {
+      DataSchema property = properties.get(name);
+      if (!validate(property, values.get(name))) {
+        return false;
+      }
+    }
 
     return true;
   }
@@ -120,6 +141,7 @@ public class DataSchemaValidator {
   private static List<Object> getValidObjects(List<?> value) {
     return ((List<?>) value)
       .stream()
+      .filter(Objects::nonNull)
       .map(Object.class::cast)
       .collect(Collectors.toList());
   }

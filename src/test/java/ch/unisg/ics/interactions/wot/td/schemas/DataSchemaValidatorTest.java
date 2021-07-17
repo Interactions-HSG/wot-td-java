@@ -3,7 +3,6 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -148,7 +147,7 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
-  public void testValidateArraySchemaPrimitiveItems() {
+  public void testValidateArraySchemaWithPrimitiveItems() {
     ArraySchema arraySchema = new ArraySchema.Builder()
       .addItem(new StringSchema.Builder().build())
       .addItem(new NumberSchema.Builder().build())
@@ -212,6 +211,29 @@ public class DataSchemaValidatorTest {
     List<String> arrayValue = new ArrayList<>();
     arrayValue.add("1");
     assertFalse(validate(objectSchema, arrayValue));
+  }
+
+  @Test
+  public void testValidateObjectSchemaWithPrimitiveProperties() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("stringName", new StringSchema.Builder().build())
+      .addProperty("numberName", new NumberSchema.Builder().build())
+      .addProperty("integerName", new IntegerSchema.Builder().build())
+      .addProperty("booleanName", new BooleanSchema.Builder().build())
+      .addProperty("nullName", new NullSchema.Builder().build())
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("stringName", "Rimuru");
+    objectValue.put("numberName", 1);
+    objectValue.put("integerName", 1);
+    objectValue.put("booleanName", false);
+    objectValue.put("nullName", null);
+
+    assertTrue(validate(objectSchema, objectValue));
+
+    objectValue.put("stringName", 1);
+    assertFalse(validate(objectSchema, objectValue));
   }
 
   @Test
