@@ -190,7 +190,7 @@ public class TDGraphWriter {
       graphBuilder.add(interactionId, rdf.createIRI(TD.hasForm), formId);
 
       // Only writes the method name for forms with one operation type (to avoid ambiguity)
-      if (form.getOperationTypes().size() == 1) {
+      if (form.getMethodName().isPresent() && form.getOperationTypes().size() == 1) {
         if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
           graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
         } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
