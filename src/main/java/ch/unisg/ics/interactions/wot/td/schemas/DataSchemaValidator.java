@@ -70,12 +70,26 @@ public class DataSchemaValidator {
     return true;
   }
 
-  public static boolean validate(ArraySchema schema, List<Object> value) {
+  public static boolean validate(ArraySchema schema, List values) {
     /* Array size validation */
-    if (schema.getMinItems().isPresent() && value.size() < schema.getMinItems().get()) {
+    if (schema.getMinItems().isPresent() && values.size() < schema.getMinItems().get()) {
       return false;
     }
-    return !schema.getMaxItems().isPresent() || value.size() <= schema.getMaxItems().get();
+    if (schema.getMaxItems().isPresent() && values.size() > schema.getMaxItems().get()) {
+      return false;
+    }
+
+    List<DataSchema> items = schema.getItems();
+    if (items.size() == 1) {
+      for (Object itemValue : values) {
+        if (!validate(items.get(0), itemValue)) {
+          return false;
+        }
+      }
+    }
+
     // TODO validate against enum
+
+    return true;
   }
 }
