@@ -3,6 +3,7 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateStringSchema() {
-
     DataSchema stringSchema = new StringSchema.Builder().build();
 
     assertTrue(validate(stringSchema, "1"));
@@ -37,7 +37,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateNumberSchema() {
-
     DataSchema numberSchema = new NumberSchema.Builder().build();
 
     assertTrue(validate(numberSchema, 1));
@@ -59,7 +58,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateIntegerSchema() {
-
     DataSchema integerSchema = new IntegerSchema.Builder().build();
 
     assertTrue(validate(integerSchema, 1));
@@ -81,7 +79,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateBooleanSchema() {
-
     DataSchema booleanSchema = new BooleanSchema.Builder().build();
 
     assertTrue(validate(booleanSchema, true));
@@ -102,7 +99,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateArraySchema() {
-
     DataSchema arraySchema = new ArraySchema.Builder().build();
     List<String> arrayValue = new ArrayList<>();
     arrayValue.add("1");
@@ -121,7 +117,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateArraySchemaSize() {
-
     ArraySchema arraySchema = new ArraySchema.Builder()
       .addMinItems(2)
       .addMaxItems(2)
@@ -139,7 +134,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateArraySchemaOneItem() {
-
     ArraySchema arraySchema = new ArraySchema.Builder()
       .addItem(new StringSchema.Builder().build())
       .build();
@@ -155,7 +149,6 @@ public class DataSchemaValidatorTest {
 
   @Test
   public void testValidateArraySchemaPrimitiveItems() {
-
     ArraySchema arraySchema = new ArraySchema.Builder()
       .addItem(new StringSchema.Builder().build())
       .addItem(new NumberSchema.Builder().build())
@@ -173,8 +166,31 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
-  public void testValidateNullSchema() {
+  public void testValidateArraySchemaWithNestedArray() {
+    ArraySchema arraySchema = new ArraySchema.Builder()
+      .addItem(new ArraySchema.Builder()
+        .addItem(new StringSchema.Builder().build())
+        .build())
+      .addItem(new ArraySchema.Builder()
+        .addItem(new NumberSchema.Builder().build())
+        .build())
+      .build();
 
+    List<Object> stringValues = Arrays.asList("1", "2");
+    List<Object> numberValues = Arrays.asList(2, 2);
+
+    List<Object> values = Arrays.asList(stringValues, numberValues);
+    assertTrue(validate(arraySchema, values));
+
+    List<Object> invertedValues = Arrays.asList(numberValues, stringValues);
+    assertFalse(validate(arraySchema, invertedValues));
+
+    assertFalse(validate(arraySchema, stringValues));
+    assertFalse(validate(arraySchema, numberValues));
+  }
+
+  @Test
+  public void testValidateNullSchema() {
     DataSchema nullSchema = new NullSchema.Builder().build();
 
     assertTrue(validate(nullSchema, null));
