@@ -5,7 +5,7 @@ import java.util.Objects;
 public class DataSchemaValidator {
 
   public static boolean validate(DataSchema schema, Object value) {
-    switch(schema.getDatatype()) {
+    switch (schema.getDatatype()) {
       case DataSchema.STRING:
         if (value instanceof String) {
           return validate((StringSchema) schema, (String) value);
@@ -22,7 +22,10 @@ public class DataSchemaValidator {
         }
         break;
       case DataSchema.BOOLEAN:
-        return false;
+        if (value instanceof Boolean) {
+          return validate((BooleanSchema) schema, ((Boolean) value).booleanValue());
+        }
+        break;
       case DataSchema.ARRAY:
         return false;
       case DataSchema.OBJECT:
@@ -49,6 +52,11 @@ public class DataSchemaValidator {
   }
 
   public static boolean validate(IntegerSchema schema, int value) {
+    // TODO validate against enum
+    return true;
+  }
+
+  public static boolean validate(BooleanSchema schema, boolean value) {
     // TODO validate against enum
     return true;
   }
