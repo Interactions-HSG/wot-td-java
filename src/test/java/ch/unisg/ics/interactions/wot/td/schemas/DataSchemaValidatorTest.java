@@ -260,6 +260,23 @@ public class DataSchemaValidatorTest {
   }
 
   @Test
+  public void testValidateObjectSchemaRequiredProperties() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("requiredName", new StringSchema.Builder().build())
+      .addProperty("optionalName", new StringSchema.Builder().build())
+      .addRequiredProperties("requiredName")
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+
+    objectValue.put("optionalName", "optionalValue");
+    assertFalse(validate(objectSchema, objectValue));
+
+    objectValue.put("requiredName", "requiredName");
+    assertTrue(validate(objectSchema, objectValue));
+  }
+
+  @Test
   public void testValidateNullSchema() {
     DataSchema nullSchema = new NullSchema.Builder().build();
 
