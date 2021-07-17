@@ -7,7 +7,10 @@ public class DataSchemaValidator {
   public static boolean validate(DataSchema schema, Object value) {
     switch(schema.getDatatype()) {
       case DataSchema.STRING:
-        return false;
+        if (value instanceof String) {
+          return validate((StringSchema) schema, (String) value);
+        }
+        break;
       case DataSchema.NUMBER:
         return false;
       case DataSchema.INTEGER:
@@ -19,13 +22,18 @@ public class DataSchemaValidator {
       case DataSchema.OBJECT:
         return false;
       case DataSchema.NULL:
-        if (!Objects.isNull(value)) {
-          return false;
+        if (Objects.isNull(value)) {
+          return true;
         }
         break;
       default:
         break;
     }
+    return false;
+  }
+
+  public static boolean validate(StringSchema schema, String value) {
+    // TODO validate against enum
     return true;
   }
 }

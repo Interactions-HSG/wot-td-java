@@ -13,9 +13,30 @@ import static org.junit.Assert.assertTrue;
 public class DataSchemaValidatorTest {
 
   @Test
+  public void testValidateStringSchema() {
+
+    DataSchema stringSchema = new StringSchema.Builder().build();
+
+    assertTrue(DataSchemaValidator.validate(stringSchema,"1"));
+
+    assertFalse(DataSchemaValidator.validate(stringSchema,1));
+    assertFalse(DataSchemaValidator.validate(stringSchema,1.5));
+    assertFalse(DataSchemaValidator.validate(stringSchema,true));
+    assertFalse(DataSchemaValidator.validate(stringSchema,null));
+
+    List<String> arrayValue = new ArrayList<>();
+    arrayValue.add("1");
+    assertFalse(DataSchemaValidator.validate(stringSchema,arrayValue));
+
+    Map<String,Object> objectValue = new HashedMap<>();
+    objectValue.put("name","Rimuru");
+    assertFalse(DataSchemaValidator.validate(stringSchema,objectValue));
+  }
+
+  @Test
   public void testValidateNullSchema() {
 
-    NullSchema nullSchema = new NullSchema.Builder().build();
+    DataSchema nullSchema = new NullSchema.Builder().build();
 
     assertTrue(DataSchemaValidator.validate(nullSchema,null));
 
