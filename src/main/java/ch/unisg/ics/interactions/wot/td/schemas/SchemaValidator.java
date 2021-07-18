@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class DataSchemaValidator {
+public class SchemaValidator {
 
   public static boolean validate(DataSchema schema, Object value) {
     switch (schema.getDatatype()) {

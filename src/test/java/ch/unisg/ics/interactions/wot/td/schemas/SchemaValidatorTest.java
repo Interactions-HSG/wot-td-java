@@ -8,11 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static ch.unisg.ics.interactions.wot.td.schemas.DataSchemaValidator.validate;
+import static ch.unisg.ics.interactions.wot.td.schemas.SchemaValidator.validate;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class DataSchemaValidatorTest {
+public class SchemaValidatorTest {
 
   @Test
   public void testValidateStringSchema() {
