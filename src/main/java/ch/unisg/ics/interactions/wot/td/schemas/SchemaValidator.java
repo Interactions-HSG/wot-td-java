@@ -1,9 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SchemaValidator {
@@ -107,32 +104,86 @@ public class SchemaValidator {
   }
 
   public static boolean validate(ObjectSchema schema, Map<String, Object> values) {
+    return (validateByPropertyNames(schema, values)
+      || validateByPropertySemanticTypes(schema, values));
+
+  }
+
+  public static boolean validateByPropertyNames(ObjectSchema schema, Map<String, Object> values) {
     Map<String, DataSchema> properties = schema.getProperties();
     List<String> requiredPropertyNames = schema.getRequiredProperties();
 
     // if there are no defined properties, return true
-    if (properties.isEmpty()) {
+    if (schema.getProperties().isEmpty()) {
       return true;
     }
 
-    // if there are properties missing from the object schema, return false
-    if (values.keySet().stream().anyMatch(name -> !properties.containsKey(name))) {
+    // if there are less values than the number of required properties, return false
+    if (values.size() < schema.getRequiredProperties().size()) {
       return false;
     }
 
-    // if a required property is missing, return false
-    if (requiredPropertyNames.stream().anyMatch(name -> !values.containsKey(name))) {
+    // if all value names are specified in the object schema,
+    // and all required property names are in values,
+    // then validate against property names
+    if (properties.keySet().containsAll(values.keySet())
+      && values.keySet().containsAll(requiredPropertyNames)) {
+      for (String name : values.keySet()) {
+        DataSchema property = properties.get(name);
+        if (!validate(property, values.get(name))) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  public static boolean validateByPropertySemanticTypes(ObjectSchema schema, Map<String, Object> values) {
+    Map<String, DataSchema> properties = schema.getProperties();
+    List<String> requiredPropertyNames = schema.getRequiredProperties();
+
+    // if there are no defined properties, return true
+    if (schema.getProperties().isEmpty()) {
+      return true;
+    }
+
+    System.out.println(values.size() < schema.getRequiredProperties().size());
+    // if there are less values than the number of required properties, return false
+    if (values.size() < schema.getRequiredProperties().size()) {
       return false;
     }
 
-    for (String name : values.keySet()) {
-      DataSchema property = properties.get(name);
-      if (!validate(property, values.get(name))) {
+    //validate against semantic types of properties
+    List<DataSchema> requiredSchemas = requiredPropertyNames.stream()
+      .map(properties::get).collect(Collectors.toList());
+
+
+    List<String> semanticTypes = new ArrayList<>();
+    requiredSchemas.stream().map(DataSchema::getSemanticTypes)
+      .forEach(semanticTypes::addAll);
+
+    // If a semantic type in values appears among the semantic types of more
+    // than one property, then values are considered invalid to avoid ambiguity
+    if (values.keySet().stream().anyMatch(type -> semanticTypes.contains(type)
+      && Collections.frequency(semanticTypes, type) > 1)) {
+      return false;
+    }
+
+    Map<String, Object> valuesByPropertyNames = new HashMap<>();
+    for (String semanticType : values.keySet()) {
+      Optional<String> name = schema.getFirstPropertyNameBySemnaticType(semanticType);
+      if (!name.isPresent()) {
+        System.out.println(semanticType);
         return false;
       }
+      System.out.println(name.get());
+      System.out.println(values.get(semanticType));
+      valuesByPropertyNames.put(name.get(), values.get(semanticType));
     }
 
-    return true;
+    return validate(schema, valuesByPropertyNames);
   }
 
   private static List<String> getValidNames(Map<?, ?> value) {

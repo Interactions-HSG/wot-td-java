@@ -294,7 +294,7 @@ public class SchemaValidatorTest {
     objectValue.put("optionalName", "optionalValue");
     assertFalse(validate(objectSchema, objectValue));
 
-    objectValue.put("requiredName", "requiredName");
+    objectValue.put("requiredName", "requiredValue");
     assertTrue(validate(objectSchema, objectValue));
   }
 
@@ -366,5 +366,49 @@ public class SchemaValidatorTest {
     Map<String, Object> objectValue = new HashedMap<>();
     objectValue.put("firstName", "Rimuru");
     assertFalse(validate(nullSchema, objectValue));
+  }
+
+  @Test
+  public void testValidateObjectSchemaBySemanticTypesSize() {
+    ObjectSchema objectSchemaNoProperties = new ObjectSchema.Builder().build();
+    ObjectSchema objectSchemaTwoProperties = new ObjectSchema.Builder()
+      .addProperty("firstName", new StringSchema.Builder()
+        .addSemanticType("http://example.org#FirstName").build())
+      .addProperty("lastName", new StringSchema.Builder()
+        .addSemanticType("http://example.org#LastName").build())
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("http://example.org#FirstName", "Rimuru");
+
+    assertTrue(validate(objectSchemaNoProperties, objectValue));
+    assertTrue(validate(objectSchemaTwoProperties, objectValue));
+
+    objectValue.put("http://example.org#LastName", "Tempest");
+    assertTrue(validate(objectSchemaNoProperties, objectValue));
+    assertTrue(validate(objectSchemaTwoProperties, objectValue));
+
+    objectValue.put("http://example.org#Species", "Demon Slime");
+    assertTrue(validate(objectSchemaNoProperties, objectValue));
+    assertFalse(validate(objectSchemaTwoProperties, objectValue));
+  }
+
+  @Test
+  public void testValidateObjectSchemaSemanticTypesRequiredProperties() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("requiredName", new StringSchema.Builder()
+        .addSemanticType("http://example.org#Required").build())
+      .addProperty("optionalName", new StringSchema.Builder()
+        .addSemanticType("http://example.org#Optional").build())
+      .addRequiredProperties("requiredName")
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+
+    objectValue.put("http://example.org#Optional", "optionalValue");
+    assertFalse(validate(objectSchema, objectValue));
+
+    objectValue.put("http://example.org#Required", "requiredValue");
+    assertTrue(validate(objectSchema, objectValue));
   }
 }
