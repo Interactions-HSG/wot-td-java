@@ -8,22 +8,78 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static ch.unisg.ics.interactions.wot.td.schemas.SchemaValidator.validate;
+import static ch.unisg.ics.interactions.wot.td.schemas.SchemaValidator.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SchemaValidatorTest {
+
+  private static ObjectSchema getObjectSchemaWithRequiredProperties() {
+    return new ObjectSchema.Builder()
+      .addProperty("requiredName", new StringSchema.Builder()
+        .addSemanticType("http://example.org#Required").build())
+      .addProperty("optionalName", new StringSchema.Builder()
+        .addSemanticType("http://example.org#Optional").build())
+      .addRequiredProperties("requiredName")
+      .build();
+  }
+
+  private static ObjectSchema getObjectSchemaWithNestedObject() {
+    IntegerSchema heightSchema = new IntegerSchema.Builder()
+      .addSemanticType("http://example.org#Height")
+      .build();
+
+    IntegerSchema ageSchema = new IntegerSchema.Builder()
+      .addSemanticType("http://example.org#Age")
+      .build();
+
+    return new ObjectSchema.Builder()
+      .addProperty("slimeForm", new ObjectSchema.Builder()
+        .addSemanticType("http://example.org#MainForm")
+        .addProperty("height", heightSchema)
+        .addProperty("age", ageSchema)
+        .build())
+      .addProperty("humanForm", new ObjectSchema.Builder()
+        .addSemanticType("http://example.org#SecondaryForm")
+        .addProperty("height", heightSchema)
+        .addProperty("age", ageSchema)
+        .build())
+      .build();
+  }
+
+  private static ObjectSchema getObjectSchemaWithNestedArray() {
+    return new ObjectSchema.Builder()
+      .addProperty("forms", new ArraySchema.Builder()
+        .addSemanticType("http://example.org#FormArray")
+        .addItem(new StringSchema.Builder()
+          .addSemanticType("http://example.org#Form")
+          .build())
+        .addMinItems(2)
+        .build())
+      .addProperty("ages", new ArraySchema.Builder()
+        .addSemanticType("http://example.org#AgeArray")
+        .addItem(new IntegerSchema.Builder()
+          .addSemanticType("http://example.org#Age").build())
+        .addItem(new IntegerSchema.Builder()
+          .addSemanticType("http://example.org#Form")
+          .addSemanticType("http://example.org#Age").build())
+        .build())
+      .build();
+  }
 
   @Test
   public void testValidateStringSchema() {
     DataSchema stringSchema = new StringSchema.Builder().build();
 
     assertTrue(validate(stringSchema, "1"));
+    assertTrue(validate((StringSchema) stringSchema, "1"));
 
     assertFalse(validate(stringSchema, 1));
     assertFalse(validate(stringSchema, 1.5));
     assertFalse(validate(stringSchema, true));
+
     assertFalse(validate(stringSchema, null));
+    assertFalse(validate((StringSchema) stringSchema, null));
 
     List<String> arrayValue = new ArrayList<>();
     arrayValue.add("1");
@@ -41,6 +97,9 @@ public class SchemaValidatorTest {
     assertTrue(validate(numberSchema, 1));
     assertTrue(validate(numberSchema, (float) 1.5));
     assertTrue(validate(numberSchema, (long) 1.5));
+    assertTrue(validate((NumberSchema) numberSchema, 1));
+    assertTrue(validate((NumberSchema) numberSchema, (float) 1.5));
+    assertTrue(validate((NumberSchema) numberSchema, (long) 1.5));
 
     assertFalse(validate(numberSchema, "1"));
     assertFalse(validate(numberSchema, true));
@@ -60,6 +119,7 @@ public class SchemaValidatorTest {
     DataSchema integerSchema = new IntegerSchema.Builder().build();
 
     assertTrue(validate(integerSchema, 1));
+    assertTrue(validate((IntegerSchema) integerSchema, 1));
 
     assertFalse(validate(integerSchema, (float) 1.5));
     assertFalse(validate(integerSchema, (long) 1.5));
@@ -81,6 +141,7 @@ public class SchemaValidatorTest {
     DataSchema booleanSchema = new BooleanSchema.Builder().build();
 
     assertTrue(validate(booleanSchema, true));
+    assertTrue(validate((BooleanSchema) booleanSchema, true));
 
     assertFalse(validate(booleanSchema, 1));
     assertFalse(validate(booleanSchema, 1.5));
@@ -99,15 +160,18 @@ public class SchemaValidatorTest {
   @Test
   public void testValidateArraySchema() {
     DataSchema arraySchema = new ArraySchema.Builder().build();
-    List<String> arrayValue = new ArrayList<>();
+    List<Object> arrayValue = new ArrayList<>();
     arrayValue.add("1");
     assertTrue(validate(arraySchema, arrayValue));
+    assertTrue(validate((ArraySchema) arraySchema, arrayValue));
 
     assertFalse(validate(arraySchema, 1));
     assertFalse(validate(arraySchema, 1.5));
     assertFalse(validate(arraySchema, "1"));
     assertFalse(validate(arraySchema, true));
+
     assertFalse(validate(arraySchema, null));
+    assertFalse(validate((ArraySchema) arraySchema, null));
 
     Map<String, Object> objectValue = new HashedMap<>();
     objectValue.put("firstName", "Rimuru");
@@ -214,10 +278,12 @@ public class SchemaValidatorTest {
   public void testValidateObjectSchema() {
     DataSchema objectSchema = new ObjectSchema.Builder().build();
 
-    Map<Object, Object> objectValue = new HashedMap<>();
+    Map<String, Object> objectValue = new HashedMap<>();
     objectValue.put("firstName", "Rimuru");
     objectValue.put("lastName", "Tempest");
     assertTrue(validate(objectSchema, objectValue));
+    assertTrue(validate((ObjectSchema) objectSchema, objectValue));
+    assertTrue(validateByPropertyNames((ObjectSchema) objectSchema, objectValue));
 
     Map<Object, Object> objectValueInvalidName = new HashedMap<>();
     objectValueInvalidName.put("firstName", "Rimuru");
@@ -245,7 +311,7 @@ public class SchemaValidatorTest {
       .addProperty("nullName", new NullSchema.Builder().build())
       .build();
 
-    HashedMap<String, Object> objectValue = new HashedMap<>();
+    HashedMap<Object, Object> objectValue = new HashedMap<>();
     objectValue.put("stringName", "Rimuru");
     objectValue.put("numberName", 1);
     objectValue.put("integerName", 1);
@@ -267,49 +333,44 @@ public class SchemaValidatorTest {
       .build();
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
-    objectValue.put("firstName", "Rimuru");
 
+    objectValue.put("firstName", "Rimuru");
     assertTrue(validate(objectSchemaNoProperties, objectValue));
     assertTrue(validate(objectSchemaTwoProperties, objectValue));
+    assertTrue(validateByPropertyNames(objectSchemaNoProperties, objectValue));
+    assertTrue(validateByPropertyNames(objectSchemaTwoProperties, objectValue));
 
     objectValue.put("lastName", "Tempest");
     assertTrue(validate(objectSchemaNoProperties, objectValue));
     assertTrue(validate(objectSchemaTwoProperties, objectValue));
+    assertTrue(validateByPropertyNames(objectSchemaNoProperties, objectValue));
+    assertTrue(validateByPropertyNames(objectSchemaTwoProperties, objectValue));
 
     objectValue.put("species", "Demon Slime");
     assertTrue(validate(objectSchemaNoProperties, objectValue));
     assertFalse(validate(objectSchemaTwoProperties, objectValue));
+    assertTrue(validateByPropertyNames(objectSchemaNoProperties, objectValue));
+    assertFalse(validateByPropertySemanticTypes(objectSchemaTwoProperties, objectValue));
   }
 
   @Test
   public void testValidateObjectSchemaRequiredProperties() {
-    ObjectSchema objectSchema = new ObjectSchema.Builder()
-      .addProperty("requiredName", new StringSchema.Builder().build())
-      .addProperty("optionalName", new StringSchema.Builder().build())
-      .addRequiredProperties("requiredName")
-      .build();
+    ObjectSchema objectSchema = getObjectSchemaWithRequiredProperties();
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
 
     objectValue.put("optionalName", "optionalValue");
     assertFalse(validate(objectSchema, objectValue));
+    assertFalse(validateByPropertyNames(objectSchema, objectValue));
 
     objectValue.put("requiredName", "requiredValue");
     assertTrue(validate(objectSchema, objectValue));
+    assertTrue(validateByPropertyNames(objectSchema, objectValue));
   }
 
   @Test
   public void testValidateObjectSchemaNestedObject() {
-    ObjectSchema objectSchema = new ObjectSchema.Builder()
-      .addProperty("slimeForm", new ObjectSchema.Builder()
-        .addProperty("height", new IntegerSchema.Builder().build())
-        .addProperty("age", new IntegerSchema.Builder().build())
-        .build())
-      .addProperty("humanForm", new ObjectSchema.Builder()
-        .addProperty("height", new IntegerSchema.Builder().build())
-        .addProperty("age", new IntegerSchema.Builder().build())
-        .build())
-      .build();
+    ObjectSchema objectSchema = getObjectSchemaWithNestedObject();
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
     HashedMap<String, Integer> nestedObjectValue1 = new HashedMap<>();
@@ -327,16 +388,7 @@ public class SchemaValidatorTest {
 
   @Test
   public void testValidateObjectSchemaNestedArray() {
-    ObjectSchema objectSchema = new ObjectSchema.Builder()
-      .addProperty("forms", new ArraySchema.Builder()
-        .addItem(new StringSchema.Builder().build())
-        .addMinItems(2)
-        .build())
-      .addProperty("ages", new ArraySchema.Builder()
-        .addItem(new IntegerSchema.Builder().build())
-        .addItem(new IntegerSchema.Builder().build())
-        .build())
-      .build();
+    ObjectSchema objectSchema = getObjectSchemaWithNestedArray();
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
     objectValue.put("forms", Arrays.asList("human"));
@@ -369,7 +421,15 @@ public class SchemaValidatorTest {
   }
 
   @Test
-  public void testValidateObjectSchemaBySemanticTypesSize() {
+  public void testValidateObjectSchemaNull() {
+    ObjectSchema objectSchema = getObjectSchemaWithRequiredProperties();
+    assertFalse(validate(objectSchema, null));
+    assertFalse(validateByPropertyNames( objectSchema, null));
+    assertFalse(validateByPropertyNames(objectSchema, null));
+  }
+
+  @Test
+  public void testValidateObjectSchemaBySemTypesSize() {
     ObjectSchema objectSchemaNoProperties = new ObjectSchema.Builder().build();
     ObjectSchema objectSchemaTwoProperties = new ObjectSchema.Builder()
       .addProperty("firstName", new StringSchema.Builder()
@@ -380,35 +440,141 @@ public class SchemaValidatorTest {
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
     objectValue.put("http://example.org#FirstName", "Rimuru");
-
     assertTrue(validate(objectSchemaNoProperties, objectValue));
     assertTrue(validate(objectSchemaTwoProperties, objectValue));
+    assertTrue(validateByPropertySemanticTypes(objectSchemaNoProperties, objectValue));
+    assertTrue(validateByPropertySemanticTypes(objectSchemaTwoProperties, objectValue));
 
     objectValue.put("http://example.org#LastName", "Tempest");
     assertTrue(validate(objectSchemaNoProperties, objectValue));
     assertTrue(validate(objectSchemaTwoProperties, objectValue));
+    assertTrue(validateByPropertySemanticTypes(objectSchemaNoProperties, objectValue));
+    assertTrue(validateByPropertySemanticTypes(objectSchemaTwoProperties, objectValue));
 
     objectValue.put("http://example.org#Species", "Demon Slime");
     assertTrue(validate(objectSchemaNoProperties, objectValue));
     assertFalse(validate(objectSchemaTwoProperties, objectValue));
+    assertTrue(validateByPropertySemanticTypes(objectSchemaNoProperties, objectValue));
+    assertFalse(validateByPropertySemanticTypes(objectSchemaTwoProperties, objectValue));
+
+    assertFalse(validate(null, objectValue));
   }
 
   @Test
-  public void testValidateObjectSchemaSemanticTypesRequiredProperties() {
-    ObjectSchema objectSchema = new ObjectSchema.Builder()
-      .addProperty("requiredName", new StringSchema.Builder()
-        .addSemanticType("http://example.org#Required").build())
-      .addProperty("optionalName", new StringSchema.Builder()
-        .addSemanticType("http://example.org#Optional").build())
-      .addRequiredProperties("requiredName")
-      .build();
+  public void testValidateObjectSchemaBySemTypesRequiredProperties() {
+    ObjectSchema objectSchema = getObjectSchemaWithRequiredProperties();
 
     HashedMap<String, Object> objectValue = new HashedMap<>();
 
     objectValue.put("http://example.org#Optional", "optionalValue");
     assertFalse(validate(objectSchema, objectValue));
+    assertFalse(validateByPropertySemanticTypes(objectSchema, objectValue));
 
     objectValue.put("http://example.org#Required", "requiredValue");
     assertTrue(validate(objectSchema, objectValue));
+    assertTrue(validateByPropertySemanticTypes(objectSchema, objectValue));
+  }
+
+  @Test
+  public void testValidateObjectSchemaBySemTypesNestedObject() {
+    ObjectSchema objectSchema = getObjectSchemaWithNestedObject();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    HashedMap<String, Integer> nestedObjectValue1 = new HashedMap<>();
+    HashedMap<String, Integer> nestedObjectValue2 = new HashedMap<>();
+
+    nestedObjectValue1.put("http://example.org#Height", 20);
+    nestedObjectValue1.put("http://example.org#Age", 2);
+    nestedObjectValue2.put("http://example.org#Height", 120);
+    nestedObjectValue2.put("http://example.org#Age", 39);
+    objectValue.put("http://example.org#MainForm", nestedObjectValue1);
+    objectValue.put("http://example.org#SecondaryForm", nestedObjectValue2);
+
+    assertTrue(validate(objectSchema, objectValue));
+  }
+
+  @Test
+  public void testValidateObjectSchemaBySemTypesNestedArray() {
+    ObjectSchema objectSchema = getObjectSchemaWithNestedArray();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("http://example.org#FormArray", Arrays.asList("human"));
+    objectValue.put("http://example.org#AgeArray", Arrays.asList(2, 39));
+
+    assertFalse(validate(objectSchema, objectValue));
+
+    objectValue.put("http://example.org#FormArray", Arrays.asList("human", "slime"));
+    assertTrue(validate(objectSchema, objectValue));
+  }
+
+  @Test
+  public void testValidateObjectSchemaByNamesAndSemTypes() {
+    ObjectSchema simpleObjectSchema = getObjectSchemaWithRequiredProperties();
+
+    HashedMap<String, Object> semTypesObjectValue = new HashedMap<>();
+    semTypesObjectValue.put("http://example.org#Required", "requiredValue");
+    semTypesObjectValue.put("http://example.org#Optional", "optionalValue");
+    assertTrue(validate(simpleObjectSchema, semTypesObjectValue));
+
+    HashedMap<String, Object> namesObjectValue = new HashedMap<>();
+    namesObjectValue.put("requiredName", "requiredValue");
+    namesObjectValue.put("optionalName", "optionalValue");
+    assertTrue(validate(simpleObjectSchema, namesObjectValue));
+
+    HashedMap<String, Object> mixedObjectValue1 = new HashedMap<>();
+    mixedObjectValue1.put("http://example.org#Required", "requiredValue");
+    mixedObjectValue1.put("optionalName", "optionalValue");
+    assertFalse(validate(simpleObjectSchema, mixedObjectValue1));
+
+    HashedMap<String, Object> mixedObjectValue2 = new HashedMap<>();
+    mixedObjectValue2.put("http://example.org#Optional", "optionalValue");
+    mixedObjectValue2.put("requiredName", "requiredValue");
+    assertFalse(validate(simpleObjectSchema, mixedObjectValue2));
+  }
+
+  @Test
+  public void testValidateObjectSchemaByNamesAndSemTypesNested() {
+    ObjectSchema nestedObjectSchema = getObjectSchemaWithNestedObject();
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    HashedMap<String, Integer> nestedObjectValue1 = new HashedMap<>();
+    HashedMap<String, Integer> nestedObjectValue2 = new HashedMap<>();
+    HashedMap<String, Integer> nestedObjectValue3 = new HashedMap<>();
+
+    nestedObjectValue1.put("http://example.org#Height", 20);
+    nestedObjectValue1.put("http://example.org#Age", 2);
+    nestedObjectValue2.put("http://example.org#Height", 120);
+    nestedObjectValue2.put("http://example.org#Age", 39);
+    objectValue.put("slimeForm", nestedObjectValue1);
+    objectValue.put("humanForm", nestedObjectValue2);
+
+    assertTrue(validate(nestedObjectSchema, objectValue));
+
+    nestedObjectValue3.put("height", 120);
+    nestedObjectValue3.put("age", 39);
+    objectValue.put("humanForm", nestedObjectValue3);
+
+    assertTrue(validate(nestedObjectSchema, objectValue));
+
+  }
+
+  @Test
+  public void testValidateObjectSchemaDuplicateSemTypes() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("a", new StringSchema.Builder()
+        .addSemanticType("http://example.org#AType")
+        .addSemanticType("http://example.org#CommonType")
+        .build())
+      .addProperty("b", new StringSchema.Builder()
+        .addSemanticType("http://example.org#BType")
+        .addSemanticType("http://example.org#CommonType")
+        .build())
+      .build();
+
+    HashedMap<String, Object> objectValue = new HashedMap<>();
+    objectValue.put("http://example.org#AType", "validValue");
+    assertTrue(validate(objectSchema, objectValue));
+
+    objectValue.put("http://example.org#CommonType", "inValidValue");
+    assertFalse(validate(objectSchema, objectValue));
   }
 }

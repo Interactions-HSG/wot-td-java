@@ -44,37 +44,39 @@ public class SchemaValidator {
         }
         break;
       case DataSchema.NULL:
-        if (Objects.isNull(value)) {
+        if (value == null) {
           return true;
         }
         break;
       default:
-        break;
     }
     return false;
   }
 
   public static boolean validate(StringSchema schema, String value) {
     /* TODO validate against enum */
-    return true;
+    return (schema != null && value != null);
   }
 
   public static boolean validate(NumberSchema schema, double value) {
     /* TODO validate against enum */
-    return true;
+    return schema != null;
   }
 
   public static boolean validate(IntegerSchema schema, int value) {
     /* TODO validate against enum */
-    return true;
+    return schema != null;
   }
 
   public static boolean validate(BooleanSchema schema, boolean value) {
     /* TODO validate against enum */
-    return true;
+    return schema != null;
   }
 
   public static boolean validate(ArraySchema schema, List<Object> values) {
+    if (schema == null || values == null) {
+      return false;
+    }
     if (schema.getMinItems().isPresent() && values.size() < schema.getMinItems().get()) {
       return false;
     }
@@ -106,26 +108,23 @@ public class SchemaValidator {
   public static boolean validate(ObjectSchema schema, Map<String, Object> values) {
     return (validateByPropertyNames(schema, values)
       || validateByPropertySemanticTypes(schema, values));
-
   }
 
   public static boolean validateByPropertyNames(ObjectSchema schema, Map<String, Object> values) {
+    if (schema == null || values == null) {
+      return false;
+    }
+
     Map<String, DataSchema> properties = schema.getProperties();
     List<String> requiredPropertyNames = schema.getRequiredProperties();
 
     // if there are no defined properties, return true
-    if (schema.getProperties().isEmpty()) {
+    if (properties.isEmpty()) {
       return true;
     }
 
-    // if there are less values than the number of required properties, return false
-    if (values.size() < schema.getRequiredProperties().size()) {
-      return false;
-    }
-
-    // if all value names are specified in the object schema,
-    // and all required property names are in values,
-    // then validate against property names
+    /* if all value names are specified in the object schema and all required
+    property names are in values, then validate against property names */
     if (properties.keySet().containsAll(values.keySet())
       && values.keySet().containsAll(requiredPropertyNames)) {
       for (String name : values.keySet()) {
@@ -136,36 +135,27 @@ public class SchemaValidator {
       }
       return true;
     }
-
     return false;
   }
 
   public static boolean validateByPropertySemanticTypes(ObjectSchema schema, Map<String, Object> values) {
-    Map<String, DataSchema> properties = schema.getProperties();
-    List<String> requiredPropertyNames = schema.getRequiredProperties();
-
-    // if there are no defined properties, return true
-    if (schema.getProperties().isEmpty()) {
-      return true;
-    }
-
-    System.out.println(values.size() < schema.getRequiredProperties().size());
-    // if there are less values than the number of required properties, return false
-    if (values.size() < schema.getRequiredProperties().size()) {
+    if (schema == null || values == null) {
       return false;
     }
 
-    //validate against semantic types of properties
-    List<DataSchema> requiredSchemas = requiredPropertyNames.stream()
-      .map(properties::get).collect(Collectors.toList());
+    Map<String, DataSchema> properties = schema.getProperties();
 
+    // if there are no defined properties, return true
+    if (properties.isEmpty()) {
+      return true;
+    }
 
     List<String> semanticTypes = new ArrayList<>();
-    requiredSchemas.stream().map(DataSchema::getSemanticTypes)
+    properties.values().stream().map(DataSchema::getSemanticTypes)
       .forEach(semanticTypes::addAll);
 
-    // If a semantic type in values appears among the semantic types of more
-    // than one property, then values are considered invalid to avoid ambiguity
+    /* If a semantic type in values appears among the semantic types of more
+    than one property, then values are considered invalid to avoid ambiguity */
     if (values.keySet().stream().anyMatch(type -> semanticTypes.contains(type)
       && Collections.frequency(semanticTypes, type) > 1)) {
       return false;
@@ -175,11 +165,8 @@ public class SchemaValidator {
     for (String semanticType : values.keySet()) {
       Optional<String> name = schema.getFirstPropertyNameBySemnaticType(semanticType);
       if (!name.isPresent()) {
-        System.out.println(semanticType);
         return false;
       }
-      System.out.println(name.get());
-      System.out.println(values.get(semanticType));
       valuesByPropertyNames.put(name.get(), values.get(semanticType));
     }
 
