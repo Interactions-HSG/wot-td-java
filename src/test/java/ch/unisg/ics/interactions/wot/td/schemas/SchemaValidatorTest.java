@@ -426,6 +426,14 @@ public class SchemaValidatorTest {
     assertFalse(validate(objectSchema, null));
     assertFalse(validateByPropertyNames( objectSchema, null));
     assertFalse(validateByPropertyNames(objectSchema, null));
+
+    HashedMap<String, Object> objectValueByNames = new HashedMap<>();
+    objectValueByNames.put("requiredName", null);
+    assertFalse(validate(objectSchema, objectValueByNames));
+
+    HashedMap<String, Object> objectValueBySemTypes = new HashedMap<>();
+    objectValueBySemTypes.put("http://example.org#Required", null);
+    assertFalse(validate(objectSchema, objectValueBySemTypes));
   }
 
   @Test
@@ -491,6 +499,9 @@ public class SchemaValidatorTest {
     objectValue.put("http://example.org#SecondaryForm", nestedObjectValue2);
 
     assertTrue(validate(objectSchema, objectValue));
+
+    nestedObjectValue1.put("http://example.org#Height", null);
+    assertFalse(validate(objectSchema, objectValue));
   }
 
   @Test
