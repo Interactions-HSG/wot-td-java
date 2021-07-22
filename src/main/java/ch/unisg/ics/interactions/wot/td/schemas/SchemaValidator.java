@@ -54,8 +54,11 @@ public class SchemaValidator {
   }
 
   public static boolean validate(StringSchema schema, String value) {
-    /* TODO validate against enum */
-    return (schema != null && value != null);
+    if (schema == null || value == null) {
+      return false;
+    }
+    Set<String> enumeration = schema.getEnumeration();
+    return (enumeration.isEmpty() || enumeration.contains(value));
   }
 
   public static boolean validate(NumberSchema schema, double value) {

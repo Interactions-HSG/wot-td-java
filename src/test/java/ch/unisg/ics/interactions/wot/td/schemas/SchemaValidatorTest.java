@@ -3,10 +3,7 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ch.unisg.ics.interactions.wot.td.schemas.SchemaValidator.*;
 import static org.junit.Assert.assertFalse;
@@ -71,18 +68,18 @@ public class SchemaValidatorTest {
   public void testValidateStringSchema() {
     DataSchema stringSchema = new StringSchema.Builder().build();
 
-    assertTrue(validate(stringSchema, "1"));
-    assertTrue(validate((StringSchema) stringSchema, "1"));
+    assertTrue(validate(stringSchema, "0"));
+    assertTrue(validate((StringSchema) stringSchema, "0"));
 
-    assertFalse(validate(stringSchema, 1));
-    assertFalse(validate(stringSchema, 1.5));
+    assertFalse(validate(stringSchema, 0));
+    assertFalse(validate(stringSchema, 0.5));
     assertFalse(validate(stringSchema, true));
 
     assertFalse(validate(stringSchema, null));
     assertFalse(validate((StringSchema) stringSchema, null));
 
     List<String> arrayValue = new ArrayList<>();
-    arrayValue.add("1");
+    arrayValue.add("0");
     assertFalse(validate(stringSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
@@ -91,17 +88,32 @@ public class SchemaValidatorTest {
   }
 
   @Test
+  public void testValidateStringSchemaEnum() {
+    Set<String> enumeration = new HashSet<>();
+    Collections.addAll(enumeration, "0", "1");
+    DataSchema stringSchema = new StringSchema.Builder()
+      .addEnum(enumeration)
+      .build();
+
+    assertTrue(validate(stringSchema, "0"));
+    assertTrue(validate((StringSchema) stringSchema, "0"));
+
+    assertFalse(validate(stringSchema, "2"));
+    assertFalse(validate((StringSchema) stringSchema, "2"));
+  }
+
+  @Test
   public void testValidateNumberSchema() {
     DataSchema numberSchema = new NumberSchema.Builder().build();
 
-    assertTrue(validate(numberSchema, 1));
-    assertTrue(validate(numberSchema, (float) 1.5));
-    assertTrue(validate(numberSchema, (long) 1.5));
-    assertTrue(validate((NumberSchema) numberSchema, 1));
-    assertTrue(validate((NumberSchema) numberSchema, (float) 1.5));
-    assertTrue(validate((NumberSchema) numberSchema, (long) 1.5));
+    assertTrue(validate(numberSchema, 0));
+    assertTrue(validate(numberSchema, (float) 0.5));
+    assertTrue(validate(numberSchema, (long) 0.5));
+    assertTrue(validate((NumberSchema) numberSchema, 0));
+    assertTrue(validate((NumberSchema) numberSchema, (float) 0.5));
+    assertTrue(validate((NumberSchema) numberSchema, (long) 0.5));
 
-    assertFalse(validate(numberSchema, "1"));
+    assertFalse(validate(numberSchema, "0"));
     assertFalse(validate(numberSchema, true));
     assertFalse(validate(numberSchema, null));
 
@@ -118,17 +130,17 @@ public class SchemaValidatorTest {
   public void testValidateIntegerSchema() {
     DataSchema integerSchema = new IntegerSchema.Builder().build();
 
-    assertTrue(validate(integerSchema, 1));
+    assertTrue(validate(integerSchema, 0));
     assertTrue(validate((IntegerSchema) integerSchema, 1));
 
-    assertFalse(validate(integerSchema, (float) 1.5));
-    assertFalse(validate(integerSchema, (long) 1.5));
-    assertFalse(validate(integerSchema, "1"));
+    assertFalse(validate(integerSchema, (float) 0.5));
+    assertFalse(validate(integerSchema, (long) 0.5));
+    assertFalse(validate(integerSchema, "0"));
     assertFalse(validate(integerSchema, true));
     assertFalse(validate(integerSchema, null));
 
     List<String> arrayValue = new ArrayList<>();
-    arrayValue.add("1");
+    arrayValue.add("0");
     assertFalse(validate(integerSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
@@ -143,13 +155,13 @@ public class SchemaValidatorTest {
     assertTrue(validate(booleanSchema, true));
     assertTrue(validate((BooleanSchema) booleanSchema, true));
 
-    assertFalse(validate(booleanSchema, 1));
-    assertFalse(validate(booleanSchema, 1.5));
-    assertFalse(validate(booleanSchema, "1"));
+    assertFalse(validate(booleanSchema, 0));
+    assertFalse(validate(booleanSchema, 0.5));
+    assertFalse(validate(booleanSchema, "0"));
     assertFalse(validate(booleanSchema, null));
 
     List<String> arrayValue = new ArrayList<>();
-    arrayValue.add("1");
+    arrayValue.add("0");
     assertFalse(validate(booleanSchema, arrayValue));
 
     Map<String, Object> objectValue = new HashedMap<>();
@@ -165,9 +177,9 @@ public class SchemaValidatorTest {
     assertTrue(validate(arraySchema, arrayValue));
     assertTrue(validate((ArraySchema) arraySchema, arrayValue));
 
-    assertFalse(validate(arraySchema, 1));
-    assertFalse(validate(arraySchema, 1.5));
-    assertFalse(validate(arraySchema, "1"));
+    assertFalse(validate(arraySchema, 0));
+    assertFalse(validate(arraySchema, 0.5));
+    assertFalse(validate(arraySchema, "0"));
     assertFalse(validate(arraySchema, true));
 
     assertFalse(validate(arraySchema, null));
@@ -185,13 +197,13 @@ public class SchemaValidatorTest {
       .addMaxItems(2)
       .build();
 
-    List<String> arrayValueEqualItems = new ArrayList<>(Arrays.asList("1", "2"));
+    List<String> arrayValueEqualItems = new ArrayList<>(Arrays.asList("0", "1"));
     assertTrue(validate(arraySchema, arrayValueEqualItems));
 
-    List<String> arrayValueLessItems = new ArrayList<>(Arrays.asList("1"));
+    List<String> arrayValueLessItems = new ArrayList<>(Arrays.asList("0"));
     assertFalse(validate(arraySchema, arrayValueLessItems));
 
-    List<String> arrayValueMoreItems = new ArrayList<>(Arrays.asList("1", "2", "3"));
+    List<String> arrayValueMoreItems = new ArrayList<>(Arrays.asList("0", "1", "2"));
     assertFalse(validate(arraySchema, arrayValueMoreItems));
   }
 
@@ -201,13 +213,13 @@ public class SchemaValidatorTest {
       .addItem(new StringSchema.Builder().build())
       .build();
 
-    assertTrue(validate(arraySchema, Arrays.asList("1", "2")));
+    assertTrue(validate(arraySchema, Arrays.asList("0", "1")));
 
-    assertFalse(validate(arraySchema, Arrays.asList(1, 2)));
-    assertFalse(validate(arraySchema, Arrays.asList(1.5, 2.5)));
+    assertFalse(validate(arraySchema, Arrays.asList(0, 1)));
+    assertFalse(validate(arraySchema, Arrays.asList(0.5, 1.5)));
     assertFalse(validate(arraySchema, Arrays.asList(true, false)));
-    assertFalse(validate(arraySchema, Arrays.asList("1", null)));
-    assertFalse(validate(arraySchema, Arrays.asList("1", 2)));
+    assertFalse(validate(arraySchema, Arrays.asList("0", null)));
+    assertFalse(validate(arraySchema, Arrays.asList("0", 1)));
   }
 
   @Test
@@ -220,12 +232,12 @@ public class SchemaValidatorTest {
       .addItem(new NullSchema.Builder().build())
       .build();
 
-    assertTrue(validate(arraySchema, Arrays.asList("1", 1, 1, false, null)));
+    assertTrue(validate(arraySchema, Arrays.asList("0", 0, 0, false, null)));
 
-    assertFalse(validate(arraySchema, Arrays.asList("1", 1, 1, false)));
-    assertFalse(validate(arraySchema, Arrays.asList("1", 1, 1, false, null, null)));
+    assertFalse(validate(arraySchema, Arrays.asList("0", 0, 0, false)));
+    assertFalse(validate(arraySchema, Arrays.asList("0", 0, 0, false, null, null)));
 
-    assertFalse(validate(arraySchema, Arrays.asList("1", "1", "1", "false", "null")));
+    assertFalse(validate(arraySchema, Arrays.asList("0", "0", "0", "false", "null")));
   }
 
   @Test
@@ -239,8 +251,8 @@ public class SchemaValidatorTest {
         .build())
       .build();
 
-    List<Object> stringValues = Arrays.asList("1", "2");
-    List<Object> numberValues = Arrays.asList(2, 2);
+    List<Object> stringValues = Arrays.asList("0", "1");
+    List<Object> numberValues = Arrays.asList(1, 1);
 
     List<Object> values = Arrays.asList(stringValues, numberValues);
     assertTrue(validate(arraySchema, values));
@@ -313,14 +325,14 @@ public class SchemaValidatorTest {
 
     HashedMap<Object, Object> objectValue = new HashedMap<>();
     objectValue.put("stringName", "Rimuru");
-    objectValue.put("numberName", 1);
-    objectValue.put("integerName", 1);
+    objectValue.put("numberName", 0);
+    objectValue.put("integerName", 0);
     objectValue.put("booleanName", false);
     objectValue.put("nullName", null);
 
     assertTrue(validate(objectSchema, objectValue));
 
-    objectValue.put("stringName", 1);
+    objectValue.put("stringName", 0);
     assertFalse(validate(objectSchema, objectValue));
   }
 
@@ -406,9 +418,9 @@ public class SchemaValidatorTest {
 
     assertTrue(validate(nullSchema, null));
 
-    assertFalse(validate(nullSchema, "1"));
-    assertFalse(validate(nullSchema, 1));
-    assertFalse(validate(nullSchema, 1.5));
+    assertFalse(validate(nullSchema, "0"));
+    assertFalse(validate(nullSchema, 0));
+    assertFalse(validate(nullSchema, 0.5));
     assertFalse(validate(nullSchema, true));
 
     List<String> arrayValue = new ArrayList<>();
