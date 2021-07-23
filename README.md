@@ -68,7 +68,7 @@ The `toggle` action is exposed via a [Form](https://www.w3.org/TR/wot-thing-desc
 ```java
 Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
         .setMethodName("PUT")
-				.build();
+        .build();
 ```
 
 We can serialize our TD in Turtle like so (support for other formats is to be added): 
