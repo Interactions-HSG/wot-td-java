@@ -1,16 +1,14 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
-import org.junit.Before;
-import org.junit.Test;
-
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class InteractionAffordanceTest {
   private static final String prefix = "http://example.org";
@@ -19,21 +17,21 @@ public class InteractionAffordanceTest {
   @Before
   public void init() {
     Form form1 = new Form.Builder("http://example.org/property1")
-        .addOperationType(TD.readProperty)
-        .build();
+      .addOperationType(TD.readProperty)
+      .build();
 
     Form form2 = new Form.Builder("http://example.org/property2")
-        .addOperationType(TD.writeProperty)
-        .build();
+      .addOperationType(TD.writeProperty)
+      .build();
 
-    test_affordance = new InteractionAffordance(Optional.of("my_affordance"),
-        Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"),
-        Arrays.asList(form1, form2));
+    test_affordance = new InteractionAffordance("my_affordance",
+      Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"),
+      Arrays.asList(form1, form2));
   }
 
-  @Test(expected = InvalidTDException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void testAffordanceWithoutNameThrowsException() {
-    test_affordance = new InteractionAffordance(Optional.empty(),
+    new InteractionAffordance(null,
       Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), null);
   }
 
@@ -61,36 +59,36 @@ public class InteractionAffordanceTest {
   @Test
   public void testHasOneSemanticType() {
     assertTrue(test_affordance.hasOneSemanticType(Arrays.asList(prefix + "Type0",
-        prefix + "Type1")));
+      prefix + "Type1")));
   }
 
   @Test
   public void testHasNotOneSemanticType() {
     assertFalse(test_affordance.hasOneSemanticType(Arrays.asList(prefix + "Type3",
-        prefix + "Type4")));
+      prefix + "Type4")));
   }
 
   @Test
   public void testHasAllSemanticTypes() {
     assertTrue(test_affordance.hasAllSemanticTypes(Arrays.asList(prefix + "Type1",
-        prefix + "Type2")));
+      prefix + "Type2")));
   }
 
   @Test
   public void testHasNotAllSemanticTypes() {
     assertFalse(test_affordance.hasAllSemanticTypes(Arrays.asList(prefix + "Type1",
-        prefix + "Type2", prefix + "Type3")));
+      prefix + "Type2", prefix + "Type3")));
   }
 
   @Test
   public void testGetFirstFormForOperationType() {
     assertTrue(test_affordance.getFirstFormForOperationType(TD.readProperty)
-        .isPresent());
+      .isPresent());
   }
 
   @Test
   public void testNoFirstFormForOperationType() {
     assertFalse(test_affordance.getFirstFormForOperationType(TD.invokeAction)
-        .isPresent());
+      .isPresent());
   }
 }
