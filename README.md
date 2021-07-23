@@ -66,7 +66,9 @@ Our `toggle` action has the semantic type `saref:ToggleCommand` and takes as inp
 The `toggle` action is exposed via a [Form](https://www.w3.org/TR/wot-thing-description/#form), which is a type of hypermedia control. To create a form, we have to specify at least the method to be used and a target URI:
 
 ```java
-Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
+Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
+        .setMethodName("PUT")
+				.build();
 ```
 
 We can serialize our TD in Turtle like so (support for other formats is to be added): 
