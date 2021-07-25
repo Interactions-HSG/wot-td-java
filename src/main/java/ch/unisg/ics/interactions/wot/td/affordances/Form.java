@@ -1,45 +1,15 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
-import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-import org.apache.commons.collections.map.MultiKeyMap;
-
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 public class Form {
 
-  private static final HashMap<String, String> URI_SCHEMES;
-  private static final MultiKeyMap DEFAULT_METHOD_BINDING = new MultiKeyMap();
-  private static final MultiKeyMap DEFAULT_SUBPROTOCOL_BINDING = new MultiKeyMap();
-
-  //To be moved in a ProtocolBinding class
-  static {
-    URI_SCHEMES = new HashMap<>();
-    URI_SCHEMES.put("http:", "HTTP");
-    URI_SCHEMES.put("https:", "HTTP");
-    URI_SCHEMES.put("coap:", "CoAP");
-    URI_SCHEMES.put("coaps:", "CoAP");
-
-    DEFAULT_METHOD_BINDING.put("HTTP", TD.readProperty, "GET");
-    DEFAULT_METHOD_BINDING.put("HTTP", TD.writeProperty, "PUT");
-    DEFAULT_METHOD_BINDING.put("HTTP", TD.invokeAction, "POST");
-    DEFAULT_METHOD_BINDING.put("CoAP", TD.readProperty, "GET");
-    DEFAULT_METHOD_BINDING.put("CoAP", TD.writeProperty, "PUT");
-    DEFAULT_METHOD_BINDING.put("CoAP", TD.invokeAction, "POST");
-    DEFAULT_METHOD_BINDING.put("CoAP", TD.observeProperty, "GET");
-    DEFAULT_METHOD_BINDING.put("CoAP", TD.unobserveProperty, "GET");
-
-    DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.observeProperty, COV.observe);
-    DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.unobserveProperty, COV.observe);
-  }
-
   private final String target;
   private final String contentType;
   private final Set<String> operationTypes;
-  private Optional<String> subprotocol;
+  private final Optional<String> subprotocol;
   private Optional<String> methodName;
 
   private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
@@ -69,15 +39,7 @@ public class Form {
       return methodName;
     }
 
-    if (getProtocol().isPresent()) {
-      String protocol = getProtocol().get();
-
-      if (DEFAULT_METHOD_BINDING.containsKey(protocol, operationType)) {
-        return Optional.of((String) DEFAULT_METHOD_BINDING.get(protocol, operationType));
-      }
-    }
-
-    return Optional.empty();
+    return ProtocolBinding.getDefaultMethod(target, operationType);
   }
 
   public String getTarget() {
@@ -102,9 +64,11 @@ public class Form {
 
   // Package-level access, used for setting affordance-specific default values after instantiation
   // Reserved for event affordances of op subscribeevent
-  void setSubprotocol(String subprotocol) {
+  /*
+  void addSubprotocol(String subprotocol) {
     this.subprotocol = Optional.of(subprotocol);
   }
+  */
 
   public Optional<String> getSubprotocol(String operationType) {
     if (!operationTypes.contains(operationType)) {
@@ -115,25 +79,7 @@ public class Form {
       return subprotocol;
     }
 
-    if (getProtocol().isPresent()) {
-      String protocol = getProtocol().get();
-
-      if (DEFAULT_SUBPROTOCOL_BINDING.containsKey(protocol, operationType)) {
-        return Optional.of((String) DEFAULT_SUBPROTOCOL_BINDING.get(protocol, operationType));
-      }
-    }
-
-    return Optional.empty();
-  }
-
-  // Might require changing scope to package level in the future
-  private Optional<String> getProtocol() {
-    Optional<String> uriScheme = URI_SCHEMES.keySet()
-      .stream()
-      .filter(scheme -> getTarget().contains(scheme))
-      .findFirst();
-
-    return uriScheme.map(URI_SCHEMES::get);
+    return ProtocolBinding.getDefaultSubprotocol(target, operationType);
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation
