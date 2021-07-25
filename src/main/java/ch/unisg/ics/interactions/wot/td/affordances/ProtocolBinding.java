@@ -7,7 +7,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class ProtocolBinding {
+public final class ProtocolBinding {
 
   private static final HashMap<String, String> URI_SCHEMES = new HashMap<>();
   private static final MultiKeyMap DEFAULT_METHOD_BINDING = new MultiKeyMap();
