@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import org.junit.Test;
 
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
@@ -24,7 +25,7 @@ public class ThingDescriptionTest {
     assertEquals("My Thing", td.getTitle());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidTDException.class)
   public void testTitleNull() {
     new ThingDescription.Builder(null).build();
   }

@@ -1,5 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +26,7 @@ public class InteractionAffordance {
   protected InteractionAffordance(String name, Optional<String> title, List<String> types,
                                   List<Form> forms) {
     if (name == null) {
-      throw new IllegalArgumentException("The name of an affordance cannot be null.");
+      throw new InvalidTDException("The name of an affordance cannot be null.");
     }
     this.name = name;
     this.title = title;

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -53,7 +54,7 @@ public class ThingDescription {
       List<ActionAffordance> actions, Optional<Model> graph) {
 
     if (title == null) {
-      throw new IllegalArgumentException("The title of a Thing cannot be null.");
+      throw new InvalidTDException("The title of a Thing cannot be null.");
     }
     this.title = title;
 

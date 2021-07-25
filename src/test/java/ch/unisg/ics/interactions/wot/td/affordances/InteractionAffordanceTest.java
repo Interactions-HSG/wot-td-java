@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class InteractionAffordanceTest {
       Arrays.asList(form1, form2));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = InvalidTDException.class)
   public void testAffordanceWithoutNameThrowsException() {
     new InteractionAffordance(null,
       Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), null);
