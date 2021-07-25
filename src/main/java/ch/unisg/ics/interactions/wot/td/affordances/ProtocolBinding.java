@@ -32,6 +32,9 @@ public final class ProtocolBinding {
     DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.unobserveProperty, COV.observe);
   }
 
+  private ProtocolBinding() {
+  }
+
   public static Optional<String> getDefaultMethod(String href, String operationType) {
     if (getProtocol(href).isPresent()) {
       String protocol = getProtocol(href).get();
@@ -54,7 +57,7 @@ public final class ProtocolBinding {
     return Optional.empty();
   }
 
-  protected static Optional<String> getProtocol(String href) {
+  static Optional<String> getProtocol(String href) {
     Optional<String> uriScheme = URI_SCHEMES.keySet()
       .stream()
       .filter(scheme -> href.contains(scheme))
@@ -62,5 +65,4 @@ public final class ProtocolBinding {
 
     return uriScheme.map(URI_SCHEMES::get);
   }
-
 }
