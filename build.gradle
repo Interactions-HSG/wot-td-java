@@ -20,7 +20,7 @@ dependencies {
   implementation 'org.apache.httpcomponents.client5:httpclient5:5.1'
   implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.1'
   implementation 'com.google.code.gson:gson:2.8.7'
-  implementation 'org.eclipse.rdf4j:rdf4j-runtime:3.7.1'
+  implementation 'org.eclipse.rdf4j:rdf4j-runtime:3.7.2'
   implementation 'org.slf4j:slf4j-api:2.0.0-alpha1'
 
   // Use JUnit test framework
