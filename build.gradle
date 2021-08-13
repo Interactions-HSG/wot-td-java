@@ -26,7 +26,7 @@ dependencies {
   // Use JUnit test framework
   testImplementation 'junit:junit:4.13.2'
 
-  runtime 'org.slf4j:slf4j-log4j12:2.0.0-alpha2'
+  runtime 'org.slf4j:slf4j-log4j12:2.0.0-alpha4'
 }
 
 jacocoTestReport {
