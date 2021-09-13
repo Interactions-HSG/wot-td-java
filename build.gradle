@@ -5,7 +5,7 @@ apply plugin: 'maven-publish'
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
   targetCompatibility = JavaVersion.VERSION_1_8
-  
+
   withJavadocJar()
   withSourcesJar()
 }
@@ -22,6 +22,10 @@ dependencies {
   implementation 'com.google.code.gson:gson:2.8.8'
   implementation 'org.eclipse.rdf4j:rdf4j-runtime:3.7.2'
   implementation 'org.slf4j:slf4j-api:2.0.0-alpha5'
+
+  //support JSON-LD 1.1
+  compile group: 'org.glassfish', name: 'jakarta.json', version: '2.0.1'
+  compile group: 'com.apicatalog', name: 'titanium-json-ld', version: '1.1.0'
 
   // Use JUnit test framework
   testImplementation 'junit:junit:4.13.2'
