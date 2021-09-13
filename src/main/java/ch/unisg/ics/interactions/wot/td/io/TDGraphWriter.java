@@ -69,7 +69,7 @@ public class TDGraphWriter {
         .addProperties()
         .addActions()
         .addGraph()
-        .write(RDFFormat.JSONLD); //TODO change
+        .write(RDFFormat.TURTLE);
   }
 
   private Model getModel() {

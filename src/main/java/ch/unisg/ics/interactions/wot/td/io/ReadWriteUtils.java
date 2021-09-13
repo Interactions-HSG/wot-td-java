@@ -4,11 +4,9 @@ import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import com.apicatalog.jsonld.JsonLd;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.document.Document;
-import com.apicatalog.jsonld.document.JsonDocument;
 
 import com.apicatalog.jsonld.document.RdfDocument;
 import org.eclipse.rdf4j.model.Model;
