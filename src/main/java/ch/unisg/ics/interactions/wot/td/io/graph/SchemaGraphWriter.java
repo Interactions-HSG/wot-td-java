@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.io;
+package ch.unisg.ics.interactions.wot.td.io.graph;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,20 +21,20 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 class SchemaGraphWriter {
   private final static Logger LOGGER = Logger.getLogger(SchemaGraphWriter.class.getCanonicalName());
-  
+
   private final ModelBuilder graphBuilder;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
-  
-  
+
+
   SchemaGraphWriter(ModelBuilder builder) {
     this.graphBuilder = builder;
   }
-  
+
   static void write(ModelBuilder builder, Resource nodeId, DataSchema schema) {
     SchemaGraphWriter writer = new SchemaGraphWriter(builder);
     writer.addDataSchema(nodeId, schema);
   }
-  
+
   private void addDataSchema(Resource nodeId, DataSchema schema) {
     switch (schema.getDatatype()) {
       case DataSchema.OBJECT:
@@ -61,60 +61,60 @@ class SchemaGraphWriter {
         break;
     }
   }
-  
+
   private void addDataSchemaMetadata(Resource nodeId, DataSchema schema) {
     addObjectIRIs(nodeId, RDF.TYPE, schema.getSemanticTypes());
     addObjectIRIs(nodeId, rdf.createIRI(JSONSchema.enumeration), schema.getEnumeration());
   }
-  
+
   private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
     graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.ObjectSchema));
     addDataSchemaMetadata(nodeId, schema);
-    
+
     /* Add object properties */
     Map<String, DataSchema> properties = schema.getProperties();
-    
+
     for (String propertyName : properties.keySet()) {
       Resource propertyId = rdf.createBNode();
-      
+
       graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.properties), propertyId);
       graphBuilder.add(propertyId, rdf.createIRI(JSONSchema.propertyName), propertyName);
-      
+
       addDataSchema(propertyId, properties.get(propertyName));
     }
-    
+
     /* Add names of required properties */
     for (String required : schema.getRequiredProperties()) {
       graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.required), required);
     }
   }
-  
+
   private void addArraySchema(Resource nodeId, ArraySchema schema) {
     graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.ArraySchema));
     addDataSchemaMetadata(nodeId, schema);
-    
+
     if (schema.getMinItems().isPresent()) {
-      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minItems), 
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minItems),
           schema.getMinItems().get().intValue());
     }
-    
+
     if (schema.getMaxItems().isPresent()) {
       graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maxItems), schema.getMaxItems().get()
           .intValue());
     }
-    
+
     for (DataSchema item : schema.getItems()) {
       BNode itemId = rdf.createBNode();
       graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.items), itemId);
       addDataSchema(itemId, item);
     }
   }
-  
+
   private void addSimpleSchema(Resource nodeId, DataSchema schema, IRI schemaType) {
     graphBuilder.add(nodeId, RDF.TYPE, schemaType);
     addDataSchemaMetadata(nodeId, schema);
   }
-  
+
   private void addNumberSchema(Resource nodeId, NumberSchema numberSchema) {
     if (numberSchema.getDatatype().equals(DataSchema.INTEGER)) {
       graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.IntegerSchema));
@@ -122,26 +122,26 @@ class SchemaGraphWriter {
       graphBuilder.add(nodeId, RDF.TYPE, rdf.createIRI(JSONSchema.NumberSchema));
     }
     addDataSchemaMetadata(nodeId, numberSchema);
-    
+
     if (numberSchema.getMinimum().isPresent()) {
       if (numberSchema.getDatatype().equals(DataSchema.INTEGER)) {
-        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), 
+        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum),
             ((IntegerSchema) numberSchema).getMinimumAsInteger().get());
       } else {
         graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.minimum), numberSchema.getMinimum().get());
       }
     }
-    
+
     if (numberSchema.getMaximum().isPresent()) {
       if (numberSchema.getDatatype().equals(DataSchema.INTEGER)) {
-        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), 
+        graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum),
             ((IntegerSchema) numberSchema).getMaximumAsInteger().get());
       } else {
         graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.maximum), numberSchema.getMaximum().get());
       }
     }
   }
-  
+
   private void addObjectIRIs(Resource nodeId, IRI property, Set<String> objects) {
     for (String type : objects) {
       try {
