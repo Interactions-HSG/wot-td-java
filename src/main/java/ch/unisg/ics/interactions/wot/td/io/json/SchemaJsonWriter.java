@@ -1,7 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.io.json;
 
 import ch.unisg.ics.interactions.wot.td.schemas.*;
-import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -18,7 +17,7 @@ public class SchemaJsonWriter {
       case DataSchema.BOOLEAN:
         return getSimpleSchema(DataSchema.BOOLEAN);
       case DataSchema.INTEGER:
-        return getNumberSchema((NumberSchema) schema, DataSchema.INTEGER);
+        return getIntegerSchema((IntegerSchema) schema, DataSchema.INTEGER);
       case DataSchema.NUMBER:
         return getNumberSchema((NumberSchema) schema, DataSchema.NUMBER);
       case DataSchema.STRING:
@@ -36,14 +35,15 @@ public class SchemaJsonWriter {
 
   private static JsonObjectBuilder getNumberSchema(NumberSchema schema, String type) {
     JsonObjectBuilder schemaObj = getSimpleSchema(type);
-    if(type.equals(DataSchema.INTEGER)){
-      //TODO should this be here or in the model class? Not touching that for the moment
-      schema.getMaximum().ifPresent(max -> schemaObj.add("maximum", max.intValue()));
-      schema.getMinimum().ifPresent(min -> schemaObj.add("maximum", min.intValue()));
-    } else {
-      schema.getMaximum().ifPresent(max -> schemaObj.add("maximum", max));
-      schema.getMinimum().ifPresent(min -> schemaObj.add("maximum", min));
-    }
+    schema.getMaximum().ifPresent(max -> schemaObj.add("maximum", max));
+    schema.getMinimum().ifPresent(min -> schemaObj.add("minimum", min));
+    return schemaObj;
+  }
+
+  private static JsonObjectBuilder getIntegerSchema(IntegerSchema schema, String type) {
+    JsonObjectBuilder schemaObj = getSimpleSchema(type);
+    schema.getMaximumAsInteger().ifPresent(max -> schemaObj.add("maximum", max));
+    schema.getMinimumAsInteger().ifPresent(min -> schemaObj.add("minimum", min));
     return schemaObj;
   }
 

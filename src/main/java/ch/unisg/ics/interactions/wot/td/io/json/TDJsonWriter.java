@@ -41,8 +41,8 @@ public class TDJsonWriter extends AbstractTDWriter {
       .addSecurity()
       .addBaseURI()
       .addProperties()
-      .addActions();
-      //TODO .addGraph()???
+      .addActions()
+      .addGraph();
 
     OutputStream out = new ByteArrayOutputStream();
     JsonWriter writer = Json.createWriter(out);
@@ -111,7 +111,12 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addGraph() {
-    //TODO I don't know if I need to implement this
+    td.getGraph().ifPresent(g -> {
+      g.getStatements(null, null, null).forEach(statement -> {
+        //TODO I'm not sure this is the right way to parse the statement
+        document.add(statement.getPredicate().stringValue(), statement.getObject().stringValue());
+      });
+    });
     return this;
   }
 
