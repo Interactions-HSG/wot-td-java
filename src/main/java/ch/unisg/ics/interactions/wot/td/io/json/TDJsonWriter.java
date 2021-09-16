@@ -81,8 +81,12 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addSecurity() {
     //TODO implement: for the time being ignores security schemes and puts NoSecurityScheme
     //Add security def
-
+    document.add("securityDefinitions",
+      Json.createObjectBuilder().add("nosec_sc",
+        Json.createObjectBuilder().add("scheme", "nosec" ))
+    );
     //Add actual security field
+    document.add("security", Json.createArrayBuilder().add("nosec"));
 
     return this;
   }
@@ -124,19 +128,25 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   private JsonObjectBuilder getProperty(PropertyAffordance prop) {
     JsonObjectBuilder propertyObj = getAffordance(prop)
-      .add(JWot.OBSERVABLE, prop.isObservable())
-      .add(JWot.TYPE, prop.getDataSchema().getDatatype());
-    //TODO add DataSchema
-    //but how?
+      .add(JWot.OBSERVABLE, prop.isObservable());
+    JsonObjectBuilder dataSchema = SchemaJsonWriter.getDataSchema(prop.getDataSchema());
+    propertyObj.addAll(dataSchema);
     return propertyObj;
   }
 
   private JsonObjectBuilder getAction(ActionAffordance affordance) {
-    //add action related fields
-    //TODO safe and idempotent are missing in the model
-    //TODO add input-output Schema
+    JsonObjectBuilder actionObj = Json.createObjectBuilder();
 
-    return Json.createObjectBuilder();
+    //TODO safe and idempotent are missing in the model
+
+    affordance.getInputSchema().ifPresent(d ->
+      actionObj.add(JWot.INPUT, SchemaJsonWriter.getDataSchema(d))
+    );
+    affordance.getOutputSchema().ifPresent(d ->
+      actionObj.add(JWot.OUTPUT, SchemaJsonWriter.getDataSchema(d))
+    );
+
+    return actionObj;
   }
 
 
@@ -156,7 +166,6 @@ public class TDJsonWriter extends AbstractTDWriter {
     affordance.getName().ifPresent(n -> affordanceObj.add(JWot.TITLE, n));
 
     //TODO description is missing in the model
-    //affordance.getName().ifPresent(n -> affordanceObj.addProperty(JWot.DESCRIPTION, n));
 
     //add forms
     affordanceObj.add(JWot.FORMS, this.getFormsArray(affordance.getForms()));
