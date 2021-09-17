@@ -1,14 +1,16 @@
 package ch.unisg.ics.interactions.wot.td.io.graph;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import ch.unisg.ics.interactions.wot.td.io.graph.ReadWriteUtils;
-import ch.unisg.ics.interactions.wot.td.io.graph.TDGraphWriter;
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -23,17 +25,13 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 public class TDGraphWriterTest {
   private static final String THING_TITLE = "My Thing";
@@ -223,8 +221,8 @@ public class TDGraphWriterTest {
         .addObserve()
         .build();
 
-    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(Arrays.asList(property)),
-        new ArrayList<ActionAffordance>(Arrays.asList()));
+    ThingDescription td = constructThingDescription(new ArrayList<>(Collections.singletonList(property)),
+      new ArrayList<>(Collections.emptyList()));
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -283,8 +281,8 @@ public class TDGraphWriterTest {
             .build())
         .build();
 
-    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(),
-        new ArrayList<ActionAffordance>(Arrays.asList(simpleAction)));
+    ThingDescription td = constructThingDescription(new ArrayList<>(),
+      new ArrayList<>(Collections.singletonList(simpleAction)));
 
     assertIsomorphicGraphs(testTD, td);
   }

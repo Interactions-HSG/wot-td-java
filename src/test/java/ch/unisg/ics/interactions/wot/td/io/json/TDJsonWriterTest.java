@@ -58,6 +58,47 @@ public class TDJsonWriterTest {
   }
 
   @Test
+  public void testThingWithSemanticTypes() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addSemanticType("http://w3id.org/eve#Artifact")
+      .addSemanticType("http://w3id.org/td#Thing")
+      .addSecurityScheme(new NoSecurityScheme())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("@type", Json.createArrayBuilder().add("http://w3id.org/eve#Artifact").add("http://w3id.org/td#Thing"))
+      .add("title", THING_TITLE)
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testThingWithNameSpace(){
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addSemanticType("http://w3id.org/eve#Artifact")
+      .addSecurityScheme(new NoSecurityScheme())
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).setNamespace("ex", "https://example.org/#").getJson();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", Json.createArrayBuilder().add("https://www.w3.org/2019/wot/td/v1")
+        .add(Json.createObjectBuilder().add("ex", "https://example.org/#"))
+      ).add("@type", "http://w3id.org/eve#Artifact")
+      .add("title", THING_TITLE)
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .build();
+
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
   public void testThingWithIRI() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSecurityScheme(new NoSecurityScheme())
