@@ -8,6 +8,10 @@ import javax.json.JsonObjectBuilder;
 
 public final class SchemaJsonWriter {
 
+  private SchemaJsonWriter(){
+    throw new AssertionError();
+  }
+
   /***
    * This methods returns the correct JsonObjectBuilder Object that is generate from the DataSchema.
    * @param schema a DataSchema object to convert.
