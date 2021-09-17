@@ -10,9 +10,7 @@ import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
 import javax.json.*;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -22,11 +20,13 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   private final JsonObjectBuilder document;
   private Optional<JsonObjectBuilder> semanticContext;
+  private final Map<String, String> prefixMap;
 
   public TDJsonWriter(ThingDescription td) {
     super(td);
     document = Json.createObjectBuilder();
     semanticContext = Optional.empty();
+    prefixMap = new HashMap<>();
   }
 
   public JsonObject getJson(){
@@ -58,6 +58,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   public TDJsonWriter setNamespace(String prefix, String namespace) {
+    this.prefixMap.put(namespace, prefix);
     if(semanticContext.isPresent()){
       semanticContext.get().add(prefix, namespace);
     } else {
@@ -127,9 +128,25 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addGraph() {
     td.getGraph().ifPresent(g -> g.getStatements(null, null, null).forEach(statement -> {
       //TODO I'm not sure this is the right way to parse the statement
-      document.add(statement.getPredicate().stringValue(), statement.getObject().stringValue());
+      document.add(getPrefixedAnnotation(statement.getPredicate().stringValue()),statement.getObject().stringValue());
     }));
     return this;
+  }
+
+  private String getPrefixedAnnotation(String annotation){
+    String[] splitAnnotation = annotation.split("#");
+    if(splitAnnotation.length <= 1){
+      return annotation;
+    }
+    String root = splitAnnotation[0]+'#';
+    String fragment = splitAnnotation[1];
+    String result;
+    if(this.prefixMap.containsKey(root)) {
+      result = this.prefixMap.get(root)+":"+fragment;
+    } else {
+      result = annotation;
+    }
+    return result;
   }
 
   private<T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {
@@ -169,7 +186,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   private JsonArrayBuilder getSemanticTypes(List<String> semanticTypes) {
     JsonArrayBuilder types = Json.createArrayBuilder();
-    semanticTypes.forEach(types::add);
+    semanticTypes.forEach(t -> types.add(getPrefixedAnnotation(t)));
     return types;
   }
 
