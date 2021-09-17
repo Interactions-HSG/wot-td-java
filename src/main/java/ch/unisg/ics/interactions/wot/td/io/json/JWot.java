@@ -1,38 +1,38 @@
 package ch.unisg.ics.interactions.wot.td.io.json;
 
-public interface JWot {
+public final class JWot {
 
-  String WOT_CONTEXT = "https://www.w3.org/2019/wot/td/v1";
+  public static final String WOT_CONTEXT = "https://www.w3.org/2019/wot/td/v1";
 
 
-  String BASE = "base";
-  String CONTEXT = "@context";
+  public static final String BASE = "base";
+  public static final String CONTEXT = "@context";
 
-  String TITLE = "title";
-  String DESCRIPTION = "description";
+  public static final String TITLE = "title";
+  public static final String DESCRIPTION = "description";
 
-  String PROPERTIES = "properties";
-  String OBSERVABLE = "observable";
+  public static final String PROPERTIES = "properties";
+  public static final String OBSERVABLE = "observable";
 
-  String ACTIONS = "actions";
-  String INPUT = "input";
-  String OUTPUT = "output";
-  String SAFE = "safe";
-  String IDEMPOTENT = "idempotent";
+  public static final String ACTIONS = "actions";
+  public static final String INPUT = "input";
+  public static final String OUTPUT = "output";
+  public static final String SAFE = "safe";
+  public static final String IDEMPOTENT = "idempotent";
 
-  String EVENTS = "events";
+  public static final String EVENTS = "events";
 
-  String SEMANTIC_TYPE = "@type";
-  String TYPE = "type";
+  public static final String SEMANTIC_TYPE = "@type";
+  public static final String TYPE = "type";
 
-  String FORMS = "forms";
-  String TARGET = "href";
-  String METHOD = "htv:methodName";
-  String CONTENT_TYPE = "contentType";
-  String SUBPROTOCOL = "subprotocol";
-  String OPERATIONS = "op";
+  public static final String FORMS = "forms";
+  public static final String TARGET = "href";
+  public static final String METHOD = "htv:methodName";
+  public static final String CONTENT_TYPE = "contentType";
+  public static final String SUBPROTOCOL = "subprotocol";
+  public static final String OPERATIONS = "op";
 
-  String SECURITY = "security";
-  String SECURITY_DEF = "securityDefinitions";
+  public static final String SECURITY = "security";
+  public static final String SECURITY_DEF = "securityDefinitions";
 
 }

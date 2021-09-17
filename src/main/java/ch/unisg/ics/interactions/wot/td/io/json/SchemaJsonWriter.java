@@ -6,8 +6,13 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
-public class SchemaJsonWriter {
+public final class SchemaJsonWriter {
 
+  /***
+   * This methods returns the correct JsonObjectBuilder Object that is generate from the DataSchema.
+   * @param schema a DataSchema object to convert.
+   * @return The JsonObjectBuilder that when built will result in a JsonObject representation of the schema.
+   */
   public static JsonObjectBuilder getDataSchema(DataSchema schema) {
     switch (schema.getDatatype()) {
       case DataSchema.OBJECT:

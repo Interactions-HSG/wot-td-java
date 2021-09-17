@@ -74,7 +74,7 @@ public class TDJsonWriter extends AbstractTDWriter {
     //TODO This is ugly why is the types sometimes a set and sometimes a list?
     if(td.getSemanticTypes().size() > 1) {
       document.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(new ArrayList<>(td.getSemanticTypes())));
-    } else if(td.getSemanticTypes().size() > 0){
+    } else if(!td.getSemanticTypes().isEmpty()){
       document.add(JWot.SEMANTIC_TYPE, td.getSemanticTypes().stream().findFirst().orElse(""));
     }
     return this;
@@ -109,7 +109,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addProperties() {
-    if(td.getProperties().size() > 0){
+    if(!td.getProperties().isEmpty()){
       document.add(JWot.PROPERTIES, this.getAffordancesObject(td.getProperties(), this::getProperty));
     }
     return this;
@@ -117,7 +117,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addActions() {
-    if(td.getActions().size() > 0) {
+    if(!td.getActions().isEmpty()) {
       document.add(JWot.ACTIONS, this.getAffordancesObject(td.getActions(), this::getAction));
     }
     return this;
@@ -133,7 +133,7 @@ public class TDJsonWriter extends AbstractTDWriter {
   }
 
   private<T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {
-    if (affordances.size() > 0) {
+    if (!affordances.isEmpty()) {
       JsonObjectBuilder rootObj = Json.createObjectBuilder();
       affordances.forEach(aff ->
         rootObj.add(aff.getTitle().get(), mapper.apply(aff))
@@ -177,7 +177,7 @@ public class TDJsonWriter extends AbstractTDWriter {
     JsonObjectBuilder affordanceObj = Json.createObjectBuilder();
 
     //add semantic type(s)
-    if(affordance.getSemanticTypes().size() > 0) {
+    if(!affordance.getSemanticTypes().isEmpty()) {
       affordanceObj.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(affordance.getSemanticTypes()));
     }
 
