@@ -1,13 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.io.json;
 
 import ch.unisg.ics.interactions.wot.td.schemas.*;
-import junit.framework.TestCase;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 
-public class SchemaJsonWriterTest extends TestCase {
+public class SchemaJsonWriterTest {
 
   @Test
   public void testWriteStringSchema() {
@@ -17,7 +17,7 @@ public class SchemaJsonWriterTest extends TestCase {
     JsonObject test =  SchemaJsonWriter.getDataSchema(
       new StringSchema.Builder().build()
     ).build();
-    assertEquals(expected, test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -28,7 +28,7 @@ public class SchemaJsonWriterTest extends TestCase {
     JsonObject test =  SchemaJsonWriter.getDataSchema(
       new BooleanSchema.Builder().build()
     ).build();
-    assertEquals(expected, test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -39,7 +39,7 @@ public class SchemaJsonWriterTest extends TestCase {
     JsonObject test =  SchemaJsonWriter.getDataSchema(
       new NullSchema.Builder().build()
     ).build();
-    assertEquals(expected, test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -55,7 +55,7 @@ public class SchemaJsonWriterTest extends TestCase {
       .addMinimum(5)
       .build()
     ).build();
-    assertEquals(expected, test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -71,7 +71,7 @@ public class SchemaJsonWriterTest extends TestCase {
         .addMinimum(5.5)
         .build()
     ).build();
-    assertEquals(expected, test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -90,7 +90,7 @@ public class SchemaJsonWriterTest extends TestCase {
         .build()
     ).build();
 
-    assertEquals(expected, test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -107,8 +107,7 @@ public class SchemaJsonWriterTest extends TestCase {
         .addProperty("name", new StringSchema.Builder().build())
       .build()
     ).build();
-
-    assertEquals(expected,test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -134,7 +133,7 @@ public class SchemaJsonWriterTest extends TestCase {
         .build()
     ).build();
 
-    assertEquals(expected,test);
+    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -165,7 +164,7 @@ public class SchemaJsonWriterTest extends TestCase {
         .build()
     ).build();
 
-    assertEquals(expected,test);
+    Assert.assertEquals(expected, test);
   }
 
 
