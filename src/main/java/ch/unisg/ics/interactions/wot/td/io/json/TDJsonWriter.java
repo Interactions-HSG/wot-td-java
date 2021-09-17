@@ -81,12 +81,12 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addSecurity() {
     //TODO implement: for the time being ignores security schemes and puts NoSecurityScheme
     //Add security def
-    document.add("securityDefinitions",
+    document.add(JWot.SECURITY_DEF,
       Json.createObjectBuilder().add("nosec_sc",
         Json.createObjectBuilder().add("scheme", "nosec" ))
     );
     //Add actual security field
-    document.add("security", Json.createArrayBuilder().add("nosec"));
+    document.add(JWot.SECURITY, Json.createArrayBuilder().add("nosec"));
 
     return this;
   }
