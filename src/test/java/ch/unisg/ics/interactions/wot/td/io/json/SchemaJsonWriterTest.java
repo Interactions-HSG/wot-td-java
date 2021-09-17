@@ -119,7 +119,7 @@ public class SchemaJsonWriterTest {
           .add("type", "string")
         ).add("age", Json.createObjectBuilder()
           .add("type", "integer")
-          .add("miniumum", 0)
+          .add("minimum", 0)
         )
       ).add("required", Json.createArrayBuilder()
       .add("name").add("age")

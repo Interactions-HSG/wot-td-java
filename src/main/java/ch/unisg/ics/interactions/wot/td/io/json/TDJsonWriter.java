@@ -74,7 +74,7 @@ public class TDJsonWriter extends AbstractTDWriter {
     //TODO This is ugly why is the types sometimes a set and sometimes a list?
     if(td.getSemanticTypes().size() > 1) {
       document.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(new ArrayList<>(td.getSemanticTypes())));
-    } else {
+    } else if(td.getSemanticTypes().size() > 0){
       document.add(JWot.SEMANTIC_TYPE, td.getSemanticTypes().stream().findFirst().orElse(""));
     }
     return this;
