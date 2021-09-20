@@ -8,6 +8,14 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -90,7 +98,7 @@ public class TDJsonWriterTest {
         .add("https://www.w3.org/2019/wot/td/v1")
         .add(Json.createObjectBuilder()
           .add("eve", "http://w3id.org/eve#")
-          .add("iot", "http://iotschema.org/").build()).build())
+          .add("iot", "http://iotschema.org/")))
       .add("@type", Json.createArrayBuilder().add("eve:Artifact").add("iot:Light"))
       .add("title", THING_TITLE)
       .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
@@ -279,6 +287,7 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td)
       .setNamespace("ex", "http://example.org/")
       .getJson();
+
     Assert.assertEquals(expected, test);
   }
 
@@ -413,6 +422,63 @@ public class TDJsonWriterTest {
       .setNamespace("ex1", "http://example.org/1/")
       .setNamespace("ex2", "http://example.org/2/")
       .getJson();
+
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testWriteAdditionalMetadata() {
+
+    ValueFactory rdf = SimpleValueFactory.getInstance();
+    Model metadata = new LinkedHashModel();
+
+    final String NS = "http://w3id.org/eve#";
+    metadata.setNamespace("eve", NS);
+
+    BNode manualId = rdf.createBNode();
+    BNode protocolId = rdf.createBNode();
+    metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS,"hasManual"), manualId);
+    metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
+    //metadata.add(manualId, DCTERMS.TITLE, rdf.createLiteral("My Lamp Manual"));
+
+    ThingDescription td = new ThingDescription.Builder("My Thing")
+      .addThingURI("http://example.org/lamp123")
+      .addSemanticType("https://saref.etsi.org/core/LightSwitch")
+      .addTriple(rdf.createIRI("http://example.org/lamp123"), RDF.TYPE, rdf.createIRI(NS,
+        "Artifact"))
+      .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
+      //.addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
+      .addGraph(metadata)
+      .addGraph(new ModelBuilder()
+        .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
+        .build())
+      .addTriple(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", Json.createArrayBuilder()
+        .add("https://www.w3.org/2019/wot/td/v1")
+        .add(Json.createObjectBuilder()
+          .add("saref", "https://saref.etsi.org/core/")
+          .add( "eve", "http://w3id.org/eve#")))
+      .add("id", "http://example.org/lamp123")
+      .add("title", THING_TITLE)
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("@type", Json.createArrayBuilder()
+        .add("eve:Artifact")
+        .add("saref:LightSwitch"))
+      .add("eve:hasManual" , Json.createObjectBuilder()
+        .add("@type","eve:Manual")
+        .add("eve:hasUsageProtocol", Json.createObjectBuilder()
+          .add("@type", "eve:UsageProtocol")
+          .add("eve:hasLanguage", "http://jason.sourceforge.net/wp/description/")))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td)
+      .setNamespace("saref", "https://saref.etsi.org/core/")
+      .getJson();
+
     Assert.assertEquals(expected, test);
   }
 

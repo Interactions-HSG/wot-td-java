@@ -7,6 +7,12 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import javax.json.*;
 import java.io.ByteArrayOutputStream;
@@ -34,6 +40,12 @@ public class TDJsonWriter extends AbstractTDWriter {
   }
 
   public JsonObject getJson() {
+
+    if (td.getGraph().isPresent()) {
+      td.getGraph().get().getNamespaces().stream()
+        .filter(ns -> !prefixMap.containsKey(ns.getName()))
+        .forEach(ns -> setNamespace(ns.getPrefix(), ns.getName()));
+    }
     if (semanticContext.isPresent()) {
       document.add(JWot.CONTEXT, Json.createArrayBuilder()
         .add(JWot.WOT_CONTEXT)
@@ -78,11 +90,21 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addTypes() {
     //TODO This is ugly why is the types sometimes a set and sometimes a list?
 
-    if (td.getSemanticTypes().size() > 1) {
-      document.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(new ArrayList<>(td.getSemanticTypes())));
-    } else if (!td.getSemanticTypes().isEmpty()) {
+    Set<String> semanticTypes = td.getSemanticTypes();
+
+    if (td.getThingURI().isPresent()) {
+      Resource thingURI = SimpleValueFactory.getInstance().createIRI(td.getThingURI().get());
+      td.getGraph().ifPresent(g -> g.getStatements(thingURI, RDF.TYPE, null)
+        .forEach(statement -> {
+          semanticTypes.add(statement.getObject().stringValue());
+        }));
+    }
+
+    if (semanticTypes.size() > 1) {
+      document.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(new ArrayList<>(semanticTypes)));
+    } else if (!semanticTypes.isEmpty()) {
       document.add(JWot.SEMANTIC_TYPE,
-        this.getPrefixedAnnotation(td.getSemanticTypes().stream().findFirst().orElse("")));
+        this.getPrefixedAnnotation(semanticTypes.stream().findFirst().orElse("")));
     }
     return this;
   }
@@ -132,11 +154,53 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addGraph() {
-    td.getGraph().ifPresent(g -> g.getStatements(null, null, null).forEach(statement -> {
-      //TODO I'm not sure this is the right way to parse the statement
-      document.add(getPrefixedAnnotation(statement.getPredicate().stringValue()), statement.getObject().stringValue());
-    }));
+
+    if (td.getThingURI().isPresent()) {
+      Resource thingURI = SimpleValueFactory.getInstance().createIRI(td.getThingURI().get());
+      td.getGraph().ifPresent(g -> g.getStatements(thingURI, null, null)
+        .forEach(statement -> {
+
+          if (!statement.getPredicate().equals(RDF.TYPE)) {
+            String prefixedPredicate = getPrefixedAnnotation(statement.getPredicate().stringValue());
+            Value object = statement.getObject();
+
+            if (!object.isBNode()) {
+              document.add(prefixedPredicate, getPrefixedAnnotation(object.stringValue()));
+            }
+            else {
+              JsonObjectBuilder objectObjBuilder = getStatementObject((Resource) object);
+              document.add(prefixedPredicate, objectObjBuilder);
+            }
+          }
+        }));
+    }
+
     return this;
+  }
+
+  protected JsonObjectBuilder getStatementObject(Resource subject) {
+    JsonObjectBuilder subjectObjBuilder = Json.createObjectBuilder();
+
+    td.getGraph().ifPresent(g -> g.getStatements(subject, null, null)
+      .forEach(statement -> {
+      IRI predicate = statement.getPredicate();
+      Value object = statement.getObject();
+
+      if (!object.isBNode()) {
+        if (predicate.equals(RDF.TYPE)) {
+          subjectObjBuilder.add(JWot.SEMANTIC_TYPE,getPrefixedAnnotation(object.stringValue()));
+        } else {
+          subjectObjBuilder.add(getPrefixedAnnotation(predicate.stringValue()),
+            getPrefixedAnnotation(object.stringValue()));
+        }
+      }
+      else {
+        JsonObjectBuilder objectObjBuilder = getStatementObject((Resource) object);
+        subjectObjBuilder.add(getPrefixedAnnotation(predicate.stringValue()), objectObjBuilder);
+      }
+    }));
+
+    return subjectObjBuilder;
   }
 
   private String getPrefixedAnnotation(String annotation) {
