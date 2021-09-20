@@ -11,6 +11,7 @@ import javax.json.*;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -152,8 +153,12 @@ public class TDJsonWriter extends AbstractTDWriter {
   private<T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {
     if (!affordances.isEmpty()) {
       JsonObjectBuilder rootObj = Json.createObjectBuilder();
-      affordances.forEach(aff ->
-        rootObj.add(aff.getTitle().get(), mapper.apply(aff))
+      //TODO check this because it doesn't look good
+      AtomicInteger index = new AtomicInteger();
+      affordances.forEach(aff ->{
+          index.addAndGet(1);
+          rootObj.add(aff.getName().get(), mapper.apply(aff));
+        }
       );
       return rootObj;
     }
@@ -198,8 +203,7 @@ public class TDJsonWriter extends AbstractTDWriter {
       affordanceObj.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(affordance.getSemanticTypes()));
     }
 
-    //add readable name
-    affordance.getName().ifPresent(n -> affordanceObj.add(JWot.TITLE, n));
+    affordance.getTitle().ifPresent(n -> affordanceObj.add(JWot.TITLE, n));
 
     //TODO description is missing in the model
 

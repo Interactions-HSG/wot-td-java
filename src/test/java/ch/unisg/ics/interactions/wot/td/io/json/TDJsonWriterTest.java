@@ -148,7 +148,7 @@ public class TDJsonWriterTest {
       new Form.Builder(THING_IRI+"/status")
         .setMethodName("GET")
         .addOperationType("readProperty").build()
-    ).addObserve().addTitle("status").build());
+    ).addObserve().addName("status").build());
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addBaseURI(IO_BASE_IRI)
@@ -191,7 +191,7 @@ public class TDJsonWriterTest {
     actions.add(new ActionAffordance.Builder(
       new Form.Builder(THING_IRI+"/changeColor")
       .setMethodName("POST").build()
-      ).addTitle("changeColor")
+      ).addName("changeColor")
       .addInputSchema(new ObjectSchema.Builder()
         .addProperty("color", new StringSchema.Builder().build())
         .build())
@@ -202,7 +202,7 @@ public class TDJsonWriterTest {
     actions.add(new ActionAffordance.Builder(
         new Form.Builder(THING_IRI+"/changeState")
           .setMethodName("POST").build()
-      ).addTitle("changeState").build()
+      ).addName("changeState").build()
     );
 
 
