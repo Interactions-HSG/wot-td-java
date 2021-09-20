@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.*;
+import static java.util.Comparator.comparing;
 
 /**
  * A writer to serialize TDs in the JSON-LD 1.1 format.
@@ -22,8 +22,8 @@ import static java.util.Comparator.*;
 public class TDJsonWriter extends AbstractTDWriter {
 
   private final JsonObjectBuilder document;
-  private Optional<JsonObjectBuilder> semanticContext;
   private final Map<String, String> prefixMap;
+  private Optional<JsonObjectBuilder> semanticContext;
 
   public TDJsonWriter(ThingDescription td) {
     super(td);
@@ -32,8 +32,8 @@ public class TDJsonWriter extends AbstractTDWriter {
     prefixMap = new HashMap<>();
   }
 
-  public JsonObject getJson(){
-    if(semanticContext.isPresent()){
+  public JsonObject getJson() {
+    if (semanticContext.isPresent()) {
       document.add(JWot.CONTEXT, Json.createArrayBuilder()
         .add(JWot.WOT_CONTEXT)
         .add(semanticContext.get()));
@@ -62,11 +62,11 @@ public class TDJsonWriter extends AbstractTDWriter {
   @Override
   public TDJsonWriter setNamespace(String prefix, String namespace) {
     this.prefixMap.put(namespace, prefix);
-    if(semanticContext.isPresent()){
+    if (semanticContext.isPresent()) {
       semanticContext.get().add(prefix, namespace);
     } else {
       JsonObjectBuilder semContextObj = Json.createObjectBuilder()
-      .add(prefix, namespace);
+        .add(prefix, namespace);
       semanticContext = Optional.of(semContextObj);
     }
 
@@ -77,9 +77,9 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addTypes() {
     //TODO This is ugly why is the types sometimes a set and sometimes a list?
 
-    if(td.getSemanticTypes().size() > 1) {
+    if (td.getSemanticTypes().size() > 1) {
       document.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(new ArrayList<>(td.getSemanticTypes())));
-    } else if(!td.getSemanticTypes().isEmpty()){
+    } else if (!td.getSemanticTypes().isEmpty()) {
       document.add(JWot.SEMANTIC_TYPE,
         this.getPrefixedAnnotation(td.getSemanticTypes().stream().findFirst().orElse("")));
     }
@@ -100,7 +100,7 @@ public class TDJsonWriter extends AbstractTDWriter {
     //Add security def
     document.add(JWot.SECURITY_DEF,
       Json.createObjectBuilder().add("nosec_sc",
-        Json.createObjectBuilder().add("scheme", "nosec" ))
+        Json.createObjectBuilder().add("scheme", "nosec"))
     );
     //Add actual security field
     document.add(JWot.SECURITY, Json.createArrayBuilder().add("nosec_sc"));
@@ -115,7 +115,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addProperties() {
-    if(!td.getProperties().isEmpty()){
+    if (!td.getProperties().isEmpty()) {
       document.add(JWot.PROPERTIES, this.getAffordancesObject(td.getProperties(), this::getProperty));
     }
     return this;
@@ -123,7 +123,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addActions() {
-    if(!td.getActions().isEmpty()) {
+    if (!td.getActions().isEmpty()) {
       document.add(JWot.ACTIONS, this.getAffordancesObject(td.getActions(), this::getAction));
     }
     return this;
@@ -133,13 +133,13 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addGraph() {
     td.getGraph().ifPresent(g -> g.getStatements(null, null, null).forEach(statement -> {
       //TODO I'm not sure this is the right way to parse the statement
-      document.add(getPrefixedAnnotation(statement.getPredicate().stringValue()),statement.getObject().stringValue());
+      document.add(getPrefixedAnnotation(statement.getPredicate().stringValue()), statement.getObject().stringValue());
     }));
     return this;
   }
 
-  private String getPrefixedAnnotation(String annotation){
-    Map<String, String> matchedPref= prefixMap.entrySet()
+  private String getPrefixedAnnotation(String annotation) {
+    Map<String, String> matchedPref = prefixMap.entrySet()
       .stream()
       .filter(map -> annotation.startsWith(map.getKey()))
       .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
@@ -150,15 +150,14 @@ public class TDJsonWriter extends AbstractTDWriter {
     if (matchedPref.size() == 1) {
       String namespace = (String) matchedPref.keySet().toArray()[0];
       return annotation.replace(namespace, matchedPref.get(namespace) + ":");
-    }
-    else {
+    } else {
       Map.Entry<String, String> bestMatch = Collections.max(matchedPref.entrySet(),
         comparing(Map.Entry::getKey));
       return annotation.replace(bestMatch.getKey(), bestMatch.getValue() + ":");
     }
   }
 
-  private<T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {
+  private <T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {
     if (!affordances.isEmpty()) {
       JsonObjectBuilder rootObj = Json.createObjectBuilder();
       affordances.forEach(aff ->
@@ -203,8 +202,12 @@ public class TDJsonWriter extends AbstractTDWriter {
     JsonObjectBuilder affordanceObj = Json.createObjectBuilder();
 
     //add semantic type(s)
-    if(!affordance.getSemanticTypes().isEmpty()) {
-      affordanceObj.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(affordance.getSemanticTypes()));
+    if (affordance.getSemanticTypes().size() > 1) {
+      affordanceObj.add(JWot.SEMANTIC_TYPE,
+        this.getSemanticTypes(new ArrayList<>(affordance.getSemanticTypes())));
+    } else if (!affordance.getSemanticTypes().isEmpty()) {
+      affordanceObj.add(JWot.SEMANTIC_TYPE,
+        this.getPrefixedAnnotation(affordance.getSemanticTypes().stream().findFirst().orElse("")));
     }
 
     //add readable name
@@ -232,8 +235,7 @@ public class TDJsonWriter extends AbstractTDWriter {
       form.getOperationTypes().forEach(op -> {
         if (JWot.JSON_OPERATION_TYPES.containsKey(op)) {
           opArray.add((String) JWot.JSON_OPERATION_TYPES.get(op));
-        }
-        else {
+        } else {
           opArray.add(op);
         }
       });
@@ -241,7 +243,7 @@ public class TDJsonWriter extends AbstractTDWriter {
 
       //Add methodName only if there is one operation type to avoid ambiguity
       form.getMethodName().ifPresent(m -> {
-        if(form.getOperationTypes().size() == 1)
+        if (form.getOperationTypes().size() == 1)
           formObj.add(JWot.METHOD, m);
       });
       formArray.add(formObj);
