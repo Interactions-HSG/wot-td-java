@@ -12,6 +12,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.*;
 
 /**
  * A writer to serialize TDs in the JSON-LD 1.1 format.
@@ -73,10 +76,12 @@ public class TDJsonWriter extends AbstractTDWriter {
   @Override
   protected TDJsonWriter addTypes() {
     //TODO This is ugly why is the types sometimes a set and sometimes a list?
+
     if(td.getSemanticTypes().size() > 1) {
       document.add(JWot.SEMANTIC_TYPE, this.getSemanticTypes(new ArrayList<>(td.getSemanticTypes())));
     } else if(!td.getSemanticTypes().isEmpty()){
-      document.add(JWot.SEMANTIC_TYPE, td.getSemanticTypes().stream().findFirst().orElse(""));
+      document.add(JWot.SEMANTIC_TYPE,
+        this.getPrefixedAnnotation(td.getSemanticTypes().stream().findFirst().orElse("")));
     }
     return this;
   }
@@ -134,19 +139,23 @@ public class TDJsonWriter extends AbstractTDWriter {
   }
 
   private String getPrefixedAnnotation(String annotation){
-    String[] splitAnnotation = annotation.split("#");
-    if(splitAnnotation.length <= 1){
+    Map<String, String> matchedPref= prefixMap.entrySet()
+      .stream()
+      .filter(map -> annotation.startsWith(map.getKey()))
+      .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
+
+    if (matchedPref.isEmpty()) {
       return annotation;
     }
-    String root = splitAnnotation[0]+'#';
-    String fragment = splitAnnotation[1];
-    String result;
-    if(this.prefixMap.containsKey(root)) {
-      result = this.prefixMap.get(root)+":"+fragment;
-    } else {
-      result = annotation;
+    if (matchedPref.size() == 1) {
+      String namespace = (String) matchedPref.keySet().toArray()[0];
+      return annotation.replace(namespace, matchedPref.get(namespace) + ":");
     }
-    return result;
+    else {
+      Map.Entry<String, String> bestMatch = Collections.max(matchedPref.entrySet(),
+        comparing(Map.Entry::getKey));
+      return annotation.replace(bestMatch.getKey(), bestMatch.getValue() + ":");
+    }
   }
 
   private<T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {

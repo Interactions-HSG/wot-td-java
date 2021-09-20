@@ -4,7 +4,6 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.io.graph.TDGraphWriter;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
@@ -14,9 +13,6 @@ import org.junit.Test;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,19 +62,27 @@ public class TDJsonWriterTest {
   public void testThingWithSemanticTypes() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSemanticType("http://w3id.org/eve#Artifact")
-      .addSemanticType("http://w3id.org/td#Thing")
+      .addSemanticType("http://iotschema.org/Light")
       .addSecurityScheme(new NoSecurityScheme())
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
-      .add("@context", "https://www.w3.org/2019/wot/td/v1")
-      .add("@type", Json.createArrayBuilder().add("http://w3id.org/eve#Artifact").add("http://w3id.org/td#Thing"))
+      .add("@context", Json.createArrayBuilder()
+        .add("https://www.w3.org/2019/wot/td/v1")
+        .add(Json.createObjectBuilder()
+          .add("eve", "http://w3id.org/eve#")
+          .add("iot", "http://iotschema.org/").build()).build())
+      .add("@type", Json.createArrayBuilder().add("eve:Artifact").add("iot:Light"))
       .add("title", THING_TITLE)
       .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
       .add("security", Json.createArrayBuilder().add("nosec_sc"))
       .build();
 
-    JsonObject test = new TDJsonWriter(td).getJson();
+    JsonObject test = new TDJsonWriter(td)
+      .setNamespace("eve", "http://w3id.org/eve#")
+      .setNamespace("iot", "http://iotschema.org/")
+      .getJson();
+
     Assert.assertEquals(expected, test);
   }
 
@@ -89,12 +93,40 @@ public class TDJsonWriterTest {
       .addSecurityScheme(new NoSecurityScheme())
       .build();
 
-    JsonObject test = new TDJsonWriter(td).setNamespace("ex", "https://example.org/#").getJson();
+    JsonObject test = new TDJsonWriter(td).setNamespace("eve", "http://w3id.org/eve#").getJson();
 
     JsonObject expected = Json.createObjectBuilder()
       .add("@context", Json.createArrayBuilder().add("https://www.w3.org/2019/wot/td/v1")
-        .add(Json.createObjectBuilder().add("ex", "https://example.org/#"))
-      ).add("@type", "http://w3id.org/eve#Artifact")
+        .add(Json.createObjectBuilder().add("eve", "http://w3id.org/eve#"))
+      ).add("@type", "eve:Artifact")
+      .add("title", THING_TITLE)
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .build();
+
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testThingWithOverlappingNameSpaces(){
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addSemanticType("http://example.org/Type1")
+      .addSemanticType("http://example.org/overlapping/Type2")
+      .addSecurityScheme(new NoSecurityScheme())
+      .build();
+
+    JsonObject test = new TDJsonWriter(td)
+      .setNamespace("ex1", "http://example.org/")
+      .setNamespace("ex2", "http://example.org/overlapping/")
+      .getJson();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", Json.createArrayBuilder()
+        .add("https://www.w3.org/2019/wot/td/v1")
+        .add(Json.createObjectBuilder()
+          .add("ex1", "http://example.org/")
+          .add("ex2", "http://example.org/overlapping/")))
+      .add("@type", Json.createArrayBuilder().add("ex1:Type1").add("ex2:Type2"))
       .add("title", THING_TITLE)
       .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
       .add("security", Json.createArrayBuilder().add("nosec_sc"))
@@ -139,8 +171,6 @@ public class TDJsonWriterTest {
 
     JsonObject test = new TDJsonWriter(td).getJson();
     Assert.assertEquals(expected, test);
-
-    Assert.assertEquals(expected, test);
   }
 
   @Test
@@ -182,10 +212,6 @@ public class TDJsonWriterTest {
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
-
-    System.out.println(test);
-    Assert.assertEquals(expected, test);
-
     Assert.assertEquals(expected, test);
   }
 
