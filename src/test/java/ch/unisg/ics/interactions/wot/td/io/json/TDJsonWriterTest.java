@@ -40,6 +40,25 @@ public class TDJsonWriterTest {
   }
 
   @Test
+  public void testThingWithTDOntologyPrefix() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addSemanticType(TD.Thing)
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("@type", "Thing")
+      .add("title", THING_TITLE)
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
   public void testThingWithSemanticType() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSemanticType("http://w3id.org/eve#Artifact")

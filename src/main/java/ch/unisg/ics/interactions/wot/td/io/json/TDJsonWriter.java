@@ -6,6 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 import javax.json.*;
 import java.io.ByteArrayOutputStream;
@@ -139,6 +140,11 @@ public class TDJsonWriter extends AbstractTDWriter {
   }
 
   private String getPrefixedAnnotation(String annotation) {
+
+    if (annotation.startsWith(TD.PREFIX)) {
+      return annotation.replace(TD.PREFIX,"");
+    }
+
     Map<String, String> matchedPref = prefixMap.entrySet()
       .stream()
       .filter(map -> annotation.startsWith(map.getKey()))
