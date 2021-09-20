@@ -153,10 +153,7 @@ public class TDJsonWriter extends AbstractTDWriter {
   private<T extends InteractionAffordance> JsonObjectBuilder getAffordancesObject(List<T> affordances, Function<T, JsonObjectBuilder> mapper) {
     if (!affordances.isEmpty()) {
       JsonObjectBuilder rootObj = Json.createObjectBuilder();
-      //TODO check this because it doesn't look good
-      AtomicInteger index = new AtomicInteger();
       affordances.forEach(aff ->{
-          index.addAndGet(1);
           rootObj.add(aff.getName().get(), mapper.apply(aff));
         }
       );
