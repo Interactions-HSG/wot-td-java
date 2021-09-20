@@ -1,5 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.io.json;
 
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+
+import javax.json.Json;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public final class JWot {
 
   public static final String WOT_CONTEXT = "https://www.w3.org/2019/wot/td/v1";
@@ -34,5 +42,12 @@ public final class JWot {
 
   public static final String SECURITY = "security";
   public static final String SECURITY_DEF = "securityDefinitions";
+
+  public static final Map JSON_OPERATION_TYPES =
+    Arrays.stream(new String[][] {
+    {TD.readProperty, "readproperty" },
+    {TD.writeProperty, "writeproperty" },
+    {TD.invokeAction, "invokeaction" },
+  }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
 }

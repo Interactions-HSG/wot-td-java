@@ -220,7 +220,14 @@ public class TDJsonWriter extends AbstractTDWriter {
 
       //Add operations
       JsonArrayBuilder opArray = Json.createArrayBuilder();
-      form.getOperationTypes().forEach(opArray::add);
+      form.getOperationTypes().forEach(op -> {
+        if (JWot.JSON_OPERATION_TYPES.containsKey(op)) {
+          opArray.add((String) JWot.JSON_OPERATION_TYPES.get(op));
+        }
+        else {
+          opArray.add(op);
+        }
+      });
       formObj.add(JWot.OPERATIONS, opArray);
 
       //Add methodName only if there is one operation type to avoid ambiguity

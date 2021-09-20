@@ -4,14 +4,19 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.io.graph.TDGraphWriter;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,7 +152,7 @@ public class TDJsonWriterTest {
       new StringSchema.Builder().build(),
       new Form.Builder(THING_IRI+"/status")
         .setMethodName("GET")
-        .addOperationType("readProperty").build()
+        .addOperationType(TD.readProperty).build()
     ).addObserve().addTitle("status").build());
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -171,7 +176,7 @@ public class TDJsonWriterTest {
               .add("href",THING_IRI+"/status")
               .add("htv:methodName", "GET")
               .add("contentType", "application/json")
-              .add("op", Json.createArrayBuilder().add("readProperty"))
+              .add("op", Json.createArrayBuilder().add("readproperty"))
             )
           )
         )
@@ -179,6 +184,8 @@ public class TDJsonWriterTest {
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
+
+    System.out.println(test);
     Assert.assertEquals(expected, test);
 
     Assert.assertEquals(expected, test);
@@ -230,7 +237,7 @@ public class TDJsonWriterTest {
               .add("href",THING_IRI+"/changeColor")
               .add("htv:methodName", "POST")
               .add("contentType", "application/json")
-              .add("op", Json.createArrayBuilder().add("https://www.w3.org/2019/wot/td#invokeAction"))
+              .add("op", Json.createArrayBuilder().add("invokeaction"))
             )
           )
         ).add("changeState", Json.createObjectBuilder()
@@ -239,7 +246,7 @@ public class TDJsonWriterTest {
               .add("href",THING_IRI+"/changeState")
               .add("htv:methodName", "POST")
               .add("contentType", "application/json")
-              .add("op", Json.createArrayBuilder().add("https://www.w3.org/2019/wot/td#invokeAction"))
+              .add("op", Json.createArrayBuilder().add("invokeaction"))
             )
           )
         )
