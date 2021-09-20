@@ -120,8 +120,6 @@ public class TDJsonWriterTest {
 
     JsonObject test = new TDJsonWriter(td).getJson();
     Assert.assertEquals(expected, test);
-
-    Assert.assertEquals(expected, test);
   }
 
   @Test
