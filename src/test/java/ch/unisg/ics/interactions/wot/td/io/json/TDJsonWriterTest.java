@@ -439,7 +439,6 @@ public class TDJsonWriterTest {
     BNode protocolId = rdf.createBNode();
     metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS,"hasManual"), manualId);
     metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
-    //metadata.add(manualId, DCTERMS.TITLE, rdf.createLiteral("My Lamp Manual"));
 
     ThingDescription td = new ThingDescription.Builder("My Thing")
       .addThingURI("http://example.org/lamp123")
@@ -447,7 +446,8 @@ public class TDJsonWriterTest {
       .addTriple(rdf.createIRI("http://example.org/lamp123"), RDF.TYPE, rdf.createIRI(NS,
         "Artifact"))
       .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
-      //.addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
+      //.addTriple(rdf.createIRI("http://example.org/lamp123"),rdf.createIRI(NS,"hasManual"),
+    //  rdf.createIRI("http://example.org/manuals/anotherManual"))
       .addGraph(metadata)
       .addGraph(new ModelBuilder()
         .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
@@ -468,6 +468,7 @@ public class TDJsonWriterTest {
       .add("@type", Json.createArrayBuilder()
         .add("eve:Artifact")
         .add("saref:LightSwitch"))
+      //.add("eve:hasManual", "http://example.org/manuals/anotherManual")
       .add("eve:hasManual" , Json.createObjectBuilder()
         .add("@type","eve:Manual")
         .add("eve:hasUsageProtocol", Json.createObjectBuilder()
@@ -479,6 +480,7 @@ public class TDJsonWriterTest {
       .setNamespace("saref", "https://saref.etsi.org/core/")
       .getJson();
 
+    System.out.println(test);
     Assert.assertEquals(expected, test);
   }
 

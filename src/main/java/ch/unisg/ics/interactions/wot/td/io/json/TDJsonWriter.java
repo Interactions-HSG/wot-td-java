@@ -154,22 +154,23 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addGraph() {
-
+    // TODO the getStatementObject can be exapnded so that addGraph() calls directly :
+    // document.addAll(getStatementObject(thingURI);
     if (td.getThingURI().isPresent()) {
       Resource thingURI = SimpleValueFactory.getInstance().createIRI(td.getThingURI().get());
       td.getGraph().ifPresent(g -> g.getStatements(thingURI, null, null)
         .forEach(statement -> {
 
           if (!statement.getPredicate().equals(RDF.TYPE)) {
-            String prefixedPredicate = getPrefixedAnnotation(statement.getPredicate().stringValue());
+            IRI predicate = statement.getPredicate();
             Value object = statement.getObject();
 
             if (!object.isBNode()) {
-              document.add(prefixedPredicate, getPrefixedAnnotation(object.stringValue()));
+              document.add(getPrefixedAnnotation(predicate.stringValue()), getPrefixedAnnotation(object.stringValue()));
             }
             else {
               JsonObjectBuilder objectObjBuilder = getStatementObject((Resource) object);
-              document.add(prefixedPredicate, objectObjBuilder);
+              document.add(getPrefixedAnnotation(predicate.stringValue()), objectObjBuilder);
             }
           }
         }));
@@ -179,6 +180,7 @@ public class TDJsonWriter extends AbstractTDWriter {
   }
 
   protected JsonObjectBuilder getStatementObject(Resource subject) {
+    //TODO Convert to JsonArry when sub and pred are the same.
     JsonObjectBuilder subjectObjBuilder = Json.createObjectBuilder();
 
     td.getGraph().ifPresent(g -> g.getStatements(subject, null, null)
