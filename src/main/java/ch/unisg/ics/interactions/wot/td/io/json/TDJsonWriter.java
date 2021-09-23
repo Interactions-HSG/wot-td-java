@@ -254,7 +254,7 @@ public class TDJsonWriter extends AbstractTDWriter {
     if (!affordances.isEmpty()) {
       JsonObjectBuilder rootObj = Json.createObjectBuilder();
       affordances.forEach(aff ->
-        rootObj.add(aff.getTitle().get(), mapper.apply(aff))
+        rootObj.add(aff.getName().get(), mapper.apply(aff))
       );
       return rootObj;
     }
@@ -304,7 +304,7 @@ public class TDJsonWriter extends AbstractTDWriter {
     }
 
     //add readable name
-    affordance.getName().ifPresent(n -> affordanceObj.add(JWot.TITLE, n));
+    affordance.getTitle().ifPresent(n -> affordanceObj.add(JWot.TITLE, n));
 
     //TODO description is missing in the model
 
