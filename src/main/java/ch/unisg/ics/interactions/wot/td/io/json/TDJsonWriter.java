@@ -189,12 +189,14 @@ public class TDJsonWriter extends AbstractTDWriter {
       Value object = statement.getObject();
 
       if (!object.isBNode()) {
+        String key;
         if (predicate.equals(RDF.TYPE)) {
-          subjectObjBuilder.add(JWot.SEMANTIC_TYPE,getPrefixedAnnotation(object.stringValue()));
+          key = JWot.SEMANTIC_TYPE;
         } else {
-          subjectObjBuilder.add(getPrefixedAnnotation(predicate.stringValue()),
-            getPrefixedAnnotation(object.stringValue()));
+          key = getPrefixedAnnotation(predicate.stringValue());
         }
+        String currentValue = getPrefixedAnnotation(object.stringValue());
+        subjectObjBuilder.add(key,currentValue);
       }
       else {
         JsonObjectBuilder objectObjBuilder = getStatementObject((Resource) object);
@@ -203,6 +205,17 @@ public class TDJsonWriter extends AbstractTDWriter {
     }));
 
     return subjectObjBuilder;
+  }
+
+  private JsonObjectBuilder getPredicateBuilder(String key, String currentValue, JsonObject currentObj) {
+    JsonObjectBuilder objBuilder = Json.createObjectBuilder();
+    if(currentObj.containsKey(key)){
+      JsonValue previousValue = currentObj.get(key);
+      objBuilder.add(key, Json.createArrayBuilder().add(previousValue).add(currentValue));
+    } else {
+      objBuilder.add(key, currentValue);
+    }
+    return objBuilder;
   }
 
   private String getPrefixedAnnotation(String annotation) {
