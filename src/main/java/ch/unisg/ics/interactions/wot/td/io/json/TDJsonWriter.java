@@ -7,10 +7,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -28,7 +25,7 @@ import static java.util.Comparator.comparing;
  */
 public class TDJsonWriter extends AbstractTDWriter {
 
-  private final JsonObjectBuilder document;
+  private JsonObjectBuilder document;
   private final Map<String, String> prefixMap;
   private Optional<JsonObjectBuilder> semanticContext;
 
@@ -154,23 +151,33 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addGraph() {
-    // TODO the getStatementObject can be exapnded so that addGraph() calls directly :
+    // TODO the getStatementObject can be expanded so that addGraph() calls directly :
     // document.addAll(getStatementObject(thingURI);
     if (td.getThingURI().isPresent()) {
       Resource thingURI = SimpleValueFactory.getInstance().createIRI(td.getThingURI().get());
       td.getGraph().ifPresent(g -> g.getStatements(thingURI, null, null)
         .forEach(statement -> {
-
           if (!statement.getPredicate().equals(RDF.TYPE)) {
             IRI predicate = statement.getPredicate();
             Value object = statement.getObject();
-
+            String key = getPrefixedAnnotation(predicate.stringValue());
+            JsonValue currentValue;
             if (!object.isBNode()) {
-              document.add(getPrefixedAnnotation(predicate.stringValue()), getPrefixedAnnotation(object.stringValue()));
+              currentValue = Json.createValue(getPrefixedAnnotation(object.stringValue()));
             }
             else {
-              JsonObjectBuilder objectObjBuilder = getStatementObject((Resource) object);
-              document.add(getPrefixedAnnotation(predicate.stringValue()), objectObjBuilder);
+              currentValue = getStatementObject((Resource) object).build();
+            }
+            //TODO Consider changing library for JsonBuilder because this is VERY ugly,
+            // it's impossible to check if keys exists without building but that erase the content of the builder itself.
+            JsonObject obj = document.build();
+            if (obj.containsKey(key)) {
+              JsonValue previousValue = obj.get(key);
+              document = Json.createObjectBuilder(obj);
+              document.add(key, Json.createArrayBuilder().add(previousValue).add(currentValue));
+            } else {
+              document = Json.createObjectBuilder(obj);
+              document.add(key, currentValue);
             }
           }
         }));
@@ -182,9 +189,12 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected JsonObjectBuilder getStatementObject(Resource subject) {
     //TODO Convert to JsonArry when sub and pred are the same.
     JsonObjectBuilder subjectObjBuilder = Json.createObjectBuilder();
-
-    td.getGraph().ifPresent(g -> g.getStatements(subject, null, null)
-      .forEach(statement -> {
+    Iterable<Statement> statements = new ArrayList<>();
+    if(td.getGraph().isPresent()){
+      statements = td.getGraph().get().getStatements(subject, null, null);
+    }
+    for(Statement statement: statements)
+    {
       IRI predicate = statement.getPredicate();
       Value object = statement.getObject();
       String key;
@@ -201,21 +211,19 @@ public class TDJsonWriter extends AbstractTDWriter {
         key = getPrefixedAnnotation(predicate.stringValue());
         currentValue = getStatementObject((Resource) object).build();
       }
-      subjectObjBuilder.add(key,currentValue);
-    }));
+      //TODO is this necessary or on the top level is enough? I think this could be useful but not sure
+      JsonObject obj = subjectObjBuilder.build();
+      if (obj.containsKey(key)) {
+        JsonValue previousValue = obj.get(key);
+        subjectObjBuilder = Json.createObjectBuilder(obj);
+        subjectObjBuilder.add(key, Json.createArrayBuilder().add(previousValue).add(currentValue));
+      } else {
+        subjectObjBuilder = Json.createObjectBuilder(obj);
+        subjectObjBuilder.add(key, currentValue);
+      }
+    }
 
     return subjectObjBuilder;
-  }
-
-  private JsonObjectBuilder getPredicateBuilder(String key, String currentValue, JsonObject currentObj) {
-    JsonObjectBuilder objBuilder = Json.createObjectBuilder();
-    if(currentObj.containsKey(key)){
-      JsonValue previousValue = currentObj.get(key);
-      objBuilder.add(key, Json.createArrayBuilder().add(previousValue).add(currentValue));
-    } else {
-      objBuilder.add(key, currentValue);
-    }
-    return objBuilder;
   }
 
   private String getPrefixedAnnotation(String annotation) {

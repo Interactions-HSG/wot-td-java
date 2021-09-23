@@ -446,8 +446,8 @@ public class TDJsonWriterTest {
       .addTriple(rdf.createIRI("http://example.org/lamp123"), RDF.TYPE, rdf.createIRI(NS,
         "Artifact"))
       .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
-      //.addTriple(rdf.createIRI("http://example.org/lamp123"),rdf.createIRI(NS,"hasManual"),
-       // rdf.createIRI("http://example.org/manuals/anotherManual"))
+      .addTriple(rdf.createIRI("http://example.org/lamp123"),rdf.createIRI(NS,"hasManual"),
+        rdf.createIRI("http://example.org/manuals/anotherManual"))
       .addGraph(metadata)
       .addGraph(new ModelBuilder()
         .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
@@ -468,11 +468,11 @@ public class TDJsonWriterTest {
         .add("saref:LightSwitch"))
       .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
       .add("security", Json.createArrayBuilder().add("nosec_sc"))
-      .add("eve:hasManual" , /*Json.createArrayBuilder().add("http://example.org/manuals/anotherManual").add(*/Json.createObjectBuilder()
+      .add("eve:hasManual" , Json.createArrayBuilder().add("http://example.org/manuals/anotherManual").add(Json.createObjectBuilder()
         .add("@type","eve:Manual")
         .add("eve:hasUsageProtocol", Json.createObjectBuilder()
           .add("@type", "eve:UsageProtocol")
-          .add("eve:hasLanguage", "http://jason.sourceforge.net/wp/description/")))//)
+          .add("eve:hasLanguage", "http://jason.sourceforge.net/wp/description/"))))
       .build();
 
     JsonObject test = new TDJsonWriter(td)
