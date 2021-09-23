@@ -187,21 +187,21 @@ public class TDJsonWriter extends AbstractTDWriter {
       .forEach(statement -> {
       IRI predicate = statement.getPredicate();
       Value object = statement.getObject();
-
+      String key;
+      JsonValue currentValue;
       if (!object.isBNode()) {
-        String key;
         if (predicate.equals(RDF.TYPE)) {
           key = JWot.SEMANTIC_TYPE;
         } else {
           key = getPrefixedAnnotation(predicate.stringValue());
         }
-        String currentValue = getPrefixedAnnotation(object.stringValue());
-        subjectObjBuilder.add(key,currentValue);
+        currentValue = Json.createValue(getPrefixedAnnotation(object.stringValue()));
       }
       else {
-        JsonObjectBuilder objectObjBuilder = getStatementObject((Resource) object);
-        subjectObjBuilder.add(getPrefixedAnnotation(predicate.stringValue()), objectObjBuilder);
+        key = getPrefixedAnnotation(predicate.stringValue());
+        currentValue = getStatementObject((Resource) object).build();
       }
+      subjectObjBuilder.add(key,currentValue);
     }));
 
     return subjectObjBuilder;
