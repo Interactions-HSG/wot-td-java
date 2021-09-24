@@ -49,7 +49,7 @@ ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
 The above code snippet creates a `ThingDescription` for a lamp with the title `My Lamp Thing` ([mandatory property](https://www.w3.org/TR/wot-thing-description/#thing)) and the semantic type `saref:LightSwitch` (see [SAREF ontology](https://saref.etsi.org/)). The lamp exposes a `toggle` action, which can be defined in a similar manner:
 
 ```java
-ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
+ActionAffordance toggle = new ActionAffordance.Builder("Toggle Form", toggleForm)
     .addTitle("Toggle")
     .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
     .addInputSchema(new ObjectSchema.Builder()
@@ -101,6 +101,7 @@ The generated TD is:
   dct:title "My Lamp Thing";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
+      td:name "Toggle Form";
       dct:title "Toggle";
       td:hasForm [
           htv:methodName "PUT";
