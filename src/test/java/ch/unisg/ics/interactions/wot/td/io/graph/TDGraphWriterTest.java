@@ -58,7 +58,7 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec", new NoSecurityScheme.Builder().build())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -73,7 +73,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
+        .addSecurityScheme("nosec", new NoSecurityScheme.Builder().build())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -85,13 +85,16 @@ public class TDGraphWriterTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"HEADER\" ;\n" +
+        "        wotsec:in \"header\" ;\n" +
         "        wotsec:name \"X-API-Key\" ;\n" +
         "    ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addSecurityScheme(new APIKeySecurityScheme(TokenLocation.HEADER, "X-API-Key"))
+        .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
+          .addTokenLocation(TokenLocation.HEADER)
+          .addTokenName("X-API-Key")
+          .build())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -112,7 +115,6 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iotschema.org/Light")
-        .addSecurityScheme(new NoSecurityScheme())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -134,7 +136,6 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSecurityScheme(new NoSecurityScheme())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -187,7 +188,6 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
         .addProperty(property)
         .build();
 
@@ -403,8 +403,7 @@ public class TDGraphWriterTest {
       List<ActionAffordance> actions) {
     ThingDescription.Builder builder = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addBaseURI("http://example.org/")
-        .addSecurityScheme(new NoSecurityScheme());
+        .addBaseURI("http://example.org/");
 
     for (PropertyAffordance property : properties) {
       builder.addProperty(property);

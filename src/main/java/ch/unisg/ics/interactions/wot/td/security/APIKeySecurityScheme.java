@@ -1,92 +1,89 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import java.util.Locale;
-import java.util.Optional;
-
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.Models;
-
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 public class APIKeySecurityScheme extends SecurityScheme {
-  public enum TokenLocation {
-    HEADER, QUERY, BODY, COOKIE
-  }
-  
+
   private final TokenLocation in;
   private final Optional<String> name;
-  
-  public APIKeySecurityScheme(Model model, Resource node) {
-    ValueFactory rdf = SimpleValueFactory.getInstance();
-    
-    Optional<Literal> in = Models.objectLiteral(model.filter(node, rdf.createIRI(WoTSec.in), 
-        null));
-    if (in.isPresent()) {
-      try {
-        this.in = TokenLocation.valueOf(in.get().stringValue().toUpperCase(Locale.ENGLISH));
-      } catch (IllegalArgumentException e) {
-        throw new InvalidTDException("Invalid token location", e);
-      }
-    } else {
-      this.in = TokenLocation.QUERY;
-    }
-    
-    Optional<Literal> name = Models.objectLiteral(model.filter(node, rdf.createIRI(WoTSec.name), 
-        null));
-    if (name.isPresent()) {
-      this.name = Optional.of(name.get().stringValue());
-    } else {
-      this.name = Optional.empty();
-    }
-  }
-  
-  public APIKeySecurityScheme() {
-    this(null);
-  }
-  
-  public APIKeySecurityScheme(String name) {
-    this(TokenLocation.QUERY, name);
-  }
-  
-  public APIKeySecurityScheme(TokenLocation in, String name) {
+  protected APIKeySecurityScheme(TokenLocation in, Optional<String> name,
+                                 Map<String, String> configuration, Set<String> semanticTypes) {
+    super(SecurityScheme.APIKEY, configuration, semanticTypes);
     this.in = in;
-    
-    if (name == null || name.isEmpty()) {
-      this.name = Optional.empty();
-    } else {
-      this.name = Optional.of(name);
-    }
+    this.name = name;
   }
-  
-  public TokenLocation getIn() {
+
+  public TokenLocation getTokenLocation() {
     return in;
   }
-  
-  public Optional<String> getName() {
+
+  public Optional<String> getTokenName() {
     return name;
   }
 
-  @Override
-  public String getSchemeType() {
-    return WoTSec.APIKeySecurityScheme;
+  public enum TokenLocation {
+    HEADER, QUERY, BODY, COOKIE
   }
-  
-  @Override
-  public Model toRDF(Resource schemeId) {
-    Model model = super.toRDF(schemeId);
-    
-    ValueFactory rdf = SimpleValueFactory.getInstance(); 
-    model.add(schemeId, rdf.createIRI(WoTSec.in), rdf.createLiteral(this.in.name()));
-    
-    if (this.name.isPresent()) {
-      model.add(schemeId, rdf.createIRI(WoTSec.name), rdf.createLiteral(this.name.get()));
+
+  public static class Builder extends SecurityScheme.Builder<APIKeySecurityScheme,
+    APIKeySecurityScheme.Builder> {
+
+    private TokenLocation in;
+    private Optional<String> name;
+
+    public Builder() {
+      this.in = TokenLocation.QUERY;
+      this.name = Optional.empty();
+      this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
+      this.semanticTypes.add(WoTSec.APIKeySecurityScheme);
     }
-    
-    return model;
+
+    public APIKeySecurityScheme.Builder addTokenLocation(TokenLocation in) {
+      this.in = in;
+      this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
+      return this;
+    }
+
+    public APIKeySecurityScheme.Builder addTokenName(String name) {
+      this.name = Optional.of(name);
+      this.configuration.put(WoTSec.name, name);
+      return this;
+    }
+
+    @Override
+    public APIKeySecurityScheme.Builder addConfiguration(Map<String, String> configuration) {
+      this.configuration.putAll(configuration);
+      if (configuration.containsKey(WoTSec.in)) {
+        try {
+          addTokenLocation(TokenLocation.valueOf(configuration.get(WoTSec.in)
+            .toUpperCase(Locale.ENGLISH)));
+        } catch (IllegalArgumentException e) {
+          throw new InvalidTDException("Invalid token location", e);
+        }
+      }
+      if (configuration.containsKey(WoTSec.name)) {
+        addTokenName(configuration.get(WoTSec.name));
+      }
+      return this;
+    }
+
+    public APIKeySecurityScheme.Builder addToken(TokenLocation in, String name) {
+      this.in = in;
+      this.name = Optional.of(name);
+      this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
+      this.configuration.put(WoTSec.name, name);
+      return this;
+    }
+
+    @Override
+    public APIKeySecurityScheme build() {
+      return new APIKeySecurityScheme(in, name, configuration, semanticTypes);
+    }
   }
 }

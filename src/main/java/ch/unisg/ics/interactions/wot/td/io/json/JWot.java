@@ -1,10 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.io.json;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
-import javax.json.Json;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -44,10 +43,15 @@ public final class JWot {
   public static final String SECURITY_DEF = "securityDefinitions";
 
   public static final Map JSON_OPERATION_TYPES =
-    Arrays.stream(new String[][] {
-    {TD.readProperty, "readproperty" },
-    {TD.writeProperty, "writeproperty" },
-    {TD.invokeAction, "invokeaction" },
-  }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+    Arrays.stream(new String[][]{
+      {TD.readProperty, "readproperty"},
+      {TD.writeProperty, "writeproperty"},
+      {TD.invokeAction, "invokeaction"},
+    }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
+  public static final Map JSON_SECURITY_PARAMS =
+    Arrays.stream(new String[][]{
+      {WoTSec.in, "in"},
+      {WoTSec.name, "name"},
+    }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 }

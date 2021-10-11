@@ -27,14 +27,13 @@ public class TDWriterTest {
   @Before
   public void init(){
     this.td = new ThingDescription.Builder(THING_TITLE)
-      .addSecurityScheme(new NoSecurityScheme())
       .build();
   }
 
   @Test
   //TODO change this as soon as you have the reader implemented
   public void testWriteJSON() {
-    String jsonTD = "{\"@context\":\"https://www.w3.org/2019/wot/td/v1\",\"title\":\"My Thing\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"security\":[\"nosec_sc\"]}";
+    String jsonTD = "{\"@context\":\"https://www.w3.org/2019/wot/td/v1\",\"title\":\"My Thing\",\"securityDefinitions\":{\"nosec\":{\"scheme\":\"nosec\"}},\"security\":[\"nosec\"]}";
     Assert.assertEquals(jsonTD, TDWriter.write(td, RDFFormat.JSONLD));
   }
 

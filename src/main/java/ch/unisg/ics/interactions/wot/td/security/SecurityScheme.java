@@ -1,35 +1,72 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import java.util.Optional;
-
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-
-import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class SecurityScheme {
-  
-  public abstract String getSchemeType();
-  
-  public static Optional<SecurityScheme> fromRDF(String type, Model model, Resource node) {
-    if (type.equals(WoTSec.NoSecurityScheme)) {
-      return Optional.of(new NoSecurityScheme());
-    }
-    
-    if (type.equals(WoTSec.APIKeySecurityScheme)) {
-      return Optional.of(new APIKeySecurityScheme(model,node));
-    }
-    
-    return Optional.empty();
+
+  public static final String NOSEC = "nosec";
+  public static final String BASIC = "basic";
+  public static final String DIGEST = "digest";
+  public static final String APIKEY = "apikey";
+  public static final String BEARER = "bearer";
+  public static final String PSK = "psk";
+  public static final String OAUTH2 = "oauth2";
+
+  private final String schemeName;
+  private final Map<String, String> configuration;
+  private final Set<String> semanticTypes;
+
+  protected SecurityScheme(String schemeName, Map<String, String> configuration,
+                           Set<String> semanticTypes) {
+    this.schemeName = schemeName;
+    this.configuration = configuration;
+    this.configuration.put("scheme", schemeName);
+    this.semanticTypes = semanticTypes;
   }
-  
-  public Model toRDF(Resource schemeId) {
-    ModelBuilder builder = new ModelBuilder();
-    builder.add(schemeId, RDF.TYPE, SimpleValueFactory.getInstance().createIRI(getSchemeType()));
-    
-    return builder.build();
+
+  public String getSchemeName() {
+    return schemeName;
+  }
+
+  public Map<String, String> getConfiguration() {
+    return configuration;
+  }
+
+  public Set<String> getSemanticTypes() {
+    return semanticTypes;
+  }
+
+  public static abstract class Builder<T extends SecurityScheme, S extends SecurityScheme.Builder<T, S>> {
+    protected Map<String, String> configuration;
+    protected Set<String> semanticTypes;
+
+
+    protected Builder() {
+      this.configuration = new HashMap<>();
+      this.semanticTypes = new HashSet<>();
+    }
+
+    @SuppressWarnings("unchecked")
+    public S addConfiguration(Map<String, String> map) {
+      this.configuration.putAll(map);
+      return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S addSemanticType(String type) {
+      this.semanticTypes.add(type);
+      return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S addSemanticTypes(Set<String> type) {
+      this.semanticTypes.addAll(type);
+      return (S) this;
+    }
+
+    public abstract T build();
   }
 }

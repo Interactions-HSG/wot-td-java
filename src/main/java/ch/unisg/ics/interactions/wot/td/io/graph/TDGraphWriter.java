@@ -1,31 +1,26 @@
 package ch.unisg.ics.interactions.wot.td.io.graph;
 
-import java.util.List;
-import java.util.Optional;
-
-import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.rio.RDFFormat;
-
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.rio.RDFFormat;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A writer for serializing TDs as RDF graphs.
@@ -38,7 +33,7 @@ public class TDGraphWriter extends AbstractTDWriter {
   public TDGraphWriter(ThingDescription td) {
     super(td);
     this.thingId = td.getThingURI().isPresent() ? rdf.createIRI(td.getThingURI().get())
-        : rdf.createBNode();
+      : rdf.createBNode();
     this.graphBuilder = new ModelBuilder();
   }
 
@@ -79,15 +74,29 @@ public class TDGraphWriter extends AbstractTDWriter {
 
   @Override
   protected TDGraphWriter addSecurity() {
-    List<SecurityScheme> securitySchemes = td.getSecuritySchemes();
+    Map<String, SecurityScheme> securitySchemes = td.getSecurityDefinitions();
 
-    for (SecurityScheme scheme : securitySchemes) {
+    for (SecurityScheme scheme : securitySchemes.values()) {
       BNode schemeId = rdf.createBNode();
+
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemeId);
 
-      Model schemeGraph = scheme.toRDF(schemeId);
-      for (Statement s : schemeGraph) {
-        graphBuilder.add(s.getSubject(), s.getPredicate(), s.getObject());
+      Map<String, String> configuration = scheme.getConfiguration();
+
+      for (String semanticType : scheme.getSemanticTypes()) {
+        graphBuilder.add(schemeId, RDF.TYPE, rdf.createIRI(semanticType));
+      }
+
+      for (Map.Entry configurationEntry : configuration.entrySet()) {
+        if (!(configurationEntry.getKey()).equals("scheme")) {
+          try {
+            IRI confTypeIri = rdf.createIRI((String) configurationEntry.getKey());
+            graphBuilder.add(schemeId, confTypeIri, configurationEntry.getValue());
+          } catch (IllegalArgumentException e) {
+            throw new InvalidTDException("The type of a security configuration entry must be " +
+              "a valid IRI:" + configurationEntry.getKey());
+          }
+        }
       }
     }
 
@@ -98,7 +107,7 @@ public class TDGraphWriter extends AbstractTDWriter {
   protected TDGraphWriter addBaseURI() {
     if (td.getBaseURI().isPresent()) {
       graphBuilder.add(thingId, rdf.createIRI(TD.hasBase),
-          rdf.createIRI(td.getBaseURI().get()));
+        rdf.createIRI(td.getBaseURI().get()));
     }
 
     return this;
@@ -145,18 +154,18 @@ public class TDGraphWriter extends AbstractTDWriter {
 
   @Override
   protected TDGraphWriter addGraph() {
-  	if(td.getGraph().isPresent()) {
-  		getModel().addAll(td.getGraph().get());
+    if (td.getGraph().isPresent()) {
+      getModel().addAll(td.getGraph().get());
 
-  		td.getGraph().get().getNamespaces().stream()
-  		    .filter(ns -> !getModel().getNamespace(ns.getPrefix()).isPresent())
-          .forEach(graphBuilder::setNamespace);
-  	}
-  	return this;
+      td.getGraph().get().getNamespaces().stream()
+        .filter(ns -> !getModel().getNamespace(ns.getPrefix()).isPresent())
+        .forEach(graphBuilder::setNamespace);
+    }
+    return this;
   }
 
   private Resource addAffordance(InteractionAffordance affordance, String affordanceProp,
-      String affordanceClass) {
+                                 String affordanceClass) {
     BNode affordanceId = rdf.createBNode();
 
     graphBuilder.add(thingId, rdf.createIRI(affordanceProp), affordanceId);
@@ -168,7 +177,7 @@ public class TDGraphWriter extends AbstractTDWriter {
 
     if (affordance.getName().isPresent()) {
       graphBuilder.add(affordanceId, rdf.createIRI(TD.name),
-          rdf.createLiteral(affordance.getName().get()));
+        rdf.createLiteral(affordance.getName().get()));
     }
 
     if (affordance.getTitle().isPresent()) {

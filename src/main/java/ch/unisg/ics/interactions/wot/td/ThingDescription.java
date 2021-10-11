@@ -1,34 +1,31 @@
 package ch.unisg.ics.interactions.wot.td;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An immutable representation of a <a href="https://www.w3.org/TR/wot-thing-description/">W3C Web of
  * Things Thing Description (TD)</a>. A <code>ThingDescription</code> is instantiated using a
  * <code>ThingDescription.Builder</code>.
- *
+ * <p>
  * The current version does not yet implement all the core vocabulary terms defined by the
  * W3C Recommendation.
  */
 public class ThingDescription {
   private final String title;
-  private final List<SecurityScheme> security;
+  private final Set<SecurityScheme> security;
+  private final Map<String, SecurityScheme> securityDefinitions;
 
   private final Optional<String> uri;
   private final Set<String> types;
@@ -39,25 +36,26 @@ public class ThingDescription {
 
   private final Optional<Model> graph;
 
-  /**
-   * Supported serialization formats -- currently only RDF serialization formats, namely Turtle and
-   * JSON-LD 1.0. The version of JSON-LD currently supported is the one provided by RDF4J.
-   */
-  public enum TDFormat {
-    RDF_TURTLE,
-    RDF_JSONLD
-  };
-
-  protected ThingDescription(String title, List<SecurityScheme> security, Optional<String> uri,
-      Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties,
-      List<ActionAffordance> actions, Optional<Model> graph) {
+  protected ThingDescription(String title, Set<SecurityScheme> security, Map<String,
+    SecurityScheme> securityDefinitions, Optional<String> uri,
+                             Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties,
+                             List<ActionAffordance> actions, Optional<Model> graph) {
 
     this.title = title;
 
-    if (security.isEmpty()) {
-      security.add(new NoSecurityScheme());
-    }
     this.security = security;
+    this.securityDefinitions = securityDefinitions;
+
+    // Set up nosec security
+    if (this.security.isEmpty()) {
+      if (getFirstSecuritySchemeByType(WoTSec.NoSecurityScheme).isPresent()) {
+        this.security.add(getFirstSecuritySchemeByType(WoTSec.NoSecurityScheme).get());
+      } else {
+        NoSecurityScheme scheme = new NoSecurityScheme.Builder().build();
+        this.security.add(scheme);
+        this.securityDefinitions.put("nosec", scheme);
+      }
+    }
 
     this.uri = uri;
     this.types = types;
@@ -73,18 +71,57 @@ public class ThingDescription {
     return title;
   }
 
-  public List<SecurityScheme> getSecuritySchemes() {
+  public Set<SecurityScheme> getSecuritySchemes() {
     return security;
+  }
+
+  public Map<String, SecurityScheme> getSecurityDefinitions() {
+    return securityDefinitions;
+  }
+
+  /**
+   * Gets the {@link SecurityScheme} that matches a given security definition name.
+   *
+   * @param name the name of the security definition
+   * @return an <code>Optional</code> with the security scheme (empty if not found)
+   */
+  public Optional<SecurityScheme> getSecuritySchemeByDefinition(String name) {
+    if (securityDefinitions.containsKey(name)) {
+      return Optional.of(securityDefinitions.get(name));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Gets the {@link SecurityScheme} that matches a given security scheme name.
+   *
+   * @param name the name of the security scheme
+   * @return an <code>Optional</code> with the security scheme (empty if not found)
+   */
+  public Optional<SecurityScheme> getSecuritySchemeByName(String name) {
+    for (SecurityScheme securityScheme : securityDefinitions.values()) {
+
+      if (securityScheme.getSchemeName().equals(name)) {
+        return Optional.of(securityScheme);
+      }
+    }
+    return Optional.empty();
   }
 
   /**
    * Gets the first {@link SecurityScheme} that matches a given semantic type.
    *
-   * @param type the type of the security scheme
+   * @param type the semantic type of the security scheme
    * @return an <code>Optional</code> with the security scheme (empty if not found)
    */
   public Optional<SecurityScheme> getFirstSecuritySchemeByType(String type) {
-    return security.stream().filter(security -> security.getSchemeType().equals(type)).findFirst();
+    for (SecurityScheme securityScheme : securityDefinitions.values()) {
+
+      if (securityScheme.getSemanticTypes().contains(type)) {
+        return Optional.of(securityScheme);
+      }
+    }
+    return Optional.empty();
   }
 
   public Optional<String> getThingURI() {
@@ -137,7 +174,7 @@ public class ThingDescription {
   /**
    * Gets a list of property affordances that have a {@link ch.unisg.ics.interactions.wot.td.affordances.Form}
    * hypermedia control for the given operation type.
-   *
+   * <p>
    * The current implementation supports two operation types for properties: <code>td:readProperty</code>
    * and <code>td:writeProperty</code>.
    *
@@ -146,7 +183,7 @@ public class ThingDescription {
    */
   public List<PropertyAffordance> getPropertiesByOperationType(String operationType) {
     return properties.stream().filter(property -> property.hasFormWithOperationType(operationType))
-        .collect(Collectors.toList());
+      .collect(Collectors.toList());
   }
 
   /**
@@ -187,7 +224,7 @@ public class ThingDescription {
   /**
    * Gets a list of action affordances that have a {@link ch.unisg.ics.interactions.wot.td.affordances.Form}
    * hypermedia control for the given operation type.
-   *
+   * <p>
    * There is one operation type available actions: <code>td:invokeAction</code>. The API will be
    * simplified in future iterations.
    *
@@ -196,7 +233,7 @@ public class ThingDescription {
    */
   public List<ActionAffordance> getActionsByOperationType(String operationType) {
     return actions.stream().filter(action -> action.hasFormWithOperationType(operationType))
-        .collect(Collectors.toList());
+      .collect(Collectors.toList());
   }
 
   /**
@@ -228,32 +265,40 @@ public class ThingDescription {
   }
 
   /**
+   * Supported serialization formats -- currently only RDF serialization formats, namely Turtle and
+   * JSON-LD 1.0. The version of JSON-LD currently supported is the one provided by RDF4J.
+   */
+  public enum TDFormat {
+    RDF_TURTLE,
+    RDF_JSONLD
+  }
+
+  /**
    * Helper class used to construct a <code>ThingDescription</code>. All TDs should have a mandatory
    * <code>title</code> field. In addition to the optional fields defined by the W3C Recommendation,
    * the <code>addGraph</code> method allows to add any other metadata as an RDF graph.
-   *
+   * <p>
    * Implements a fluent API.
    */
   public static class Builder {
     private final String title;
-    private final List<SecurityScheme> security;
-
-    private Optional<String> uri;
-    private Optional<String> baseURI;
+    private final Set<SecurityScheme> security;
+    private final HashMap<String, SecurityScheme> securityDefinitions;
     private final Set<String> types;
-
     private final List<PropertyAffordance> properties;
     private final List<ActionAffordance> actions;
-
+    private Optional<String> uri;
+    private Optional<String> baseURI;
     private Optional<Model> graph;
 
     public Builder(String title) {
       this.title = title;
-      this.security = new ArrayList<SecurityScheme>();
+      this.security = new HashSet<SecurityScheme>();
+      this.securityDefinitions = new HashMap<String, SecurityScheme>();
 
       this.uri = Optional.empty();
       this.baseURI = Optional.empty();
-      this.types= new HashSet<String>();
+      this.types = new HashSet<String>();
 
       this.properties = new ArrayList<PropertyAffordance>();
       this.actions = new ArrayList<ActionAffordance>();
@@ -261,14 +306,28 @@ public class ThingDescription {
       this.graph = Optional.empty();
     }
 
-    public Builder addSecurityScheme(SecurityScheme security) {
-      this.security.add(security);
+    public Builder addSecurityScheme(String name, SecurityScheme security, boolean applied) {
+      if (applied) {
+        this.security.add(security);
+      }
+      this.securityDefinitions.put(name, security);
       return this;
     }
 
-    public Builder addSecuritySchemes(List<SecurityScheme> security) {
-      this.security.addAll(security);
+    public Builder addSecurityScheme(String name, SecurityScheme security) {
+      return addSecurityScheme(name, security, true);
+    }
+
+    public Builder addSecuritySchemes(Map<String, SecurityScheme> security, boolean applied) {
+      if (applied) {
+        this.security.addAll(security.values());
+      }
+      this.securityDefinitions.putAll(security);
       return this;
+    }
+
+    public Builder addSecuritySchemes(Map<String, SecurityScheme> security) {
+      return addSecuritySchemes(security, true);
     }
 
     public Builder addThingURI(String uri) {
@@ -335,9 +394,9 @@ public class ThingDescription {
      * Convenience method used to add a single triple. If an RDF graph is already present, the triple
      * will be added to the existing graph.
      *
-     * @param subject the subject
+     * @param subject   the subject
      * @param predicate the predicate
-     * @param object the object
+     * @param object    the object
      * @return this <code>Builder</code>
      */
     public Builder addTriple(Resource subject, IRI predicate, Value object) {
@@ -356,7 +415,8 @@ public class ThingDescription {
      * @return the constructed <code>ThingDescription</code>
      */
     public ThingDescription build() {
-      return new ThingDescription(title, security, uri, types, baseURI, properties, actions, graph);
+      return new ThingDescription(title, security, securityDefinitions, uri, types, baseURI,
+        properties, actions, graph);
     }
   }
 }

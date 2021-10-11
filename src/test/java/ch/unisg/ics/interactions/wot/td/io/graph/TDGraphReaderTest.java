@@ -227,8 +227,8 @@ public class TDGraphReaderTest {
 
     assertEquals(1, reader.readSecuritySchemes().size());
 
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme ->
-      scheme.getSchemeType().equals(WoTSec.NoSecurityScheme)));
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme ->
+      scheme.getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
   }
 
   @Test
@@ -249,11 +249,11 @@ public class TDGraphReaderTest {
 
     assertEquals(1, reader.readSecuritySchemes().size());
 
-    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme instanceof APIKeySecurityScheme);
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
-    assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getIn());
-    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getName().get());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
+    assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getTokenName().get());
   }
 
   @Test
@@ -269,10 +269,10 @@ public class TDGraphReaderTest {
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     assertEquals(1, reader.readSecuritySchemes().size());
-    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
-    assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getIn());
-    assertFalse(((APIKeySecurityScheme) scheme).getName().isPresent());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
+    assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertFalse(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
   }
 
   @Test(expected = InvalidTDException.class)
@@ -308,10 +308,10 @@ public class TDGraphReaderTest {
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.NoSecurityScheme)));
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.APIKeySecurityScheme)));
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
+      .getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
+      .getSemanticTypes().contains(WoTSec.APIKeySecurityScheme)));
   }
 
   @Test
@@ -496,8 +496,8 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.NoSecurityScheme)));
+    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSemanticTypes()
+      .contains(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
 
     // Check action metadata

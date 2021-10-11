@@ -6,8 +6,12 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
@@ -25,8 +29,8 @@ import static java.util.Comparator.comparing;
  */
 public class TDJsonWriter extends AbstractTDWriter {
 
-  private JsonObjectBuilder document;
   private final Map<String, String> prefixMap;
+  private JsonObjectBuilder document;
   private Optional<JsonObjectBuilder> semanticContext;
 
   public TDJsonWriter(ThingDescription td) {
@@ -115,15 +119,40 @@ public class TDJsonWriter extends AbstractTDWriter {
 
   @Override
   protected TDJsonWriter addSecurity() {
-    //TODO implement: for the time being ignores security schemes and puts NoSecurityScheme
-    // because I don't know ho to serialize them from the model
-    //Add security def
-    document.add(JWot.SECURITY_DEF,
-      Json.createObjectBuilder().add("nosec_sc",
-        Json.createObjectBuilder().add("scheme", "nosec"))
-    );
-    //Add actual security field
-    document.add(JWot.SECURITY, Json.createArrayBuilder().add("nosec_sc"));
+    JsonObjectBuilder definitionBuilder = Json.createObjectBuilder();
+    JsonArrayBuilder securityBuilder = Json.createArrayBuilder();
+
+    Map<String, SecurityScheme> definitions = td.getSecurityDefinitions();
+    Set<SecurityScheme> securitySchemes = td.getSecuritySchemes();
+
+    for (Map.Entry<String, SecurityScheme> definition : definitions.entrySet()) {
+      JsonObjectBuilder configurationBuilder = Json.createObjectBuilder();
+
+      SecurityScheme scheme = definition.getValue();
+      Map<String, String> configurationDetails = scheme.getConfiguration();
+      for (String configurationName : configurationDetails.keySet()) {
+
+        if (JWot.JSON_SECURITY_PARAMS.containsKey(configurationName)) {
+          configurationBuilder.add((String) JWot.JSON_SECURITY_PARAMS.get(configurationName),
+            configurationDetails.get(configurationName));
+        } else {
+          configurationBuilder.add(getPrefixedAnnotation(configurationName),
+            configurationDetails.get(configurationName));
+        }
+      }
+      String definitionName = definition.getKey();
+      definitionBuilder.add(definitionName, configurationBuilder);
+
+      if (securitySchemes.contains(scheme)) {
+        securityBuilder.add(definitionName);
+      }
+    }
+
+    if (!securitySchemes.isEmpty()) {
+      document.add(JWot.SECURITY_DEF, definitionBuilder);
+    }
+    document.add(JWot.SECURITY, securityBuilder);
+
     return this;
   }
 
@@ -164,8 +193,7 @@ public class TDJsonWriter extends AbstractTDWriter {
             JsonValue currentValue;
             if (!object.isBNode()) {
               currentValue = Json.createValue(getPrefixedAnnotation(object.stringValue()));
-            }
-            else {
+            } else {
               currentValue = getStatementObject((Resource) object).build();
             }
             //TODO Consider changing library for JsonBuilder because this is VERY ugly,
@@ -190,11 +218,10 @@ public class TDJsonWriter extends AbstractTDWriter {
     //TODO Convert to JsonArry when sub and pred are the same.
     JsonObjectBuilder subjectObjBuilder = Json.createObjectBuilder();
     Iterable<Statement> statements = new ArrayList<>();
-    if(td.getGraph().isPresent()){
+    if (td.getGraph().isPresent()) {
       statements = td.getGraph().get().getStatements(subject, null, null);
     }
-    for(Statement statement: statements)
-    {
+    for (Statement statement : statements) {
       IRI predicate = statement.getPredicate();
       Value object = statement.getObject();
       String key;
@@ -206,8 +233,7 @@ public class TDJsonWriter extends AbstractTDWriter {
           key = getPrefixedAnnotation(predicate.stringValue());
         }
         currentValue = Json.createValue(getPrefixedAnnotation(object.stringValue()));
-      }
-      else {
+      } else {
         key = getPrefixedAnnotation(predicate.stringValue());
         currentValue = getStatementObject((Resource) object).build();
       }
@@ -229,7 +255,7 @@ public class TDJsonWriter extends AbstractTDWriter {
   private String getPrefixedAnnotation(String annotation) {
 
     if (annotation.startsWith(TD.PREFIX)) {
-      return annotation.replace(TD.PREFIX,"");
+      return annotation.replace(TD.PREFIX, "");
     }
 
     Map<String, String> matchedPref = prefixMap.entrySet()

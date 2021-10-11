@@ -33,14 +33,13 @@ public class TDJsonWriterTest {
   @Test
   public void testEmptyThing() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-      .addSecurityScheme(new NoSecurityScheme())
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
@@ -50,7 +49,6 @@ public class TDJsonWriterTest {
   @Test
   public void testThingWithTDOntologyPrefix() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-      .addSecurityScheme(new NoSecurityScheme())
       .addSemanticType(TD.Thing)
       .build();
 
@@ -58,8 +56,8 @@ public class TDJsonWriterTest {
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("@type", "Thing")
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
@@ -70,15 +68,14 @@ public class TDJsonWriterTest {
   public void testThingWithSemanticType() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSemanticType("http://w3id.org/eve#Artifact")
-      .addSecurityScheme(new NoSecurityScheme())
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("@type", "http://w3id.org/eve#Artifact")
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
@@ -90,7 +87,6 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSemanticType("http://w3id.org/eve#Artifact")
       .addSemanticType("http://iotschema.org/Light")
-      .addSecurityScheme(new NoSecurityScheme())
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
@@ -101,8 +97,8 @@ public class TDJsonWriterTest {
           .add("iot", "http://iotschema.org/")))
       .add("@type", Json.createArrayBuilder().add("eve:Artifact").add("iot:Light"))
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     JsonObject test = new TDJsonWriter(td)
@@ -117,7 +113,6 @@ public class TDJsonWriterTest {
   public void testThingWithNameSpace() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSemanticType("http://w3id.org/eve#Artifact")
-      .addSecurityScheme(new NoSecurityScheme())
       .build();
 
     JsonObject test = new TDJsonWriter(td).setNamespace("eve", "http://w3id.org/eve#").getJson();
@@ -127,8 +122,8 @@ public class TDJsonWriterTest {
         .add(Json.createObjectBuilder().add("eve", "http://w3id.org/eve#"))
       ).add("@type", "eve:Artifact")
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     Assert.assertEquals(expected, test);
@@ -139,7 +134,6 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSemanticType("http://example.org/Type1")
       .addSemanticType("http://example.org/overlapping/Type2")
-      .addSecurityScheme(new NoSecurityScheme())
       .build();
 
     JsonObject test = new TDJsonWriter(td)
@@ -155,8 +149,8 @@ public class TDJsonWriterTest {
           .add("ex2", "http://example.org/overlapping/")))
       .add("@type", Json.createArrayBuilder().add("ex1:Type1").add("ex2:Type2"))
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     Assert.assertEquals(expected, test);
@@ -165,7 +159,6 @@ public class TDJsonWriterTest {
   @Test
   public void testThingWithIRI() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-      .addSecurityScheme(new NoSecurityScheme())
       .addThingURI(THING_IRI)
       .build();
 
@@ -173,8 +166,8 @@ public class TDJsonWriterTest {
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("title", THING_TITLE)
       .add("id", THING_IRI)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
@@ -184,7 +177,6 @@ public class TDJsonWriterTest {
   @Test
   public void testThingWithBase() {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-      .addSecurityScheme(new NoSecurityScheme())
       .addBaseURI(IO_BASE_IRI)
       .build();
 
@@ -192,8 +184,8 @@ public class TDJsonWriterTest {
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("title", THING_TITLE)
       .add("base", IO_BASE_IRI)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
@@ -212,15 +204,14 @@ public class TDJsonWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addBaseURI(IO_BASE_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
       .addProperties(properties)
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .add("base", IO_BASE_IRI)
       .add("properties", Json.createObjectBuilder().add("status",
         Json.createObjectBuilder()
@@ -255,7 +246,6 @@ public class TDJsonWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addBaseURI(IO_BASE_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
       .addProperties(properties)
       .build();
 
@@ -265,8 +255,8 @@ public class TDJsonWriterTest {
         .add(Json.createObjectBuilder()
           .add("ex", "http://example.org/")))
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .add("base", IO_BASE_IRI)
       .add("properties", Json.createObjectBuilder().add("status",
         Json.createObjectBuilder()
@@ -315,15 +305,14 @@ public class TDJsonWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addBaseURI(IO_BASE_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
       .addActions(actions)
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
       .add("@context", "https://www.w3.org/2019/wot/td/v1")
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .add("base", IO_BASE_IRI)
       .add("actions", Json.createObjectBuilder().add("changeColor", Json.createObjectBuilder()
           .add("input", Json.createObjectBuilder()
@@ -377,7 +366,6 @@ public class TDJsonWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addBaseURI(IO_BASE_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
       .addActions(actions)
       .build();
 
@@ -388,8 +376,8 @@ public class TDJsonWriterTest {
           .add("ex1", "http://example.org/1/")
           .add("ex2", "http://example.org/2/")))
       .add("title", THING_TITLE)
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .add("base", IO_BASE_IRI)
       .add("actions", Json.createObjectBuilder()
         .add("changeColor", Json.createObjectBuilder()
@@ -466,8 +454,8 @@ public class TDJsonWriterTest {
       .add("@type", Json.createArrayBuilder()
         .add("eve:Artifact")
         .add("saref:LightSwitch"))
-      .add("securityDefinitions", Json.createObjectBuilder().add("nosec_sc", Json.createObjectBuilder().add("scheme", "nosec")))
-      .add("security", Json.createArrayBuilder().add("nosec_sc"))
+      .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
+      .add("security", Json.createArrayBuilder().add("nosec"))
       .add("eve:hasManual" , Json.createArrayBuilder().add("http://example.org/manuals/anotherManual").add(Json.createObjectBuilder()
         .add("@type","eve:Manual")
         .add("eve:hasUsageProtocol", Json.createObjectBuilder()
