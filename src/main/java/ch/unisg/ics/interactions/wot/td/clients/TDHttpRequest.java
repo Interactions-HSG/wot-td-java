@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -69,6 +70,16 @@ public class TDHttpRequest {
       this.request.setHeader(scheme.getTokenName().get(), token);
     } else {
       LOGGER.info("API key could not be added in " + scheme.getTokenLocation().name());
+    }
+
+    return this;
+  }
+
+  public TDHttpRequest setBasicAuth(BasicSecurityScheme scheme, String token) {
+    if (scheme.getTokenLocation() == BasicSecurityScheme.TokenLocation.HEADER) {
+      this.request.setHeader(scheme.getTokenName().get(), token);
+    } else {
+      LOGGER.info("Token could not be added in " + scheme.getTokenLocation().name());
     }
 
     return this;
