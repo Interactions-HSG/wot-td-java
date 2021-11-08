@@ -10,6 +10,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -115,6 +116,48 @@ public class TDGraphWriterTest {
       .addThingURI(THING_IRI)
       .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
         .addToken(TokenLocation.HEADER, "X-API-Key")
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testBasicSecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
+        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
+        .addTokenName("Authorization")
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testBasicSecuritySchemeOneToken() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
+        .addToken(BasicSecurityScheme.TokenLocation.HEADER,"Authorization")
         .build())
       .build();
 

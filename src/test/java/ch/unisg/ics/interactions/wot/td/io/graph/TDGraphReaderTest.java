@@ -12,6 +12,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -285,6 +286,68 @@ public class TDGraphReaderTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+        "        wotsec:in \"bla\" ;\n" +
+        "  ] .";
+
+    new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+  }
+
+  @Test
+  public void testReadBasicSecurityScheme() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ;\n" +
+        "        wotsec:in \"header\" ;\n" +
+        "        wotsec:name \"Authorization\" ;\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof BasicSecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertEquals(BasicSecurityScheme.TokenLocation.HEADER,
+      ((BasicSecurityScheme) scheme).getTokenLocation());
+    assertEquals("Authorization", ((BasicSecurityScheme) scheme).getTokenName().get());
+  }
+
+  @Test
+  public void testBasicSecuritySchemeDefaultValues() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertEquals(BasicSecurityScheme.TokenLocation.HEADER,
+      ((BasicSecurityScheme) scheme).getTokenLocation());
+    assertFalse(((BasicSecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test(expected = InvalidTDException.class)
+  public void testBasicSecuritySchemeInvalidTokenLocation() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ;\n" +
         "        wotsec:in \"bla\" ;\n" +
         "  ] .";
 

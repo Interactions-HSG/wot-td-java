@@ -7,6 +7,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
@@ -520,6 +521,61 @@ public class TDJsonWriterTest {
           .add("in", "query")
           .add("name", "X-API-Key")))
       .add("security", Json.createArrayBuilder().add("apikey"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    System.out.println(test);
+    Assert.assertEquals(expected, test);
+
+  }
+
+  @Test
+  public void testWriteBasicSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
+        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
+        .addTokenName("Authorization")
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("basic",
+        Json.createObjectBuilder()
+          .add("scheme", "basic")
+          .add("in", "header")
+          .add("name", "Authorization")))
+      .add("security", Json.createArrayBuilder().add("basic"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    System.out.println(test);
+    Assert.assertEquals(expected, test);
+
+  }
+
+  @Test
+  public void testWriteDefaultBasicSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("basic",
+        Json.createObjectBuilder()
+          .add("scheme", "basic")
+          .add("in", "header")))
+      .add("security", Json.createArrayBuilder().add("basic"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();
