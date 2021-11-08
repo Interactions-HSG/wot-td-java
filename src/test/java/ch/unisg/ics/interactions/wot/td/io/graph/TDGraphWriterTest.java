@@ -101,6 +101,27 @@ public class TDGraphWriterTest {
   }
 
   @Test
+  public void testWriteAPIKeySecuritySchemeOneToken() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"X-API-Key\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
+        .addToken(TokenLocation.HEADER, "X-API-Key")
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
   public void testWriteAdditionalTypes() throws RDFParseException, RDFHandlerException, IOException {
     String testTD =
         PREFIXES +
