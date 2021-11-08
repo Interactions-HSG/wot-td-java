@@ -6,6 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
@@ -469,6 +470,63 @@ public class TDJsonWriterTest {
 
     System.out.println(test);
     Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testWriteAPIKeySecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
+        .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
+        .addTokenName("X-API-Key")
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("apikey",
+        Json.createObjectBuilder()
+          .add("scheme", "apikey")
+          .add("in", "header")
+          .add("name", "X-API-Key")))
+      .add("security", Json.createArrayBuilder().add("apikey"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    System.out.println(test);
+    Assert.assertEquals(expected, test);
+
+  }
+
+  @Test
+  public void testWriteDefaultAPIKeySecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
+        .addTokenName("X-API-Key")
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("apikey",
+        Json.createObjectBuilder()
+          .add("scheme", "apikey")
+          .add("in", "query")
+          .add("name", "X-API-Key")))
+      .add("security", Json.createArrayBuilder().add("apikey"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    System.out.println(test);
+    Assert.assertEquals(expected, test);
+
   }
 
 }
