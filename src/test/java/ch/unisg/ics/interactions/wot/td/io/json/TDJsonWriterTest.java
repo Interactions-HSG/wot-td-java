@@ -9,6 +9,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -478,7 +479,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
-        .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
+        .addTokenLocation(TokenLocation.HEADER)
         .addTokenName("X-API-Key")
         .build())
       .build();
@@ -535,7 +536,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
+        .addTokenLocation(TokenLocation.HEADER)
         .addTokenName("Authorization")
         .build())
       .build();

@@ -10,16 +10,16 @@ import java.util.Set;
 
 public class BasicSecurityScheme extends SecurityScheme{
 
-  private final BasicSecurityScheme.TokenLocation in;
+  private final TokenLocation in;
   private final Optional<String> name;
-  protected BasicSecurityScheme(BasicSecurityScheme.TokenLocation in, Optional<String> name,
+  protected BasicSecurityScheme(TokenLocation in, Optional<String> name,
                                 Map<String, String> configuration, Set<String> semanticTypes) {
     super(SecurityScheme.BASIC, configuration, semanticTypes);
     this.in = in;
     this.name = name;
   }
 
-  public BasicSecurityScheme.TokenLocation getTokenLocation() {
+  public TokenLocation getTokenLocation() {
     return in;
   }
 
@@ -27,24 +27,20 @@ public class BasicSecurityScheme extends SecurityScheme{
     return name;
   }
 
-  public enum TokenLocation {
-    HEADER, QUERY, BODY, COOKIE
-  }
-
   public static class Builder extends SecurityScheme.Builder<BasicSecurityScheme,
     BasicSecurityScheme.Builder> {
 
-    private BasicSecurityScheme.TokenLocation in;
+    private TokenLocation in;
     private Optional<String> name;
 
     public Builder() {
-      this.in = BasicSecurityScheme.TokenLocation.HEADER;
+      this.in = TokenLocation.HEADER;
       this.name = Optional.empty();
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
       this.semanticTypes.add(WoTSec.BasicSecurityScheme);
     }
 
-    public BasicSecurityScheme.Builder addTokenLocation(BasicSecurityScheme.TokenLocation in) {
+    public BasicSecurityScheme.Builder addTokenLocation(TokenLocation in) {
       this.in = in;
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
       return this;
@@ -61,7 +57,7 @@ public class BasicSecurityScheme extends SecurityScheme{
       this.configuration.putAll(configuration);
       if (configuration.containsKey(WoTSec.in)) {
         try {
-          addTokenLocation(BasicSecurityScheme.TokenLocation.valueOf(configuration.get(WoTSec.in)
+          addTokenLocation(TokenLocation.valueOf(configuration.get(WoTSec.in)
             .toUpperCase(Locale.ENGLISH)));
         } catch (IllegalArgumentException e) {
           throw new InvalidTDException("Invalid token location", e);
@@ -73,7 +69,7 @@ public class BasicSecurityScheme extends SecurityScheme{
       return this;
     }
 
-    public BasicSecurityScheme.Builder addToken(BasicSecurityScheme.TokenLocation in, String name) {
+    public BasicSecurityScheme.Builder addToken(TokenLocation in, String name) {
       this.in = in;
       this.name = Optional.of(name);
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));

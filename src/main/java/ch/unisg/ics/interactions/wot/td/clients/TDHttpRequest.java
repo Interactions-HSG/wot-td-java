@@ -31,7 +31,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 
 /**
  * Wrapper for constructing and executing an HTTP request based on a given <code>ThingDescription</code>.
@@ -76,7 +76,7 @@ public class TDHttpRequest {
   }
 
   public TDHttpRequest setBasicAuth(BasicSecurityScheme scheme, String token) {
-    if (scheme.getTokenLocation() == BasicSecurityScheme.TokenLocation.HEADER) {
+    if (scheme.getTokenLocation() == TokenLocation.HEADER) {
       this.request.setHeader(scheme.getTokenName().get(), token);
     } else {
       LOGGER.info("Token could not be added in " + scheme.getTokenLocation().name());

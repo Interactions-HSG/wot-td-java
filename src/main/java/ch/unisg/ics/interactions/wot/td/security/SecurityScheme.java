@@ -15,6 +15,10 @@ public abstract class SecurityScheme {
   public static final String PSK = "psk";
   public static final String OAUTH2 = "oauth2";
 
+  public enum TokenLocation {
+    HEADER, QUERY, BODY, COOKIE
+  }
+
   private final String schemeName;
   private final Map<String, String> configuration;
   private final Set<String> semanticTypes;

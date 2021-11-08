@@ -27,10 +27,6 @@ public class APIKeySecurityScheme extends SecurityScheme {
     return name;
   }
 
-  public enum TokenLocation {
-    HEADER, QUERY, BODY, COOKIE
-  }
-
   public static class Builder extends SecurityScheme.Builder<APIKeySecurityScheme,
     APIKeySecurityScheme.Builder> {
 

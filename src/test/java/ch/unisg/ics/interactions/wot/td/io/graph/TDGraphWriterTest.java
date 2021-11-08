@@ -9,7 +9,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import org.eclipse.rdf4j.model.BNode;
@@ -135,7 +135,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
+        .addTokenLocation(TokenLocation.HEADER)
         .addTokenName("Authorization")
         .build())
       .build();
@@ -157,7 +157,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addToken(BasicSecurityScheme.TokenLocation.HEADER,"Authorization")
+        .addToken(TokenLocation.HEADER,"Authorization")
         .build())
       .build();
 
