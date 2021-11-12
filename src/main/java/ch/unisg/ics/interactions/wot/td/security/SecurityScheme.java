@@ -31,10 +31,20 @@ public abstract class SecurityScheme {
     this.semanticTypes = semanticTypes;
   }
 
+  /**
+   * Gets the name of the security scheme (i.e. nosec, apikey, basic,
+   * digest, bearer, psk, and oauth2).
+   * @return the name of the security scheme
+   */
   public String getSchemeName() {
     return schemeName;
   }
 
+  /**
+   * Gets the security configuration which can be used in security definitions
+   * of a <code>Thing Description</code>.
+   * @return the security configuration
+   */
   public Map<String, String> getConfiguration() {
     return configuration;
   }
