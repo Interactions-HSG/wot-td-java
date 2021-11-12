@@ -9,8 +9,6 @@ import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -18,7 +16,6 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.Assert;
 import org.junit.Test;
@@ -429,7 +426,7 @@ public class TDJsonWriterTest {
 
     BNode manualId = rdf.createBNode();
     BNode protocolId = rdf.createBNode();
-    metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS,"hasManual"), manualId);
+    metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS, "hasManual"), manualId);
     metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
 
     ThingDescription td = new ThingDescription.Builder("My Thing")
@@ -438,13 +435,13 @@ public class TDJsonWriterTest {
       .addTriple(rdf.createIRI("http://example.org/lamp123"), RDF.TYPE, rdf.createIRI(NS,
         "Artifact"))
       .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
-      .addTriple(rdf.createIRI("http://example.org/lamp123"),rdf.createIRI(NS,"hasManual"),
+      .addTriple(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS, "hasManual"),
         rdf.createIRI("http://example.org/manuals/anotherManual"))
       .addGraph(metadata)
       .addGraph(new ModelBuilder()
         .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
         .build())
-      .addTriple(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
+      .addTriple(protocolId, rdf.createIRI(NS, "hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
       .build();
 
     JsonObject expected = Json.createObjectBuilder()
@@ -452,7 +449,7 @@ public class TDJsonWriterTest {
         .add("https://www.w3.org/2019/wot/td/v1")
         .add(Json.createObjectBuilder()
           .add("saref", "https://saref.etsi.org/core/")
-          .add( "eve", "http://w3id.org/eve#")))
+          .add("eve", "http://w3id.org/eve#")))
       .add("title", THING_TITLE)
       .add("id", "http://example.org/lamp123")
       .add("@type", Json.createArrayBuilder()
@@ -460,8 +457,8 @@ public class TDJsonWriterTest {
         .add("saref:LightSwitch"))
       .add("securityDefinitions", Json.createObjectBuilder().add("nosec", Json.createObjectBuilder().add("scheme", "nosec")))
       .add("security", Json.createArrayBuilder().add("nosec"))
-      .add("eve:hasManual" , Json.createArrayBuilder().add("http://example.org/manuals/anotherManual").add(Json.createObjectBuilder()
-        .add("@type","eve:Manual")
+      .add("eve:hasManual", Json.createArrayBuilder().add("http://example.org/manuals/anotherManual").add(Json.createObjectBuilder()
+        .add("@type", "eve:Manual")
         .add("eve:hasUsageProtocol", Json.createObjectBuilder()
           .add("@type", "eve:UsageProtocol")
           .add("eve:hasLanguage", "http://jason.sourceforge.net/wp/description/"))))
@@ -479,7 +476,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
-        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
         .addTokenName("X-API-Key")
         .build())
       .build();
@@ -499,7 +496,6 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td).getJson();
 
     Assert.assertEquals(expected, test);
-
   }
 
   @Test
@@ -526,7 +522,6 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td).getJson();
 
     Assert.assertEquals(expected, test);
-
   }
 
   @Test
@@ -534,7 +529,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
         .addTokenName("Authorization")
         .build())
       .build();
@@ -554,7 +549,6 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td).getJson();
 
     Assert.assertEquals(expected, test);
-
   }
 
   @Test
@@ -579,7 +573,6 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td).getJson();
 
     Assert.assertEquals(expected, test);
-
   }
 
   @Test
@@ -587,7 +580,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
-        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenLocation(DigestSecurityScheme.TokenLocation.HEADER)
         .addTokenName("nonce")
         .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH)
         .build())
@@ -609,7 +602,6 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td).getJson();
 
     Assert.assertEquals(expected, test);
-
   }
 
   @Test
@@ -635,7 +627,6 @@ public class TDJsonWriterTest {
     JsonObject test = new TDJsonWriter(td).getJson();
 
     Assert.assertEquals(expected, test);
-
   }
 
 }

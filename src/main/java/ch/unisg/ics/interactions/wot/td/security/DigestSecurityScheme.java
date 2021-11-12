@@ -2,7 +2,6 @@ package ch.unisg.ics.interactions.wot.td.security;
 
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
-import org.eclipse.rdf4j.sparqlbuilder.core.query.Queries;
 
 import java.util.Locale;
 import java.util.Map;
@@ -27,6 +26,10 @@ public class DigestSecurityScheme extends SecurityScheme {
     AUTH, AUTH_INT
   }
 
+  public enum TokenLocation {
+    HEADER, QUERY, BODY, COOKIE
+  }
+
   /**
    * Gets the quality of protection, i.e. auth, or auth-int.
    * @return the quality of protection
@@ -38,7 +41,7 @@ public class DigestSecurityScheme extends SecurityScheme {
   /**
    * Gets the location of security authentication information. The location
    * must be one of those specified in the enum
-   * {@link ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation}, i.e.
+   * {@link ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.TokenLocation}, i.e.
    * header, query, body, or cookie
    * @return the location of security authentication information
    */
@@ -73,7 +76,7 @@ public class DigestSecurityScheme extends SecurityScheme {
     /**
      * Specifies the location of security authentication information. The location
      * must be one of those specified in the enum
-     * {@link ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation}, i.e.
+     * {@link ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.TokenLocation}, i.e.
      * header, query, body, or cookie.
      * @param in the location of security authentication information
      */

@@ -11,9 +11,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -254,7 +253,8 @@ public class TDGraphReaderTest {
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme instanceof APIKeySecurityScheme);
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
-    assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertEquals(APIKeySecurityScheme.TokenLocation.HEADER,
+      ((APIKeySecurityScheme) scheme).getTokenLocation());
     assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getTokenName().get());
   }
 
@@ -273,7 +273,8 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
-    assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertEquals(APIKeySecurityScheme.TokenLocation.QUERY,
+      ((APIKeySecurityScheme) scheme).getTokenLocation());
     assertFalse(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
   }
 
@@ -314,7 +315,7 @@ public class TDGraphReaderTest {
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme instanceof BasicSecurityScheme);
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
-    assertEquals(TokenLocation.HEADER,
+    assertEquals(BasicSecurityScheme.TokenLocation.HEADER,
       ((BasicSecurityScheme) scheme).getTokenLocation());
     assertEquals("Authorization", ((BasicSecurityScheme) scheme).getTokenName().get());
   }
@@ -334,7 +335,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
-    assertEquals(TokenLocation.HEADER,
+    assertEquals(BasicSecurityScheme.TokenLocation.HEADER,
       ((BasicSecurityScheme) scheme).getTokenLocation());
     assertFalse(((BasicSecurityScheme) scheme).getTokenName().isPresent());
   }
@@ -379,7 +380,7 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
     assertEquals(DigestSecurityScheme.QualityOfProtection.AUTH,
       ((DigestSecurityScheme) scheme).getQoP());
-    assertEquals(TokenLocation.HEADER,
+    assertEquals(DigestSecurityScheme.TokenLocation.HEADER,
       ((DigestSecurityScheme) scheme).getTokenLocation());
     assertEquals("nonce", ((DigestSecurityScheme) scheme).getTokenName().get());
   }
@@ -401,7 +402,7 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
     assertEquals(DigestSecurityScheme.QualityOfProtection.AUTH,
       ((DigestSecurityScheme) scheme).getQoP());
-    assertEquals(TokenLocation.HEADER,
+    assertEquals(DigestSecurityScheme.TokenLocation.HEADER,
       ((DigestSecurityScheme) scheme).getTokenLocation());
     assertFalse(((DigestSecurityScheme) scheme).getTokenName().isPresent());
   }

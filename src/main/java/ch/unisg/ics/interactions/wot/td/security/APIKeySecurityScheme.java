@@ -12,6 +12,7 @@ public class APIKeySecurityScheme extends SecurityScheme {
 
   private final TokenLocation in;
   private final Optional<String> name;
+
   protected APIKeySecurityScheme(TokenLocation in, Optional<String> name,
                                  Map<String, String> configuration, Set<String> semanticTypes) {
     super(SecurityScheme.APIKEY, configuration, semanticTypes);
@@ -19,10 +20,14 @@ public class APIKeySecurityScheme extends SecurityScheme {
     this.name = name;
   }
 
+  public enum TokenLocation {
+    HEADER, QUERY, BODY, COOKIE
+  }
+
   /**
    * Gets the location of security authentication information. The location
    * must be one of those specified in the enum
-   * {@link ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation}, i.e.
+   * {@link ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation}, i.e.
    * header, query, body, or cookie
    * @return the location of security authentication information
    */
@@ -54,7 +59,7 @@ public class APIKeySecurityScheme extends SecurityScheme {
     /**
      * Specifies the location of security authentication information. The location
      * must be one of those specified in the enum
-     * {@link ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation}, i.e.
+     * {@link ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation}, i.e.
      * header, query, body, or cookie.
      * @param in the location of security authentication information
      */

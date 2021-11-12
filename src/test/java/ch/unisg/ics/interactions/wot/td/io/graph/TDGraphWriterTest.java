@@ -9,9 +9,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -29,7 +28,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -94,7 +92,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
-          .addTokenLocation(TokenLocation.HEADER)
+          .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
           .addTokenName("X-API-Key")
           .build())
         .build();
@@ -116,7 +114,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
-        .addToken(TokenLocation.HEADER, "X-API-Key")
+        .addToken(APIKeySecurityScheme.TokenLocation.HEADER, "X-API-Key")
         .build())
       .build();
 
@@ -136,7 +134,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
         .addTokenName("Authorization")
         .build())
       .build();
@@ -158,7 +156,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addToken(TokenLocation.HEADER,"Authorization")
+        .addToken(BasicSecurityScheme.TokenLocation.HEADER,"Authorization")
         .build())
       .build();
 
@@ -180,7 +178,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
-        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenLocation(DigestSecurityScheme.TokenLocation.HEADER)
         .addTokenName("nonce")
         .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH)
         .build())
