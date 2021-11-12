@@ -8,10 +8,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.*;
@@ -201,6 +198,9 @@ public class TDGraphReader {
       } else if (schemeTypes.contains(WoTSec.BasicSecurityScheme)) {
         schemeBuilder = new BasicSecurityScheme.Builder();
         schemeTypes.remove(WoTSec.BasicSecurityScheme);
+      } else if (schemeTypes.contains(WoTSec.DigestSecurityScheme)) {
+        schemeBuilder = new DigestSecurityScheme.Builder();
+        schemeTypes.remove(WoTSec.DigestSecurityScheme);
       } else {
         throw new InvalidTDException("Unknown type of security scheme");
       }

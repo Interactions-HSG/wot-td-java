@@ -9,6 +9,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
@@ -158,6 +159,52 @@ public class TDGraphWriterTest {
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
         .addToken(TokenLocation.HEADER,"Authorization")
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testDigestSecurityScheme() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
+        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenName("nonce")
+        .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH)
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testBasicSecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
+        .addTokenName("nonce")
         .build())
       .build();
 

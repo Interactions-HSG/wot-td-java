@@ -8,6 +8,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -470,7 +471,6 @@ public class TDJsonWriterTest {
       .setNamespace("saref", "https://saref.etsi.org/core/")
       .getJson();
 
-    System.out.println(test);
     Assert.assertEquals(expected, test);
   }
 
@@ -498,7 +498,6 @@ public class TDJsonWriterTest {
 
     JsonObject test = new TDJsonWriter(td).getJson();
 
-    System.out.println(test);
     Assert.assertEquals(expected, test);
 
   }
@@ -526,7 +525,6 @@ public class TDJsonWriterTest {
 
     JsonObject test = new TDJsonWriter(td).getJson();
 
-    System.out.println(test);
     Assert.assertEquals(expected, test);
 
   }
@@ -555,7 +553,6 @@ public class TDJsonWriterTest {
 
     JsonObject test = new TDJsonWriter(td).getJson();
 
-    System.out.println(test);
     Assert.assertEquals(expected, test);
 
   }
@@ -581,7 +578,62 @@ public class TDJsonWriterTest {
 
     JsonObject test = new TDJsonWriter(td).getJson();
 
-    System.out.println(test);
+    Assert.assertEquals(expected, test);
+
+  }
+
+  @Test
+  public void testWriteDigestSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
+        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenName("nonce")
+        .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH)
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("digest",
+        Json.createObjectBuilder()
+          .add("scheme", "digest")
+          .add("qop", "auth")
+          .add("in", "header")
+          .add("name", "nonce")))
+      .add("security", Json.createArrayBuilder().add("digest"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    Assert.assertEquals(expected, test);
+
+  }
+
+  @Test
+  public void testWriteDefaultDigestSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("digest",
+        Json.createObjectBuilder()
+          .add("scheme", "digest")
+          .add("qop", "auth")
+          .add("in", "header")))
+      .add("security", Json.createArrayBuilder().add("digest"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
     Assert.assertEquals(expected, test);
 
   }

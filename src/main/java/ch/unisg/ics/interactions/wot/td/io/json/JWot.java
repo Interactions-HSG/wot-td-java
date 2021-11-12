@@ -53,5 +53,6 @@ public final class JWot {
     Arrays.stream(new String[][]{
       {WoTSec.in, "in"},
       {WoTSec.name, "name"},
+      {WoTSec.qop, "qop"},
     }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 }
