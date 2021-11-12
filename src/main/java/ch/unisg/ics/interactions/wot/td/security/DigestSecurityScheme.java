@@ -23,7 +23,27 @@ public class DigestSecurityScheme extends SecurityScheme {
   }
 
   public enum QualityOfProtection {
-    AUTH, AUTH_INT
+    AUTH("AUTH"),
+    AUTH_INT("AUTH-INT");
+
+    private String strValue;
+
+    QualityOfProtection(String strValue) { this.strValue = strValue; }
+
+    public String toString() {
+      return this.strValue;
+    }
+
+    public static QualityOfProtection fromString(String strValue) {
+      for (QualityOfProtection qop : values()) {
+        if (strValue.equals(qop.strValue)) {
+          return qop;
+        }
+      }
+      String msg = "No enum constant ch.unisg.ics.interactions.wot.td.security" +
+        ".DigestSecurityScheme.QualityOfProtection." + strValue;
+      throw new IllegalArgumentException(msg);
+    }
   }
 
   public enum TokenLocation {
@@ -120,7 +140,7 @@ public class DigestSecurityScheme extends SecurityScheme {
       }
       if (configuration.containsKey(WoTSec.qop)) {
         try {
-          addQoP(QualityOfProtection.valueOf(configuration.get(WoTSec.qop)
+          addQoP(QualityOfProtection.fromString(configuration.get(WoTSec.qop)
             .toUpperCase(Locale.ENGLISH)));
         } catch (IllegalArgumentException e) {
           throw new InvalidTDException("Invalid token location", e);

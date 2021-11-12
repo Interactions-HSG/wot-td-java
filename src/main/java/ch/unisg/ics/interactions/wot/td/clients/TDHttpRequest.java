@@ -5,12 +5,14 @@ import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -31,7 +33,6 @@ import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme.TokenLocation;
 
 /**
  * Wrapper for constructing and executing an HTTP request based on a given <code>ThingDescription</code>.
@@ -66,7 +67,7 @@ public class TDHttpRequest {
   }
 
   public TDHttpRequest setAPIKey(APIKeySecurityScheme scheme, String token) {
-    if (scheme.getTokenLocation() == TokenLocation.HEADER) {
+    if (scheme.getTokenLocation() == APIKeySecurityScheme.TokenLocation.HEADER) {
       this.request.setHeader(scheme.getTokenName().get(), token);
     } else {
       LOGGER.info("API key could not be added in " + scheme.getTokenLocation().name());
@@ -76,8 +77,19 @@ public class TDHttpRequest {
   }
 
   public TDHttpRequest setBasicAuth(BasicSecurityScheme scheme, String token) {
-    if (scheme.getTokenLocation() == TokenLocation.HEADER) {
+    if (scheme.getTokenLocation() == BasicSecurityScheme.TokenLocation.HEADER) {
       this.request.setHeader(scheme.getTokenName().get(), token);
+    } else {
+      LOGGER.info("Token could not be added in " + scheme.getTokenLocation().name());
+    }
+
+    return this;
+  }
+
+  public TDHttpRequest setDigestAuth(DigestSecurityScheme scheme, String token) {
+    if (scheme.getTokenLocation() == DigestSecurityScheme.TokenLocation.HEADER) {
+      this.request.setHeader(scheme.getTokenName().get(), token);
+      this.request.setHeader("qop", scheme.getQoP().toString().toLowerCase(Locale.ENGLISH));
     } else {
       LOGGER.info("Token could not be added in " + scheme.getTokenLocation().name());
     }

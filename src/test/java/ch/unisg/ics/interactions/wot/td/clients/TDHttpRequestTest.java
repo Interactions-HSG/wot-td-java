@@ -16,7 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.apache.commons.io.IOUtils;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
@@ -74,6 +80,19 @@ public class TDHttpRequestTest {
       "ex:forkliftRobot a td:Thing ; \n" +
       "    dct:title \"forkliftRobot\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"X-API-Key\" ;\n" +
+      "    ] ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Basic\" ;\n" +
+      "    ] ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth-int\" ;\n" +
+      "    ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
       "        td:hasForm [\n" +
@@ -323,6 +342,102 @@ public class TDHttpRequestTest {
     // TODO
   }
 
+  @Test
+  public void testAddHeader() throws ProtocolException {
+    assertEquals(1, td.getProperties().size());
+    Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
+    assertTrue(property.isPresent());
+    Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
+    assertTrue(form.isPresent());
+
+    TDHttpRequest tdRequest = new TDHttpRequest(form.get(), TD.writeProperty)
+      .setPrimitivePayload(property.get().getDataSchema(), true);
+
+    tdRequest.addHeader("headerName", "headerValue");
+
+    BasicClassicHttpRequest request = tdRequest.getRequest();
+    List<Header> headers = Arrays.asList(request.getHeaders());
+    assertEquals(headers.stream().filter(header -> "headerName".equals(header.getName())).count(),
+      1);
+    assertEquals(request.getHeader("headerName").getValue(), "headerValue");
+  }
+
+  @Test
+  public void testSetAPIKey() throws ProtocolException {
+    assertEquals(1, td.getProperties().size());
+    Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
+    assertTrue(property.isPresent());
+    Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
+    assertTrue(form.isPresent());
+
+    TDHttpRequest tdRequest = new TDHttpRequest(form.get(), TD.writeProperty)
+      .setPrimitivePayload(property.get().getDataSchema(), true);
+
+    Optional<SecurityScheme> securityScheme =
+      td.getFirstSecuritySchemeByType(WoTSec.APIKeySecurityScheme);
+    assertTrue(securityScheme.isPresent());
+    tdRequest.setAPIKey((APIKeySecurityScheme) securityScheme.get(), "api-key-value");
+
+    BasicClassicHttpRequest request = tdRequest.getRequest();
+
+    List<Header> headers = Arrays.asList(request.getHeaders());
+    assertEquals(headers.stream().filter(header -> "X-API-Key".equals(header.getName())).count(),
+      1);
+    assertEquals(request.getHeader("X-API-Key").getValue(), "api-key-value");
+  }
+
+  @Test
+  public void testSetBasicAuth() throws ProtocolException {
+    assertEquals(1, td.getProperties().size());
+    Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
+    assertTrue(property.isPresent());
+    Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
+    assertTrue(form.isPresent());
+
+    TDHttpRequest tdRequest = new TDHttpRequest(form.get(), TD.writeProperty)
+      .setPrimitivePayload(property.get().getDataSchema(), true);
+
+    Optional<SecurityScheme> securityScheme =
+      td.getFirstSecuritySchemeByType(WoTSec.BasicSecurityScheme);
+    assertTrue(securityScheme.isPresent());
+    tdRequest.setBasicAuth((BasicSecurityScheme) securityScheme.get(), "basic-value");
+
+    BasicClassicHttpRequest request = tdRequest.getRequest();
+
+    List<Header> headers = Arrays.asList(request.getHeaders());
+    assertEquals(headers.stream().filter(header -> "Basic".equals(header.getName())).count(),
+      1);
+    assertEquals(request.getHeader("Basic").getValue(), "basic-value");
+  }
+
+  @Test
+  public void testSetDigestAuth() throws ProtocolException {
+    assertEquals(1, td.getProperties().size());
+    Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
+    assertTrue(property.isPresent());
+    Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
+    assertTrue(form.isPresent());
+
+    TDHttpRequest tdRequest = new TDHttpRequest(form.get(), TD.writeProperty)
+      .setPrimitivePayload(property.get().getDataSchema(), true);
+
+    Optional<SecurityScheme> securityScheme =
+      td.getFirstSecuritySchemeByType(WoTSec.DigestSecurityScheme);
+    assertTrue(securityScheme.isPresent());
+    tdRequest.setDigestAuth((DigestSecurityScheme) securityScheme.get(), "nonce-value");
+
+    BasicClassicHttpRequest request = tdRequest.getRequest();
+
+    List<Header> headers = Arrays.asList(request.getHeaders());
+    assertEquals(headers.stream().filter(header -> "nonce".equals(header.getName())).count(),
+      1);
+    assertEquals(request.getHeader("nonce").getValue(), "nonce-value");
+
+    assertEquals(headers.stream().filter(header -> "qop".equals(header.getName())).count(),
+      1);
+    assertEquals(request.getHeader("qop").getValue(), "auth-int");
+  }
+
   private void assertUserSchemaPayload(BasicClassicHttpRequest request)
       throws UnsupportedOperationException, IOException, ProtocolException {
     StringWriter writer = new StringWriter();
@@ -334,4 +449,5 @@ public class TDHttpRequestTest {
     assertEquals("Andrei", payload.get("first_name").getAsString());
     assertEquals("Ciortea", payload.get("last_name").getAsString());
   }
+
 }
