@@ -39,7 +39,7 @@ public class TDGraphWriterTest {
   private static final String IO_BASE_IRI = "http://example.org/";
 
   private static final String PREFIXES =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -51,7 +51,7 @@ public class TDGraphWriterTest {
   @Test
   public void testNoThingURI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD =
-        PREFIXES +
+      PREFIXES +
         "\n" +
         "[] a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -59,7 +59,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addSecurityScheme("nosec", new NoSecurityScheme.Builder().build())
-        .build();
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -67,14 +67,14 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteTitle() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n" ;
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addSecurityScheme("nosec", new NoSecurityScheme.Builder().build())
-        .build();
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("nosec", new NoSecurityScheme.Builder().build())
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -82,20 +82,20 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteAPIKeySecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"header\" ;\n" +
-        "        wotsec:name \"X-API-Key\" ;\n" +
-        "    ] .\n";
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"X-API-Key\" ;\n" +
+      "    ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
-          .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
-          .addTokenName("X-API-Key")
-          .build())
-        .build();
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
+        .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
+        .addTokenName("X-API-Key")
+        .build())
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -156,7 +156,7 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addToken(BasicSecurityScheme.TokenLocation.HEADER,"Authorization")
+        .addToken(BasicSecurityScheme.TokenLocation.HEADER, "Authorization")
         .build())
       .build();
 
@@ -188,7 +188,29 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testBasicSecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+  public void testWriteDigestSecuritySchemeOneToken() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
+        .addToken(DigestSecurityScheme.TokenLocation.HEADER, "nonce")
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testDigestSecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -212,7 +234,7 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteAdditionalTypes() throws RDFParseException, RDFHandlerException, IOException {
     String testTD =
-        PREFIXES +
+      PREFIXES +
         "@prefix eve: <http://w3id.org/eve#> .\n" +
         "@prefix iot: <http://iotschema.org/> .\n" +
         "\n" +
@@ -221,20 +243,20 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSemanticType("http://iotschema.org/Light")
-        .build();
+      .addThingURI(THING_IRI)
+      .addSemanticType("http://w3id.org/eve#Artifact")
+      .addSemanticType("http://iotschema.org/Light")
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
 
   @Test
   public void testWriteTypesDeduplication() throws RDFParseException, RDFHandlerException,
-      IOException {
+    IOException {
 
     String testTD =
-        PREFIXES +
+      PREFIXES +
         "@prefix eve: <http://w3id.org/eve#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing, eve:Artifact ;\n" +
@@ -242,10 +264,10 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSemanticType("http://w3id.org/eve#Artifact")
-        .build();
+      .addThingURI(THING_IRI)
+      .addSemanticType("http://w3id.org/eve#Artifact")
+      .addSemanticType("http://w3id.org/eve#Artifact")
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -253,7 +275,7 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteBaseURI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD =
-        PREFIXES +
+      PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
@@ -261,74 +283,74 @@ public class TDGraphWriterTest {
         "    td:hasBase <http://example.org/> .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addBaseURI("http://example.org/")
-        .build();
+      .addThingURI(THING_IRI)
+      .addBaseURI("http://example.org/")
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
 
   @Test
   public void testWriteOnePropertyDefaultValues() throws RDFParseException, RDFHandlerException,
-      IOException {
+    IOException {
     String testTD = PREFIXES +
-        "@prefix iot: <http://iotschema.org/> .\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        td:isObservable true ;\n" +
-        "        td:hasForm [\n" +
-        "            hctl:hasTarget <http://example.org/count> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
-        "        ] ;\n" +
-        "    ] ." ;
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
 
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
-            new Form.Builder("http://example.org/count").build())
-        .addSemanticType("http://iotschema.org/MyProperty")
-        .addName("my_property")
-        .addObserve()
-        .build();
+      new Form.Builder("http://example.org/count").build())
+      .addSemanticType("http://iotschema.org/MyProperty")
+      .addName("my_property")
+      .addObserve()
+      .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addProperty(property)
-        .build();
+      .addThingURI(THING_IRI)
+      .addProperty(property)
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
 
   @Test
   public void testWritePropertySubprotocol() throws RDFParseException, RDFHandlerException,
-      IOException {
+    IOException {
     String testTD = PREFIXES +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
-        "        td:isObservable true ;\n" +
-        "        td:hasForm [\n" +
-        "            hctl:hasTarget <http://example.org/count> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
-        "            hctl:forSubProtocol \"websub\";\n" +
-        "        ] ;\n" +
-        "    ] ." ;
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
+      "            hctl:forSubProtocol \"websub\";\n" +
+      "        ] ;\n" +
+      "    ] .";
 
 
     PropertyAffordance property = new PropertyAffordance.Builder(new IntegerSchema.Builder().build(),
-            new Form.Builder("http://example.org/count")
-                .addSubProtocol("websub")
-                .build())
-        .addObserve()
-        .build();
+      new Form.Builder("http://example.org/count")
+        .addSubProtocol("websub")
+        .build())
+      .addObserve()
+      .build();
 
     ThingDescription td = constructThingDescription(new ArrayList<>(Collections.singletonList(property)),
       new ArrayList<>(Collections.emptyList()));
@@ -339,56 +361,56 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteOneAction() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
-        "@prefix iot: <http://iotschema.org/> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
-        "    td:hasActionAffordance [\n" +
-        "        a td:ActionAffordance, iot:MyAction ;\n" +
-        "        td:name \"my_action\" ;\n" +
-        "        dct:title \"My Action\" ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/action> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:invokeAction;\n" +
-        "        ] ;\n" +
-        "        td:hasInputSchema [\n" +
-        "            a js:ObjectSchema ;\n" +
-        "            js:properties [\n" +
-        "                a js:NumberSchema ;\n" +
-        "                js:propertyName \"number_value\";\n" +
-        "            ] ;\n" +
-        "            js:required \"number_value\" ;\n" +
-        "        ] ;\n" +
-        "        td:hasOutputSchema [\n" +
-        "            a js:ObjectSchema ;\n" +
-        "            js:properties [\n" +
-        "                a js:BooleanSchema ;\n" +
-        "                js:propertyName \"boolean_value\";\n" +
-        "            ] ;\n" +
-        "            js:required \"boolean_value\" ;\n" +
-        "        ]\n" +
-        "    ] ." ;
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance, iot:MyAction ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        dct:title \"My Action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/action> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "        td:hasInputSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:NumberSchema ;\n" +
+      "                js:propertyName \"number_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"number_value\" ;\n" +
+      "        ] ;\n" +
+      "        td:hasOutputSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:BooleanSchema ;\n" +
+      "                js:propertyName \"boolean_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"boolean_value\" ;\n" +
+      "        ]\n" +
+      "    ] .";
 
     ActionAffordance simpleAction = new ActionAffordance.Builder(
-            new Form.Builder( "http://example.org/action")
-              .setMethodName("PUT")
-              .build())
-        .addName("my_action")
-        .addTitle("My Action")
-        .addSemanticType("http://iotschema.org/MyAction")
-        .addInputSchema(new ObjectSchema.Builder()
-            .addProperty("number_value", new NumberSchema.Builder().build())
-            .addRequiredProperties("number_value")
-            .build())
-        .addOutputSchema(new ObjectSchema.Builder()
-            .addProperty("boolean_value", new BooleanSchema.Builder().build())
-            .addRequiredProperties("boolean_value")
-            .build())
-        .build();
+      new Form.Builder("http://example.org/action")
+        .setMethodName("PUT")
+        .build())
+      .addName("my_action")
+      .addTitle("My Action")
+      .addSemanticType("http://iotschema.org/MyAction")
+      .addInputSchema(new ObjectSchema.Builder()
+        .addProperty("number_value", new NumberSchema.Builder().build())
+        .addRequiredProperties("number_value")
+        .build())
+      .addOutputSchema(new ObjectSchema.Builder()
+        .addProperty("boolean_value", new BooleanSchema.Builder().build())
+        .addRequiredProperties("boolean_value")
+        .build())
+      .build();
 
     ThingDescription td = constructThingDescription(new ArrayList<>(),
       new ArrayList<>(Collections.singletonList(simpleAction)));
@@ -398,42 +420,42 @@ public class TDGraphWriterTest {
 
   @Test
   public void testWriteAdditionalMetadata() throws RDFParseException, RDFHandlerException, IOException {
-  	String testTD = PREFIXES +
-  	    "@prefix eve: <http://w3id.org/eve#> .\n" +
-  	    "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
-  	    "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-  	    "    dct:title \"My Lamp Thing\" ;\n" +
-  	    "    eve:hasManual [ a eve:Manual;\n" +
-  	    "        dct:title \"My Lamp Manual\";\n" +
-  	    "        eve:hasUsageProtocol [ a eve:UsageProtocol;\n" +
-  	    "            dct:title \"Party Light\";\n" +
-  	    "            eve:hasLanguage <http://jason.sourceforge.net/wp/description/>\n" +
-  	    "        ]\n" +
-  	    "    ].\n" ;
+    String testTD = PREFIXES +
+      "@prefix eve: <http://w3id.org/eve#> .\n" +
+      "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
+      "    dct:title \"My Lamp Thing\" ;\n" +
+      "    eve:hasManual [ a eve:Manual;\n" +
+      "        dct:title \"My Lamp Manual\";\n" +
+      "        eve:hasUsageProtocol [ a eve:UsageProtocol;\n" +
+      "            dct:title \"Party Light\";\n" +
+      "            eve:hasLanguage <http://jason.sourceforge.net/wp/description/>\n" +
+      "        ]\n" +
+      "    ].\n";
 
-  	ValueFactory rdf = SimpleValueFactory.getInstance();
-  	Model metadata = new LinkedHashModel();
+    ValueFactory rdf = SimpleValueFactory.getInstance();
+    Model metadata = new LinkedHashModel();
 
-  	final String NS = "http://w3id.org/eve#";
-  	metadata.setNamespace("eve", NS);
+    final String NS = "http://w3id.org/eve#";
+    metadata.setNamespace("eve", NS);
 
     BNode manualId = rdf.createBNode();
-  	BNode protocolId = rdf.createBNode();
-  	metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS,"hasManual"), manualId);
-  	metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
-  	metadata.add(manualId, DCTERMS.TITLE, rdf.createLiteral("My Lamp Manual"));
+    BNode protocolId = rdf.createBNode();
+    metadata.add(rdf.createIRI("http://example.org/lamp123"), rdf.createIRI(NS, "hasManual"), manualId);
+    metadata.add(manualId, RDF.TYPE, rdf.createIRI(NS, "Manual"));
+    metadata.add(manualId, DCTERMS.TITLE, rdf.createLiteral("My Lamp Manual"));
 
-  	ThingDescription td = new ThingDescription.Builder("My Lamp Thing")
-  	    .addThingURI("http://example.org/lamp123")
-  	    .addSemanticType("https://saref.etsi.org/core/LightSwitch")
-  	    .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
-  	    .addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
-  	    .addGraph(metadata)
-  	    .addGraph(new ModelBuilder()
-  	        .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
-  	        .build())
-  	    .addTriple(protocolId, rdf.createIRI(NS,"hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
-  	    .build();
+    ThingDescription td = new ThingDescription.Builder("My Lamp Thing")
+      .addThingURI("http://example.org/lamp123")
+      .addSemanticType("https://saref.etsi.org/core/LightSwitch")
+      .addTriple(protocolId, RDF.TYPE, rdf.createIRI(NS, "UsageProtocol"))
+      .addTriple(protocolId, DCTERMS.TITLE, rdf.createLiteral("Party Light"))
+      .addGraph(metadata)
+      .addGraph(new ModelBuilder()
+        .add(manualId, rdf.createIRI(NS, "hasUsageProtocol"), protocolId)
+        .build())
+      .addTriple(protocolId, rdf.createIRI(NS, "hasLanguage"), rdf.createIRI("http://jason.sourceforge.net/wp/description/"))
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -441,78 +463,78 @@ public class TDGraphWriterTest {
   @Test
   public void testWriteReadmeExample() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
-        "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
-        "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-        "  dct:title \"My Lamp Thing\" ;\n" +
-        "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
-        "      dct:title \"Toggle\";\n" +
-        "      td:hasForm [\n" +
-        "          htv:methodName \"PUT\";\n" +
-        "          hctl:forContentType \"application/json\";\n" +
-        "          hctl:hasTarget <http://mylamp.example.org/toggle>;\n" +
-        "          hctl:hasOperationType td:invokeAction\n" +
-        "        ];\n" +
-        "      td:hasInputSchema [ a saref:OnOffState, js:ObjectSchema;\n" +
-        "          js:properties [ a js:BooleanSchema;\n" +
-        "              js:propertyName \"status\"\n" +
-        "            ];\n" +
-        "          js:required \"status\"\n" +
-        "        ];\n" +
-        "    ].";
+      "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
+      "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
+      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
+      "      dct:title \"Toggle\";\n" +
+      "      td:hasForm [\n" +
+      "          htv:methodName \"PUT\";\n" +
+      "          hctl:forContentType \"application/json\";\n" +
+      "          hctl:hasTarget <http://mylamp.example.org/toggle>;\n" +
+      "          hctl:hasOperationType td:invokeAction\n" +
+      "        ];\n" +
+      "      td:hasInputSchema [ a saref:OnOffState, js:ObjectSchema;\n" +
+      "          js:properties [ a js:BooleanSchema;\n" +
+      "              js:propertyName \"status\"\n" +
+      "            ];\n" +
+      "          js:required \"status\"\n" +
+      "        ];\n" +
+      "    ].";
 
     Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
-        .setMethodName("PUT")
-        .build();
+      .setMethodName("PUT")
+      .build();
 
     ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
-        .addTitle("Toggle")
-        .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
-        .addInputSchema(new ObjectSchema.Builder()
-            .addSemanticType("https://saref.etsi.org/core/OnOffState")
-            .addProperty("status", new BooleanSchema.Builder()
-                .build())
-            .addRequiredProperties("status")
-            .build())
-        .build();
+      .addTitle("Toggle")
+      .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
+      .addInputSchema(new ObjectSchema.Builder()
+        .addSemanticType("https://saref.etsi.org/core/OnOffState")
+        .addProperty("status", new BooleanSchema.Builder()
+          .build())
+        .addRequiredProperties("status")
+        .build())
+      .build();
 
     ThingDescription td = new ThingDescription.Builder("My Lamp Thing")
-        .addThingURI("http://example.org/lamp123")
-        .addSemanticType("https://saref.etsi.org/core/LightSwitch")
-        .addAction(toggle)
-        .build();
+      .addThingURI("http://example.org/lamp123")
+      .addSemanticType("https://saref.etsi.org/core/LightSwitch")
+      .addAction(toggle)
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
 
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,
-      RDFHandlerException, IOException {
+    RDFHandlerException, IOException {
     Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD,
-        IO_BASE_IRI);
+      IO_BASE_IRI);
 
     String description = new TDGraphWriter(td)
-        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
-        .setNamespace("htv", "http://www.w3.org/2011/http#")
-        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
-        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
-        .setNamespace("dct", "http://purl.org/dc/terms/")
-        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("saref", "https://saref.etsi.org/core/")
-        .write();
+      .setNamespace("td", "https://www.w3.org/2019/wot/td#")
+      .setNamespace("htv", "http://www.w3.org/2011/http#")
+      .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
+      .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
+      .setNamespace("dct", "http://purl.org/dc/terms/")
+      .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+      .setNamespace("saref", "https://saref.etsi.org/core/")
+      .write();
 
     System.out.println(description);
 
     Model tdModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description,
-        IO_BASE_IRI);
+      IO_BASE_IRI);
 
     assertTrue(Models.isomorphic(expectedModel, tdModel));
 
   }
 
   private ThingDescription constructThingDescription(List<PropertyAffordance> properties,
-      List<ActionAffordance> actions) {
+                                                     List<ActionAffordance> actions) {
     ThingDescription.Builder builder = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addBaseURI("http://example.org/");
+      .addThingURI(THING_IRI)
+      .addBaseURI("http://example.org/");
 
     for (PropertyAffordance property : properties) {
       builder.addProperty(property);

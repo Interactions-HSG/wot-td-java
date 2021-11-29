@@ -30,6 +30,7 @@ public abstract class SecurityScheme {
   /**
    * Gets the name of the security scheme (i.e. nosec, apikey, basic,
    * digest, bearer, psk, and oauth2).
+   *
    * @return the name of the security scheme
    */
   public String getSchemeName() {
@@ -39,6 +40,7 @@ public abstract class SecurityScheme {
   /**
    * Gets the security configuration which can be used in security definitions
    * of a <code>Thing Description</code>.
+   *
    * @return the security configuration
    */
   public Map<String, String> getConfiguration() {
@@ -49,7 +51,8 @@ public abstract class SecurityScheme {
     return semanticTypes;
   }
 
-  public static abstract class Builder<T extends SecurityScheme, S extends SecurityScheme.Builder<T, S>> {
+  public static abstract class Builder<T extends SecurityScheme,
+    S extends Builder> {
     protected Map<String, String> configuration;
     protected Set<String> semanticTypes;
 

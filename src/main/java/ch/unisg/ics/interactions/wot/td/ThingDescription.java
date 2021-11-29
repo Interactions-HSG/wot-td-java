@@ -98,7 +98,7 @@ public class ThingDescription {
    * @param name the name of the security scheme
    * @return an <code>Optional</code> with the security scheme (empty if not found)
    */
-  public Optional<SecurityScheme> getSecuritySchemeByName(String name) {
+  public Optional<SecurityScheme> getFirstSecuritySchemeByName(String name) {
     for (SecurityScheme securityScheme : securityDefinitions.values()) {
 
       if (securityScheme.getSchemeName().equals(name)) {
