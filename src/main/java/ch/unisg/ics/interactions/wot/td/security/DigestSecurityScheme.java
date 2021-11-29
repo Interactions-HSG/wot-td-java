@@ -81,15 +81,7 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
      */
     @Override
     public DigestSecurityScheme.Builder addConfiguration(Map<String, String> configuration) {
-      this.configuration.putAll(configuration);
-      if (configuration.containsKey(WoTSec.in)) {
-        try {
-          addTokenLocation(TokenLocation.valueOf(configuration.get(WoTSec.in)
-            .toUpperCase(Locale.ENGLISH)));
-        } catch (IllegalArgumentException e) {
-          throw new InvalidTDException("Invalid token location", e);
-        }
-      }
+      super.addConfiguration(configuration);
       if (configuration.containsKey(WoTSec.qop)) {
         try {
           addQoP(QualityOfProtection.fromString(configuration.get(WoTSec.qop)
@@ -97,9 +89,6 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
         } catch (IllegalArgumentException e) {
           throw new InvalidTDException("Invalid token location", e);
         }
-      }
-      if (configuration.containsKey(WoTSec.name)) {
-        addTokenName(configuration.get(WoTSec.name));
       }
       return this;
     }
