@@ -62,7 +62,9 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      * i.e. header, query, body, or cookie.
      *
      * @param in the location of security authentication information
+     * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public S addTokenLocation(TokenLocation in) {
       this.in = in;
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
@@ -73,7 +75,9 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      * Specifies the name for query, header, or cookie parameters.
      *
      * @param name the name of the token
+     * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public S addTokenName(String name) {
       this.name = Optional.of(name);
       this.configuration.put(WoTSec.name, name);
@@ -85,8 +89,10 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      * of a <code>Thing Description</code>.
      *
      * @param configuration the security configuration
+     * @return the builder
      */
     @Override
+    @SuppressWarnings("unchecked")
     public S addConfiguration(Map<String, String> configuration) {
       this.configuration.putAll(configuration);
       if (configuration.containsKey(WoTSec.in)) {
@@ -109,9 +115,11 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      * The location must be one of those specified in the enum <code>TokenLocation</code>, i.e.
      * header, query, body, or cookie.
      *
-     * @param in   the name of the token
+     * @param in the location of security authentication information
      * @param name the name of the token
+     * @return the builder
      */
+    @SuppressWarnings("unchecked")
     public S addToken(TokenLocation in, String name) {
       this.in = in;
       this.name = Optional.of(name);
