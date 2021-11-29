@@ -10,10 +10,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -273,7 +270,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
-    assertEquals(APIKeySecurityScheme.TokenLocation.QUERY,
+    assertEquals(TokenBasedSecurityScheme.TokenLocation.QUERY,
       ((APIKeySecurityScheme) scheme).getTokenLocation());
     assertFalse(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
   }

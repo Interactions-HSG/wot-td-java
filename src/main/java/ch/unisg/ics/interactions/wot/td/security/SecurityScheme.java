@@ -49,7 +49,9 @@ public abstract class SecurityScheme {
     return semanticTypes;
   }
 
-  public static abstract class Builder<T extends SecurityScheme, S extends SecurityScheme.Builder<T, S>> {
+  public static abstract class Builder<T extends SecurityScheme,
+    S extends SecurityScheme.Builder<T,
+    S>> {
     protected Map<String, String> configuration;
     protected Set<String> semanticTypes;
 
