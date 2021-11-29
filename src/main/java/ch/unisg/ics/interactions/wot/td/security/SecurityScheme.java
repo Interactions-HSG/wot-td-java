@@ -1,6 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import java.security.Security;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,6 +30,7 @@ public abstract class SecurityScheme {
   /**
    * Gets the name of the security scheme (i.e. nosec, apikey, basic,
    * digest, bearer, psk, and oauth2).
+   *
    * @return the name of the security scheme
    */
   public String getSchemeName() {
@@ -40,6 +40,7 @@ public abstract class SecurityScheme {
   /**
    * Gets the security configuration which can be used in security definitions
    * of a <code>Thing Description</code>.
+   *
    * @return the security configuration
    */
   public Map<String, String> getConfiguration() {
@@ -50,7 +51,8 @@ public abstract class SecurityScheme {
     return semanticTypes;
   }
 
-  public static abstract class Builder<T extends SecurityScheme>{
+  public static abstract class Builder<T extends SecurityScheme,
+    S extends Builder> {
     protected Map<String, String> configuration;
     protected Set<String> semanticTypes;
 
@@ -61,21 +63,21 @@ public abstract class SecurityScheme {
     }
 
     @SuppressWarnings("unchecked")
-    public SecurityScheme.Builder<T> addConfiguration(Map<String, String> map) {
+    public S addConfiguration(Map<String, String> map) {
       this.configuration.putAll(map);
-      return this;
+      return (S) this;
     }
 
     @SuppressWarnings("unchecked")
-    public SecurityScheme.Builder<T> addSemanticType(String type) {
+    public S addSemanticType(String type) {
       this.semanticTypes.add(type);
-      return this;
+      return (S) this;
     }
 
     @SuppressWarnings("unchecked")
-    public SecurityScheme.Builder<T> addSemanticTypes(Set<String> type) {
+    public S addSemanticTypes(Set<String> type) {
       this.semanticTypes.addAll(type);
-      return this;
+      return (S) this;
     }
 
     public abstract T build();

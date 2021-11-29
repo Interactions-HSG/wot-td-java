@@ -7,14 +7,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class BasicSecurityScheme extends TokenBasedSecurityScheme{
+public class BasicSecurityScheme extends TokenBasedSecurityScheme {
 
   protected BasicSecurityScheme(TokenLocation in, Optional<String> name,
                                 Map<String, String> configuration, Set<String> semanticTypes) {
     super(in, name, SecurityScheme.BASIC, configuration, semanticTypes);
   }
 
-  public static class Builder extends TokenBasedSecurityScheme.Builder<BasicSecurityScheme> {
+  public static class Builder extends TokenBasedSecurityScheme.Builder<BasicSecurityScheme,
+    BasicSecurityScheme.Builder> {
 
     public Builder() {
       this.in = TokenLocation.HEADER;

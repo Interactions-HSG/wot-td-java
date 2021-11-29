@@ -8,15 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class TokenBasedSecurityScheme extends SecurityScheme{
-
-  public enum TokenLocation {
-    HEADER, QUERY, BODY, COOKIE
-  }
+public abstract class TokenBasedSecurityScheme extends SecurityScheme {
 
   private final TokenLocation in;
   private final Optional<String> name;
-
   protected TokenBasedSecurityScheme(TokenLocation in, Optional<String> name, String schemeName, Map<String, String> configuration, Set<String> semanticTypes) {
     super(schemeName, configuration, semanticTypes);
     this.in = in;
@@ -28,6 +23,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
    * must be one of those specified in the enum
    * {@link ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation}, i.e.
    * header, query, body, or cookie
+   *
    * @return the location of security authentication information
    */
   public TokenLocation getTokenLocation() {
@@ -36,14 +32,20 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
 
   /**
    * Gets the name for query, header, or cookie parameters.
+   *
    * @return the name of the token
    */
   public Optional<String> getTokenName() {
     return name;
   }
 
-  public static abstract class Builder<T extends TokenBasedSecurityScheme> extends SecurityScheme.Builder<T>
-  {
+  public enum TokenLocation {
+    HEADER, QUERY, BODY, COOKIE
+  }
+
+  public static abstract class Builder<T extends TokenBasedSecurityScheme,
+    S extends TokenBasedSecurityScheme.Builder>
+    extends SecurityScheme.Builder<TokenBasedSecurityScheme, TokenBasedSecurityScheme.Builder> {
     protected APIKeySecurityScheme.TokenLocation in;
     protected Optional<String> name;
 
@@ -58,31 +60,34 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
      * must be one of those specified in the enum
      * {@link ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation},
      * i.e. header, query, body, or cookie.
+     *
      * @param in the location of security authentication information
      */
-    public TokenBasedSecurityScheme.Builder<T> addTokenLocation(TokenLocation in) {
+    public S addTokenLocation(TokenLocation in) {
       this.in = in;
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
-      return this;
+      return (S) this;
     }
 
     /**
      * Specifies the name for query, header, or cookie parameters.
+     *
      * @param name the name of the token
      */
-    public TokenBasedSecurityScheme.Builder<T> addTokenName(String name) {
+    public S addTokenName(String name) {
       this.name = Optional.of(name);
       this.configuration.put(WoTSec.name, name);
-      return this;
+      return (S) this;
     }
 
     /**
      * Specifies the security configuration, which can be used in security definitions
      * of a <code>Thing Description</code>.
+     *
      * @param configuration the security configuration
      */
     @Override
-    public TokenBasedSecurityScheme.Builder<T> addConfiguration(Map<String, String> configuration) {
+    public S addConfiguration(Map<String, String> configuration) {
       this.configuration.putAll(configuration);
       if (configuration.containsKey(WoTSec.in)) {
         try {
@@ -95,7 +100,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
       if (configuration.containsKey(WoTSec.name)) {
         addTokenName(configuration.get(WoTSec.name));
       }
-      return this;
+      return (S) this;
     }
 
     /**
@@ -103,15 +108,16 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
      * of a <code>Thing Description</code>.
      * The location must be one of those specified in the enum <code>TokenLocation</code>, i.e.
      * header, query, body, or cookie.
-     * @param in the name of the token
+     *
+     * @param in   the name of the token
      * @param name the name of the token
      */
-    public TokenBasedSecurityScheme.Builder<T> addToken(TokenLocation in, String name) {
+    public S addToken(TokenLocation in, String name) {
       this.in = in;
       this.name = Optional.of(name);
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
       this.configuration.put(WoTSec.name, name);
-      return this;
+      return (S) this;
     }
 
     public abstract T build();
