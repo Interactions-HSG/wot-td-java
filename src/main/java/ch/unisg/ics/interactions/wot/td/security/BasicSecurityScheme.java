@@ -14,8 +14,7 @@ public class BasicSecurityScheme extends TokenBasedSecurityScheme{
     super(in, name, SecurityScheme.BASIC, configuration, semanticTypes);
   }
 
-  public static class Builder extends TokenBasedSecurityScheme.Builder<BasicSecurityScheme,
-    BasicSecurityScheme.Builder> {
+  public static class Builder extends TokenBasedSecurityScheme.Builder<BasicSecurityScheme> {
 
     public Builder() {
       this.in = TokenLocation.HEADER;

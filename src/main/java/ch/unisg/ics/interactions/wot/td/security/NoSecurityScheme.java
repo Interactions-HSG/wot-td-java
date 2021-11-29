@@ -11,8 +11,7 @@ public class NoSecurityScheme extends SecurityScheme {
     super(SecurityScheme.NOSEC, configuration, semanticTypes);
   }
 
-  public static class Builder extends SecurityScheme.Builder<NoSecurityScheme,
-    NoSecurityScheme.Builder> {
+  public static class Builder extends SecurityScheme.Builder<NoSecurityScheme> {
 
     public Builder() {
       this.semanticTypes.add(WoTSec.NoSecurityScheme);

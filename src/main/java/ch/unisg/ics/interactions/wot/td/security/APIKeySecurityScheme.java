@@ -13,8 +13,7 @@ public class APIKeySecurityScheme extends TokenBasedSecurityScheme {
     super(in, name, SecurityScheme.APIKEY, configuration, semanticTypes);
   }
 
-  public static class Builder extends TokenBasedSecurityScheme.Builder<APIKeySecurityScheme,
-    APIKeySecurityScheme.Builder> {
+  public static class Builder extends TokenBasedSecurityScheme.Builder<APIKeySecurityScheme> {
 
     public Builder() {
       this.in = TokenLocation.QUERY;

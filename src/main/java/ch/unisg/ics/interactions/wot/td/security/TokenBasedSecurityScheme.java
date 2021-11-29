@@ -42,11 +42,8 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
     return name;
   }
 
-  public static abstract class Builder<T extends TokenBasedSecurityScheme,
-    S extends TokenBasedSecurityScheme.Builder> extends SecurityScheme.Builder<TokenBasedSecurityScheme,
-    TokenBasedSecurityScheme.Builder<TokenBasedSecurityScheme, TokenBasedSecurityScheme.Builder>>
+  public static abstract class Builder<T extends TokenBasedSecurityScheme> extends SecurityScheme.Builder<T>
   {
-
     protected APIKeySecurityScheme.TokenLocation in;
     protected Optional<String> name;
 
@@ -63,20 +60,20 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
      * i.e. header, query, body, or cookie.
      * @param in the location of security authentication information
      */
-    public S addTokenLocation(TokenLocation in) {
+    public TokenBasedSecurityScheme.Builder<T> addTokenLocation(TokenLocation in) {
       this.in = in;
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
-      return (S) this;
+      return this;
     }
 
     /**
      * Specifies the name for query, header, or cookie parameters.
      * @param name the name of the token
      */
-    public S addTokenName(String name) {
+    public TokenBasedSecurityScheme.Builder<T> addTokenName(String name) {
       this.name = Optional.of(name);
       this.configuration.put(WoTSec.name, name);
-      return (S) this;
+      return this;
     }
 
     /**
@@ -85,7 +82,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
      * @param configuration the security configuration
      */
     @Override
-    public S addConfiguration(Map<String, String> configuration) {
+    public TokenBasedSecurityScheme.Builder<T> addConfiguration(Map<String, String> configuration) {
       this.configuration.putAll(configuration);
       if (configuration.containsKey(WoTSec.in)) {
         try {
@@ -98,7 +95,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
       if (configuration.containsKey(WoTSec.name)) {
         addTokenName(configuration.get(WoTSec.name));
       }
-      return (S) this;
+      return this;
     }
 
     /**
@@ -109,12 +106,12 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme{
      * @param in the name of the token
      * @param name the name of the token
      */
-    public S addToken(TokenLocation in, String name) {
+    public TokenBasedSecurityScheme.Builder<T> addToken(TokenLocation in, String name) {
       this.in = in;
       this.name = Optional.of(name);
       this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
       this.configuration.put(WoTSec.name, name);
-      return (S) this;
+      return this;
     }
 
     public abstract T build();

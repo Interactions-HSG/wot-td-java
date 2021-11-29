@@ -77,8 +77,7 @@ public class DigestSecurityScheme extends SecurityScheme {
     return name;
   }
 
-  public static class Builder extends SecurityScheme.Builder<DigestSecurityScheme,
-    DigestSecurityScheme.Builder> {
+  public static class Builder extends SecurityScheme.Builder<DigestSecurityScheme> {
 
     private QualityOfProtection qop;
     private TokenLocation in;
