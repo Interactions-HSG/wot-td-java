@@ -78,6 +78,7 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
      * of a <code>Thing Description</code>.
      *
      * @param configuration the security configuration
+     * @return the builder
      */
     @Override
     public DigestSecurityScheme.Builder addConfiguration(Map<String, String> configuration) {
