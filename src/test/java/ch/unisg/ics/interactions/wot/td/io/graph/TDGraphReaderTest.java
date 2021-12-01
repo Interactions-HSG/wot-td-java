@@ -510,6 +510,7 @@ public class TDGraphReaderTest {
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
+    assertEquals(2, reader.readSecuritySchemes().size());
     assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
       .getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
     assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
