@@ -11,6 +11,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.*;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -250,7 +251,7 @@ public class TDGraphReaderTest {
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme instanceof APIKeySecurityScheme);
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
-    assertEquals(APIKeySecurityScheme.TokenLocation.HEADER,
+    assertEquals(TokenLocation.HEADER,
       ((APIKeySecurityScheme) scheme).getTokenLocation());
     assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getTokenName().get());
   }
@@ -270,7 +271,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
-    assertEquals(TokenBasedSecurityScheme.TokenLocation.QUERY,
+    assertEquals(TokenLocation.QUERY,
       ((APIKeySecurityScheme) scheme).getTokenLocation());
     assertFalse(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
   }
@@ -312,7 +313,7 @@ public class TDGraphReaderTest {
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme instanceof BasicSecurityScheme);
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
-    assertEquals(BasicSecurityScheme.TokenLocation.HEADER,
+    assertEquals(TokenLocation.HEADER,
       ((BasicSecurityScheme) scheme).getTokenLocation());
     assertEquals("Authorization", ((BasicSecurityScheme) scheme).getTokenName().get());
   }
@@ -332,7 +333,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
-    assertEquals(BasicSecurityScheme.TokenLocation.HEADER,
+    assertEquals(TokenLocation.HEADER,
       ((BasicSecurityScheme) scheme).getTokenLocation());
     assertFalse(((BasicSecurityScheme) scheme).getTokenName().isPresent());
   }
@@ -377,7 +378,7 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
     assertEquals(DigestSecurityScheme.QualityOfProtection.AUTH,
       ((DigestSecurityScheme) scheme).getQoP());
-    assertEquals(DigestSecurityScheme.TokenLocation.HEADER,
+    assertEquals(TokenLocation.HEADER,
       ((DigestSecurityScheme) scheme).getTokenLocation());
     assertEquals("nonce", ((DigestSecurityScheme) scheme).getTokenName().get());
   }
@@ -399,7 +400,7 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
     assertEquals(DigestSecurityScheme.QualityOfProtection.AUTH,
       ((DigestSecurityScheme) scheme).getQoP());
-    assertEquals(DigestSecurityScheme.TokenLocation.HEADER,
+    assertEquals(TokenLocation.HEADER,
       ((DigestSecurityScheme) scheme).getTokenLocation());
     assertFalse(((DigestSecurityScheme) scheme).getTokenName().isPresent());
   }
@@ -434,6 +435,62 @@ public class TDGraphReaderTest {
         "  ] .";
 
     new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+  }
+
+  @Test
+  public void testReadBearerSecurityScheme() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme ;\n" +
+        "        wotsec:in \"header\" ;\n" +
+        "        wotsec:name \"Authorization\" ;\n" +
+        "        wotsec:authorization \"server.example.com\" ;\n" +
+        "        wotsec:alg \"ECDSA 256\" ;\n" +
+        "        wotsec:format \"cwt\" ;\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof BearerSecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((BearerSecurityScheme) scheme).getTokenLocation());
+    assertEquals("Authorization", ((BearerSecurityScheme) scheme).getTokenName().get());
+    assertEquals("server.example.com", ((BearerSecurityScheme) scheme).getAuthorization()
+      .get());
+    assertEquals("ECDSA 256", ((BearerSecurityScheme) scheme).getAlg());
+    assertEquals("cwt", ((BearerSecurityScheme) scheme).getFormat());
+  }
+
+  @Test
+  public void testBearerSecuritySchemeDefaultValues() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((BearerSecurityScheme) scheme).getTokenLocation());
+    assertEquals("ES256",((BearerSecurityScheme) scheme).getAlg());
+    assertEquals("jwt",((BearerSecurityScheme) scheme).getFormat());
+    assertFalse(((BearerSecurityScheme) scheme).getTokenName().isPresent());
+    assertFalse(((BearerSecurityScheme) scheme).getAuthorization().isPresent());
   }
 
   @Test

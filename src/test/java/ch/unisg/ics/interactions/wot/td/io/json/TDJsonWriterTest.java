@@ -8,7 +8,9 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BearerSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -476,7 +478,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("apikey", new APIKeySecurityScheme.Builder()
-        .addTokenLocation(APIKeySecurityScheme.TokenLocation.HEADER)
+        .addTokenLocation(TokenLocation.HEADER)
         .addTokenName("X-API-Key")
         .build())
       .build();
@@ -529,7 +531,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("basic", new BasicSecurityScheme.Builder()
-        .addTokenLocation(BasicSecurityScheme.TokenLocation.HEADER)
+        .addTokenLocation(TokenLocation.HEADER)
         .addTokenName("Authorization")
         .build())
       .build();
@@ -580,7 +582,7 @@ public class TDJsonWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("digest", new DigestSecurityScheme.Builder()
-        .addTokenLocation(DigestSecurityScheme.TokenLocation.HEADER)
+        .addTokenLocation(TokenLocation.HEADER)
         .addTokenName("nonce")
         .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH)
         .build())
@@ -629,4 +631,62 @@ public class TDJsonWriterTest {
     Assert.assertEquals(expected, test);
   }
 
+  @Test
+  public void testWriteBearerSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("bearer", new BearerSecurityScheme.Builder()
+        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenName("Authorization")
+        .addAuthorization("server.example.com")
+        .addAlg("ECDSA 256")
+        .addFormat("cwt")
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("bearer",
+        Json.createObjectBuilder()
+          .add("scheme", "bearer")
+          .add("authorization", "server.example.com")
+          .add("alg", "ECDSA 256")
+          .add("format", "cwt")
+          .add("in", "header")
+          .add("name", "Authorization")))
+      .add("security", Json.createArrayBuilder().add("bearer"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testWriteDefaultBearerSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("bearer", new BearerSecurityScheme.Builder()
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("bearer",
+        Json.createObjectBuilder()
+          .add("scheme", "bearer")
+          .add("alg", "ES256")
+          .add("format", "jwt")
+          .add("in", "header")))
+      .add("security", Json.createArrayBuilder().add("bearer"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    Assert.assertEquals(expected, test);
+  }
 }

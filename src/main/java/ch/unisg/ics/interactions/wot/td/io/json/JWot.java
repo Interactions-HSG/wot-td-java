@@ -54,5 +54,8 @@ public final class JWot {
       {WoTSec.in, "in"},
       {WoTSec.name, "name"},
       {WoTSec.qop, "qop"},
+      {WoTSec.authorization, "authorization"},
+      {WoTSec.alg, "alg"},
+      {WoTSec.format, "format"},
     }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 }

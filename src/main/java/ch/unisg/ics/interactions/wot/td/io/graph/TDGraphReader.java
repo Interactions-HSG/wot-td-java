@@ -201,6 +201,9 @@ public class TDGraphReader {
       } else if (schemeTypes.contains(WoTSec.DigestSecurityScheme)) {
         schemeBuilder = new DigestSecurityScheme.Builder();
         schemeTypes.remove(WoTSec.DigestSecurityScheme);
+      } else if (schemeTypes.contains(WoTSec.BearerSecurityScheme)) {
+        schemeBuilder = new BearerSecurityScheme.Builder();
+        schemeTypes.remove(WoTSec.BearerSecurityScheme);
       } else {
         throw new InvalidTDException("Unknown type of security scheme");
       }
