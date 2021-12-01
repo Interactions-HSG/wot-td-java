@@ -12,6 +12,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
 
   private final TokenLocation in;
   private final Optional<String> name;
+
   protected TokenBasedSecurityScheme(TokenLocation in, Optional<String> name, String schemeName, Map<String, String> configuration, Set<String> semanticTypes) {
     super(schemeName, configuration, semanticTypes);
     this.in = in;
@@ -50,9 +51,8 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
     protected Optional<String> name;
 
     protected Builder() {
-      this.in = TokenLocation.HEADER;
       this.name = Optional.empty();
-      this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
+      this.addTokenLocation(TokenLocation.HEADER);
     }
 
     /**
@@ -97,14 +97,14 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
       this.configuration.putAll(configuration);
       if (configuration.containsKey(WoTSec.in)) {
         try {
-          addTokenLocation(TokenLocation.valueOf(configuration.get(WoTSec.in)
+          this.addTokenLocation(TokenLocation.valueOf(configuration.get(WoTSec.in)
             .toUpperCase(Locale.ENGLISH)));
         } catch (IllegalArgumentException e) {
           throw new InvalidTDException("Invalid token location", e);
         }
       }
       if (configuration.containsKey(WoTSec.name)) {
-        addTokenName(configuration.get(WoTSec.name));
+        this.addTokenName(configuration.get(WoTSec.name));
       }
       return (S) this;
     }
@@ -115,7 +115,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      * The location must be one of those specified in the enum <code>TokenLocation</code>, i.e.
      * header, query, body, or cookie.
      *
-     * @param in the location of security authentication information
+     * @param in   the location of security authentication information
      * @param name the name of the token
      * @return the builder
      */

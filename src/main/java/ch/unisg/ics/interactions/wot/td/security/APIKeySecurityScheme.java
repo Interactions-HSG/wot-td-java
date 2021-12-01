@@ -2,7 +2,6 @@ package ch.unisg.ics.interactions.wot.td.security;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,10 +17,9 @@ public class APIKeySecurityScheme extends TokenBasedSecurityScheme {
     APIKeySecurityScheme.Builder> {
 
     public Builder() {
-      this.in = TokenLocation.QUERY;
       this.name = Optional.empty();
-      this.configuration.put(WoTSec.in, in.toString().toLowerCase(Locale.ENGLISH));
       this.semanticTypes.add(WoTSec.APIKeySecurityScheme);
+      this.addTokenLocation(TokenLocation.QUERY);
     }
 
     @Override
