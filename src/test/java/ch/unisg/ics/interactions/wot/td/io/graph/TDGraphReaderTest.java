@@ -487,10 +487,53 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
     assertEquals(TokenLocation.HEADER,
       ((BearerSecurityScheme) scheme).getTokenLocation());
-    assertEquals("ES256",((BearerSecurityScheme) scheme).getAlg());
-    assertEquals("jwt",((BearerSecurityScheme) scheme).getFormat());
+    assertEquals("ES256", ((BearerSecurityScheme) scheme).getAlg());
+    assertEquals("jwt", ((BearerSecurityScheme) scheme).getFormat());
     assertFalse(((BearerSecurityScheme) scheme).getTokenName().isPresent());
     assertFalse(((BearerSecurityScheme) scheme).getAuthorization().isPresent());
+  }
+
+  @Test
+  public void testReadPSKSecurityScheme() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:PSKSecurityScheme ;\n" +
+        "        wotsec:identity \"192.0.2.1\" ;\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof PSKSecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
+    assertEquals(scheme.getSchemeName(), "psk");
+    assertEquals("192.0.2.1", ((PSKSecurityScheme) scheme).getIdentity().get());
+  }
+
+  @Test
+  public void testPSKSecuritySchemeDefaultValues() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:PSKSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
+    assertEquals(scheme.getSchemeName(), "psk");
+    assertFalse(((PSKSecurityScheme) scheme).getIdentity().isPresent());
   }
 
   @Test

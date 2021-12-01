@@ -6,10 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BearerSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
@@ -683,6 +680,54 @@ public class TDJsonWriterTest {
           .add("format", "jwt")
           .add("in", "header")))
       .add("security", Json.createArrayBuilder().add("bearer"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testWritePSKSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("psk", new PSKSecurityScheme.Builder()
+        .addIdentity("192.0.2.1")
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("psk",
+        Json.createObjectBuilder()
+          .add("scheme", "psk")
+          .add("identity", "192.0.2.1")))
+      .add("security", Json.createArrayBuilder().add("psk"))
+      .build();
+
+    JsonObject test = new TDJsonWriter(td).getJson();
+
+    Assert.assertEquals(expected, test);
+  }
+
+  @Test
+  public void testWriteDefaultPSKSecurityScheme() {
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("psk", new PSKSecurityScheme.Builder()
+        .build())
+      .build();
+
+    JsonObject expected = Json.createObjectBuilder()
+      .add("@context", "https://www.w3.org/2019/wot/td/v1")
+      .add("title", THING_TITLE)
+      .add("id", THING_IRI)
+      .add("securityDefinitions", Json.createObjectBuilder().add("psk",
+        Json.createObjectBuilder()
+          .add("scheme", "psk")))
+      .add("security", Json.createArrayBuilder().add("psk"))
       .build();
 
     JsonObject test = new TDJsonWriter(td).getJson();

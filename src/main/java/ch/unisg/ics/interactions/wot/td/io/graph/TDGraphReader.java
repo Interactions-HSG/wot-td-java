@@ -61,10 +61,10 @@ public class TDGraphReader {
    * Returns a ThingDescription object based on the path parameter that points to a file. Should the path be invalid
    * or if the file does not exist, an IOException is thrown.
    *
-   * @param path the location of the file that contains the thing description
-   * @throws IOException when the file is not read correctly
-   * @param  format  the file's thing description
+   * @param path   the location of the file that contains the thing description
+   * @param format the file's thing description
    * @return the thing description
+   * @throws IOException when the file is not read correctly
    */
   public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
     String content = new String(Files.readAllBytes(Paths.get(path)));
@@ -204,6 +204,9 @@ public class TDGraphReader {
       } else if (schemeTypes.contains(WoTSec.BearerSecurityScheme)) {
         schemeBuilder = new BearerSecurityScheme.Builder();
         schemeTypes.remove(WoTSec.BearerSecurityScheme);
+      } else if (schemeTypes.contains(WoTSec.PSKSecurityScheme)) {
+        schemeBuilder = new PSKSecurityScheme.Builder();
+        schemeTypes.remove(WoTSec.PSKSecurityScheme);
       } else {
         throw new InvalidTDException("Unknown type of security scheme");
       }

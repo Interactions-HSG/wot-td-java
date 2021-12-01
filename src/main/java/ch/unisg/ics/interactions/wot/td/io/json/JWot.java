@@ -57,5 +57,6 @@ public final class JWot {
       {WoTSec.authorization, "authorization"},
       {WoTSec.alg, "alg"},
       {WoTSec.format, "format"},
+      {WoTSec.identity, "identity"},
     }).collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 }
