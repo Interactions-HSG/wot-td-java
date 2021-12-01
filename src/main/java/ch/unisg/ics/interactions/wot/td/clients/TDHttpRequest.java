@@ -1,5 +1,22 @@
 package ch.unisg.ics.interactions.wot.td.clients;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BearerSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
+import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
@@ -11,39 +28,15 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import org.apache.commons.io.IOUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpResponse;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
-
-import com.google.gson.Gson;
-
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-
 /**
  * Wrapper for constructing and executing an HTTP request based on a given <code>ThingDescription</code>.
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
- *
  */
 public class TDHttpRequest {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
   private final Form form;
-  private BasicClassicHttpRequest request;
+  private final BasicClassicHttpRequest request;
 
   public TDHttpRequest(Form form, String operationType) {
     this.form = form;
@@ -54,7 +47,7 @@ public class TDHttpRequest {
       this.request = new BasicClassicHttpRequest(methodName.get(), form.getTarget());
     } else {
       throw new IllegalArgumentException("No default binding for the given operation type: "
-          + operationType);
+        + operationType);
     }
 
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
@@ -97,58 +90,70 @@ public class TDHttpRequest {
     return this;
   }
 
+  public TDHttpRequest setBearerAuth(BearerSecurityScheme scheme, String token) {
+    if (scheme.getTokenLocation() == BearerSecurityScheme.TokenLocation.HEADER) {
+      this.request.setHeader(scheme.getTokenName().get(), token);
+      this.request.setHeader("alg", scheme.getAlg());
+      this.request.setHeader("format", scheme.getFormat());
+    } else {
+      LOGGER.info("Token could not be added in " + scheme.getTokenLocation().name());
+    }
+
+    return this;
+  }
+
   public TDHttpRequest addHeader(String key, String value) {
     this.request.addHeader(key, value);
     return this;
   }
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     if (dataSchema.getDatatype().equals(DataSchema.BOOLEAN)) {
       request.setEntity(new StringEntity(String.valueOf(value),
-          ContentType.create(form.getContentType())));
+        ContentType.create(form.getContentType())));
     } else {
       throw new IllegalArgumentException("The payload's datatype does not match BooleanSchema "
-          + "(payload datatype: " + dataSchema.getDatatype() + ")");
+        + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
 
     return this;
   }
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, String value)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     if (dataSchema.getDatatype().equals(DataSchema.STRING)) {
       request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
     } else {
       throw new IllegalArgumentException("The payload's datatype does not match StringSchema "
-          + "(payload datatype: " + dataSchema.getDatatype() + ")");
+        + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
 
     return this;
   }
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, long value)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     if (dataSchema.getDatatype().equals(DataSchema.INTEGER)
-        || dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
+      || dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
       request.setEntity(new StringEntity(String.valueOf(value),
-          ContentType.create(form.getContentType())));
+        ContentType.create(form.getContentType())));
     } else {
       throw new IllegalArgumentException("The payload's datatype does not match IntegerSchema or "
-          + "NumberSchema (payload datatype: " + dataSchema.getDatatype() + ")");
+        + "NumberSchema (payload datatype: " + dataSchema.getDatatype() + ")");
     }
 
     return this;
   }
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, double value)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     if (dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
       request.setEntity(new StringEntity(String.valueOf(value),
-          ContentType.create(form.getContentType())));
+        ContentType.create(form.getContentType())));
     } else {
       throw new IllegalArgumentException("The payload's datatype does not match NumberSchema "
-          + "(payload datatype: " + dataSchema.getDatatype() + ")");
+        + "(payload datatype: " + dataSchema.getDatatype() + ")");
     }
 
     return this;
@@ -163,8 +168,8 @@ public class TDHttpRequest {
    * </ul>
    *
    * @param objectSchema schema to be used for validating the payload and constructing the body of
-   * the request
-   * @param payload the actual payload
+   *                     the request
+   * @param payload      the actual payload
    * @return this <code>TDHttpRequest</code>
    */
   public TDHttpRequest setObjectPayload(ObjectSchema objectSchema, Map<String, Object> payload) {
@@ -183,8 +188,8 @@ public class TDHttpRequest {
    * as <code>Map&lt;String,Object&gt;</code>, or lists of values (that is, nested lists).
    *
    * @param arraySchema schema used for validating the payload and constructing the body of
-   * the request
-   * @param payload the actual payload
+   *                    the request
+   * @param payload     the actual payload
    * @return this <code>TDHttpRequest</code>
    */
   public TDHttpRequest setArrayPayload(ArraySchema arraySchema, List<Object> payload) {
