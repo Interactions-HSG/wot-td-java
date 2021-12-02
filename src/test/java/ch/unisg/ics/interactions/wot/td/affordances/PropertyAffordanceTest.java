@@ -1,14 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PropertyAffordanceTest {
 
@@ -20,7 +19,7 @@ public class PropertyAffordanceTest {
     Form form = new Form.Builder("http://example.org/action1")
         .build();
 
-    testProperty = new PropertyAffordance.Builder(form)
+    testProperty = new PropertyAffordance.Builder("my_property", form)
         .addTitle("My Property")
         .addDataSchema(schema)
         .addSemanticType("sem_type")

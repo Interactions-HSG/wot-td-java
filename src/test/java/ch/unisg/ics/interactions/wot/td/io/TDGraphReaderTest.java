@@ -1,19 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.junit.Test;
-
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
@@ -28,11 +14,22 @@ import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocat
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
 
 public class TDGraphReaderTest {
 
   private static final String TEST_SIMPLE_TD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -180,7 +177,7 @@ public class TDGraphReaderTest {
       "} ]";
 
   private static final String TEST_IO_HEAD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -193,6 +190,7 @@ public class TDGraphReaderTest {
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasActionAffordance [\n" +
       "        a td:ActionAffordance ;\n" +
+      "        td:name \"my_action\" ;\n" +
       "        dct:title \"My Action\" ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
@@ -201,7 +199,7 @@ public class TDGraphReaderTest {
       "            hctl:hasOperationType td:invokeAction;\n" +
       "        ] ;\n";
 
-  private static final String TEST_IO_TAIL = "    ] ." ;
+  private static final String TEST_IO_TAIL = "    ] .";
 
   @Test
   public void testReadTitle() {
@@ -238,7 +236,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadAPIKeySecurityScheme() {
     String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
@@ -255,7 +253,7 @@ public class TDGraphReaderTest {
 
     SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
     assertTrue(scheme instanceof APIKeySecurityScheme);
-    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemeType());
+    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
     assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getIn());
     assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getName().get());
   }
@@ -263,7 +261,7 @@ public class TDGraphReaderTest {
   @Test
   public void testAPIKeySecuritySchemeDefaultValues() {
     String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
@@ -274,7 +272,7 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     assertEquals(1, reader.readSecuritySchemes().size());
     SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
-    assertEquals(WoTSec.APIKeySecurityScheme, ((APIKeySecurityScheme) scheme).getSchemeType());
+    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
     assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getIn());
     assertFalse(((APIKeySecurityScheme) scheme).getName().isPresent());
   }
@@ -282,7 +280,7 @@ public class TDGraphReaderTest {
   @Test(expected = InvalidTDException.class)
   public void testAPIKeySecuritySchemeInvalidTokenLocation() {
     String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
@@ -298,7 +296,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadMultipleSecuritySchemes() {
     String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -313,9 +311,9 @@ public class TDGraphReaderTest {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
     assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-        .equals(WoTSec.NoSecurityScheme)));
+      .equals(WoTSec.NoSecurityScheme)));
     assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-        .equals(WoTSec.APIKeySecurityScheme)));
+      .equals(WoTSec.APIKeySecurityScheme)));
   }
 
   @Test
@@ -326,7 +324,7 @@ public class TDGraphReaderTest {
     assertEquals(1, properties.size());
 
     PropertyAffordance property = properties.get(0);
-    assertEquals("my_property", property.getName().get());
+    assertEquals("my_property", property.getName());
     assertEquals("My Property", property.getTitle().get());
     assertTrue(property.isObservable());
     assertEquals(2, property.getSemanticTypes().size());
@@ -379,7 +377,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readActions().size());
     ActionAffordance action = reader.readActions().get(0);
 
-    assertEquals("my_action", action.getName().get());
+    assertEquals("my_action", action.getName());
     assertEquals("My Action", action.getTitle().get());
     assertEquals(1, action.getSemanticTypes().size());
     assertEquals(TD.ActionAffordance, action.getSemanticTypes().get(0));
@@ -393,7 +391,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadMultipleSimpleActions() {
     String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
         "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -406,6 +404,7 @@ public class TDGraphReaderTest {
         "    td:hasBase <http://example.org/> ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
+        "        td:name \"first_action\" ;\n" +
         "        dct:title \"First Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
@@ -416,6 +415,7 @@ public class TDGraphReaderTest {
         "    ] ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
+        "        td:name \"second_action\" ;\n" +
         "        dct:title \"Second Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
@@ -426,6 +426,7 @@ public class TDGraphReaderTest {
         "    ] ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
+        "        td:name \"third_action\" ;\n" +
         "        dct:title \"Third Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
@@ -433,7 +434,7 @@ public class TDGraphReaderTest {
         "            hctl:forContentType \"application/json\";\n" +
         "            hctl:hasOperationType td:invokeAction;\n" +
         "        ] ;\n" +
-        "    ] ." ;
+        "    ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
@@ -517,13 +518,13 @@ public class TDGraphReaderTest {
 
   @Test
   public void testReadTDFromFile() throws IOException {
-	  // Read a TD from a File by passing its path as parameter
-	  ThingDescription simple = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/simple_td.ttl");
-	  ThingDescription forklift = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/forkliftRobot.ttl");
+    // Read a TD from a File by passing its path as parameter
+    ThingDescription simple = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/simple_td.ttl");
+    ThingDescription forklift = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/forkliftRobot.ttl");
 
-	  // Check if a TD was created from the file by checking its title
-	  assertEquals("My Thing", simple.getTitle());
-	  assertEquals("forkliftRobot", forklift.getTitle());
+    // Check if a TD was created from the file by checking its title
+    assertEquals("My Thing", simple.getTitle());
+    assertEquals("forkliftRobot", forklift.getTitle());
   }
 
   @Test
@@ -536,7 +537,7 @@ public class TDGraphReaderTest {
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
     assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-        .equals(WoTSec.NoSecurityScheme)));
+      .equals(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
 
     // Check action metadata
@@ -569,26 +570,100 @@ public class TDGraphReaderTest {
 
   @Test
   public void testMissingMandatoryTitle() {
-  	String testTDWithMissingTitle =
-  	    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-  			"@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-  			"\n" +
-  			"<http://example.org/#thing> a td:Thing ;\n" +
-  			"    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-  			"    td:hasBase <http://example.org/> .\n" ;
+    String testTDWithMissingTitle =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasBase <http://example.org/> .\n";
 
-  	Exception exception = assertThrows(InvalidTDException.class, () -> {
-  		TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
     });
 
-  	String expectedMessage = "Missing mandatory title.";
+    String expectedMessage = "Missing mandatory title.";
     String actualMessage = exception.getMessage();
 
     assertTrue(actualMessage.contains(expectedMessage));
   }
 
+  @Test
+  public void testMissingMandatoryPropertyAffordanceName() {
+    String testTDWithMissingAffordanceName =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"PUT\" ;\n" +
+        "            hctl:hasTarget <http://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:writeProperty;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingAffordanceName);
+    });
+
+    StringWriter writer = new StringWriter();
+    exception.printStackTrace(new PrintWriter(writer));
+    String expectedMessage = "Invalid property definition.";
+    String expectedRootMessage = "Missing mandatory affordance name.";
+    String actualMessage = writer.toString();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+    assertTrue(actualMessage.contains(expectedRootMessage));
+  }
+
+  @Test
+  public void testMissingMandatoryActionAffordanceName() {
+    String testTDWithMissingAffordanceName =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasActionAffordance [\n" +
+        "        a td:ActionAffordance ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"PUT\" ;\n" +
+        "            hctl:hasTarget <http://example.org/action> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:invokeAction;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingAffordanceName);
+    });
+
+    StringWriter writer = new StringWriter();
+    exception.printStackTrace(new PrintWriter(writer));
+    String expectedMessage = "Invalid action definition.";
+    String expectedRootMessage = "Missing mandatory affordance name.";
+    String actualMessage = writer.toString();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+    assertTrue(actualMessage.contains(expectedRootMessage));
+  }
+
   private void assertForm(Form form, String methodName, String target,
-      String contentType, String operationType) {
+                          String contentType, String operationType) {
     assertEquals(methodName, form.getMethodName().get());
     assertEquals(target, form.getTarget());
     assertEquals(contentType, form.getContentType());

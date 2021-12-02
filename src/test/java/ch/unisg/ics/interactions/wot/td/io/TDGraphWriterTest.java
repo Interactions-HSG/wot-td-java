@@ -4,10 +4,22 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -22,25 +34,13 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
-
 public class TDGraphWriterTest {
   private static final String THING_TITLE = "My Thing";
   private static final String THING_IRI = "http://example.org/#thing";
   private static final String IO_BASE_IRI = "http://example.org/";
 
   private static final String PREFIXES =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -161,7 +161,7 @@ public class TDGraphWriterTest {
 
   @Test
   public void testWriteOnePropertyDefaultValues() throws RDFParseException, RDFHandlerException,
-      IOException {
+    IOException {
     String testTD = PREFIXES +
         "@prefix iot: <http://iotschema.org/> .\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
@@ -179,11 +179,10 @@ public class TDGraphWriterTest {
         "    ] ." ;
 
 
-    PropertyAffordance property = new PropertyAffordance.Builder(
+    PropertyAffordance property = new PropertyAffordance.Builder("my_property",
             new Form.Builder("http://example.org/count").build())
         .addDataSchema(new IntegerSchema.Builder().build())
         .addSemanticType("http://iotschema.org/MyProperty")
-        .addName("my_property")
         .addObserve()
         .build();
 
@@ -214,13 +213,12 @@ public class TDGraphWriterTest {
         "        ] ;\n" +
         "    ] .";
 
-    PropertyAffordance property = new PropertyAffordance.Builder(
+    PropertyAffordance property = new PropertyAffordance.Builder("my_property",
             new Form.Builder("http://example.org/count")
                 .setContentType("video/mpeg")
                 .addOperationType(TD.readProperty)
                 .build())
         .addSemanticType("http://iotschema.org/MyProperty")
-        .addName("my_property")
         .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -234,7 +232,7 @@ public class TDGraphWriterTest {
 
   @Test
   public void testWritePropertySubprotocol() throws RDFParseException, RDFHandlerException,
-      IOException {
+    IOException {
     String testTD = PREFIXES +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -242,6 +240,7 @@ public class TDGraphWriterTest {
         "    td:hasBase <http://example.org/> ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
         "        td:isObservable true ;\n" +
         "        td:hasForm [\n" +
         "            hctl:hasTarget <http://example.org/count> ;\n" +
@@ -251,8 +250,7 @@ public class TDGraphWriterTest {
         "        ] ;\n" +
         "    ] ." ;
 
-
-    PropertyAffordance property = new PropertyAffordance.Builder(
+    PropertyAffordance property = new PropertyAffordance.Builder("my_property",
             new Form.Builder("http://example.org/count")
                 .addSubProtocol("websub")
                 .build())
@@ -260,8 +258,8 @@ public class TDGraphWriterTest {
         .addObserve()
         .build();
 
-    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(Arrays.asList(property)),
-        new ArrayList<ActionAffordance>(Arrays.asList()));
+    ThingDescription td = constructThingDescription(new ArrayList<>(Collections.singletonList(property)),
+      new ArrayList<>(Collections.emptyList()));
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -303,11 +301,10 @@ public class TDGraphWriterTest {
         "        ]\n" +
         "    ] ." ;
 
-    ActionAffordance simpleAction = new ActionAffordance.Builder(
+    ActionAffordance simpleAction = new ActionAffordance.Builder("my_action",
             new Form.Builder( "http://example.org/action")
               .setMethodName("PUT")
               .build())
-        .addName("my_action")
         .addTitle("My Action")
         .addSemanticType("http://iotschema.org/MyAction")
         .addInputSchema(new ObjectSchema.Builder()
@@ -320,8 +317,8 @@ public class TDGraphWriterTest {
             .build())
         .build();
 
-    ThingDescription td = constructThingDescription(new ArrayList<PropertyAffordance>(),
-        new ArrayList<ActionAffordance>(Arrays.asList(simpleAction)));
+    ThingDescription td = constructThingDescription(new ArrayList<>(),
+        new ArrayList<>(Collections.singletonList(simpleAction)));
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -375,6 +372,7 @@ public class TDGraphWriterTest {
         "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
         "  dct:title \"My Lamp Thing\" ;\n" +
         "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
+        "      td:name \"toggle\";\n" +
         "      dct:title \"Toggle\";\n" +
         "      td:hasForm [\n" +
         "          htv:methodName \"PUT\";\n" +
@@ -394,7 +392,7 @@ public class TDGraphWriterTest {
         .setMethodName("PUT")
         .build();
 
-    ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
+    ActionAffordance toggle = new ActionAffordance.Builder("toggle", toggleForm)
         .addTitle("Toggle")
         .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
         .addInputSchema(new ObjectSchema.Builder()
@@ -431,11 +429,9 @@ public class TDGraphWriterTest {
 
     System.out.println(description);
 
-    Model tdModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description,
-        IO_BASE_IRI);
+    Model tdModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, description, IO_BASE_IRI);
 
     assertTrue(Models.isomorphic(expectedModel, tdModel));
-
   }
 
   private ThingDescription constructThingDescription(List<PropertyAffordance> properties,

@@ -49,7 +49,7 @@ ThingDescription td = (new ThingDescription.Builder("My Lamp Thing"))
 The above code snippet creates a `ThingDescription` for a lamp with the title `My Lamp Thing` ([mandatory property](https://www.w3.org/TR/wot-thing-description/#thing)) and the semantic type `saref:LightSwitch` (see [SAREF ontology](https://saref.etsi.org/)). The lamp exposes a `toggle` action, which can be defined in a similar manner:
 
 ```java
-ActionAffordance toggle = new ActionAffordance.Builder(toggleForm)
+ActionAffordance toggle = new ActionAffordance.Builder("Toggle Form", toggleForm)
     .addTitle("Toggle")
     .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
     .addInputSchema(new ObjectSchema.Builder()
@@ -66,7 +66,9 @@ Our `toggle` action has the semantic type `saref:ToggleCommand` and takes as inp
 The `toggle` action is exposed via a [Form](https://www.w3.org/TR/wot-thing-description/#form), which is a type of hypermedia control. To create a form, we have to specify at least the method to be used and a target URI:
 
 ```java
-Form toggleForm = new Form("PUT", "http://mylamp.example.org/toggle");
+Form toggleForm = new Form.Builder("http://mylamp.example.org/toggle")
+        .setMethodName("PUT")
+        .build();
 ```
 
 We can serialize our TD in Turtle like so (support for other formats is to be added): 
@@ -99,6 +101,7 @@ The generated TD is:
   dct:title "My Lamp Thing";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
+      td:name "Toggle Form";
       dct:title "Toggle";
       td:hasForm [
           htv:methodName "PUT";

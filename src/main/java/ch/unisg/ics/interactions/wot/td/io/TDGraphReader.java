@@ -1,33 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.hc.client5.http.fluent.Request;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
@@ -40,17 +12,31 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import org.apache.hc.client5.http.fluent.Request;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
  * maintains the full RDF graph read as input, which can be retrieved with the <code>getGraph</code>
  * method.
- *
  */
 public class TDGraphReader {
   private final Resource thingId;
-  private Model model;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
+  private Model model;
 
   public static ThingDescription readFromURL(TDFormat format, String url) throws IOException {
     String representation = Request.get(url).execute().returnContent().asString();
@@ -64,6 +50,7 @@ public class TDGraphReader {
    * @param	format	the file's thing description
    * @param path	the location of the file that contains the thing description
    * @return	the thing description
+   * @throws IOException if an I/O error occurs reading from the stream
    */
   public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
     String content = new String(Files.readAllBytes(Paths.get(path)));
@@ -160,8 +147,8 @@ public class TDGraphReader {
     Set<IRI> thingTypes = Models.objectIRIs(model.filter(thingId, RDF.TYPE, null));
 
     return thingTypes.stream()
-        .map(iri -> iri.stringValue())
-        .collect(Collectors.toSet());
+      .map(iri -> iri.stringValue())
+      .collect(Collectors.toSet());
   }
 
   final Optional<String> readBaseURI() {
@@ -205,9 +192,11 @@ public class TDGraphReader {
     for (Resource propertyId : propertyIds) {
       try {
         List<Form> forms = readForms(propertyId, InteractionAffordance.PROPERTY);
-        PropertyAffordance.Builder builder = new PropertyAffordance.Builder(forms);
+        String name = readAffordanceName(propertyId);
+        PropertyAffordance.Builder builder = new PropertyAffordance.Builder(name, forms);
 
         Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(propertyId, model);
+
         if (schema.isPresent()) {
           builder.addDataSchema(schema.get());
         }
@@ -243,8 +232,12 @@ public class TDGraphReader {
         continue;
       }
 
-      ActionAffordance action = readAction(affordanceId);
-      actions.add(action);
+      try {
+        ActionAffordance action = readAction(affordanceId);
+        actions.add(action);
+      } catch (InvalidTDException e) {
+        throw new InvalidTDException("Invalid action definition.", e);
+      }
     }
 
     return actions;
@@ -252,13 +245,15 @@ public class TDGraphReader {
 
   private ActionAffordance readAction(Resource affordanceId) {
     List<Form> forms = readForms(affordanceId, InteractionAffordance.ACTION);
-    ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(forms);
+    String name = readAffordanceName(affordanceId);
+    ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(name, forms);
 
     readAffordanceMetadata(actionBuilder, affordanceId);
 
     try {
       Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId,
           rdf.createIRI(TD.hasInputSchema), null));
+
       if (inputSchemaId.isPresent()) {
         try {
           Optional<DataSchema> input = SchemaGraphReader.readDataSchema(inputSchemaId.get(), model);
@@ -272,11 +267,12 @@ public class TDGraphReader {
 
       Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId,
           rdf.createIRI(TD.hasOutputSchema), null));
+
       if (outSchemaId.isPresent()) {
-          Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
-          if (output.isPresent()) {
-            actionBuilder.addOutputSchema(output.get());
-          }
+        Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
+        if (output.isPresent()) {
+          actionBuilder.addOutputSchema(output.get());
+        }
       }
     } catch (InvalidTDException e) {
       throw new InvalidTDException("Invalid action definition.", e);
@@ -285,23 +281,30 @@ public class TDGraphReader {
     return actionBuilder.build();
   }
 
+  private String readAffordanceName(Resource affordanceId) {
+    Literal affordanceName;
+
+    try {
+      affordanceName = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name),
+        null)).get();
+    } catch (NoSuchElementException e) {
+      throw new InvalidTDException("Missing mandatory affordance name.", e);
+    }
+
+    return affordanceName.stringValue();
+  }
+
   private void readAffordanceMetadata(InteractionAffordance
-      .Builder<?, ? extends InteractionAffordance.Builder<?,?>> builder, Resource affordanceId) {
+                                        .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
     /* Read semantic types */
     Set<IRI> types = Models.objectIRIs(model.filter(affordanceId, RDF.TYPE, null));
     builder.addSemanticTypes(types.stream().map(type -> type.stringValue())
-        .collect(Collectors.toList()));
-
-    /* Read name */
-    Optional<Literal> name = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name),
-        null));
-    if (name.isPresent()) {
-      builder.addName(name.get().stringValue());
-    }
+      .collect(Collectors.toList()));
 
     /* Read title */
     Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId,
-        rdf.createIRI(DCT.title), null));
+      rdf.createIRI(DCT.title), null));
+
     if (title.isPresent()) {
       builder.addTitle(title.get().stringValue());
     }
@@ -334,6 +337,7 @@ public class TDGraphReader {
 
       Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType),
           null));
+
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
 
       String target = targetOpt.get().stringValue();
@@ -355,7 +359,7 @@ public class TDGraphReader {
 
     if (forms.isEmpty()) {
       throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have "
-          + "at least one valid.");
+        + "at least one valid.");
     }
 
     return forms;
