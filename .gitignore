@@ -14,3 +14,18 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+# Gradle and Maven with auto-import
+*.iml
+*.ipr
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+.idea/
+
+# Californium
+Californium.properties

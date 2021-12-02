@@ -12,6 +12,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -27,6 +28,17 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 public class TDGraphReaderTest {
+
+  private static final String PREFIXES =
+    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+      "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+      "@prefix saref: <https://saref.etsi.org/core/> .\n" +
+      "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
   private static final String TEST_SIMPLE_TD =
     "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
@@ -332,11 +344,333 @@ public class TDGraphReaderTest {
 
     Optional<Form> form = property.getFirstFormForOperationType(TD.readProperty);
     assertTrue(form.isPresent());
-    assertEquals("websub", form.get().getSubProtocol().get());
+    assertEquals("websub", form.get().getSubprotocol().get());
   }
 
   @Test
-  public void testReadOnePropertyNoSchema() throws IOException {
+  public void testReadFormWithHttpAndCoapBindings() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <http://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "        ] ;\n" +
+        "        td:hasForm [\n" +
+        "            cov:methodName \"PUT\" ;\n" +
+        "            hctl:hasTarget <coap://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:writeProperty;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+    assertEquals(2, property.getForms().size());
+
+    Form formHTTP = property.getFirstFormForOperationType(TD.readProperty).get();
+    Form formCoAP = property.getFirstFormForOperationType(TD.writeProperty).get();
+
+    assertEquals("GET", formHTTP.getMethodName().get());
+    assertEquals("http://example.org/property", formHTTP.getTarget());
+
+    assertEquals("PUT", formCoAP.getMethodName().get());
+    assertEquals("coap://example.org/property", formCoAP.getTarget());
+  }
+
+  @Test
+  public void testReadReadPropertyDefaultMethodValues() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] , [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+
+    assertEquals(2, property.getForms().size());
+
+    List<Form> forms = property.getForms();
+    assertFalse(forms.get(0).getMethodName().isPresent());
+    assertFalse(forms.get(1).getMethodName().isPresent());
+
+    assertTrue(forms.get(0).getMethodName(TD.readProperty).isPresent());
+    assertTrue(forms.get(1).getMethodName(TD.readProperty).isPresent());
+
+    assertEquals("GET", forms.get(0).getMethodName(TD.readProperty).get());
+    assertEquals("GET", forms.get(1).getMethodName(TD.readProperty).get());
+
+    assertFalse(forms.get(0).getSubprotocol().isPresent());
+    assertFalse(forms.get(1).getSubprotocol().isPresent());
+
+    assertFalse(forms.get(0).getSubprotocol(TD.readProperty).isPresent());
+    assertFalse(forms.get(1).getSubprotocol(TD.readProperty).isPresent());
+  }
+
+  @Test
+  public void testReadWritePropertyDefaultMethodValues() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] , [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+
+    assertEquals(2, property.getForms().size());
+
+    List<Form> forms = property.getForms();
+    assertFalse(forms.get(0).getMethodName().isPresent());
+    assertFalse(forms.get(1).getMethodName().isPresent());
+
+    assertTrue(forms.get(0).getMethodName(TD.writeProperty).isPresent());
+    assertTrue(forms.get(1).getMethodName(TD.writeProperty).isPresent());
+
+    assertEquals("PUT", forms.get(0).getMethodName(TD.writeProperty).get());
+    assertEquals("PUT", forms.get(1).getMethodName(TD.writeProperty).get());
+
+    assertFalse(forms.get(0).getSubprotocol().isPresent());
+    assertFalse(forms.get(1).getSubprotocol().isPresent());
+
+    assertFalse(forms.get(0).getSubprotocol(TD.writeProperty).isPresent());
+    assertFalse(forms.get(1).getSubprotocol(TD.writeProperty).isPresent());
+  }
+
+  @Test
+  public void testReadObservePropertyDefaultMethodValues() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:observeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+
+    assertEquals(1, property.getForms().size());
+
+    Optional<Form> form = property.getFirstFormForOperationType(TD.observeProperty);
+    assertTrue(form.isPresent());
+
+    assertFalse(form.get().getMethodName().isPresent());
+    assertTrue(form.get().getMethodName(TD.observeProperty).isPresent());
+    assertEquals("GET", form.get().getMethodName(TD.observeProperty).get());
+
+    assertFalse(form.get().getSubprotocol().isPresent());
+    assertTrue(form.get().getSubprotocol(TD.observeProperty).isPresent());
+    assertEquals(COV.observe, form.get().getSubprotocol(TD.observeProperty).get());
+  }
+
+  @Test
+  public void testReadUnobservePropertyDefaultMethodValues() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:unobserveProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+
+    assertEquals(1, property.getForms().size());
+
+    Optional<Form> form = property.getFirstFormForOperationType(TD.unobserveProperty);
+    assertTrue(form.isPresent());
+
+    assertFalse(form.get().getMethodName().isPresent());
+    assertTrue(form.get().getMethodName(TD.unobserveProperty).isPresent());
+    assertEquals("GET", form.get().getMethodName(TD.unobserveProperty).get());
+
+    assertFalse(form.get().getSubprotocol().isPresent());
+    assertTrue(form.get().getSubprotocol(TD.unobserveProperty).isPresent());
+    assertEquals(COV.observe, form.get().getSubprotocol(TD.unobserveProperty).get());
+  }
+
+  @Test(expected = InvalidTDException.class)
+  public void testFormWithInvalidProtocolBinding() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <mqtt://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    new TDGraphReader(RDFFormat.TURTLE, testTD).readProperties();
+  }
+
+  @Test
+  public void testReadSubProtocolStringAndIRI() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable true ;\n" +
+        "        td:hasForm [\n" +
+        "            htv:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <http://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "            hctl:forSubProtocol \"websub\";\n" +
+        "        ] ;\n" +
+        "        td:hasForm [\n" +
+        "            cov:methodName \"GET\" ;\n" +
+        "            hctl:hasTarget <coap://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:observeProperty;\n" +
+        "            hctl:forSubProtocol cov:observe;\n" +
+        "        ] ;\n" +
+        "    ] .";
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    PropertyAffordance property = reader.readProperties().get(0);
+    Form formHTTP = property.getFirstFormForOperationType(TD.readProperty).get();
+    Form formCoAP = property.getFirstFormForOperationType(TD.observeProperty).get();
+
+    assertEquals(COV.observe, formCoAP.getSubprotocol().get());
+    assertEquals("websub", formHTTP.getSubprotocol().get());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testReadSubProtocolUnknownOperationType() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<PropertyAffordance> properties = reader.readProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance property = properties.get(0);
+
+    Optional<Form> form = property.getFirstFormForOperationType(TD.writeProperty);
+    assertTrue(form.isPresent());
+
+    form.get().getSubprotocol(TD.observeProperty);
+  }
+
+  @Test
+  public void testReadOnePropertyNoSchema() {
     String testTD =
         "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
@@ -669,5 +1003,4 @@ public class TDGraphReaderTest {
     assertEquals(contentType, form.getContentType());
     assertTrue(form.hasOperationType(operationType));
   }
-
 }

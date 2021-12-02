@@ -7,16 +7,19 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +28,9 @@ import java.util.Optional;
  * used in the serialization.
  */
 public class TDGraphWriter {
+  private static final String[] HTTP_URI_SCHEMES = new String[]{"http:", "https:"};
+  private static final String[] COAP_URI_SCHEMES = new String[]{"coap:", "coaps:"};
+
   private final Resource thingId;
   private final ThingDescription td;
   private final ModelBuilder graphBuilder;
@@ -186,7 +192,11 @@ public class TDGraphWriter {
 
       // Only writes the method name for forms with one operation type (to avoid ambiguity)
       if (form.getMethodName().isPresent() && form.getOperationTypes().size() == 1) {
-        graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
+        if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
+          graphBuilder.add(formId, rdf.createIRI(HTV.methodName), form.getMethodName().get());
+        } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(form.getTarget()::contains)) {
+          graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName().get());
+        }
       }
       graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
       graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
@@ -200,9 +210,14 @@ public class TDGraphWriter {
         }
       }
 
-      Optional<String> subprotocol = form.getSubProtocol();
-      if (subprotocol.isPresent()) {
-        graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subprotocol.get());
+      Optional<String> subProtocol = form.getSubprotocol();
+      if (subProtocol.isPresent()) {
+        try {
+          IRI subProtocolIri = rdf.createIRI(subProtocol.get());
+          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocolIri);
+        } catch (IllegalArgumentException e) {
+          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocol.get());
+        }
       }
     }
   }

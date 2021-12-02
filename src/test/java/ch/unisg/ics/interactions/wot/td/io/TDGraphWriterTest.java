@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
@@ -42,6 +44,7 @@ public class TDGraphWriterTest {
   private static final String PREFIXES =
     "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+      "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
@@ -178,7 +181,6 @@ public class TDGraphWriterTest {
         "        ] ;\n" +
         "    ] ." ;
 
-
     PropertyAffordance property = new PropertyAffordance.Builder("my_property",
             new Form.Builder("http://example.org/count").build())
         .addDataSchema(new IntegerSchema.Builder().build())
@@ -231,35 +233,154 @@ public class TDGraphWriterTest {
   }
 
   @Test
+  public void testWriteOnePropertyOneOperationTypeNoMethod() throws RDFParseException, RDFHandlerException,
+      IOException {
+
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    PropertyAffordance property = new PropertyAffordance.Builder("my_property",
+      new Form.Builder("http://example.org/count")
+        .addOperationType(TD.writeProperty)
+        .build())
+      .addSemanticType("http://iotschema.org/MyProperty")
+      .addDataSchema(new IntegerSchema.Builder().build())
+      .addObserve()
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addProperty(property)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
   public void testWritePropertySubprotocol() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        td:isObservable true ;\n" +
-        "        td:hasForm [\n" +
-        "            hctl:hasTarget <http://example.org/count> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
-        "            hctl:forSubProtocol \"websub\";\n" +
-        "        ] ;\n" +
-        "    ] ." ;
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
+      "            hctl:forSubProtocol \"websub\";\n" +
+      "        ] ;\n" +
+      "    ] ." ;
 
     PropertyAffordance property = new PropertyAffordance.Builder("my_property",
-            new Form.Builder("http://example.org/count")
-                .addSubProtocol("websub")
-                .build())
-        .addDataSchema(new IntegerSchema.Builder().build())
-        .addObserve()
-        .build();
+      new Form.Builder("http://example.org/count")
+        .addSubProtocol("websub")
+        .build())
+      .addDataSchema(new IntegerSchema.Builder().build())
+      .addObserve()
+      .build();
 
     ThingDescription td = constructThingDescription(new ArrayList<>(Collections.singletonList(property)),
       new ArrayList<>(Collections.emptyList()));
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWritePropertySubprotocolIRI() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            cov:methodName \"GET\" ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:observeProperty;\n" +
+      "            hctl:forSubProtocol cov:observe;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+
+    PropertyAffordance property = new PropertyAffordance.Builder("my_property",
+      new Form.Builder("coap://example.org/count")
+        .addSubProtocol(COV.observe)
+        .setMethodName("GET")
+        .addOperationType(TD.observeProperty)
+        .build())
+      .addDataSchema(new IntegerSchema.Builder().build())
+      .addObserve()
+      .build();
+
+    ThingDescription td = constructThingDescription(new ArrayList<>(Collections.singletonList(property)),
+      new ArrayList<>(Collections.emptyList()));
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteActionDefaultMethodValues() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance, iot:MyAction ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"POST\";\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ,[\n" +
+      "            cov:methodName \"POST\";\n" +
+      "            hctl:hasTarget <coap://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    Form httpForm = new Form.Builder("http://example.org/count")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Form coapForm = new Form.Builder("coap://example.org/count")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    ActionAffordance action = new ActionAffordance.Builder("my_action", Arrays.asList(httpForm, coapForm))
+      .addSemanticType("http://iotschema.org/MyAction")
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addAction(action)
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
@@ -413,19 +534,19 @@ public class TDGraphWriterTest {
   }
 
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,
-      RDFHandlerException, IOException {
-    Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD,
-        IO_BASE_IRI);
+    RDFHandlerException, IOException {
+    Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, IO_BASE_IRI);
 
     String description = new TDGraphWriter(td)
-        .setNamespace("td", "https://www.w3.org/2019/wot/td#")
-        .setNamespace("htv", "http://www.w3.org/2011/http#")
-        .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
-        .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
-        .setNamespace("dct", "http://purl.org/dc/terms/")
-        .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
-        .setNamespace("saref", "https://saref.etsi.org/core/")
-        .write();
+      .setNamespace("td", "https://www.w3.org/2019/wot/td#")
+      .setNamespace("htv", "http://www.w3.org/2011/http#")
+      .setNamespace("cov", "http://www.example.org/coap-binding#")
+      .setNamespace("hctl", "https://www.w3.org/2019/wot/hypermedia#")
+      .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
+      .setNamespace("dct", "http://purl.org/dc/terms/")
+      .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+      .setNamespace("saref", "https://saref.etsi.org/core/")
+      .write();
 
     System.out.println(description);
 

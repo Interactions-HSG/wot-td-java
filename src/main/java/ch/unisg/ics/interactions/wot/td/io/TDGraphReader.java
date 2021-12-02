@@ -8,11 +8,14 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+
 import org.apache.hc.client5.http.fluent.Request;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -34,6 +37,9 @@ import java.util.stream.Collectors;
  * method.
  */
 public class TDGraphReader {
+  private static final String[] HTTP_URI_SCHEMES = new String[]{"http", "https"};
+  private static final String[] COAP_URI_SCHEMES = new String[]{"coap", "coaps"};
+
   private final Resource thingId;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
   private Model model;
@@ -108,14 +114,10 @@ public class TDGraphReader {
     RDFParser parser = Rio.createParser(format);
     parser.setRDFHandler(new StatementCollector(model));
 
-    StringReader stringReader = new StringReader(representation);
-
-    try {
+    try (StringReader stringReader = new StringReader(representation)) {
       parser.parse(stringReader, baseURI);
     } catch (RDFParseException | RDFHandlerException | IOException e) {
       throw new InvalidTDException("RDF Syntax Error", e);
-    } finally {
-      stringReader.close();
     }
   }
 
@@ -165,7 +167,7 @@ public class TDGraphReader {
     Set<Resource> nodeIds = Models.objectResources(model.filter(thingId,
         rdf.createIRI(TD.hasSecurityConfiguration), null));
 
-    List<SecurityScheme> schemes = new ArrayList<SecurityScheme>();
+    List<SecurityScheme> schemes = new ArrayList<>();
 
     for (Resource node : nodeIds) {
       Optional<IRI> securityScheme = Models.objectIRI(model.filter(node, RDF.TYPE, null));
@@ -184,7 +186,7 @@ public class TDGraphReader {
   }
 
   List<PropertyAffordance> readProperties() {
-    List<PropertyAffordance> properties = new ArrayList<PropertyAffordance>();
+    List<PropertyAffordance> properties = new ArrayList<>();
 
     Set<Resource> propertyIds = Models.objectResources(model.filter(thingId,
         rdf.createIRI(TD.hasPropertyAffordance), null));
@@ -222,7 +224,7 @@ public class TDGraphReader {
   }
 
   List<ActionAffordance> readActions() {
-    List<ActionAffordance> actions = new ArrayList<ActionAffordance>();
+    List<ActionAffordance> actions = new ArrayList<>();
 
     Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId,
         rdf.createIRI(TD.hasActionAffordance), null));
@@ -311,7 +313,7 @@ public class TDGraphReader {
   }
 
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
-    List<Form> forms = new ArrayList<Form>();
+    List<Form> forms = new ArrayList<>();
 
     Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId,
         rdf.createIRI(TD.hasForm), null));
@@ -324,19 +326,28 @@ public class TDGraphReader {
         continue;
       }
 
-      Optional<Literal> methodNameOpt = Models.objectLiteral(model.filter(formId,
+      Optional<Literal> methodNameOpt = Optional.empty();
+      if (Arrays.stream(HTTP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
+        methodNameOpt = Models.objectLiteral(model.filter(formId,
           rdf.createIRI(HTV.methodName), null));
+      } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
+        methodNameOpt = Models.objectLiteral(model.filter(formId,
+          rdf.createIRI(COV.methodName), null));
+      } else {
+        throw new InvalidTDException("[" + affordanceType + "] Invalid or unsupported protocol "
+          + "binding for the URI scheme of href member.");
+      }
 
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId,
-          rdf.createIRI(HCTL.forContentType), null));
+        rdf.createIRI(HCTL.forContentType), null));
       String contentType = contentTypeOpt.isPresent() ? contentTypeOpt.get().stringValue()
-          : "application/json";
+        : "application/json";
 
-      Optional<Literal> subprotocolOpt = Models.objectLiteral(model.filter(formId,
-          rdf.createIRI(HCTL.forSubProtocol), null));
+      Optional<String> subprotocolOpt = Models.objectString(model.filter(formId,
+        rdf.createIRI(HCTL.forSubProtocol), null));
 
       Set<IRI> opsIRIs = Models.objectIRIs(model.filter(formId, rdf.createIRI(HCTL.hasOperationType),
-          null));
+        null));
 
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
 
@@ -351,7 +362,7 @@ public class TDGraphReader {
       }
 
       if (subprotocolOpt.isPresent()) {
-        builder.addSubProtocol(subprotocolOpt.get().stringValue());
+        builder.addSubProtocol(subprotocolOpt.get());
       }
 
       forms.add(builder.build());
