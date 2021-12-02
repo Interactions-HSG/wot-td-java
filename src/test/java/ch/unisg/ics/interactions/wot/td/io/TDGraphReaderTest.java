@@ -87,94 +87,94 @@ public class TDGraphReaderTest {
       "            ] ;\n" +
       "            js:required \"boolean_value\" ;\n" +
       "        ]\n" +
-      "    ] .";
+      "    ] ." ;
 
   private static final String TEST_SIMPLE_TD_JSONLD = "[ {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx111\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/security#NoSecurityScheme\" ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx112\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#ActionAffordance\" ],\n" +
-    "  \"http://purl.org/dc/terms/title\" : [ {\n" +
-    "    \"@value\" : \"My Action\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/td#hasForm\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx113\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/td#hasInputSchema\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx114\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/td#hasOutputSchema\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx116\"\n" +
-    "  } ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx113\",\n" +
-    "  \"http://www.w3.org/2011/http#methodName\" : [ {\n" +
-    "    \"@value\" : \"PUT\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/hypermedia#forContentType\" : [ {\n" +
-    "    \"@value\" : \"application/json\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/hypermedia#hasOperationType\" : [ {\n" +
-    "    \"@id\" : \"https://www.w3.org/2019/wot/td#invokeAction\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/hypermedia#hasTarget\" : [ {\n" +
-    "    \"@id\" : \"http://example.org/action\"\n" +
-    "  } ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx114\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx115\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
-    "    \"@value\" : \"number_value\"\n" +
-    "  } ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx115\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#NumberSchema\" ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#maximum\" : [ {\n" +
-    "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
-    "    \"@value\" : \"100.05\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#minimum\" : [ {\n" +
-    "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
-    "    \"@value\" : \"-100.05\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
-    "    \"@value\" : \"number_value\"\n" +
-    "  } ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx116\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx117\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
-    "    \"@value\" : \"boolean_value\"\n" +
-    "  } ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"_:node1ea75dfphx117\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#BooleanSchema\" ],\n" +
-    "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
-    "    \"@value\" : \"boolean_value\"\n" +
-    "  } ]\n" +
-    "}, {\n" +
-    "  \"@id\" : \"http://example.org/#thing\",\n" +
-    "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#Thing\" ],\n" +
-    "  \"http://purl.org/dc/terms/title\" : [ {\n" +
-    "    \"@value\" : \"My Thing\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx112\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" +
-    "    \"@id\" : \"http://example.org/\"\n" +
-    "  } ],\n" +
-    "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" +
-    "    \"@id\" : \"_:node1ea75dfphx111\"\n" +
-    "  } ]\n" +
-    "} ]";
+      "  \"@id\" : \"_:node1ea75dfphx111\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/security#NoSecurityScheme\" ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"_:node1ea75dfphx112\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#ActionAffordance\" ],\n" +
+      "  \"http://purl.org/dc/terms/title\" : [ {\n" +
+      "    \"@value\" : \"My Action\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/td#hasForm\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx113\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/td#hasInputSchema\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx114\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/td#hasOutputSchema\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx116\"\n" +
+      "  } ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"_:node1ea75dfphx113\",\n" +
+      "  \"http://www.w3.org/2011/http#methodName\" : [ {\n" +
+      "    \"@value\" : \"PUT\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/hypermedia#forContentType\" : [ {\n" +
+      "    \"@value\" : \"application/json\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/hypermedia#hasOperationType\" : [ {\n" +
+      "    \"@id\" : \"https://www.w3.org/2019/wot/td#invokeAction\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/hypermedia#hasTarget\" : [ {\n" +
+      "    \"@id\" : \"http://example.org/action\"\n" +
+      "  } ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"_:node1ea75dfphx114\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx115\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
+      "    \"@value\" : \"number_value\"\n" +
+      "  } ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"_:node1ea75dfphx115\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#NumberSchema\" ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#maximum\" : [ {\n" +
+      "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
+      "    \"@value\" : \"100.05\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#minimum\" : [ {\n" +
+      "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
+      "    \"@value\" : \"-100.05\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
+      "    \"@value\" : \"number_value\"\n" +
+      "  } ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"_:node1ea75dfphx116\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx117\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
+      "    \"@value\" : \"boolean_value\"\n" +
+      "  } ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"_:node1ea75dfphx117\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#BooleanSchema\" ],\n" +
+      "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
+      "    \"@value\" : \"boolean_value\"\n" +
+      "  } ]\n" +
+      "}, {\n" +
+      "  \"@id\" : \"http://example.org/#thing\",\n" +
+      "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#Thing\" ],\n" +
+      "  \"http://purl.org/dc/terms/title\" : [ {\n" +
+      "    \"@value\" : \"My Thing\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx112\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" +
+      "    \"@id\" : \"http://example.org/\"\n" +
+      "  } ],\n" +
+      "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" +
+      "    \"@id\" : \"_:node1ea75dfphx111\"\n" +
+      "  } ]\n" +
+      "} ]";
 
   private static final String TEST_IO_HEAD =
     "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
@@ -230,7 +230,7 @@ public class TDGraphReaderTest {
     assertEquals(1, reader.readSecuritySchemes().size());
 
     assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme ->
-      scheme.getSchemeType().equals(WoTSec.NoSecurityScheme)));
+        scheme.getSchemeType().equals(WoTSec.NoSecurityScheme)));
   }
 
   @Test
@@ -336,6 +336,41 @@ public class TDGraphReaderTest {
   }
 
   @Test
+  public void testReadOnePropertyNoSchema() throws IOException {
+    String testTD =
+        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:isObservable false ;\n" +
+        "        td:hasForm [\n" +
+        "            hctl:hasTarget <http://example.org/count> ;\n" +
+        "            hctl:forContentType \"video/mpeg\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "        ] ;\n" +
+        "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readProperties().size());
+
+    PropertyAffordance property = reader.readProperties().get(0);
+
+    DataSchema schema = property.getDataSchema();
+    assertEquals(DataSchema.EMPTY, schema.getDatatype());
+    assertTrue(schema.getSemanticTypes().isEmpty());
+    assertTrue(schema.getEnumeration().isEmpty());
+  }
+
+  @Test
   public void testReadOneSimpleAction() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
 
@@ -406,7 +441,7 @@ public class TDGraphReaderTest {
     assertEquals(3, reader.readActions().size());
 
     List<String> actionTitles = reader.readActions().stream().map(action -> action.getTitle().get())
-      .collect(Collectors.toList());
+        .collect(Collectors.toList());
 
     assertTrue(actionTitles.contains("First Action"));
     assertTrue(actionTitles.contains("Second Action"));
@@ -416,7 +451,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadOneActionOneObjectInput() {
     String testSimpleObject =
-      "        td:hasInputSchema [\n" +
+        "        td:hasInputSchema [\n" +
         "            a js:ObjectSchema ;\n" +
         "            js:properties [\n" +
         "                a js:BooleanSchema ;\n" +
@@ -446,7 +481,7 @@ public class TDGraphReaderTest {
         "        ]\n";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_IO_HEAD + testSimpleObject
-      + TEST_IO_TAIL);
+        + TEST_IO_TAIL);
 
     ActionAffordance action = reader.readActions().get(0);
 

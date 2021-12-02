@@ -17,13 +17,14 @@ public class PropertyAffordanceTest {
   public void init() {
     DataSchema schema = new NumberSchema.Builder().build();
     Form form = new Form.Builder("http://example.org/action1")
-      .build();
+        .build();
 
-    testProperty = new PropertyAffordance.Builder("my_property", schema, form)
-      .addTitle("My Property")
-      .addSemanticType("sem_type")
-      .addObserve()
-      .build();
+    testProperty = new PropertyAffordance.Builder("my_property", form)
+        .addTitle("My Property")
+        .addDataSchema(schema)
+        .addSemanticType("sem_type")
+        .addObserve()
+        .build();
   }
 
   @Test
