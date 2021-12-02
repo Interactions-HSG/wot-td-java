@@ -52,6 +52,7 @@ public class TDCoapRequestTest {
     "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
     "    td:hasPropertyAffordance [\n" +
     "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
+    "        td:name \"status\" ;\n" +
     "        td:hasForm [\n" +
     "            hctl:hasTarget <coap://example.org/forkliftRobot/busy> ; \n" +
     "            cov:methodName \"PUT\" ; \n" +
@@ -60,6 +61,7 @@ public class TDCoapRequestTest {
     "    ] ;\n" +
     "    td:hasActionAffordance [\n" +
     "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
+    "        td:name \"carry\" ;\n" +
     "        dct:title \"carry\" ; \n" +
     "        td:hasForm [\n" +
     "            hctl:hasTarget <coap://example.org/forkliftRobot/carry> ; \n" +

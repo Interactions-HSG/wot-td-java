@@ -5,35 +5,35 @@
 @prefix wotsec: <https://www.w3.org/2019/wot/security#> .
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
 
-<http://example.org/#thing> a td:Thing ; 
+<http://example.org/#thing> a td:Thing ;
     dct:title "My Thing" ;
     td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;
-    td:hasBase <http://example.org/> ; 
-    td:hasActionAffordance [ 
-        a td:ActionAffordance ; 
-        dct:title "My Action" ; 
-        td:hasForm [ 
-            htv:methodName "PUT" ; 
-            hctl:hasTarget <http://example.org/action> ; 
-            hctl:forContentType "application/json"; 
-            hctl:hasOperationType td:invokeAction; 
-        ] ; 
-        td:hasInputSchema [ 
-            a js:ObjectSchema ; 
-            js:properties [ 
+    td:hasBase <http://example.org/> ;
+    td:hasActionAffordance [
+        a td:ActionAffordance ;
+        td:name "My Action" ;
+        td:hasForm [
+            htv:methodName "PUT" ;
+            hctl:hasTarget <http://example.org/action> ;
+            hctl:forContentType "application/json";
+            hctl:hasOperationType td:invokeAction;
+        ] ;
+        td:hasInputSchema [
+            a js:ObjectSchema ;
+            js:properties [
                 a js:NumberSchema ;
                 js:propertyName "number_value";
-                js:maximum 100.05 ; 
+                js:maximum 100.05 ;
                 js:minimum -100.05 ;
             ] ;
             js:required "number_value" ;
-        ] ; 
-        td:hasOutputSchema [ 
-            a js:ObjectSchema ; 
-            js:properties [ 
+        ] ;
+        td:hasOutputSchema [
+            a js:ObjectSchema ;
+            js:properties [
                 a js:BooleanSchema ;
                 js:propertyName "boolean_value";
             ] ;
             js:required "boolean_value" ;
-        ] 
+        ]
     ] .

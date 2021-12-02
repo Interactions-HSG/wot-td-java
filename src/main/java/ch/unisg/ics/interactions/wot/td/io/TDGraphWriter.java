@@ -7,7 +7,12 @@ import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.vocabularies.*;
+import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
+import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
+import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
+import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
@@ -164,14 +169,10 @@ public class TDGraphWriter {
 
     graphBuilder.add(thingId, rdf.createIRI(affordanceProp), affordanceId);
     graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(affordanceClass));
+    graphBuilder.add(affordanceId, rdf.createIRI(TD.name), rdf.createLiteral(affordance.getName()));
 
     for (String type : affordance.getSemanticTypes()) {
       graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(type));
-    }
-
-    if (affordance.getName().isPresent()) {
-      graphBuilder.add(affordanceId, rdf.createIRI(TD.name),
-        rdf.createLiteral(affordance.getName().get()));
     }
 
     if (affordance.getTitle().isPresent()) {
@@ -209,13 +210,13 @@ public class TDGraphWriter {
         }
       }
 
-      Optional<String> subProt = form.getSubprotocol();
-      if (subProt.isPresent()) {
+      Optional<String> subProtocol = form.getSubprotocol();
+      if (subProtocol.isPresent()) {
         try {
-          IRI subProtIri = rdf.createIRI(subProt.get());
-          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtIri);
+          IRI subProtocolIri = rdf.createIRI(subProtocol.get());
+          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocolIri);
         } catch (IllegalArgumentException e) {
-          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProt.get());
+          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocol.get());
         }
       }
     }
