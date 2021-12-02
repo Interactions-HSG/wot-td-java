@@ -36,7 +36,11 @@ public class TDCoapResponse {
     }
   }
 
-  public String getResponseCode() {
+  public int getResponseCode() {
+    return response.getRawCode();
+  }
+
+  public String getResponseCodeName() {
     return response.getCode().name();
   }
 
