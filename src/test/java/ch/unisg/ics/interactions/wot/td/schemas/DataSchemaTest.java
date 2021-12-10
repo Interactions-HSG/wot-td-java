@@ -225,7 +225,6 @@ public class DataSchemaTest {
 
     Map<String, Object> userGroupPayload = userGroupSchema.instantiate(userGroup);
 
-    System.out.println(userGroupPayload);
     assertTrue(userGroupPayload.containsKey("count"));
     assertTrue(userGroupPayload.containsKey("admin"));
 
