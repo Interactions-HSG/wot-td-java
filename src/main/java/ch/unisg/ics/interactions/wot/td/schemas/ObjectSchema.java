@@ -72,11 +72,13 @@ public class ObjectSchema extends DataSchema {
     for (String tag : values.keySet()) {
       Optional<String> propertyName = getFirstPropertyNameBySemnaticType(tag);
       Optional<String> name = Optional.empty();
+
       if (propertyName.isPresent()) {
         name = propertyName;
       } else if (properties.containsKey(tag)) {
         name = Optional.of(tag);
       }
+
       if (name.isPresent()) {
         Optional<DataSchema> property = getProperty(name.get());
         if (property.isPresent() && property.get().getDatatype().equals(DataSchema.OBJECT)
