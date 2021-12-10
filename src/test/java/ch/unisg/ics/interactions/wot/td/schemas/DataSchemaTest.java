@@ -1,22 +1,37 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.HashSet;
-
+import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class DataSchemaTest {
 
   private final ObjectSchema userSchema = new ObjectSchema.Builder()
-      .addProperty("id", new IntegerSchema.Builder().build())
-      .addProperty("full_name", new StringSchema.Builder().build())
-      .addRequiredProperties("id")
-      .build();
+    .addSemanticType("http://example.com#User")
+    .addProperty("id", new IntegerSchema.Builder()
+      .addSemanticType("http://example.com#Id")
+      .build())
+    .addProperty("full_name", new StringSchema.Builder()
+      .addSemanticType("http://example.com#FullName")
+      .build())
+    .addRequiredProperties("id")
+    .build();
+
+  private final ObjectSchema userGroupSchema = new ObjectSchema.Builder()
+    .addSemanticType("http://example.com#UserGroup")
+    .addProperty("count", new IntegerSchema.Builder()
+      .addSemanticType("http://example.com#Count")
+      .addMinimum(0)
+      .addMaximum(100)
+      .build())
+    .addProperty("admin", userSchema)
+    .build();
 
   @Test
   public void testEmptySchema() {
@@ -44,10 +59,10 @@ public class DataSchemaTest {
     assertEquals("string", stringSchema.getDatatype());
 
     DataSchema semanticString = new StringSchema.Builder()
-        .addSemanticType("sem1")
-        .addSemanticType("sem2")
-        .addSemanticTypes(new HashSet<String>(Arrays.asList("sem3", "sem4")))
-        .build();
+      .addSemanticType("sem1")
+      .addSemanticType("sem2")
+      .addSemanticTypes(new HashSet<String>(Arrays.asList("sem3", "sem4")))
+      .build();
 
     assertEquals("string", semanticString.getDatatype());
     assertTrue(semanticString.getSemanticTypes().contains("sem1"));
@@ -62,10 +77,10 @@ public class DataSchemaTest {
     assertEquals("boolean", booleanSchema.getDatatype());
 
     DataSchema semanticBoolean = new BooleanSchema.Builder()
-        .addSemanticType("sem1")
-        .addSemanticType("sem2")
-        .addSemanticTypes(new HashSet<String>(Arrays.asList("sem3", "sem4")))
-        .build();
+      .addSemanticType("sem1")
+      .addSemanticType("sem2")
+      .addSemanticTypes(new HashSet<String>(Arrays.asList("sem3", "sem4")))
+      .build();
 
     assertEquals("boolean", semanticBoolean.getDatatype());
     assertTrue(semanticBoolean.getSemanticTypes().contains("sem1"));
@@ -81,10 +96,10 @@ public class DataSchemaTest {
 
     // To be discussed: does it make sense to have semantic tags for null schemas?
     DataSchema semanticNull = new NullSchema.Builder()
-        .addSemanticType("sem1")
-        .addSemanticType("sem2")
-        .addSemanticTypes(new HashSet<String>(Arrays.asList("sem3", "sem4")))
-        .build();
+      .addSemanticType("sem1")
+      .addSemanticType("sem2")
+      .addSemanticTypes(new HashSet<String>(Arrays.asList("sem3", "sem4")))
+      .build();
     assertEquals("null", semanticNull.getDatatype());
 
     assertTrue(semanticNull.getSemanticTypes().contains("sem1"));
@@ -96,9 +111,9 @@ public class DataSchemaTest {
   @Test
   public void testIntegerSchema() {
     IntegerSchema integerSchema = new IntegerSchema.Builder()
-        .addMinimum(-100)
-        .addMaximum(100)
-        .build();
+      .addMinimum(-100)
+      .addMaximum(100)
+      .build();
     assertEquals("integer", integerSchema.getDatatype());
     assertEquals(-100, integerSchema.getMinimum().get().longValue());
     assertEquals(100, integerSchema.getMaximum().get().longValue());
@@ -116,9 +131,9 @@ public class DataSchemaTest {
   @Test
   public void testNumberSchema() {
     NumberSchema numberSchema = new NumberSchema.Builder()
-        .addMinimum(-100.05)
-        .addMaximum(100.05)
-        .build();
+      .addMinimum(-100.05)
+      .addMaximum(100.05)
+      .build();
     assertEquals("number", numberSchema.getDatatype());
     assertEquals(-100.05, numberSchema.getMinimum().get().doubleValue(), 0.01);
     assertEquals(100.05, numberSchema.getMaximum().get().doubleValue(), 0.01);
@@ -136,15 +151,15 @@ public class DataSchemaTest {
   @Test
   public void testObjectSchema() {
     ObjectSchema schema = new ObjectSchema.Builder()
-        .addProperty("id", new IntegerSchema.Builder().build())
-        .addProperty("active", new BooleanSchema.Builder().build())
-        .addProperty("first_name", new StringSchema.Builder().build())
-        .addProperty("last_name", new StringSchema.Builder().build())
-        .addProperty("age", new IntegerSchema.Builder().addMaximum(18).addMaximum(150).build())
-        .addProperty("height", new NumberSchema.Builder().addMaximum(299.99).addMaximum(100.0).build())
-        .addProperty("connections", new NullSchema.Builder().build())
-        .addRequiredProperties("id", "active")
-        .build();
+      .addProperty("id", new IntegerSchema.Builder().build())
+      .addProperty("active", new BooleanSchema.Builder().build())
+      .addProperty("first_name", new StringSchema.Builder().build())
+      .addProperty("last_name", new StringSchema.Builder().build())
+      .addProperty("age", new IntegerSchema.Builder().addMaximum(18).addMaximum(150).build())
+      .addProperty("height", new NumberSchema.Builder().addMaximum(299.99).addMaximum(100.0).build())
+      .addProperty("connections", new NullSchema.Builder().build())
+      .addRequiredProperties("id", "active")
+      .build();
 
     assertEquals(7, schema.getProperties().size());
     assertTrue(schema.getProperties().containsKey("id"));
@@ -171,34 +186,84 @@ public class DataSchemaTest {
   @Test(expected = InvalidTDException.class)
   public void testObjectSchemaMissingRequired() {
     new ObjectSchema.Builder()
-        .addProperty("full_name", new StringSchema.Builder().build())
-        .addRequiredProperties("id")
-        .build();
+      .addProperty("full_name", new StringSchema.Builder().build())
+      .addRequiredProperties("id")
+      .build();
   }
 
   @Test
   public void testSchemaNestedObjects() {
-    ObjectSchema userGroup = new ObjectSchema.Builder()
-        .addProperty("count", new IntegerSchema.Builder().addMinimum(0).addMaximum(100).build())
-        .addProperty("admin", userSchema)
-        .build();
+    assertEquals(2, userGroupSchema.getProperties().size());
+    assertEquals(userSchema, userGroupSchema.getProperty("admin").get());
+  }
 
-    assertEquals(2, userGroup.getProperties().size());
-    assertEquals(userSchema, userGroup.getProperty("admin").get());
+  @Test
+  public void testInstantiateObjectWithMismatchingProperties() {
+    HashMap<String, Object> user = new HashMap<>();
+    user.put("http://example.com#Id", 42);
+    user.put("http://example.com#WrongType", "Douglas Adams");
+
+    Map<String, Object> userPayload = userSchema.instantiate(user);
+
+    assertTrue(userPayload.containsKey("id"));
+    assertFalse(userPayload.containsKey("full_name"));
+
+    assertEquals(42, userPayload.get("id"));
+  }
+
+  @Test
+  public void testInstantiateObjectByType() {
+    HashMap<String, Object> user = new HashMap<>();
+    user.put("http://example.com#Id", 42);
+    user.put("http://example.com#FullName", "Douglas Adams");
+
+    Map<String, Object> userPayload = userSchema.instantiate(user);
+
+    assertTrue(userPayload.containsKey("id"));
+    assertTrue(userPayload.containsKey("full_name"));
+
+    assertEquals(42, userPayload.get("id"));
+    assertEquals("Douglas Adams", userPayload.get("full_name"));
+  }
+
+  @Test
+  public void testInstantiateNestedObjectsByType() {
+    HashMap<String, Object> user = new HashMap<>();
+    user.put("http://example.com#Id", 42);
+    user.put("http://example.com#FullName", "Douglas Adams");
+
+    HashMap<String, Object> userGroup = new HashMap<>();
+    userGroup.put("http://example.com#Count", 2);
+    userGroup.put("http://example.com#User", user);
+
+    Map<String, Object> userGroupPayload = userGroupSchema.instantiate(userGroup);
+
+    assertTrue(userGroupPayload.containsKey("count"));
+    assertTrue(userGroupPayload.containsKey("admin"));
+
+    assertEquals(2, userGroupPayload.get("count"));
+
+    assertTrue(userGroupPayload.get("admin") instanceof Map);
+    Map userPayload = (Map) userGroupPayload.get("admin");
+    assertTrue(userPayload.containsKey("id"));
+    assertTrue(userPayload.containsKey("full_name"));
+
+    assertEquals(42, userPayload.get("id"));
+    assertEquals("Douglas Adams", userPayload.get("full_name"));
   }
 
   @Test
   public void testArraySchema() {
     IntegerSchema itemSchema = new IntegerSchema.Builder()
-        .addMinimum(-100)
-        .addMaximum(100)
-        .build();
+      .addMinimum(-100)
+      .addMaximum(100)
+      .build();
 
     ArraySchema array = new ArraySchema.Builder()
-        .addItem(itemSchema)
-        .addMinItems(5)
-        .addMaxItems(1000)
-        .build();
+      .addItem(itemSchema)
+      .addMinItems(5)
+      .addMaxItems(1000)
+      .build();
 
     assertEquals(1, array.getItems().size());
     assertEquals(5, array.getMinItems().get().longValue());
@@ -215,12 +280,12 @@ public class DataSchemaTest {
     DataSchema nullSchema = new NullSchema.Builder().build();
 
     ArraySchema array = new ArraySchema.Builder()
-        .addItem(integerSchema)
-        .addItem(numberSchema)
-        .addItem(stringSchema)
-        .addItem(booleanSchema)
-        .addItem(nullSchema)
-        .build();
+      .addItem(integerSchema)
+      .addItem(numberSchema)
+      .addItem(stringSchema)
+      .addItem(booleanSchema)
+      .addItem(nullSchema)
+      .build();
 
     assertEquals(5, array.getItems().size());
     assertEquals(integerSchema, array.getItems().get(0));
@@ -233,29 +298,32 @@ public class DataSchemaTest {
   @Test(expected = IllegalArgumentException.class)
   public void testArraySchemaNegativeMinItem() {
     new ArraySchema.Builder()
-        .addItem(new IntegerSchema.Builder().build())
-        .addMinItems(-10)
-        .build();
+      .addItem(new IntegerSchema.Builder().build())
+      .addMinItems(-10)
+      .build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testArraySchemaNegativeMaxItem() {
     new ArraySchema.Builder()
-        .addItem(new IntegerSchema.Builder().build())
-        .addMaxItems(-10)
-        .build();
+      .addItem(new IntegerSchema.Builder().build())
+      .addMaxItems(-10)
+      .build();
   }
 
   @Test
   public void testSchemaArrayOfObjects() {
     ArraySchema userArray = new ArraySchema.Builder()
-        .addItem(userSchema)
-        .build();
+      .addItem(userSchema)
+      .build();
 
     ObjectSchema userGroup = new ObjectSchema.Builder()
-        .addProperty("count", new IntegerSchema.Builder().addMinimum(0).addMaximum(100).build())
-        .addProperty("users", userArray)
-        .build();
+      .addProperty("count", new IntegerSchema.Builder()
+        .addMinimum(0)
+        .addMaximum(100)
+        .build())
+      .addProperty("users", userArray)
+      .build();
 
     assertEquals(2, userGroup.getProperties().size());
     assertEquals(DataSchema.INTEGER, userGroup.getProperty("count").get().getDatatype());
