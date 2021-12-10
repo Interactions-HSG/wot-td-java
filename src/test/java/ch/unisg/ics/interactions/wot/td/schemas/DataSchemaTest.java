@@ -8,8 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DataSchemaTest {
 
@@ -196,6 +195,20 @@ public class DataSchemaTest {
   public void testSchemaNestedObjects() {
     assertEquals(2, userGroupSchema.getProperties().size());
     assertEquals(userSchema, userGroupSchema.getProperty("admin").get());
+  }
+
+  @Test
+  public void testInstantiateObjectWithMismatchingProperties() {
+    HashMap<String, Object> user = new HashMap<>();
+    user.put("http://example.com#Id", 42);
+    user.put("http://example.com#WrongType", "Douglas Adams");
+
+    Map<String, Object> userPayload = userSchema.instantiate(user);
+
+    assertTrue(userPayload.containsKey("id"));
+    assertFalse(userPayload.containsKey("full_name"));
+
+    assertEquals(42, userPayload.get("id"));
   }
 
   @Test
