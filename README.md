@@ -253,7 +253,7 @@ If the security scheme is found, we can use it to set the security token:
 
 ```java
 if (securityScheme.isPresent()) {
-  request.setAPIKey(securityScheme.get(), token);
+  request.setAPIKey((APIKeySecurityScheme) securityScheme.get(), token);
 }
 ```
 
