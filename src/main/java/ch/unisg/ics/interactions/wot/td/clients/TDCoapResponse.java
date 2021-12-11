@@ -7,8 +7,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.coap.Option;
+import org.eclipse.californium.core.coap.OptionNumberRegistry;
 import org.eclipse.californium.core.coap.Response;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +41,17 @@ public class TDCoapResponse {
 
   public int getResponseCode() {
     return response.getRawCode();
+  }
+
+  public Map<String, String> getOptions(){
+    Map<String, String> optionMap = new Hashtable<>();
+    List<Option> optionList = response.getOptions().asSortedList();
+    for (Option option: optionList){
+      String key = OptionNumberRegistry.toString(option.getNumber());
+      String value = option.getStringValue();
+      optionMap.put(key, value);
+    }
+    return optionMap;
   }
 
   public String getResponseCodeName() {

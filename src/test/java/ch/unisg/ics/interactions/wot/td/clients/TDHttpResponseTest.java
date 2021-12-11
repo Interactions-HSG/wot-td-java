@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
