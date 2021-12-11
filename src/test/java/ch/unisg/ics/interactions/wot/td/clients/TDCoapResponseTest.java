@@ -1,9 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.clients;
 
 import ch.unisg.ics.interactions.wot.td.schemas.*;
+import org.eclipse.californium.core.coap.Option;
+import org.eclipse.californium.core.coap.OptionNumberRegistry;
+import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.Response;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -233,6 +237,28 @@ public class TDCoapResponseTest {
     response.setPayload("[1, 2, 3]");
 
     new TDCoapResponse(response).getPayloadAsArray(schema);
+  }
+
+
+  @Test
+  public void testResponseOptions() {
+    Response response = new Response(ResponseCode.VALID);
+    OptionSet optionSet = new OptionSet();
+    optionSet.addLocationPath("http://example.com");
+    response.setOptions(optionSet);
+
+    List<Option> optionList = response.getOptions().asSortedList();
+    Map <String, String> expectedOptions = new HashMap<>();
+    for (Option option : optionList) {
+      String key = OptionNumberRegistry.toString(option.getNumber());
+      String value = option.getStringValue();
+      expectedOptions.put(key, value);
+    }
+
+    TDCoapResponse testResponse = new TDCoapResponse(response);
+    Map <String, String> testOptions  = testResponse.getOptions();
+    assertTrue(testOptions.containsKey("Location-Path"));
+    assertEquals(testOptions.get("Location-Path"), "http://example.com");
   }
 
 }
