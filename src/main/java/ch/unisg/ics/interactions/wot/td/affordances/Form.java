@@ -9,16 +9,16 @@ public class Form {
   private final String target;
   private final String contentType;
   private final Set<String> operationTypes;
-  private final Optional<String> subprotocol;
+  private final Optional<String> subProtocol;
   private Optional<String> methodName;
 
   private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
-               Optional<String> subprotocol) {
+               Optional<String> subProtocol) {
     this.methodName = methodName;
     this.target = href;
     this.contentType = mediaType;
     this.operationTypes = operationTypes;
-    this.subprotocol = subprotocol;
+    this.subProtocol = subProtocol;
   }
 
   public Optional<String> getMethodName() {
@@ -58,28 +58,42 @@ public class Form {
     return operationTypes;
   }
 
-  public Optional<String> getSubprotocol() {
-    return subprotocol;
+  public Optional<String> getSubProtocol() {
+    return subProtocol;
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation
   // Reserved for event affordances of op subscribeevent
   /*
-  void addSubprotocol(String subprotocol) {
-    this.subprotocol = Optional.of(subprotocol);
+  void addSubProtocol(String subProtocol) {
+    this.subProtocol = Optional.of(subProtocol);
   }
   */
 
-  public Optional<String> getSubprotocol(String operationType) {
+  public boolean hasSubProtocol(String operationType, String subProtocol) {
+    Optional<String> targetSubProtocol = getSubProtocol(operationType);
+    return targetSubProtocol.isPresent() && subProtocol.equals(targetSubProtocol.get());
+  }
+
+  public Optional<String> getSubProtocol(String operationType) {
     if (!operationTypes.contains(operationType)) {
       throw new IllegalArgumentException("Unknown operation type: " + operationType);
     }
 
-    if (subprotocol.isPresent()) {
-      return subprotocol;
+    if (subProtocol.isPresent()) {
+      return subProtocol;
     }
 
-    return ProtocolBinding.getDefaultSubprotocol(target, operationType);
+    return ProtocolBinding.getDefaultSubProtocol(target, operationType);
+  }
+
+  public boolean hasProtocol(String protocol) {
+    Optional<String> targetProtocol = ProtocolBinding.getProtocol(target);
+    return targetProtocol.isPresent() && protocol.equals(targetProtocol.get());
+  }
+
+  public Optional<String> getProtocol() {
+    return ProtocolBinding.getProtocol(target);
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation
@@ -92,14 +106,14 @@ public class Form {
     private final Set<String> operationTypes;
     private Optional<String> methodName;
     private String contentType;
-    private Optional<String> subprotocol;
+    private Optional<String> subProtocol;
 
     public Builder(String target) {
       this.target = target;
       this.methodName = Optional.empty();
       this.contentType = "application/json";
       this.operationTypes = new HashSet<String>();
-      this.subprotocol = Optional.empty();
+      this.subProtocol = Optional.empty();
     }
 
     public Builder addOperationType(String operationType) {
@@ -122,14 +136,14 @@ public class Form {
       return this;
     }
 
-    public Builder addSubProtocol(String subprotocol) {
-      this.subprotocol = Optional.of(subprotocol);
+    public Builder addSubProtocol(String subProtocol) {
+      this.subProtocol = Optional.of(subProtocol);
       return this;
     }
 
     public Form build() {
       return new Form(this.target, this.methodName, this.contentType, this.operationTypes,
-        this.subprotocol);
+        this.subProtocol);
     }
 
   }

@@ -46,7 +46,7 @@ public final class ProtocolBinding {
     return Optional.empty();
   }
 
-  public static Optional<String> getDefaultSubprotocol(String href, String operationType) {
+  public static Optional<String> getDefaultSubProtocol(String href, String operationType) {
     if (getProtocol(href).isPresent()) {
       String protocol = getProtocol(href).get();
 
