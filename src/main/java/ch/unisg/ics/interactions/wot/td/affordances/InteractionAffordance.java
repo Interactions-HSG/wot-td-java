@@ -66,6 +66,42 @@ public class InteractionAffordance {
     return Optional.empty();
   }
 
+  public boolean hasFormWithProtocol(String operationType, String protocol) {
+    return !forms.stream().filter(form -> form.hasOperationType(operationType)
+      && form.hasProtocol(protocol))
+      .collect(Collectors.toList()).isEmpty();
+  }
+
+  public Optional<Form> getFirstFormForProtocol(String operationType, String protocol) {
+    if (hasFormWithProtocol(operationType, protocol)) {
+      Form firstForm = forms.stream().filter(form -> form.hasOperationType(operationType)
+        && form.hasProtocol(protocol))
+        .collect(Collectors.toList()).get(0);
+
+      return Optional.of(firstForm);
+    }
+
+    return Optional.empty();
+  }
+
+  public boolean hasFormWithSubProtocol(String operationType, String subProtocol) {
+    return !forms.stream().filter(form -> form.hasOperationType(operationType)
+      && form.hasSubProtocol(operationType, subProtocol))
+      .collect(Collectors.toList()).isEmpty();
+  }
+
+  public Optional<Form> getFirstFormForSubProtocol(String operationType, String subProtocol) {
+    if (hasFormWithSubProtocol(operationType, subProtocol)) {
+      Form firstForm = forms.stream().filter(form -> form.hasOperationType(operationType)
+          && form.hasSubProtocol(operationType, subProtocol))
+        .collect(Collectors.toList()).get(0);
+
+      return Optional.of(firstForm);
+    }
+
+    return Optional.empty();
+  }
+
   public boolean hasSemanticType(String type) {
     return this.types.contains(type);
   }
