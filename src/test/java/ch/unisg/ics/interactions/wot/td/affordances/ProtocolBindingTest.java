@@ -14,7 +14,7 @@ public class ProtocolBindingTest {
   public void testDefaultProtocolBinding() {
     String href = "coap://example.org/1";
     Optional<String> readPropertyMethodBinding = ProtocolBinding.getDefaultMethod(href, TD.readProperty);
-    Optional<String> readPropertySubprotocolBinding = ProtocolBinding.getDefaultSubprotocol(href,
+    Optional<String> readPropertySubprotocolBinding = ProtocolBinding.getDefaultSubProtocol(href,
       TD.readProperty);
 
     assertTrue(readPropertyMethodBinding.isPresent());
@@ -23,7 +23,7 @@ public class ProtocolBindingTest {
 
     Optional<String> observePropertyMethodBinding = ProtocolBinding.getDefaultMethod(href,
       TD.observeProperty);
-    Optional<String> observePropertySubprotocolBinding = ProtocolBinding.getDefaultSubprotocol(href,
+    Optional<String> observePropertySubprotocolBinding = ProtocolBinding.getDefaultSubProtocol(href,
       TD.observeProperty);
 
     assertTrue(observePropertyMethodBinding.isPresent());
@@ -36,7 +36,7 @@ public class ProtocolBindingTest {
   public void testUnknownUriScheme() {
     String href = "unknown://example.org/1";
     assertFalse(ProtocolBinding.getDefaultMethod(href, TD.readProperty).isPresent());
-    assertFalse(ProtocolBinding.getDefaultSubprotocol(href, TD.readProperty).isPresent());
+    assertFalse(ProtocolBinding.getDefaultSubProtocol(href, TD.readProperty).isPresent());
   }
 
   @Test
@@ -44,6 +44,6 @@ public class ProtocolBindingTest {
     String href = "http://example.org/1";
     String operationType = "http://example.org#unknownOp";
     assertFalse(ProtocolBinding.getDefaultMethod(href, operationType).isPresent());
-    assertFalse(ProtocolBinding.getDefaultSubprotocol(href, operationType).isPresent());
+    assertFalse(ProtocolBinding.getDefaultSubProtocol(href, operationType).isPresent());
   }
 }
