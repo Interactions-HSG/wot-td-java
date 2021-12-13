@@ -39,13 +39,13 @@ public class InteractionAffordanceTest {
 
     test_affordance = new InteractionAffordance("my_affordance",
       Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"),
-      Arrays.asList(form1, form2, form3, form4));
+      Arrays.asList(form1, form2, form3, form4), Optional.empty());
   }
 
   @Test(expected = InvalidTDException.class)
   public void testAffordanceWithoutNameThrowsException() {
     new InteractionAffordance(null,
-      Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), null);
+      Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), null, Optional.empty());
   }
 
   @Test

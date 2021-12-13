@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ProtocolException;
@@ -36,12 +37,6 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 public class TDHttpRequestTest {
@@ -323,6 +318,20 @@ public class TDHttpRequestTest {
   @Test
   public void testValidateArrayPayload() {
     // TODO
+  }
+
+  @Test
+  public void testPathVariable(){
+    Form form = new Form.Builder(PREFIX + "{subscriptionId}")
+      .setMethodName("PUT")
+      .addOperationType(TD.invokeAction)
+      .build();
+    Map<String, DataSchema> uriVariables = new HashMap();
+    uriVariables.put("subscriptionId", new StringSchema.Builder().build());
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put("subscriptionId", "abc");
+    TDHttpRequest request = new TDHttpRequest(form, TD.invokeAction, uriVariables, parameters);
+    assertEquals(PREFIX + "abc", request.getTarget());
   }
 
   private void assertUserSchemaPayload(BasicClassicHttpRequest request)
