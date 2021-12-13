@@ -37,8 +37,11 @@ public class TDCoapRequest {
   private final List<CoapClient> executors = new ArrayList<>();
   private final ReentrantLock executorsLock = new ReentrantLock();
 
+  private final String target;
+
   public TDCoapRequest(Form form, String operationType) {
     this.form = form;
+    this.target = form.getTarget();
 
     Optional<String> methodName = form.getMethodName(operationType);
     Optional<String> subProtocol = form.getSubProtocol(operationType);
@@ -60,6 +63,36 @@ public class TDCoapRequest {
       }
     }
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
+  }
+
+  public TDCoapRequest(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values) {
+    this.form = form;
+    this.target = UriTemplate.createUri(form.getTarget(), uriVariables, values);
+
+    Optional<String> methodName = form.getMethodName(operationType);
+    Optional<String> subProtocol = form.getSubProtocol(operationType);
+
+    if (methodName.isPresent()) {
+      this.request = new Request(CoAP.Code.valueOf(methodName.get()));
+      this.request.setURI(this.target);
+    } else {
+      throw new IllegalArgumentException("No default binding for the given operation type: "
+        + operationType);
+    }
+
+    if (subProtocol.isPresent() && subProtocol.get().equals(COV.observe)) {
+      if (operationType.equals(TD.observeProperty)) {
+        this.request.setObserve();
+      }
+      if (operationType.equals(TD.unobserveProperty)) {
+        this.request.setObserveCancel();
+      }
+    }
+    this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
+  }
+
+  public String getTarget(){
+    return target;
   }
 
   /**

@@ -364,6 +364,20 @@ public class TDCoapRequestTest {
     // TODO
   }
 
+  @Test
+  public void testPathVariable(){
+    Form form = new Form.Builder("coap://example.org/{subscriptionId}")
+      .setMethodName("PUT")
+      .addOperationType(TD.invokeAction)
+      .build();
+    Map<String, DataSchema> uriVariables = new HashMap();
+    uriVariables.put("subscriptionId", new StringSchema.Builder().build());
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put("subscriptionId", "abc");
+    TDCoapRequest request = new TDCoapRequest(form, TD.invokeAction, uriVariables, parameters);
+    assertEquals("coap://example.org/abc", request.getTarget());
+  }
+
   private void assertUserSchemaPayload(Request request)
     throws UnsupportedOperationException {
 
