@@ -6,16 +6,14 @@ import java.util.*;
 
 public class UriTemplate {
 
-  private final String template;
 
   private final List<String> extracted;
 
   public UriTemplate(String expression){
-    this.template = expression;
     this.extracted = extract(expression);
   }
 
-  public static List<String> extract(String path){
+   static List<String> extract(String path){
     List<String> extracted = new ArrayList<>();
     int n = path.length();
     String s = "";
@@ -37,7 +35,7 @@ public class UriTemplate {
     return extracted;
   }
 
-  public static List<String> getListVariables(String expression){
+   static List<String> getListVariables(String expression){
     List<String> variables = new ArrayList<>();
     String s = "";
     int n = expression.length();
@@ -58,11 +56,11 @@ public class UriTemplate {
     return variables;
   }
 
-  public static Set<String> getVariables(String expression){
+   static Set<String> getVariables(String expression){
     return new HashSet<>(getListVariables(expression));
   }
 
-  public static String replace(String expression, Map<String, DataSchema> uriVariables, Map<String, Object> values){
+   static String replace(String expression, Map<String, DataSchema> uriVariables, Map<String, Object> values){
     String s = "";
     if (expression.charAt(1)=='?') {
       s = s + '?';
@@ -100,7 +98,7 @@ public class UriTemplate {
     return s;
   }
 
-  public static String getValue(Object object, String datatype){
+   static String getValue(Object object, String datatype){
     if (datatype.equals(DataSchema.STRING)) {
       return (String) object;
     } else if (datatype.equals(DataSchema.INTEGER)) {
@@ -121,7 +119,7 @@ public class UriTemplate {
 
   }
 
-  public static String getType(Object object){
+    static String getType(Object object){
     if (object instanceof String){
       return DataSchema.STRING;
     } else if (object instanceof Integer){
@@ -141,7 +139,7 @@ public class UriTemplate {
     }
   }
 
-  public static boolean check(Map<String, DataSchema> uriVariables, Map<String, Object> values){
+    static boolean check(Map<String, DataSchema> uriVariables, Map<String, Object> values){
     boolean b = true;
     for (String key: uriVariables.keySet()){
       DataSchema schema = uriVariables.get(key);
