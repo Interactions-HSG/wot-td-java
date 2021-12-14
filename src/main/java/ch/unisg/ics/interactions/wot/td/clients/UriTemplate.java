@@ -104,13 +104,13 @@ public class UriTemplate {
           value = object.toString();
           break;
         case DataSchema.INTEGER:
-          value = ((Integer) object).toString();
+          value = String.valueOf((int) object);
           break;
         case DataSchema.NUMBER:
-          value = object.toString();
+          value = String.valueOf((double) object);
           break;
         case DataSchema.BOOLEAN:
-          value = ((Boolean) object).toString();
+          value = String.valueOf((boolean) object);
           break;
         case DataSchema.NULL:
           if (object == null) {
