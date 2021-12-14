@@ -41,16 +41,18 @@ public final class UriTemplate {
     int n = expression.length();
     for (int i = 0; i < n;i++){
       char c = expression.charAt(i);
-      if (!(c == '{' || c == '}' || c == '?' || c == ',')){
-        s = s + c;
-
-      }
-      else if (c == ','){
+      if (c == ','){
         variables.add(s);
         s = "";
       }
       else if (i == n-1){
         variables.add(s);
+      }
+      else if (c == '{' || c == '}' || c == '?' ){
+
+      }
+      else {
+        s = s + c;
       }
     }
 
