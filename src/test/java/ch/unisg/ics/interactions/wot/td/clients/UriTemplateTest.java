@@ -30,6 +30,53 @@ public class UriTemplateTest {
   }
 
   @Test
+  public void testGetValue(){
+    Object object1 = "abc";
+    String datatype1 = DataSchema.STRING;
+    String value1 = UriTemplate.getValue(object1, datatype1);
+    Object object2 = Integer.valueOf(2);
+    String datatype2 = DataSchema.INTEGER;
+    String value2 = UriTemplate.getValue(object2, datatype2);
+    Object object3 = Double.valueOf(22.3);
+    String datatype3 = DataSchema.NUMBER;
+    String value3 = UriTemplate.getValue(object3, datatype3);
+    Object object4 = Boolean.valueOf(true);
+    String datatype4 = DataSchema.BOOLEAN;
+    String value4 = UriTemplate.getValue(object4, datatype4);
+    Object object5 = null;
+    String datatype5 = DataSchema.NULL;
+    String value5 = UriTemplate.getValue(object5, datatype5);
+    assertEquals("abc", value1);
+    assertEquals("2", value2);
+    assertEquals("22.3", value3);
+    assertEquals("true", value4);
+    assertEquals("null", value5);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGetValueObject(){
+    Object object = new Object();
+    String datatype = DataSchema.OBJECT;
+    UriTemplate.getValue(object, datatype);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGetValueArray(){
+    ArrayList<String> array = new ArrayList<>();
+    array.add("abc");
+    array.add("de");
+    String datatype = DataSchema.ARRAY;
+    UriTemplate.getValue(array, datatype);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+    public void testGetValueEmpty(){
+    Object object = new Object();
+    String datatype = DataSchema.EMPTY;
+    UriTemplate.getValue(object, datatype);
+  }
+
+  @Test
   public void testReplaceVariables(){
     String expression = "{?p,q,r,s}";
     Map<String, Object> map = new HashMap<>();

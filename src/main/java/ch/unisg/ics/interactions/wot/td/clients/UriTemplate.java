@@ -4,7 +4,11 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.util.*;
 
-public class UriTemplate {
+public final class UriTemplate {
+
+  private UriTemplate(){
+    throw new UnsupportedOperationException();
+  }
 
   public static List<String> extract(String path){
     List<String> extracted = new ArrayList<>();
@@ -37,7 +41,7 @@ public class UriTemplate {
     int n = expression.length();
     for (int i = 0; i<n;i++){
       char c= expression.charAt(i);
-      if (c!='{' && c!='}' && c!='?' && c!=','){
+      if (!(c=='{' || c=='}' || c=='?' || c==',')){
         s = s + c;
 
       }
@@ -71,21 +75,8 @@ public class UriTemplate {
         Object object = values.get(variable);
         if (uriVariables.containsKey(variable)) {
           String datatype = uriVariables.get(variable).getDatatype();
-          if (datatype.equals(DataSchema.STRING)) {
-            String value = (String) object;
-            s = s + variable + "=" + value;
-          } else if (datatype.equals(DataSchema.INTEGER)) {
-            Integer value = (Integer) object;
-            s = s + variable + "=" + value;
-
-          } else if (datatype.equals(DataSchema.NUMBER)) {
-            Double value = (Double) object;
-            s = s + variable + "=" + value;
-          } else if (datatype.equals(DataSchema.BOOLEAN)) {
-            Boolean value = (Boolean) object;
-            s = s + variable + "=" + value;
-          }
-
+          String value = getValue(object, datatype);
+          s = s + variable + "=" + value;
           if (i != n - 1) {
             s = s + "&";
           }
@@ -100,20 +91,8 @@ public class UriTemplate {
         Object object = values.get(variable);
         if (uriVariables.containsKey(variable)) {
           String datatype = uriVariables.get(variable).getDatatype();
-          if (datatype.equals(DataSchema.STRING)) {
-            String value = (String) object;
-            s = s + value;
-          } else if (datatype.equals(DataSchema.INTEGER)) {
-            Integer value = (Integer) object;
-            s = s + value;
-
-          } else if (datatype.equals(DataSchema.NUMBER)) {
-            Double value = (Double) object;
-            s = s + value;
-          } else if (datatype.equals(DataSchema.BOOLEAN)) {
-            Boolean value = (Boolean) object;
-            s = s + value;
-          }
+          String value = getValue(object, datatype);
+          s = s + value;
           if (i != n - 1) {
             s = s + ",";
           }
@@ -123,6 +102,30 @@ public class UriTemplate {
     }
 
     return s;
+  }
+
+  public static String getValue(Object object, String datatype){
+    if (datatype.equals(DataSchema.STRING)) {
+      String value = (String) object;
+      return value;
+    } else if (datatype.equals(DataSchema.INTEGER)) {
+      Integer value = (Integer) object;
+      return value.toString();
+
+    } else if (datatype.equals(DataSchema.NUMBER)) {
+      Double value = (Double) object;
+      return value.toString();
+    } else if (datatype.equals(DataSchema.BOOLEAN)) {
+      Boolean value = (Boolean) object;
+      return value.toString();
+    }
+    else if (datatype.equals(DataSchema.NULL)){
+      return "null";
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
+
   }
 
   public static String createUri(String path, Map<String, DataSchema> uriVariables, Map<String, Object> values){

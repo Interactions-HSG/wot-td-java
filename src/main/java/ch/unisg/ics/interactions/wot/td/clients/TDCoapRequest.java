@@ -37,7 +37,7 @@ public class TDCoapRequest {
   private final List<CoapClient> executors = new ArrayList<>();
   private final ReentrantLock executorsLock = new ReentrantLock();
 
-  private String target;
+  private final String target;
 
   public TDCoapRequest(Form form, String operationType) {
     this.form = form;
