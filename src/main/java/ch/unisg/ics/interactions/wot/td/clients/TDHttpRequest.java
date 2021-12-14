@@ -42,7 +42,7 @@ public class TDHttpRequest {
 
   private final Form form;
   private BasicClassicHttpRequest request;
-  private String target;
+  private final String target;
 
   public TDHttpRequest(Form form, String operationType) {
     this.form = form;

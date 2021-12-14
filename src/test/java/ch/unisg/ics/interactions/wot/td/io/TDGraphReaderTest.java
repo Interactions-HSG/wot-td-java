@@ -132,7 +132,7 @@ public class TDGraphReaderTest {
       "    \"@id\" : \"https://www.w3.org/2019/wot/td#invokeAction\"\n" +
       "  } ],\n" +
       "  \"https://www.w3.org/2019/wot/hypermedia#hasTarget\" : [ {\n" +
-      "    \"@id\" : \"http://example.org/action\"\n" +
+      "    \"@id\" : \"http://example.org/action/\"\n" +
       "  } ]\n" +
       "}, {\n" +
       "  \"@id\" : \"_:node1ea75dfphx114\",\n" +
@@ -214,10 +214,9 @@ public class TDGraphReaderTest {
 
   private static final String TEST_IO_TAIL = "    ] .";
 
-  /*@Test
+  @Test
   public void testReadTitle() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.JSONLD, TEST_SIMPLE_TD_JSONLD);
-
     assertEquals("My Thing", reader.readThingTitle());
   }
 
@@ -995,7 +994,7 @@ public class TDGraphReaderTest {
 
     assertTrue(actualMessage.contains(expectedMessage));
     assertTrue(actualMessage.contains(expectedRootMessage));
-  }*/
+  }
 
   @Test
   public void testUriVariable(){
@@ -1030,20 +1029,6 @@ public class TDGraphReaderTest {
       "        ]\n" +
       "    ] .\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
-    /*System.out.println("td read");
-    List<ActionAffordance> actions = td.getActions();
-    System.out.println("actions retrieved");
-    ActionAffordance action = actions.get(0);
-    System.out.println("action retrieved");
-    Map<String, DataSchema> uriVariables = action.getUriVariables().get();
-    System.out.println("uri variables retrieved");
-    System.out.println("uri variables: "+uriVariables);
-    DataSchema schema = uriVariables.get("token");
-    System.out.println("schema retrieved");
-    System.out.println("schema: "+schema);
-    String s = schema.getDatatype();
-    System.out.println("datatype retrieved");
-    System.out.println("schema type: "+s);*/
     String s = td.getActions().get(0).getUriVariables().get().get("token").getDatatype();
     assertEquals(DataSchema.STRING,s);
   }
@@ -1152,12 +1137,9 @@ public class TDGraphReaderTest {
         "            js:required \"boolean_value\" ;\n" +
         "        ]\n" +
         "    ] ." ;
-    System.out.println(TDDescription);
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
     DataSchema uriVariableSchema1 = td.getProperties().get(0).getUriVariables().get().get("name");
     assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
-    //DataSchema uriVariableSchema2=td.getProperties().get(0).getUriVariables().get().get("number");
-    //assertEquals(DataSchema.NUMBER,uriVariableSchema2.getDatatype());
   }
 
   private void assertForm(Form form, String methodName, String target,

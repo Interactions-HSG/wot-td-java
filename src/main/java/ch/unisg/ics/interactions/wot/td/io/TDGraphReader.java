@@ -110,7 +110,7 @@ public class TDGraphReader {
 
     RDFParser parser = Rio.createParser(format);
     parser.setRDFHandler(new StatementCollector(model));
-    try (StringReader stringReader = conversion(representation)) {
+    try (StringReader stringReader = conversion(representation, format)) {
       parser.parse(stringReader, baseURI);
     } catch (RDFParseException | RDFHandlerException | IOException e) {
       throw new InvalidTDException("RDF Syntax Error", e);
@@ -348,9 +348,7 @@ public class TDGraphReader {
         null));
 
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
-      System.out.println("targetOpt: "+targetOpt);
       String target = targetOpt.get().stringValue();
-      System.out.println("target: "+target);
       Form.Builder builder = new Form.Builder(target)
           .setContentType(contentType)
           .addOperationTypes(ops);
@@ -393,25 +391,23 @@ public class TDGraphReader {
       }
   }
 
-  private StringReader conversion(String str){
+  private StringReader conversion(String str, RDFFormat format){
     String newStr = "";
-    for (int i = 0; i<str.length();i++){
-      char c = str.charAt(i);
-      if (c == '{'){
-        newStr = newStr + "%7B";
+    if (format.equals(RDFFormat.TURTLE)) {
+      for (int i = 0; i < str.length(); i++) {
+        char c = str.charAt(i);
+        if (c == '{') {
+          newStr = newStr + "%7B";
+        } else if (c == '}') {
+          newStr = newStr + "%7D";
+        } else {
+          newStr = newStr + c;
+        }
       }
-      else if (c == '}'){
-        newStr = newStr + "%7D";
-      }
-      else {
-        newStr = newStr + c;
-      }
+    } else {
+      newStr = str;
     }
     return new StringReader(newStr);
   }
 
-  private List<Character> getIteratorFromString(String str){
-    List<Character> list = str.chars().mapToObj( e -> (char)e).collect(Collectors.toList());
-    return list;
-  }
 }
