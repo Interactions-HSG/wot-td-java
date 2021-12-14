@@ -40,9 +40,8 @@ public class UriTemplateTest {
     Object object3 = Double.valueOf(22.3);
     String datatype3 = DataSchema.NUMBER;
     String value3 = UriTemplate.getValue(object3, datatype3);
-    Object object4 = Boolean.valueOf(true);
     String datatype4 = DataSchema.BOOLEAN;
-    String value4 = UriTemplate.getValue(object4, datatype4);
+    String value4 = UriTemplate.getValue(Boolean.TRUE, datatype4);
     Object object5 = null;
     String datatype5 = DataSchema.NULL;
     String value5 = UriTemplate.getValue(object5, datatype5);

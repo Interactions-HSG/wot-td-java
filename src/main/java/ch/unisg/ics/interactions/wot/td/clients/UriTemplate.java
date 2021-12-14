@@ -12,17 +12,17 @@ public final class UriTemplate {
 
   public static List<String> extract(String path){
     List<String> extracted = new ArrayList<>();
-    int n= path.length();
-    String s="";
-    for (int i = 0; i<n; i++){
-      if (path.charAt(i)=='{'){
+    int n = path.length();
+    String s = "";
+    for (int i = 0; i < n; i++){
+      if (path.charAt(i) == '{'){
         extracted.add(s);
-        s="{";
+        s = "{";
       }
       else if (path.charAt(i)=='}'){
         s = s +"}";
         extracted.add(s);
-        s="";
+        s = "";
       }
       else if (i==n-1){
         s = s + path.charAt(i);
@@ -37,19 +37,19 @@ public final class UriTemplate {
 
   public static List<String> getListVariables(String expression){
     List<String> variables = new ArrayList<>();
-    String s="";
+    String s = "";
     int n = expression.length();
-    for (int i = 0; i<n;i++){
-      char c= expression.charAt(i);
-      if (!(c=='{' || c=='}' || c=='?' || c==',')){
+    for (int i = 0; i < n;i++){
+      char c = expression.charAt(i);
+      if (!(c == '{' || c == '}' || c == '?' || c == ',')){
         s = s + c;
 
       }
-      else if (c==','){
+      else if (c == ','){
         variables.add(s);
         s = "";
       }
-      else if (i==n-1){
+      else if (i == n-1){
         variables.add(s);
       }
     }
@@ -106,8 +106,7 @@ public final class UriTemplate {
 
   public static String getValue(Object object, String datatype){
     if (datatype.equals(DataSchema.STRING)) {
-      String value = (String) object;
-      return value;
+      return (String) object;
     } else if (datatype.equals(DataSchema.INTEGER)) {
       Integer value = (Integer) object;
       return value.toString();
