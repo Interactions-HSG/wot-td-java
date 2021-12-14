@@ -91,7 +91,7 @@ public class TDCoapRequest {
     this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
   }
 
-  public String getTarget(){
+  public String getTarget() {
     return target;
   }
 

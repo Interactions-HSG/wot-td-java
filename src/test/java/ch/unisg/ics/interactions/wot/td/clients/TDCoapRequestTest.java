@@ -365,7 +365,7 @@ public class TDCoapRequestTest {
   }
 
   @Test
-  public void testPathVariable(){
+  public void testPathVariable() {
     Form form = new Form.Builder("coap://example.org/{subscriptionId}")
       .setMethodName("PUT")
       .addOperationType(TD.invokeAction)

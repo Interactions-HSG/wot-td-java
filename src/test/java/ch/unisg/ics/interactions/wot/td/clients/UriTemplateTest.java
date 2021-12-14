@@ -10,27 +10,27 @@ import static org.junit.Assert.*;
 public class UriTemplateTest {
 
   @Test
-  public void testExtraction(){
+  public void testExtraction() {
     String path = "http://example.com/{?p,q}";
     List<String> extracted = UriTemplate.extract(path);
-    List expected = new ArrayList();
+    List<String> expected = new ArrayList<>();
     expected.add("http://example.com/");
     expected.add("{?p,q}");
     assertEquals(expected, extracted);
   }
 
   @Test
-  public void testGetVariables(){
+  public void testGetVariables() {
     String expression = "{?p,q}";
     Set<String> variables = UriTemplate.getVariables(expression);
-    Set expected = new HashSet();
+    Set<String> expected = new HashSet<>();
     expected.add("p");
     expected.add("q");
     assertEquals(expected, variables);
   }
 
   @Test
-  public void testGetValue(){
+  public void testGetValue() {
     Object object1 = "abc";
     String datatype1 = DataSchema.STRING;
     String value1 = UriTemplate.getValue(object1, datatype1);
@@ -53,14 +53,14 @@ public class UriTemplateTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testGetValueObject(){
+  public void testGetValueObject() {
     Object object = new Object();
     String datatype = DataSchema.OBJECT;
     UriTemplate.getValue(object, datatype);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testGetValueArray(){
+  public void testGetValueArray() {
     ArrayList<String> array = new ArrayList<>();
     array.add("abc");
     array.add("de");
@@ -69,14 +69,19 @@ public class UriTemplateTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-    public void testGetValueEmpty(){
+  public void testGetValueEmpty() {
     Object object = new Object();
     String datatype = DataSchema.EMPTY;
     UriTemplate.getValue(object, datatype);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void getInvalidSchemaUriVariable() {
+    UriTemplate.getValue(0.5, DataSchema.INTEGER);
+  }
+
   @Test
-  public void testReplaceVariables(){
+  public void testReplaceVariables() {
     String expression = "{?p,q,r,s}";
     Map<String, Object> map = new HashMap<>();
     map.put("p", "abc");
@@ -89,13 +94,13 @@ public class UriTemplateTest {
     uriVariables.put("r", new BooleanSchema.Builder().build());
     uriVariables.put("s", new NumberSchema.Builder().build());
     String actual = UriTemplate.replace(expression, uriVariables, map);
-    System.out.println("actual: "+actual);
+    System.out.println("actual: " + actual);
     String expected = "?p=abc&q=32&r=true&s=23.3";
     assertEquals(expected, actual);
   }
 
   @Test
-  public void testCheck(){
+  public void testCheck() {
     Map<String, DataSchema> uriVariables = new Hashtable<>();
     uriVariables.put("p", new StringSchema.Builder().build());
     uriVariables.put("q", new IntegerSchema.Builder().build());
@@ -119,7 +124,7 @@ public class UriTemplateTest {
   }
 
   @Test
-  public void testUriVariables(){
+  public void testUriVariables() {
     String path = "http://example.com/{?p,q}";
     Map<String, DataSchema> uriVariables = new HashMap<>();
     uriVariables.put("p", new StringSchema.Builder().build());
@@ -128,17 +133,17 @@ public class UriTemplateTest {
     map2.put("p", "abc");
     map2.put("q", 32);
     String uri = new UriTemplate(path).createUri(uriVariables, map2); //UriTemplate.createUri(path, uriVariables, map2);
-    assertEquals("http://example.com/?p=abc&q=32",uri);
+    assertEquals("http://example.com/?p=abc&q=32", uri);
   }
 
   @Test
-  public void testUriVariables2(){
+  public void testUriVariables2() {
     String path = "http://example.com/{p}";
     Map<String, DataSchema> uriVariables = new HashMap<>();
     uriVariables.put("p", new StringSchema.Builder().build());
     Map<String, Object> map2 = new HashMap<>();
     map2.put("p", "abc");
     String uri = new UriTemplate(path).createUri(uriVariables, map2);
-    assertEquals("http://example.com/abc",uri);
+    assertEquals("http://example.com/abc", uri);
   }
 }
