@@ -3,10 +3,7 @@ package ch.unisg.ics.interactions.wot.td.affordances;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * TODO: add javadoc
@@ -20,8 +17,8 @@ public class ActionAffordance extends InteractionAffordance {
   // TODO: add safe, idempotent
 
   private ActionAffordance(String name, Optional<String> title, List<String> types,
-                           List<Form> forms, Optional<DataSchema> input, Optional<DataSchema> output) {
-    super(name, title, types, forms);
+                           List<Form> forms, Optional<Map<String,DataSchema>> uriVariables, Optional<DataSchema> input, Optional<DataSchema> output) {
+    super(name, title, types, forms, uriVariables);
     this.input = input;
     this.output = output;
   }
@@ -74,7 +71,7 @@ public class ActionAffordance extends InteractionAffordance {
     }
 
     public ActionAffordance build() {
-      return new ActionAffordance(name, title, types, forms, inputSchema, outputSchema);
+      return new ActionAffordance(name, title, types, forms, uriVariables, inputSchema, outputSchema);
     }
   }
 }

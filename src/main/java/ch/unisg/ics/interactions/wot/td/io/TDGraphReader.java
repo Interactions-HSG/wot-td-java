@@ -6,13 +6,9 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 
 import org.apache.hc.client5.http.fluent.Request;
 
@@ -30,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
@@ -113,8 +110,7 @@ public class TDGraphReader {
 
     RDFParser parser = Rio.createParser(format);
     parser.setRDFHandler(new StatementCollector(model));
-
-    try (StringReader stringReader = new StringReader(representation)) {
+    try (StringReader stringReader = conversion(representation, format)) {
       parser.parse(stringReader, baseURI);
     } catch (RDFParseException | RDFHandlerException | IOException e) {
       throw new InvalidTDException("RDF Syntax Error", e);
@@ -207,6 +203,7 @@ public class TDGraphReader {
         }
 
         readAffordanceMetadata(builder, propertyId);
+        readUriVariables(builder, propertyId);
 
         Optional<Literal> observable = Models.objectLiteral(model.filter(propertyId,
           rdf.createIRI(TD.isObservable), null));
@@ -251,6 +248,7 @@ public class TDGraphReader {
     ActionAffordance.Builder actionBuilder = new ActionAffordance.Builder(name, forms);
 
     readAffordanceMetadata(actionBuilder, affordanceId);
+    readUriVariables(actionBuilder, affordanceId);
 
     try {
       Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId,
@@ -350,9 +348,7 @@ public class TDGraphReader {
         null));
 
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
-
       String target = targetOpt.get().stringValue();
-
       Form.Builder builder = new Form.Builder(target)
           .setContentType(contentType)
           .addOperationTypes(ops);
@@ -375,4 +371,43 @@ public class TDGraphReader {
 
     return forms;
   }
+
+  private void readUriVariables(InteractionAffordance
+                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId){
+    Set<Resource> uriVariableIds = Models.objectResources(model.filter(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), null));
+    for (Resource uriVariableId : uriVariableIds){
+      readUriVariable(builder, uriVariableId);
+    }
+  }
+
+  private void readUriVariable(InteractionAffordance
+                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource uriVariableId) {
+      Optional<DataSchema> opDataSchema = SchemaGraphReader.readDataSchema(uriVariableId, model);
+      Optional<Literal> opNameLiteral = Models.objectLiteral(model.filter(uriVariableId, rdf.createIRI(TD.name), null));
+      if (opDataSchema.isPresent() && opNameLiteral.isPresent()){
+        String name = opNameLiteral.get().stringValue();
+        DataSchema schema = opDataSchema.get();
+        builder.addUriVariable(name, schema);
+      }
+  }
+
+  private StringReader conversion(String str, RDFFormat format){
+    String newStr = "";
+    if (format.equals(RDFFormat.TURTLE)) {
+      for (int i = 0; i < str.length(); i++) {
+        char c = str.charAt(i);
+        if (c == '{') {
+          newStr = newStr + "%7B";
+        } else if (c == '}') {
+          newStr = newStr + "%7D";
+        } else {
+          newStr = newStr + c;
+        }
+      }
+    } else {
+      newStr = str;
+    }
+    return new StringReader(newStr);
+  }
+
 }

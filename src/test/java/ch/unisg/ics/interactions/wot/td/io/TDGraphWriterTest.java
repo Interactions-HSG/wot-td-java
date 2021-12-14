@@ -8,15 +8,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
@@ -531,6 +528,148 @@ public class TDGraphWriterTest {
         .build();
 
     assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void writeURIVariable() throws IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
+      "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
+      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
+      "  td:name   \"toggleAffordance\";  "+
+      "  td:hasUriTemplateSchema [ a js:StringSchema;\n"+
+      "  td:name  \"name\" ];  "+
+      "      dct:title \"Toggle\";\n" +
+      "      td:hasForm [\n" +
+      "          htv:methodName \"PUT\";\n" +
+      "          hctl:forContentType \"application/json\";\n" +
+      "          hctl:hasTarget <http://mylamp.example.org/%7Bname%7D/toggle>;\n" +
+      "          hctl:hasOperationType td:invokeAction\n" +
+      "        ];\n" +
+      "      td:hasInputSchema [ a saref:OnOffState, js:ObjectSchema;\n" +
+      "          js:properties [ a js:BooleanSchema;\n" +
+      "              js:propertyName \"status\"\n" +
+      "            ];\n" +
+      "          js:required \"status\"\n" +
+      "        ];\n" +
+      "    ].";
+    DataSchema uriVariable = new StringSchema.Builder().build();
+    Form toggleForm = new Form.Builder("http://mylamp.example.org/{name}/toggle")
+      .setMethodName("PUT")
+      .build();
+
+    ActionAffordance toggle = new ActionAffordance.Builder("toggleAffordance", toggleForm)
+      .addTitle("Toggle")
+      .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
+      .addUriVariable("name",uriVariable)
+      .addInputSchema(new ObjectSchema.Builder()
+        .addSemanticType("https://saref.etsi.org/core/OnOffState")
+        .addProperty("status", new BooleanSchema.Builder()
+          .build())
+        .addRequiredProperties("status")
+        .build())
+      .build();
+    ThingDescription td=new ThingDescription.Builder("My Lamp Thing")
+      .addThingURI("http://example.org/lamp123")
+      .addSemanticType("https://saref.etsi.org/core/LightSwitch")
+      .addAction(toggle)
+      .build();
+    assertIsomorphicGraphs(testTD,td);
+  }
+
+  @Test
+  public void writeManyUriVariables() throws IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
+      "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
+      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
+      "  td:name   \"toggleAffordance\";  "+
+      "      dct:title \"Toggle\";\n" +
+      "      td:hasForm [\n" +
+      "          htv:methodName \"PUT\";\n" +
+      "          hctl:forContentType \"application/json\";\n" +
+      "          hctl:hasTarget <http://mylamp.example.org/%7Bname%7D/%7Bnumber%7D/toggle>;\n" +
+      "          hctl:hasOperationType td:invokeAction\n" +
+      "        ];\n" +
+      "      td:hasInputSchema [ a saref:OnOffState, js:ObjectSchema;\n" +
+      "          js:properties [ a js:BooleanSchema;\n" +
+      "              js:propertyName \"status\"\n" +
+      "            ];\n" +
+      "          js:required \"status\"\n" +
+      "        ];\n" +
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
+      "      td:name \"name\" ]; "+
+      "      td:hasUriTemplateSchema [ a js:NumberSchema;\n"+
+      "      td:name \"number\" ]; "+
+      "    ].";
+    DataSchema uriVariable1 = new StringSchema.Builder().build();
+    DataSchema uriVariable2 = new NumberSchema.Builder().build();
+    Form toggleForm = new Form.Builder("http://mylamp.example.org/{name}/{number}/toggle")
+      .setMethodName("PUT")
+      .build();
+
+    ActionAffordance toggle = new ActionAffordance.Builder("toggleAffordance", toggleForm)
+      .addTitle("Toggle")
+      .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
+      .addUriVariable("name", uriVariable1)
+      .addUriVariable("number", uriVariable2)
+      .addInputSchema(new ObjectSchema.Builder()
+        .addSemanticType("https://saref.etsi.org/core/OnOffState")
+        .addProperty("status", new BooleanSchema.Builder()
+          .build())
+        .addRequiredProperties("status")
+        .build())
+      .build();
+    ThingDescription td=new ThingDescription.Builder("My Lamp Thing")
+      .addThingURI("http://example.org/lamp123")
+      .addSemanticType("https://saref.etsi.org/core/LightSwitch")
+      .addAction(toggle)
+      .build();
+    assertIsomorphicGraphs(testTD,td);
+  }
+
+
+  @Test
+  public void writeURIVariablePropertyAffordance() throws IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/lamp123> a td:Thing;\n" +
+      "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
+      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:hasPropertyAffordance [ a td:PropertyAffordance, js:StringSchema;\n" +
+      "  td:name  \"lightAffordance\"; "+
+      "       td:isObservable false;  "+
+      "      dct:title \"Light\";\n" +
+      "      td:hasForm [\n" +
+      "          htv:methodName \"GET\";\n" +
+      "          hctl:forContentType \"application/json\";\n" +
+      "          hctl:hasTarget <http://mylamp.example.org/%7Bname%7D/%7Bnumber%7D/light>;\n" +
+      "          hctl:hasOperationType td:readProperty\n" +
+      "        ];\n" +
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
+      "      td:name   \"name\" ]; "+
+      "      td:hasUriTemplateSchema [ a js:NumberSchema;\n"+
+      "      td:name   \"number\" ]; "+
+      "    ].";
+    DataSchema uriVariable1 = new StringSchema.Builder().build();
+    DataSchema uriVariable2 = new NumberSchema.Builder().build();
+    Form lightForm = new Form.Builder("http://mylamp.example.org/{name}/{number}/light")
+      .setMethodName("GET")
+      .addOperationType(TD.readProperty)
+      .build();
+    DataSchema property=new StringSchema.Builder().build();
+    PropertyAffordance light = new PropertyAffordance.Builder("lightAffordance", lightForm)
+      .addDataSchema(property)
+      .addTitle("Light")
+      .addUriVariable("name",uriVariable1)
+      .addUriVariable("number", uriVariable2)
+      .build();
+    ThingDescription td=new ThingDescription.Builder("My Lamp Thing")
+      .addThingURI("http://example.org/lamp123")
+      .addProperty(light)
+      .build();
+    assertIsomorphicGraphs(testTD,td);
   }
 
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,

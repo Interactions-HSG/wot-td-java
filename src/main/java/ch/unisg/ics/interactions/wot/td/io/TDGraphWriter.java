@@ -6,6 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
@@ -21,6 +22,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -175,6 +177,19 @@ public class TDGraphWriter {
       graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(type));
     }
 
+    Optional<Map<String,DataSchema>> uriVariable = affordance.getUriVariables();
+    if (uriVariable.isPresent()){
+      Map<String,DataSchema> map=uriVariable.get();
+      for (String key: map.keySet()){
+        DataSchema value = map.get(key);
+        Resource uriId = rdf.createBNode();
+        graphBuilder.add(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), uriId);
+        SchemaGraphWriter.write(graphBuilder, uriId, value);
+        graphBuilder.add(uriId, rdf.createIRI(TD.name), key);
+      }
+
+    }
+
     if (affordance.getTitle().isPresent()) {
       graphBuilder.add(affordanceId, rdf.createIRI(DCT.title), affordance.getTitle().get());
     }
@@ -198,7 +213,7 @@ public class TDGraphWriter {
           graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName().get());
         }
       }
-      graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(form.getTarget()));
+      graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(conversion(form.getTarget())));
       graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
 
       for (String opType : form.getOperationTypes()) {
@@ -224,5 +239,22 @@ public class TDGraphWriter {
 
   private String write(RDFFormat format) {
     return ReadWriteUtils.writeToString(format, getModel());
+  }
+
+  private String conversion(String str){
+    String newStr = "";
+    for (int i = 0; i<str.length();i++){
+      char c = str.charAt(i);
+      if (c == '{'){
+        newStr = newStr + "%7B";
+      }
+      else if (c == '}'){
+        newStr = newStr + "%7D";
+      }
+      else {
+        newStr = newStr + c;
+      }
+    }
+    return newStr;
   }
 }

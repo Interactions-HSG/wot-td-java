@@ -1,21 +1,14 @@
 package ch.unisg.ics.interactions.wot.td.clients;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import com.google.gson.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ProtocolException;
@@ -24,93 +17,82 @@ import org.apache.http.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
+import static org.junit.Assert.*;
 
 public class TDHttpRequestTest {
   private static final String PREFIX = "http://example.org/";
 
   static final ObjectSchema USER_SCHEMA = new ObjectSchema.Builder()
-      .addSemanticType(PREFIX + "User")
-      .addProperty("first_name", new StringSchema.Builder()
-          .addSemanticType(PREFIX + "FirstName")
-          .build())
-      .addProperty("last_name", new StringSchema.Builder()
-          .addSemanticType(PREFIX + "LastName")
-          .build())
-      .addRequiredProperties("last_name")
-      .build();
+    .addSemanticType(PREFIX + "User")
+    .addProperty("first_name", new StringSchema.Builder()
+      .addSemanticType(PREFIX + "FirstName")
+      .build())
+    .addProperty("last_name", new StringSchema.Builder()
+      .addSemanticType(PREFIX + "LastName")
+      .build())
+    .addRequiredProperties("last_name")
+    .build();
 
   private static final Form FORM = new Form.Builder(PREFIX + "toggle")
-      .setMethodName("PUT")
-      .addOperationType(TD.invokeAction)
-      .build();
+    .setMethodName("PUT")
+    .addOperationType(TD.invokeAction)
+    .build();
 
   private static final String FORKLIFT_ROBOT_TD = "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
-      "@prefix ex: <http://example.org/> .\n" +
-      "\n" +
-      "ex:forkliftRobot a td:Thing ; \n" +
-      "    dct:title \"forkliftRobot\" ;\n" +
-      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasPropertyAffordance [\n" +
-      "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
-      "        td:name \"status\" ; \n" +
-      "        td:hasForm [\n" +
-      "            hctl:hasTarget <http://example.org/forkliftRobot/busy> ; \n" +
-      "        ] ; \n" +
-      "    ] ;\n" +
-      "    td:hasActionAffordance [\n" +
-      "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
-      "        dct:title \"carry\" ; \n" +
-      "        td:name \"carry\" ; \n" +
-      "        td:hasForm [\n" +
-      "            hctl:hasTarget <http://example.org/forkliftRobot/carry> ; \n" +
-      "        ] ; \n" +
-      "        td:hasInputSchema [ \n" +
-      "            a js:ObjectSchema ;\n" +
-      "            js:properties [ \n" +
-      "                a js:ArraySchema, ex:SourcePosition ;\n" +
-      "                js:propertyName \"sourcePosition\";\n" +
-      "                js:minItems 3 ;\n" +
-      "                js:maxItems 3 ;\n" +
-      "                js:items [\n" +
-      "                    a js:NumberSchema ;\n" +
-      "                ] ;\n" +
-      "            ] ;\n" +
-      "            js:properties [\n" +
-      "                a js:ArraySchema, ex:TargetPosition ;\n" +
-      "                js:propertyName \"targetPosition\";\n" +
-      "                js:minItems 3 ;\n" +
-      "                js:maxItems 3 ;\n" +
-      "                js:items [\n" +
-      "                    a js:NumberSchema ;\n" +
-      "                ] ;\n" +
-      "            ] ;\n" +
-      "            js:required \"sourcePosition\", \"targetPosition\" ;" +
-      "        ] ; \n" +
-      "    ] .\n";
+    "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+    "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+    "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+    "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+    "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    "@prefix ex: <http://example.org/> .\n" +
+    "\n" +
+    "ex:forkliftRobot a td:Thing ; \n" +
+    "    dct:title \"forkliftRobot\" ;\n" +
+    "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+    "    td:hasPropertyAffordance [\n" +
+    "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
+    "        td:name \"status\" ; \n" +
+    "        td:hasForm [\n" +
+    "            hctl:hasTarget <http://example.org/forkliftRobot/busy> ; \n" +
+    "        ] ; \n" +
+    "    ] ;\n" +
+    "    td:hasActionAffordance [\n" +
+    "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
+    "        dct:title \"carry\" ; \n" +
+    "        td:name \"carry\" ; \n" +
+    "        td:hasForm [\n" +
+    "            hctl:hasTarget <http://example.org/forkliftRobot/carry> ; \n" +
+    "        ] ; \n" +
+    "        td:hasInputSchema [ \n" +
+    "            a js:ObjectSchema ;\n" +
+    "            js:properties [ \n" +
+    "                a js:ArraySchema, ex:SourcePosition ;\n" +
+    "                js:propertyName \"sourcePosition\";\n" +
+    "                js:minItems 3 ;\n" +
+    "                js:maxItems 3 ;\n" +
+    "                js:items [\n" +
+    "                    a js:NumberSchema ;\n" +
+    "                ] ;\n" +
+    "            ] ;\n" +
+    "            js:properties [\n" +
+    "                a js:ArraySchema, ex:TargetPosition ;\n" +
+    "                js:propertyName \"targetPosition\";\n" +
+    "                js:minItems 3 ;\n" +
+    "                js:maxItems 3 ;\n" +
+    "                js:items [\n" +
+    "                    a js:NumberSchema ;\n" +
+    "                ] ;\n" +
+    "            ] ;\n" +
+    "            js:required \"sourcePosition\", \"targetPosition\" ;" +
+    "        ] ; \n" +
+    "    ] .\n";
 
   private ThingDescription td;
 
@@ -122,11 +104,11 @@ public class TDHttpRequestTest {
   @Test
   public void testToStringNullEntity() {
     TDHttpRequest request = new TDHttpRequest(new Form.Builder("http://example.org/action")
-        .addOperationType(TD.invokeAction).build(),
-        TD.invokeAction);
+      .addOperationType(TD.invokeAction).build(),
+      TD.invokeAction);
 
     assertEquals("[TDHttpRequest] Method: POST, Target: http://example.org/action, "
-        + "Content-Type: application/json", request.toString());
+      + "Content-Type: application/json", request.toString());
   }
 
   @Test
@@ -138,8 +120,8 @@ public class TDHttpRequestTest {
     assertTrue(form.isPresent());
 
     BasicClassicHttpRequest request = new TDHttpRequest(form.get(), TD.writeProperty)
-        .setPrimitivePayload(property.get().getDataSchema(), true)
-        .getRequest();
+      .setPrimitivePayload(property.get().getDataSchema(), true)
+      .getRequest();
 
     assertEquals("PUT", request.getMethod());
 
@@ -163,8 +145,8 @@ public class TDHttpRequestTest {
     payloadVariables.put(PREFIX + "TargetPosition", Arrays.asList(30, 60, 70));
 
     BasicClassicHttpRequest request = new TDHttpRequest(form.get(), TD.invokeAction)
-        .setObjectPayload((ObjectSchema) action.get().getInputSchema().get(), payloadVariables)
-        .getRequest();
+      .setObjectPayload((ObjectSchema) action.get().getInputSchema().get(), payloadVariables)
+      .getRequest();
 
     assertEquals("POST", request.getMethod());
 
@@ -186,39 +168,39 @@ public class TDHttpRequestTest {
   @Test
   public void testNoPayload() {
     BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
-        .getRequest();
+      .getRequest();
     assertNull(request.getEntity());
   }
 
   @Test
   public void testSimpleObjectPayload() throws ProtocolException, URISyntaxException,
-      JsonSyntaxException, ParseException, IOException {
+    JsonSyntaxException, ParseException, IOException {
     ObjectSchema payloadSchema = new ObjectSchema.Builder()
-        .addProperty("first_name", new StringSchema.Builder().build())
-        .addProperty("last_name", new StringSchema.Builder().build())
-        .build();
+      .addProperty("first_name", new StringSchema.Builder().build())
+      .addProperty("last_name", new StringSchema.Builder().build())
+      .build();
 
     Map<String, Object> payloadVariables = new HashMap<String, Object>();
     payloadVariables.put("first_name", "Andrei");
     payloadVariables.put("last_name", "Ciortea");
 
     BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
-        .setObjectPayload(payloadSchema, payloadVariables)
-        .getRequest();
+      .setObjectPayload(payloadSchema, payloadVariables)
+      .getRequest();
 
     assertUserSchemaPayload(request);
   }
 
   @Test
   public void testSimpleSemanticObjectPayload() throws ProtocolException, URISyntaxException,
-      JsonSyntaxException, ParseException, IOException {
+    JsonSyntaxException, ParseException, IOException {
     Map<String, Object> payloadVariables = new HashMap<String, Object>();
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
 
     BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
-        .setObjectPayload(USER_SCHEMA, payloadVariables)
-        .getRequest();
+      .setObjectPayload(USER_SCHEMA, payloadVariables)
+      .getRequest();
 
     assertEquals("PUT", request.getMethod());
     assertEquals(0, request.getUri().compareTo(URI.create(PREFIX + "toggle")));
@@ -228,29 +210,29 @@ public class TDHttpRequestTest {
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidBooleanPayload() {
     new TDHttpRequest(FORM, TD.invokeAction)
-    .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
-    .getRequest();
+      .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
+      .getRequest();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidIntegerPayload() {
     new TDHttpRequest(FORM, TD.invokeAction)
-    .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
-    .getRequest();
+      .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
+      .getRequest();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
     new TDHttpRequest(FORM, TD.invokeAction)
-    .setPrimitivePayload(new StringSchema.Builder().build(), true)
-    .getRequest();
+      .setPrimitivePayload(new StringSchema.Builder().build(), true)
+      .getRequest();
   }
 
   @Test
   public void testArrayPayload() throws UnsupportedOperationException, IOException {
     ArraySchema payloadSchema = new ArraySchema.Builder()
-        .addItem(new NumberSchema.Builder().build())
-        .build();
+      .addItem(new NumberSchema.Builder().build())
+      .build();
 
     List<Object> payloadVariables = new ArrayList<Object>();
     payloadVariables.add(1);
@@ -258,8 +240,8 @@ public class TDHttpRequestTest {
     payloadVariables.add(5);
 
     BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
-        .setArrayPayload(payloadSchema, payloadVariables)
-        .getRequest();
+      .setArrayPayload(payloadSchema, payloadVariables)
+      .getRequest();
 
     StringWriter writer = new StringWriter();
     IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
@@ -273,16 +255,16 @@ public class TDHttpRequestTest {
 
   @Test
   public void testSemanticObjectWithOneArrayPayload() throws UnsupportedOperationException,
-      IOException {
+    IOException {
     ObjectSchema payloadSchema = new ObjectSchema.Builder()
-        .addProperty("speed", new NumberSchema.Builder()
-            .addSemanticType(PREFIX + "Speed")
-            .build())
-        .addProperty("coordinates", new ArraySchema.Builder()
-            .addSemanticType(PREFIX + "3DCoordinates")
-            .addItem(new IntegerSchema.Builder().build())
-            .build())
-        .build();
+      .addProperty("speed", new NumberSchema.Builder()
+        .addSemanticType(PREFIX + "Speed")
+        .build())
+      .addProperty("coordinates", new ArraySchema.Builder()
+        .addSemanticType(PREFIX + "3DCoordinates")
+        .addItem(new IntegerSchema.Builder().build())
+        .build())
+      .build();
 
     List<Object> coordinates = new ArrayList<Object>();
     coordinates.add(30);
@@ -294,8 +276,8 @@ public class TDHttpRequestTest {
     payloadVariables.put(PREFIX + "3DCoordinates", coordinates);
 
     BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
-        .setObjectPayload(payloadSchema, payloadVariables)
-        .getRequest();
+      .setObjectPayload(payloadSchema, payloadVariables)
+      .getRequest();
 
     StringWriter writer = new StringWriter();
     IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
@@ -325,8 +307,22 @@ public class TDHttpRequestTest {
     // TODO
   }
 
+  @Test
+  public void testPathVariable() {
+    Form form = new Form.Builder(PREFIX + "{subscriptionId}")
+      .setMethodName("PUT")
+      .addOperationType(TD.invokeAction)
+      .build();
+    Map<String, DataSchema> uriVariables = new HashMap();
+    uriVariables.put("subscriptionId", new StringSchema.Builder().build());
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put("subscriptionId", "abc");
+    TDHttpRequest request = new TDHttpRequest(form, TD.invokeAction, uriVariables, parameters);
+    assertEquals(PREFIX + "abc", request.getTarget());
+  }
+
   private void assertUserSchemaPayload(BasicClassicHttpRequest request)
-      throws UnsupportedOperationException, IOException, ProtocolException {
+    throws UnsupportedOperationException, IOException, ProtocolException {
     StringWriter writer = new StringWriter();
     IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
 

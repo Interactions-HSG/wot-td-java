@@ -10,8 +10,8 @@ public class PropertyAffordance extends InteractionAffordance {
   private final boolean observable;
 
   private PropertyAffordance(String name, DataSchema schema, boolean observable,
-      Optional<String> title, List<String> types, List<Form> forms) {
-    super(name, title, types, forms);
+      Optional<String> title, List<String> types, List<Form> forms, Optional<Map<String,DataSchema>> uriVariables) {
+    super(name, title, types, forms, uriVariables);
     this.schema = schema;
     this.observable = observable;
   }
@@ -60,7 +60,7 @@ public class PropertyAffordance extends InteractionAffordance {
 
     @Override
     public PropertyAffordance build() {
-      return new PropertyAffordance(name, schema, observable, title, types, forms);
+      return new PropertyAffordance(name, schema, observable, title, types, forms, uriVariables);
     }
   }
 }

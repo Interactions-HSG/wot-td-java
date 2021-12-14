@@ -1,11 +1,10 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import javax.swing.text.html.Option;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,8 +22,10 @@ public class InteractionAffordance {
   protected List<String> types;
   protected List<Form> forms;
 
+  protected Optional<Map<String, DataSchema>> uriVariables;
+
   protected InteractionAffordance(String name, Optional<String> title, List<String> types,
-                                  List<Form> forms) {
+                                  List<Form> forms, Optional<Map<String,DataSchema>> uriVariables) {
     if (name == null) {
       throw new InvalidTDException("The name of an affordance cannot be null.");
     }
@@ -32,6 +33,7 @@ public class InteractionAffordance {
     this.title = title;
     this.types = types;
     this.forms = forms;
+    this.uriVariables = uriVariables;
   }
 
   public String getName() {
@@ -49,6 +51,9 @@ public class InteractionAffordance {
   public List<Form> getForms() {
     return forms;
   }
+
+
+  public Optional<Map<String, DataSchema>> getUriVariables() { return uriVariables; }
 
   public boolean hasFormWithOperationType(String operationType) {
     return !forms.stream().filter(form -> form.hasOperationType(operationType))
@@ -134,6 +139,7 @@ public class InteractionAffordance {
     protected Optional<String> title;
     protected List<String> types;
     protected List<Form> forms;
+    protected Optional<Map<String,DataSchema>> uriVariables;
 
     protected Builder(String name, Form form) {
       this(name, new ArrayList<Form>(Arrays.asList(form)));
@@ -144,6 +150,7 @@ public class InteractionAffordance {
       this.title = Optional.empty();
       this.types = new ArrayList<String>();
       this.forms = forms;
+      this.uriVariables = Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -173,6 +180,31 @@ public class InteractionAffordance {
     @SuppressWarnings("unchecked")
     public S addForms(List<Form> forms) {
       this.forms.addAll(forms);
+      return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S addUriVariable(String name,DataSchema dataSchema) throws IllegalArgumentException{
+      if (dataSchema.getDatatype().equals(DataSchema.OBJECT) || dataSchema.getDatatype().equals(DataSchema.ARRAY)) {
+        throw new IllegalArgumentException();
+      } else {
+        if (this.uriVariables.isPresent()) {
+          this.uriVariables.get().put(name, dataSchema);
+        } else {
+          Map<String, DataSchema> map = new HashMap<>();
+          this.uriVariables = Optional.of(map);
+          this.uriVariables.get().put(name, dataSchema);
+        }
+        return (S) this;
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    public S addUriVariables(Map<String,DataSchema> variables) throws IllegalArgumentException{
+      for (String key : variables.keySet()){
+        addUriVariable(key,variables.get(key));
+
+      }
       return (S) this;
     }
 

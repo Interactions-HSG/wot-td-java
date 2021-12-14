@@ -28,6 +28,8 @@ public final class TD {
 
   public static final String hasForm = PREFIX + "hasForm";
 
+  public static final String hasUriTemplateSchema= PREFIX+"hasUriTemplateSchema";
+
   /* Named individuals */
   public static final String readProperty = PREFIX + "readProperty";
   public static final String writeProperty = PREFIX + "writeProperty";
