@@ -62,7 +62,7 @@ public class TDHttpRequest {
 
   public TDHttpRequest(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values){
     this.form = form;
-    this.target = UriTemplate.createUri(form.getTarget(), uriVariables, values);
+    this.target = new UriTemplate(form.getTarget()).createUri(uriVariables, values);
 
     Optional<String> methodName = form.getMethodName(operationType);
 

@@ -4,10 +4,12 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.util.*;
 
-public final class UriTemplate {
+public class UriTemplate {
 
-  private UriTemplate(){
-    throw new UnsupportedOperationException();
+  private final String template;
+
+  public UriTemplate(String expression){
+    this.template = expression;
   }
 
   public static List<String> extract(String path){
@@ -18,17 +20,14 @@ public final class UriTemplate {
       if (path.charAt(i) == '{'){
         extracted.add(s);
         s = "{";
-      }
-      else if (path.charAt(i)=='}'){
+      } else if (path.charAt(i)=='}'){
         s = s +"}";
         extracted.add(s);
         s = "";
-      }
-      else if (i==n-1){
+      } else if (i==n-1){
         s = s + path.charAt(i);
         extracted.add(s);
-      }
-      else {
+      } else {
         s = s + path.charAt(i);
       }
     }
@@ -44,18 +43,14 @@ public final class UriTemplate {
       if (c == ','){
         variables.add(s);
         s = "";
-      }
-      else if (i == n-1){
+      } else if (i == n-1){
         variables.add(s);
-      }
-      else if (c == '{' || c == '}' || c == '?' ){
+      } else if (c == '{' || c == '}' || c == '?' ){
 
-      }
-      else {
+      } else {
         s = s + c;
       }
     }
-
 
     return variables;
   }
@@ -63,8 +58,6 @@ public final class UriTemplate {
   public static Set<String> getVariables(String expression){
     return new HashSet<>(getListVariables(expression));
   }
-
-
 
   public static String replace(String expression, Map<String, DataSchema> uriVariables, Map<String, Object> values){
     String s = "";
@@ -84,8 +77,7 @@ public final class UriTemplate {
           }
         }
       }
-    }
-    else {
+    } else {
       List<String> variables = getListVariables(expression);
       int n = variables.size();
       for (int i = 0; i < n; i++) {
@@ -100,7 +92,6 @@ public final class UriTemplate {
           }
         }
       }
-
     }
 
     return s;
@@ -119,27 +110,73 @@ public final class UriTemplate {
     } else if (datatype.equals(DataSchema.BOOLEAN)) {
       Boolean value = (Boolean) object;
       return value.toString();
-    }
-    else if (datatype.equals(DataSchema.NULL)){
+    } else if (datatype.equals(DataSchema.NULL)){
       return "null";
-    }
-    else {
+    } else {
       throw new IllegalArgumentException();
     }
 
   }
 
-  public static String createUri(String path, Map<String, DataSchema> uriVariables, Map<String, Object> values){
-    List<String> extracted = extract(path);
-    String s = "";
-    int n = extracted.size();
-    for (int i = 0; i<n;i++){
-      String e = extracted.get(i);
-      if (e.charAt(0)=='{'){
-        e = replace(e,uriVariables, values);
-      }
-      s = s + e;
+  public static String getType(Object object){
+    if (object instanceof String){
+      return DataSchema.STRING;
+    } else if (object instanceof Integer){
+      return DataSchema.INTEGER;
+    } else if (object instanceof Long){
+      return DataSchema.INTEGER;
+    } else if (object instanceof Double){
+      return DataSchema.NUMBER;
+    } else if (object instanceof Boolean){
+      return DataSchema.BOOLEAN;
+    } else if (object instanceof List){
+      return DataSchema.ARRAY;
+    } else if(object == null){
+      return DataSchema.NULL;
+    } else {
+      return DataSchema.OBJECT;
     }
-    return s;
+  }
+
+  public static boolean check(Map<String, DataSchema> uriVariables, Map<String, Object> values){
+    boolean b = true;
+    for (String key: uriVariables.keySet()){
+      DataSchema schema = uriVariables.get(key);
+      Object value = values.get(key);
+      String datatype = schema.getDatatype();
+      String valueType = getType(value);
+      if (datatype.equals(valueType)){
+      }
+      else if (valueType.equals(DataSchema.INTEGER) && datatype.equals(DataSchema.NUMBER)){
+
+      }
+      else {
+        b = false;
+      }
+    }
+    return b;
+  }
+
+  public static String createUri(String path, Map<String, DataSchema> uriVariables, Map<String, Object> values) {
+    List<String> extracted = extract(path);
+    boolean b = check(uriVariables, values);
+    if (b) {
+      String s = "";
+      int n = extracted.size();
+      for (int i = 0; i < n; i++) {
+        String e = extracted.get(i);
+        if (e.charAt(0) == '{') {
+          e = replace(e, uriVariables, values);
+        }
+        s = s + e;
+      }
+      return s;
+    } else {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  public String createUri(Map<String, DataSchema> uriVariables, Map<String, Object> values){
+    return createUri(template, uriVariables, values);
   }
 }

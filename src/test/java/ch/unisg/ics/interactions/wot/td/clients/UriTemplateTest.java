@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class UriTemplateTest {
 
@@ -92,6 +92,30 @@ public class UriTemplateTest {
     System.out.println("actual: "+actual);
     String expected = "?p=abc&q=32&r=true&s=23.3";
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testCheck(){
+    Map<String, DataSchema> uriVariables = new Hashtable<>();
+    uriVariables.put("p", new StringSchema.Builder().build());
+    uriVariables.put("q", new IntegerSchema.Builder().build());
+    uriVariables.put("r1", new NumberSchema.Builder().build());
+    uriVariables.put("r2", new NumberSchema.Builder().build());
+    uriVariables.put("s", new BooleanSchema.Builder().build());
+    Map<String, Object> values = new Hashtable<>();
+    values.put("p", "abc");
+    values.put("q", Integer.valueOf(2));
+    values.put("r1", Double.valueOf(22.3));
+    values.put("r2", Integer.valueOf(3));
+    values.put("s", Boolean.TRUE);
+    boolean b = UriTemplate.check(uriVariables, values);
+    Map<String, DataSchema> uriVariables2 = new Hashtable<>();
+    uriVariables2.put("p", new ObjectSchema.Builder().build());
+    Map<String, Object> values2 = new Hashtable<>();
+    values2.put("p", "abc");
+    boolean b2 = UriTemplate.check(uriVariables2, values2);
+    assertTrue(b);
+    assertFalse(b2);
   }
 
   @Test
