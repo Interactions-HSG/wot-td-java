@@ -8,8 +8,11 @@ public class UriTemplate {
 
   private final String template;
 
+  private final List<String> extracted;
+
   public UriTemplate(String expression){
     this.template = expression;
+    this.extracted = extract(expression);
   }
 
   public static List<String> extract(String path){
@@ -157,8 +160,7 @@ public class UriTemplate {
     return b;
   }
 
-  public static String createUri(String path, Map<String, DataSchema> uriVariables, Map<String, Object> values) {
-    List<String> extracted = extract(path);
+  public String createUri( Map<String, DataSchema> uriVariables, Map<String, Object> values) {
     boolean b = check(uriVariables, values);
     if (b) {
       String s = "";
@@ -176,7 +178,4 @@ public class UriTemplate {
     }
   }
 
-  public String createUri(Map<String, DataSchema> uriVariables, Map<String, Object> values){
-    return createUri(template, uriVariables, values);
-  }
 }
