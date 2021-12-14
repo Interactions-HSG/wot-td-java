@@ -37,7 +37,7 @@ public class TDCoapRequest {
   private final List<CoapClient> executors = new ArrayList<>();
   private final ReentrantLock executorsLock = new ReentrantLock();
 
-  private final String target;
+  private String target;
 
   public TDCoapRequest(Form form, String operationType) {
     this.form = form;
@@ -48,7 +48,7 @@ public class TDCoapRequest {
 
     if (methodName.isPresent()) {
       this.request = new Request(CoAP.Code.valueOf(methodName.get()));
-      this.request.setURI(form.getTarget());
+      this.request.setURI(this.target);
     } else {
       throw new IllegalArgumentException("No default binding for the given operation type: "
         + operationType);
