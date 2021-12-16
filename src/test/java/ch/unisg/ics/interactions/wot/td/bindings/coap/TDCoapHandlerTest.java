@@ -1,5 +1,7 @@
-package ch.unisg.ics.interactions.wot.td.clients;
+package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
+import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapHandler;
+import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapResponse;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.Response;

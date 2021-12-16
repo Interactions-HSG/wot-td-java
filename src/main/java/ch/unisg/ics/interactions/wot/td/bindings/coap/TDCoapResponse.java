@@ -1,72 +1,60 @@
-package ch.unisg.ics.interactions.wot.td.clients;
-
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.eclipse.californium.core.coap.Option;
+import org.eclipse.californium.core.coap.OptionNumberRegistry;
+import org.eclipse.californium.core.coap.Response;
+
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
- * Wrapper for an HTTP response received when performing a
- * {@link ch.unisg.ics.interactions.wot.td.clients.TDHttpRequest}. The payload of the response is
+ * Wrapper for a CoAP response received when performing a
+ * {@link TDCoapRequest}. The payload of the response is
  * deserialized based on a <code>DataSchema</code> from a given <code>ThingDescription</code>.
- *
  */
-public class TDHttpResponse {
-  private final static Logger LOGGER = Logger.getLogger(TDHttpResponse.class.getCanonicalName());
+public class TDCoapResponse {
+  private final static Logger LOGGER = Logger.getLogger(TDCoapResponse.class.getCanonicalName());
 
-  private final ClassicHttpResponse response;
+  private final Response response;
   private Optional<String> payload;
 
-  public TDHttpResponse(ClassicHttpResponse response) {
+  public TDCoapResponse(Response response) {
 
     this.response = response;
 
-    HttpEntity entity = response.getEntity();
-
-    if (entity == null) {
+    if (response.getPayload() == null) {
       this.payload = Optional.empty();
     } else {
-      String encoding = entity.getContentEncoding() == null ? "UTF-8" : entity.getContentEncoding();
-
-      try {
-        this.payload = Optional.of(IOUtils.toString(entity.getContent(), encoding));
-        EntityUtils.consume(entity);
-      } catch (IOException e) {
-        LOGGER.log(Level.WARNING, e.getMessage());
-      }
+      this.payload = Optional.ofNullable(response.getPayloadString());
     }
   }
 
-  public int getStatusCode() {
-    return response.getCode();
+  public int getResponseCode() {
+    return response.getRawCode();
   }
 
-  public Map<String, String> getHeaders(){
-    Header[] headers = response.getHeaders();
-    Map<String, String> headerMap = new Hashtable<>();
-    for (int i = 0; i< headers.length; i++){
-      String key = headers[i].getName();
-      String value = headers[i].getValue();
-      headerMap.put(key, value);
+  public Map<String, String> getOptions(){
+    Map<String, String> optionMap = new Hashtable<>();
+    List<Option> optionList = response.getOptions().asSortedList();
+    for (Option option: optionList){
+      String key = OptionNumberRegistry.toString(option.getNumber());
+      String value = option.getStringValue();
+      optionMap.put(key, value);
     }
-    return headerMap;
+    return optionMap;
+  }
+
+  public String getResponseCodeName() {
+    return response.getCode().name();
   }
 
   public Optional<String> getPayload() {
@@ -97,18 +85,18 @@ public class TDHttpResponse {
    * <li>a value can be a primitive, an object represented as a <code>Map&lt;String,Object&gt;</code>
    * (that is, a nested object), or an ordered list of values of type <code>List&lt;Object&gt;</code></li>
    * </ul>
-   *
+   * <p>
    * Note: in the current implementation, the payload of the response is not yet validated against
    * the provided schema.
    *
    * @param schema schema to be used for validating the payload and constructing the map
    * @return the constructed map
    * @throws IllegalArgumentException if the payload of the response does not conform to the provided
-   * schema
+   *                                  schema
    */
   @SuppressWarnings("unchecked")
   public Map<String, Object> getPayloadAsObject(ObjectSchema schema)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     return (Map<String, Object>) getPayloadWithSchema(schema);
   }
 
@@ -117,14 +105,14 @@ public class TDHttpResponse {
    * The array payload is represented as an ordered list of
    * values of type <code>List&lt;Object&gt;</code>. Values can be primitives, objects represented
    * as <code>Map&lt;String,Object&gt;</code>, or lists of values (that is, nested lists).
-   *
+   * <p>
    * Note: in the current implementation, the payload of the response is not yet validated against
    * the provided schema.
    *
    * @param schema schema to be used for validating the payload and constructing the list
    * @return the constructed list
-   * @throws IllegalArgumentException if the payload of the response does not conform to the provided
-   * schema
+   * @throws IllegalArgumentException if the payload of the response does not conform to the
+   * provided schema
    */
   @SuppressWarnings("unchecked")
   public List<Object> getPayloadAsArray(ArraySchema schema) throws IllegalArgumentException {
@@ -136,7 +124,4 @@ public class TDHttpResponse {
     return schema.parseJson(content);
   }
 
-  public boolean isPayloadNull() {
-    return true;
-  }
 }
