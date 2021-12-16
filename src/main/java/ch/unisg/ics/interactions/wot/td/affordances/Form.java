@@ -1,8 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class Form {
 
@@ -10,6 +8,7 @@ public class Form {
   private final String contentType;
   private final Set<String> operationTypes;
   private final Optional<String> subProtocol;
+  private final Map<String, Object> additionalProperties = new HashMap<>();
   private Optional<String> methodName;
 
   private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
@@ -19,6 +18,12 @@ public class Form {
     this.contentType = mediaType;
     this.operationTypes = operationTypes;
     this.subProtocol = subProtocol;
+  }
+
+  private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
+               Optional<String> subProtocol, Map<String, Object> additionalProperties) {
+    this(href, methodName, mediaType, operationTypes, subProtocol);
+    this.additionalProperties.putAll(additionalProperties);
   }
 
   public Optional<String> getMethodName() {
@@ -60,6 +65,10 @@ public class Form {
 
   public Optional<String> getSubProtocol() {
     return subProtocol;
+  }
+
+  public Map<String, Object> getAdditionalProperties() {
+    return additionalProperties;
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation
@@ -107,6 +116,7 @@ public class Form {
     private Optional<String> methodName;
     private String contentType;
     private Optional<String> subProtocol;
+    private Map<String, Object> additionalProperties;
 
     public Builder(String target) {
       this.target = target;
@@ -114,6 +124,7 @@ public class Form {
       this.contentType = "application/json";
       this.operationTypes = new HashSet<String>();
       this.subProtocol = Optional.empty();
+      this.additionalProperties = new HashMap<>();
     }
 
     public Builder addOperationType(String operationType) {
@@ -141,9 +152,14 @@ public class Form {
       return this;
     }
 
+    public Builder addProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
     public Form build() {
       return new Form(this.target, this.methodName, this.contentType, this.operationTypes,
-        this.subProtocol);
+        this.subProtocol, this.additionalProperties);
     }
 
   }

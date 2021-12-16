@@ -567,12 +567,13 @@ public class TDGraphReaderTest {
     assertEquals(COV.observe, form.get().getSubProtocol(TD.unobserveProperty).get());
   }
 
-  @Test(expected = InvalidTDException.class)
+  @Test
   public void testFormWithInvalidProtocolBinding() {
     String testTD =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
         "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
+        "@prefix mqv: <http://www.example.org/mqtt-binding#> .\n" +
         "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
@@ -586,14 +587,20 @@ public class TDGraphReaderTest {
         "        td:name \"my_property\" ;\n" +
         "        td:isObservable true ;\n" +
         "        td:hasForm [\n" +
-        "            htv:methodName \"GET\" ;\n" +
+        "            mqv:controlPacketValue \"SUBSCRIBE\" ;\n" +
         "            hctl:hasTarget <mqtt://example.org/property> ;\n" +
         "            hctl:forContentType \"application/json\";\n" +
         "            hctl:hasOperationType td:readProperty;\n" +
         "        ] ;\n" +
         "    ] .";
 
-    new TDGraphReader(RDFFormat.TURTLE, testTD).readProperties();
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Form form = reader.readProperties().get(0).getForms().get(0);
+    Map<String, Object> p = form.getAdditionalProperties();
+
+    assertEquals(1, p.size());
+    assertEquals("SUBSCRIBE", p.get("http://www.example.org/mqtt-binding#controlPacketValue"));
   }
 
   @Test
