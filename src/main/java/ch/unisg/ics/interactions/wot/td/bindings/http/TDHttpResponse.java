@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ch.unisg.ics.interactions.wot.td.bindings.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
@@ -28,7 +29,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
  * deserialized based on a <code>DataSchema</code> from a given <code>ThingDescription</code>.
  *
  */
-public class TDHttpResponse {
+public class TDHttpResponse implements Response {
   private final static Logger LOGGER = Logger.getLogger(TDHttpResponse.class.getCanonicalName());
 
   private final ClassicHttpResponse response;

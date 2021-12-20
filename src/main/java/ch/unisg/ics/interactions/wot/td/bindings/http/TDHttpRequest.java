@@ -1,6 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
+import ch.unisg.ics.interactions.wot.td.bindings.Response;
 import ch.unisg.ics.interactions.wot.td.clients.UriTemplate;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
@@ -30,7 +32,7 @@ import java.util.logging.Logger;
  * Wrapper for constructing and executing an HTTP request based on a given <code>ThingDescription</code>.
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
  */
-public class TDHttpRequest {
+public class TDHttpRequest implements Operation {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
   private final Form form;
@@ -75,7 +77,8 @@ public class TDHttpRequest {
     return target;
   }
 
-  public TDHttpResponse execute() throws IOException {
+  @Override
+  public Response execute() throws IOException {
     HttpClient client = HttpClients.createDefault();
     HttpResponse response = client.execute(request);
     return new TDHttpResponse((ClassicHttpResponse) response);
@@ -94,6 +97,17 @@ public class TDHttpRequest {
   public TDHttpRequest addHeader(String key, String value) {
     this.request.addHeader(key, value);
     return this;
+  }
+
+  @Override
+  public void setPayload(DataSchema schema, Object payload) {
+    if (payload instanceof Map) setObjectPayload((ObjectSchema) schema, (Map<String, Object>) payload);
+    else if (payload instanceof List) setArrayPayload((ArraySchema) schema, (List<Object>) payload);
+    else if (payload instanceof String) setPrimitivePayload(schema, (String) payload);
+    else if (payload instanceof Boolean) setPrimitivePayload(schema, (Boolean) payload);
+    else if (payload instanceof Long) setPrimitivePayload(schema, (Long) payload);
+    else if (payload instanceof Double) setPrimitivePayload(schema, (Double) payload);
+    // TODO else, throw payload type error
   }
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value)

@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * {@link TDCoapRequest}. The payload of the response is
  * deserialized based on a <code>DataSchema</code> from a given <code>ThingDescription</code>.
  */
-public class TDCoapResponse {
+public class TDCoapResponse implements ch.unisg.ics.interactions.wot.td.bindings.Response {
   private final static Logger LOGGER = Logger.getLogger(TDCoapResponse.class.getCanonicalName());
 
   private final Response response;

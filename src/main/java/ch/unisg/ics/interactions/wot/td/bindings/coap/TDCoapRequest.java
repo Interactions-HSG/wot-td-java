@@ -1,6 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
+import ch.unisg.ics.interactions.wot.td.bindings.Response;
 import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
 import ch.unisg.ics.interactions.wot.td.clients.UriTemplate;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
@@ -30,7 +32,7 @@ import java.util.logging.Logger;
  * Wrapper for constructing and executing a CoAP request based on a given <code>ThingDescription</code>.
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
  */
-public class TDCoapRequest {
+public class TDCoapRequest implements Operation {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
   private final Form form;
@@ -103,7 +105,8 @@ public class TDCoapRequest {
    * @return the CoAP response
    * @throws IOException if any issue occurred
    */
-  public TDCoapResponse execute() throws IOException {
+  @Override
+  public Response execute() throws IOException {
     CoapClient client = new CoapClient();
     CoapResponse response = null;
 
@@ -193,6 +196,18 @@ public class TDCoapRequest {
   public TDCoapRequest addOption(String key, String value) {
     // TODO Support CoAP options e.g. for observation flag
     return null;
+  }
+
+  @Override
+  public void setPayload(DataSchema schema, Object payload) {
+    if (payload instanceof Map) setObjectPayload((ObjectSchema) schema, (Map<String, Object>) payload);
+    else if (payload instanceof List) setArrayPayload((ArraySchema) schema, (List<Object>) payload);
+    else if (payload instanceof String) setPrimitivePayload(schema, (String) payload);
+    else if (payload instanceof Boolean) setPrimitivePayload(schema, (Boolean) payload);
+    else if (payload instanceof Long) setPrimitivePayload(schema, (Long) payload);
+    else if (payload instanceof Double) setPrimitivePayload(schema, (Double) payload);
+    // TODO else, throw payload type error
+    // TODO add common interface to HTTP, CoAP(, and any other binding)?
   }
 
   public TDCoapRequest setPrimitivePayload(DataSchema dataSchema, boolean value)
