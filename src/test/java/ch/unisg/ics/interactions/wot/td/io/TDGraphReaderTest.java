@@ -568,7 +568,7 @@ public class TDGraphReaderTest {
   }
 
   @Test
-  public void testFormWithInvalidProtocolBinding() {
+  public void testFormWithUnknownProtocolBinding() {
     String testTD =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
