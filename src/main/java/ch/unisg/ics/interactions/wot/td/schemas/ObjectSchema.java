@@ -141,6 +141,7 @@ public class ObjectSchema extends DataSchema {
       return this;
     }
 
+    @Override
     public ObjectSchema build() throws InvalidTDException {
       for (String propertyName : required) {
         if (!properties.containsKey(propertyName)) {
