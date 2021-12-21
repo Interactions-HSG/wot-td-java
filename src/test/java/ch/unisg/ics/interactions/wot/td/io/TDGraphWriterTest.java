@@ -672,6 +672,46 @@ public class TDGraphWriterTest {
     assertIsomorphicGraphs(testTD,td);
   }
 
+  @Test
+  public void testFormWithUnknownProtocolBinding() throws IOException {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+        "    td:hasPropertyAffordance [\n" +
+        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+        "        td:name \"my_property\" ;\n" +
+        "        td:hasForm [\n" +
+        "            hctl:hasTarget <x://example.org/property> ;\n" +
+        "            hctl:forContentType \"application/json\";\n" +
+        "            hctl:hasOperationType td:readProperty;\n" +
+        "        ] ;\n" +
+        "        td:isObservable false \n" +
+        "    ] .";
+
+    Form form = new Form.Builder("x://example.org/property")
+      .addOperationType(TD.readProperty)
+      .build();
+
+    PropertyAffordance prop = new PropertyAffordance.Builder("my_property", form)
+      .addDataSchema(new IntegerSchema.Builder().build())
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder("My Thing")
+      .addThingURI("http://example.org/#thing")
+      .addProperty(prop)
+      .build();
+
+    assertIsomorphicGraphs(testTD,td);
+  }
+
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,
     RDFHandlerException, IOException {
     Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, IO_BASE_IRI);

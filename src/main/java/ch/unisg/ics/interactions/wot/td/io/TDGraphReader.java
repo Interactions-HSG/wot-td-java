@@ -331,9 +331,6 @@ public class TDGraphReader {
       } else if (Arrays.stream(COAP_URI_SCHEMES).anyMatch(targetOpt.toString()::contains)) {
         methodNameOpt = Models.objectLiteral(model.filter(formId,
           rdf.createIRI(COV.methodName), null));
-      } else {
-        throw new InvalidTDException("[" + affordanceType + "] Invalid or unsupported protocol "
-          + "binding for the URI scheme of href member.");
       }
 
       Optional<Literal> contentTypeOpt = Models.objectLiteral(model.filter(formId,
