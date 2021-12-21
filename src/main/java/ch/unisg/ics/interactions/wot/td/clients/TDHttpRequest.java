@@ -37,25 +37,20 @@ public class TDHttpRequest {
   private final BasicClassicHttpRequest request;
 
   public TDHttpRequest(Form form, String operationType) {
-    this.form = form;
-    this.target = form.getTarget();
-
-    Optional<String> methodName = form.getMethodName(operationType);
-
-    if (methodName.isPresent()) {
-      this.request = new BasicClassicHttpRequest(methodName.get(), form.getTarget());
-    } else {
-      throw new IllegalArgumentException("No default binding for the given operation type: "
-        + operationType);
-    }
-
-    this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
+    this(form, form.getTarget(), operationType);
   }
 
   public TDHttpRequest(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values) {
-    this.form = form;
-    this.target = new UriTemplate(form.getTarget()).createUri(uriVariables, values);
+    this(form, new UriTemplate(form.getTarget()).createUri(uriVariables, values), operationType);
+  }
 
+  private TDHttpRequest(Form form, String target, String operationType) {
+    if (!form.getProtocol().isPresent() || !"HTTP".equals(form.getProtocol().get())) {
+      throw new IllegalArgumentException("The HTTP protocol binding cannot be applied with the " +
+        "given form");
+    }
+    this.form = form;
+    this.target = target;
     Optional<String> methodName = form.getMethodName(operationType);
 
     if (methodName.isPresent()) {
@@ -66,8 +61,6 @@ public class TDHttpRequest {
     }
 
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
-
-
   }
 
   public String getTarget() {
