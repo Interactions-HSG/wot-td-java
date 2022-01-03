@@ -70,6 +70,7 @@ public class ThingDescriptionTest {
     assertEquals("http://example.org/", td.getBaseURI().get());
   }
 
+  @Test
   public void testGetFirstSecuritySchemeByType() {
     ThingDescription td = new ThingDescription.Builder("Secured Thing")
       .addSecurityScheme(new NoSecurityScheme())

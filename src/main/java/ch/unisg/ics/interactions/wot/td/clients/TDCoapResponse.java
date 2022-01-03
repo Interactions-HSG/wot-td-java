@@ -6,7 +6,6 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionNumberRegistry;
 import org.eclipse.californium.core.coap.Response;

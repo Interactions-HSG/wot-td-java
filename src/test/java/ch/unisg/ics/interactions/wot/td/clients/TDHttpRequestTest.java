@@ -194,7 +194,7 @@ public class TDHttpRequestTest {
   @Test
   public void testSimpleSemanticObjectPayload() throws ProtocolException, URISyntaxException,
     JsonSyntaxException, ParseException, IOException {
-    Map<String, Object> payloadVariables = new HashMap<String, Object>();
+    Map<String, Object> payloadVariables = new HashMap<>();
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
     payloadVariables.put(PREFIX + "LastName", "Ciortea");
 
@@ -207,25 +207,68 @@ public class TDHttpRequestTest {
     assertUserSchemaPayload(request);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
+  public void testMissingProtocolBinding() {
+    Form form = new Form.Builder("x://example.org/toggle")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(form, TD.invokeAction);
+    });
+
+    String expectedMessage = "The HTTP protocol binding cannot be applied with the given form";
+    assertTrue(ex.getMessage().contains(expectedMessage));
+  }
+
+  @Test
+  public void testMismatchedProtocolBinding() {
+    Form form = new Form.Builder("coap://example.org/toggle")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(form, TD.invokeAction);
+    });
+
+    String expectedMessage = "The HTTP protocol binding cannot be applied with the given form";
+    assertTrue(ex.getMessage().contains(expectedMessage));
+  }
+
+  @Test
   public void testInvalidBooleanPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
-      .getRequest();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(FORM, TD.invokeAction)
+        .setPrimitivePayload(new BooleanSchema.Builder().build(), "string");
+    });
+
+    String expectedMessage = "The payload's datatype does not match StringSchema " +
+      "(payload datatype: boolean)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidIntegerPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
-      .getRequest();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(FORM, TD.invokeAction)
+        .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5);
+    });
+
+    String expectedMessage = "The payload's datatype does not match NumberSchema " +
+      "(payload datatype: integer)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidStringPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new StringSchema.Builder().build(), true)
-      .getRequest();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(FORM, TD.invokeAction)
+        .setPrimitivePayload(new StringSchema.Builder().build(), true);
+    });
+
+    String expectedMessage = "The payload's datatype does not match BooleanSchema " +
+      "(payload datatype: string)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
   @Test
@@ -313,7 +356,7 @@ public class TDHttpRequestTest {
       .setMethodName("PUT")
       .addOperationType(TD.invokeAction)
       .build();
-    Map<String, DataSchema> uriVariables = new HashMap();
+    Map<String, DataSchema> uriVariables = new HashMap<>();
     uriVariables.put("subscriptionId", new StringSchema.Builder().build());
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("subscriptionId", "abc");

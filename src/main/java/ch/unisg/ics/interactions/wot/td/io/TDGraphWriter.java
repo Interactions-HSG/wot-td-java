@@ -6,14 +6,8 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-
+import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
