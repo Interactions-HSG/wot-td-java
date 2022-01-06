@@ -33,7 +33,7 @@ public class ProtocolBindings {
   public static Operation bind(Form form, String operationType) {
     String scheme = URI.create(form.getTarget()).getScheme();
 
-    if (registeredBindings.containsKey(scheme)) throw new BindingNotFoundException();
+    if (!registeredBindings.containsKey(scheme)) throw new BindingNotFoundException();
 
     ProtocolBinding b = registeredBindings.get(scheme);
     return b.bind(form, operationType);
