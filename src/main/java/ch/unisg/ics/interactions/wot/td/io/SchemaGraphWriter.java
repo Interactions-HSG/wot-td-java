@@ -67,6 +67,9 @@ class SchemaGraphWriter {
   private void addDataSchemaMetadata(Resource nodeId, DataSchema schema) {
     addObjectIRIs(nodeId, RDF.TYPE, schema.getSemanticTypes());
     addObjectIRIs(nodeId, rdf.createIRI(JSONSchema.enumeration), schema.getEnumeration());
+    if (schema.getContentMediaType().isPresent()) {
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.contentMediaType), schema.getContentMediaType().get());
+    }
   }
 
   private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
