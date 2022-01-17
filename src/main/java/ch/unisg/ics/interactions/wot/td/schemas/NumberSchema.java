@@ -9,14 +9,15 @@ public class NumberSchema extends DataSchema {
   final protected Optional<Double> minimum;
   final protected Optional<Double> maximum;
 
-  protected NumberSchema(Set<String> semanticTypes, Set<String> enumeration, Optional<Double> minimum,
-      Optional<Double> maximum) {
-    this(DataSchema.NUMBER, semanticTypes, enumeration, minimum, maximum);
+  protected NumberSchema(Set<String> semanticTypes, Set<String> enumeration,
+                         Optional<String> contentMediaType, Optional<Double> minimum,
+                         Optional<Double> maximum) {
+    this(DataSchema.NUMBER, semanticTypes, enumeration, contentMediaType, minimum, maximum);
   }
 
   protected NumberSchema(String numberType, Set<String> semanticTypes, Set<String> enumeration,
-      Optional<Double> minimum, Optional<Double> maximum) {
-    super(numberType, semanticTypes, enumeration);
+      Optional<String> contentMediaType, Optional<Double> minimum, Optional<Double> maximum) {
+    super(numberType, semanticTypes, enumeration, contentMediaType);
     this.minimum = minimum;
     this.maximum = maximum;
   }
@@ -59,7 +60,7 @@ public class NumberSchema extends DataSchema {
 
     @Override
     public NumberSchema build() {
-      return new NumberSchema(semanticTypes, enumeration, minimum, maximum);
+      return new NumberSchema(semanticTypes, enumeration, contentMediaType, minimum, maximum);
     }
   }
 }

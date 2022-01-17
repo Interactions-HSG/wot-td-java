@@ -330,4 +330,34 @@ public class DataSchemaTest {
     assertEquals(DataSchema.ARRAY, userGroup.getProperty("users").get().getDatatype());
     assertEquals(userSchema, ((ArraySchema) userGroup.getProperty("users").get()).getItems().get(0));
   }
+
+  @Test
+  public void testContentMediaType() {
+    IntegerSchema integerSchema = new IntegerSchema.Builder()
+      .setContentMediaType("application/json").build();
+    NumberSchema numberSchema = new NumberSchema.Builder()
+      .setContentMediaType("application/json").build();
+    StringSchema stringSchema = new StringSchema.Builder()
+      .setContentMediaType("application/json").build();
+    ArraySchema arraySchema = new ArraySchema.Builder()
+      .setContentMediaType("application/json").build();
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .setContentMediaType("application/json").build();
+    BooleanSchema booleanSchema = new BooleanSchema.Builder()
+      .setContentMediaType("application/json").build();
+
+    assertTrue(integerSchema.getContentMediaType().isPresent());
+    assertTrue(numberSchema.getContentMediaType().isPresent());
+    assertTrue(stringSchema.getContentMediaType().isPresent());
+    assertTrue(arraySchema.getContentMediaType().isPresent());
+    assertTrue(objectSchema.getContentMediaType().isPresent());
+    assertTrue(booleanSchema.getContentMediaType().isPresent());
+
+    assertEquals("application/json", integerSchema.getContentMediaType().get());
+    assertEquals("application/json", numberSchema.getContentMediaType().get());
+    assertEquals("application/json", stringSchema.getContentMediaType().get());
+    assertEquals("application/json", arraySchema.getContentMediaType().get());
+    assertEquals("application/json", objectSchema.getContentMediaType().get());
+    assertEquals("application/json", booleanSchema.getContentMediaType().get());
+  }
 }

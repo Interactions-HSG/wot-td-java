@@ -13,8 +13,9 @@ public class ObjectSchema extends DataSchema {
   final private List<String> required;
 
   protected ObjectSchema(Set<String> semanticTypes, Set<String> enumeration,
+                         Optional<String> contentMediaType,
                          Map<String, DataSchema> properties, List<String> required) {
-    super(DataSchema.OBJECT, semanticTypes, enumeration);
+    super(DataSchema.OBJECT, semanticTypes, enumeration, contentMediaType);
 
     this.properties = properties;
     this.required = required;
@@ -150,7 +151,7 @@ public class ObjectSchema extends DataSchema {
         }
       }
 
-      return new ObjectSchema(semanticTypes, enumeration, properties, required);
+      return new ObjectSchema(semanticTypes, enumeration, contentMediaType, properties, required);
     }
   }
 }

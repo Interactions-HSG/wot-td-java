@@ -23,11 +23,14 @@ public abstract class DataSchema {
   final private String datatype;
   final private Set<String> semanticTypes;
   final private Set<String> enumeration;
+  private final Optional<String> contentMediaType;
 
-  protected DataSchema(String datatype, Set<String> semanticTypes, Set<String> enumeration) {
+  protected DataSchema(String datatype, Set<String> semanticTypes, Set<String> enumeration,
+                       Optional<String> contentMediaType) {
     this.datatype = datatype;
     this.semanticTypes = semanticTypes;
     this.enumeration = enumeration;
+    this. contentMediaType = contentMediaType;
   }
 
   public abstract Object parseJson(JsonElement element);
@@ -44,6 +47,8 @@ public abstract class DataSchema {
     return enumeration;
   }
 
+  public Optional<String> getContentMediaType() { return contentMediaType; }
+
   public boolean isA(String type) {
     return semanticTypes.contains(type);
   }
@@ -52,7 +57,7 @@ public abstract class DataSchema {
     Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
     Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
 
-    return new DataSchema(DataSchema.EMPTY, semanticTypes, enumeration) {
+    return new DataSchema(DataSchema.EMPTY, semanticTypes, enumeration, Optional.empty()) {
 
       @Override
       public Object parseJson(JsonElement element) {
@@ -67,10 +72,12 @@ public abstract class DataSchema {
   public static abstract class Builder<T extends DataSchema, S extends Builder<T,S>> {
     protected Set<String> semanticTypes;
     protected Set<String> enumeration;
+    protected Optional<String> contentMediaType;
 
     protected Builder() {
       this.semanticTypes = new HashSet<String>();
       this.enumeration = new HashSet<String>();
+      this.contentMediaType = Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -88,6 +95,12 @@ public abstract class DataSchema {
     @SuppressWarnings("unchecked")
     public S addEnum(Set<String> values) {
       this.enumeration.addAll(values);
+      return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S setContentMediaType(String contentMediaType) {
+      this.contentMediaType = Optional.of(contentMediaType);
       return (S) this;
     }
 

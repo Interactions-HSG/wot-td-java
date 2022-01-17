@@ -14,9 +14,10 @@ public class ArraySchema extends DataSchema {
   final private Optional<Integer> minItems;
   final private Optional<Integer> maxItems;
 
-  protected ArraySchema(Set<String> semanticTypes, Set<String> enumeration, List<DataSchema> items,
+  protected ArraySchema(Set<String> semanticTypes, Set<String> enumeration,
+                        Optional<String> contentMediaType, List<DataSchema> items,
       Optional<Integer> minItems, Optional<Integer> maxItems) {
-    super(DataSchema.ARRAY, semanticTypes, enumeration);
+    super(DataSchema.ARRAY, semanticTypes, enumeration, contentMediaType);
 
     this.items = items;
     this.minItems = minItems;
@@ -147,7 +148,7 @@ public class ArraySchema extends DataSchema {
 
     @Override
     public ArraySchema build() {
-      return new ArraySchema(semanticTypes, enumeration, items, minItems, maxItems);
+      return new ArraySchema(semanticTypes, enumeration, contentMediaType, items, minItems, maxItems);
     }
   }
 }

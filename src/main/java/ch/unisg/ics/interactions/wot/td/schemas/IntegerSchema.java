@@ -8,8 +8,9 @@ import com.google.gson.JsonElement;
 public class IntegerSchema extends NumberSchema {
 
   protected IntegerSchema(Set<String> semanticTypes, Set<String> enumeration,
+      Optional<String> contentMediaType,
       Optional<Double> minimum, Optional<Double> maximum) {
-    super(DataSchema.INTEGER, semanticTypes, enumeration, minimum, maximum);
+    super(DataSchema.INTEGER, semanticTypes, enumeration,  contentMediaType, minimum, maximum);
   }
 
   public Optional<Integer> getMinimumAsInteger() {
@@ -50,7 +51,8 @@ public class IntegerSchema extends NumberSchema {
 
     @Override
     public IntegerSchema build() {
-      return new IntegerSchema(semanticTypes, enumeration, minimum, maximum);
+      return new IntegerSchema(semanticTypes, enumeration,
+        contentMediaType, minimum, maximum);
     }
   }
 }
