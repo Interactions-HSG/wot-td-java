@@ -1,12 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import java.util.*;
 
 public abstract class DataSchema {
   public static final String OBJECT = "object";
@@ -24,13 +21,15 @@ public abstract class DataSchema {
   final private Set<String> semanticTypes;
   final private Set<String> enumeration;
   private final Optional<String> contentMediaType;
+  private final List<DataSchema> dataSchemas;
 
   protected DataSchema(String datatype, Set<String> semanticTypes, Set<String> enumeration,
-                       Optional<String> contentMediaType) {
+                       Optional<String> contentMediaType, List<DataSchema> dataSchemas) {
     this.datatype = datatype;
     this.semanticTypes = semanticTypes;
     this.enumeration = enumeration;
-    this. contentMediaType = contentMediaType;
+    this.contentMediaType = contentMediaType;
+    this.dataSchemas = dataSchemas;
   }
 
   public abstract Object parseJson(JsonElement element);
@@ -47,17 +46,13 @@ public abstract class DataSchema {
     return enumeration;
   }
 
-  public Optional<String> getContentMediaType() { return contentMediaType; }
-
-  public boolean isA(String type) {
-    return semanticTypes.contains(type);
-  }
-
   public static DataSchema getEmptySchema() {
     Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
     Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
+    List<DataSchema> dataSchemas = new ArrayList<>();
 
-    return new DataSchema(DataSchema.EMPTY, semanticTypes, enumeration, Optional.empty()) {
+    return new DataSchema(DataSchema.EMPTY, semanticTypes, enumeration,
+      Optional.empty(), dataSchemas) {
 
       @Override
       public Object parseJson(JsonElement element) {
@@ -69,15 +64,49 @@ public abstract class DataSchema {
     };
   }
 
+  public Optional<String> getContentMediaType() {
+    return contentMediaType;
+  }
+
+  public List<DataSchema> getValidSchemas() {
+    return dataSchemas;
+  }
+
+  public List<DataSchema> getValidSchemasBySemanticType(String type) {
+    List<DataSchema> schemas = new ArrayList<>();
+    for (DataSchema schema : dataSchemas) {
+      if (schema.getSemanticTypes().contains(type)) {
+        schemas.add(schema);
+      }
+    }
+    return schemas;
+  }
+
+  public boolean isA(String type) {
+    return semanticTypes.contains(type);
+  }
+
+  public List<DataSchema> getValidSchemasByContentMediaType(String contentMediaType) {
+    List<DataSchema> schemas = new ArrayList<>();
+    for (DataSchema schema : dataSchemas) {
+      if (schema.getContentMediaType().isPresent() && contentMediaType.equals(schema.getContentMediaType().get())) {
+        schemas.add(schema);
+      }
+    }
+    return schemas;
+  }
+
   public static abstract class Builder<T extends DataSchema, S extends Builder<T,S>> {
     protected Set<String> semanticTypes;
     protected Set<String> enumeration;
     protected Optional<String> contentMediaType;
+    protected List<DataSchema> dataSchemas;
 
     protected Builder() {
       this.semanticTypes = new HashSet<String>();
       this.enumeration = new HashSet<String>();
       this.contentMediaType = Optional.empty();
+      this.dataSchemas = new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -101,6 +130,12 @@ public abstract class DataSchema {
     @SuppressWarnings("unchecked")
     public S setContentMediaType(String contentMediaType) {
       this.contentMediaType = Optional.of(contentMediaType);
+      return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S oneOf(DataSchema... dataSchemas) {
+      this.dataSchemas.addAll(Arrays.asList(dataSchemas));
       return (S) this;
     }
 

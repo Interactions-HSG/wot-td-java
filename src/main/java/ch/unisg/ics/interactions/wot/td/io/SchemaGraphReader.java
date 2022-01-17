@@ -1,27 +1,15 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NullSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class SchemaGraphReader {
   private final Model model;
@@ -180,15 +168,26 @@ class SchemaGraphReader {
 
     /* Read enumeration */
     Set<String> enumeration = Models.objectStrings(model.filter(schemaId,
-        rdf.createIRI(JSONSchema.enumeration), null));
+      rdf.createIRI(JSONSchema.enumeration), null));
     builder.addEnum(enumeration);
 
-    /* Read contentMediaType */
+    /* Read content media type */
     Optional<Literal> contentMediaType = Models.objectLiteral(model.filter(schemaId,
       rdf.createIRI(JSONSchema.contentMediaType), null));
     if (contentMediaType.isPresent()) {
       builder.setContentMediaType(contentMediaType.get().stringValue());
     }
+
+    /* Read one of schemas */
+    Set<Resource> oneOfSchemas = Models.objectResources(model.filter(schemaId,
+      rdf.createIRI(JSONSchema.oneOf), null));
+    for (Resource oneSchemaId : oneOfSchemas) {
+      Optional<DataSchema> oneSchema = readDataSchema(oneSchemaId);
+      if (oneSchema.isPresent()) {
+        builder.oneOf(oneSchema.get());
+      }
+    }
+
   }
 
 }

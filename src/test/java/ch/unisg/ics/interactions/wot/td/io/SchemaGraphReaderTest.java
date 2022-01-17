@@ -1,8 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.io.IOException;
-import java.util.Optional;
-
+import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -14,10 +15,8 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
+import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -252,17 +251,48 @@ public class SchemaGraphReaderTest {
     assertEquals(1, user.getProperties().size());
     assertTrue(user.getProperties().containsKey("full_name"));
     assertTrue(user.getProperties().get("full_name").getSemanticTypes()
-        .contains(PREFIX + "FullName"));
+      .contains(PREFIX + "FullName"));
     assertEquals(1, user.getRequiredProperties().size());
     assertTrue(user.getRequiredProperties().contains("full_name"));
   }
 
   @Test
+  public void testReadSchemaOneOf() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testObject =
+      "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix ex: <http://example.org/#> .\n" +
+        "[\n" +
+        "    a js:ObjectSchema ;\n" +
+        "    js:oneOf [ a js:ObjectSchema, ex:Schema0 ] ;\n" +
+        "    js:oneOf [ a js:ObjectSchema, ex:Schema1 ] \n" +
+        "] .";
+
+    Model model = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, testObject,
+      IO_BASE_IRI);
+    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE,
+      rdf.createIRI(JSONSchema.ObjectSchema)));
+
+    Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
+
+    assertTrue(schema.isPresent());
+    assertEquals(DataSchema.OBJECT, schema.get().getDatatype());
+    assertEquals(schema.get().getValidSchemas().size(), 2);
+
+    ObjectSchema schema0 = (ObjectSchema) schema.get().getValidSchemas().get(0);
+    ObjectSchema schema1 = (ObjectSchema) schema.get().getValidSchemas().get(1);
+
+    assertEquals(DataSchema.OBJECT, schema0.getDatatype());
+    assertEquals(DataSchema.OBJECT, schema1.getDatatype());
+  }
+
+  @Test
   public void testReadArrayMultipleSemanticObjects() throws RDFParseException,
-      RDFHandlerException, IOException {
+    RDFHandlerException, IOException {
 
     String testArray =
-        "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+      "@prefix td: <http://www.w3.org/ns/td#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "[\n" +
         "    a js:ArraySchema, <http://example.org/#UserAccountList> ;\n" +

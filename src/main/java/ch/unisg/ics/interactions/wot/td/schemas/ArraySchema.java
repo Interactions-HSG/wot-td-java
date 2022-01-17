@@ -1,13 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 
 public class ArraySchema extends DataSchema {
   final private List<DataSchema> items;
@@ -15,9 +15,9 @@ public class ArraySchema extends DataSchema {
   final private Optional<Integer> maxItems;
 
   protected ArraySchema(Set<String> semanticTypes, Set<String> enumeration,
-                        Optional<String> contentMediaType, List<DataSchema> items,
-      Optional<Integer> minItems, Optional<Integer> maxItems) {
-    super(DataSchema.ARRAY, semanticTypes, enumeration, contentMediaType);
+                        Optional<String> contentMediaType, List<DataSchema> dataSchemas,
+                        List<DataSchema> items, Optional<Integer> minItems, Optional<Integer> maxItems) {
+    super(DataSchema.ARRAY, semanticTypes, enumeration, contentMediaType, dataSchemas);
 
     this.items = items;
     this.minItems = minItems;
@@ -148,7 +148,8 @@ public class ArraySchema extends DataSchema {
 
     @Override
     public ArraySchema build() {
-      return new ArraySchema(semanticTypes, enumeration, contentMediaType, items, minItems, maxItems);
+      return new ArraySchema(semanticTypes, enumeration, contentMediaType, dataSchemas,
+        items, minItems, maxItems);
     }
   }
 }

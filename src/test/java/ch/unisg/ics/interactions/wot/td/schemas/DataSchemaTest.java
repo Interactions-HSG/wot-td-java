@@ -3,10 +3,7 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -359,5 +356,53 @@ public class DataSchemaTest {
     assertEquals("application/json", arraySchema.getContentMediaType().get());
     assertEquals("application/json", objectSchema.getContentMediaType().get());
     assertEquals("application/json", booleanSchema.getContentMediaType().get());
+  }
+
+  @Test
+  public void testOneOf() {
+    ObjectSchema objectSchema0 = new ObjectSchema.Builder()
+      .addSemanticType("sem0")
+      .setContentMediaType("application/0+json")
+      .build();
+
+    ObjectSchema objectSchema1 = new ObjectSchema.Builder()
+      .addSemanticType("sem1")
+      .setContentMediaType("application/1+json")
+      .build();
+
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .oneOf(objectSchema0, objectSchema1).build();
+
+    List<DataSchema> dataSchemas = objectSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 2);
+    assertEquals(dataSchemas.get(0), objectSchema0);
+    assertEquals(dataSchemas.get(1), objectSchema1);
+
+    List<DataSchema> dataSchemasBySemanticType = objectSchema.getValidSchemasBySemanticType("sem0");
+    assertEquals(1, dataSchemasBySemanticType.size());
+    assertEquals(objectSchema0, dataSchemasBySemanticType.get(0));
+
+    List<DataSchema> dataSchemasByContentMediaType =
+      objectSchema.getValidSchemasByContentMediaType("application/1+json");
+    assertEquals(1, dataSchemasByContentMediaType.size());
+    assertEquals(objectSchema1, dataSchemasByContentMediaType.get(0));
+
+  }
+
+  @Test
+  public void testGetOneOfBySemanticType() {
+    ObjectSchema objectSchema0 = new ObjectSchema.Builder()
+      .addSemanticType("sem0").build();
+
+    ObjectSchema objectSchema1 = new ObjectSchema.Builder()
+      .addSemanticType("sem1").build();
+
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .oneOf(objectSchema0, objectSchema1).build();
+
+    List<DataSchema> dataSchemas = objectSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 2);
+    assertEquals(dataSchemas.get(0), objectSchema0);
+    assertEquals(dataSchemas.get(1), objectSchema1);
   }
 }

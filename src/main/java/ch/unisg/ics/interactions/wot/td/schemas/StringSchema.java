@@ -1,15 +1,16 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import com.google.gson.JsonElement;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.gson.JsonElement;
 
 public class StringSchema extends DataSchema {
 
   private StringSchema(Set<String> semanticTypes, Set<String> enumeration,
-                       Optional<String> contentMediaType) {
-    super(DataSchema.STRING, semanticTypes, enumeration, contentMediaType);
+                       Optional<String> contentMediaType, List<DataSchema> dataSchemas) {
+    super(DataSchema.STRING, semanticTypes, enumeration, contentMediaType, dataSchemas);
   }
 
   @Override
@@ -25,7 +26,8 @@ public class StringSchema extends DataSchema {
 
     @Override
     public StringSchema build() {
-      return new StringSchema(semanticTypes, enumeration, contentMediaType);
+      return new StringSchema(semanticTypes, enumeration, contentMediaType,
+        dataSchemas);
     }
   }
 }

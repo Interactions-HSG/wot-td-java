@@ -1,15 +1,16 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import com.google.gson.JsonElement;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.gson.JsonElement;
 
 public class NullSchema extends DataSchema {
 
   private NullSchema(Set<String> semanticTypes, Set<String> enumeration,
-                     Optional<String> contentMediaType) {
-    super(DataSchema.NULL, semanticTypes, enumeration, contentMediaType);
+                     Optional<String> contentMediaType, List<DataSchema> dataSchemas) {
+    super(DataSchema.NULL, semanticTypes, enumeration, contentMediaType, dataSchemas);
   }
 
   @Override
@@ -25,7 +26,7 @@ public class NullSchema extends DataSchema {
 
     @Override
     public NullSchema build() {
-      return new NullSchema(semanticTypes, enumeration, contentMediaType);
+      return new NullSchema(semanticTypes, enumeration, contentMediaType, dataSchemas);
     }
   }
 }
