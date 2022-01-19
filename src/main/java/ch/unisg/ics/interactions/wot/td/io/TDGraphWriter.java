@@ -1,10 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
@@ -63,6 +60,7 @@ public class TDGraphWriter {
       .addBaseURI()
       .addProperties()
       .addActions()
+      .addEvents()
       .addGraph()
       .write(RDFFormat.TURTLE);
   }
@@ -142,6 +140,41 @@ public class TDGraphWriter {
         graphBuilder.add(actionId, rdf.createIRI(TD.hasOutputSchema), outputId);
 
         SchemaGraphWriter.write(graphBuilder, outputId, schema);
+      }
+    }
+
+    return this;
+  }
+
+  private TDGraphWriter addEvents() {
+    for (EventAffordance event : td.getEvents()) {
+      Resource eventId = addAffordance(event, TD.hasEventAffordance, TD.EventAffordance);
+
+      if (event.getSubscriptionSchema().isPresent()) {
+        DataSchema schema = event.getSubscriptionSchema().get();
+
+        Resource subscriptionId = rdf.createBNode();
+        graphBuilder.add(eventId, rdf.createIRI(TD.hasSubscriptionSchema), subscriptionId);
+
+        SchemaGraphWriter.write(graphBuilder, subscriptionId, schema);
+      }
+
+      if (event.getNotificationSchema().isPresent()) {
+        DataSchema schema = event.getNotificationSchema().get();
+
+        Resource notificationId = rdf.createBNode();
+        graphBuilder.add(eventId, rdf.createIRI(TD.hasNotificationSchema), notificationId);
+
+        SchemaGraphWriter.write(graphBuilder, notificationId, schema);
+      }
+
+      if (event.getCancellationSchema().isPresent()) {
+        DataSchema schema = event.getCancellationSchema().get();
+
+        Resource cancellationId = rdf.createBNode();
+        graphBuilder.add(eventId, rdf.createIRI(TD.hasCancellationSchema), cancellationId);
+
+        SchemaGraphWriter.write(graphBuilder, cancellationId, schema);
       }
     }
 
