@@ -16,9 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -303,6 +301,24 @@ public class SchemaGraphWriterTest {
         new ObjectSchema.Builder().addSemanticType("https://example.org/#Schema0").build(),
         new ObjectSchema.Builder().addSemanticType("https://example.org/#Schema1").build())
       .build();
+
+    assertModel(expectedSchema, schema);
+  }
+
+  @Test
+  public void testWriteSuperSchema() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String expectedSchema = TEST_SCHEMA_PREFIXES +
+      "[\n" +
+      "    a js:DataSchema ;\n" +
+      "    js:oneOf [ a js:ObjectSchema, ex:Schema0] ;\n" +
+      "    js:oneOf [ a js:StringSchema, ex:Schema1] ;\n" +
+      "] .";
+
+    List<DataSchema> dataSchemas = new ArrayList<>();
+    dataSchemas.add(new ObjectSchema.Builder().addSemanticType("https://example.org/#Schema0").build());
+    dataSchemas.add(new StringSchema.Builder().addSemanticType("https://example.org/#Schema1").build());
+    DataSchema schema = DataSchema.getSuperSchema(dataSchemas);
 
     assertModel(expectedSchema, schema);
   }

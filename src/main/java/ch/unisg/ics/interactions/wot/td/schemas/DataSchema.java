@@ -3,6 +3,7 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 public abstract class DataSchema {
@@ -16,6 +17,7 @@ public abstract class DataSchema {
   public static final String NULL = "null";
 
   public static final String EMPTY = "empty";
+  public static final String SUPER = "super";
 
   final private String datatype;
   final private Set<String> semanticTypes;
@@ -49,7 +51,7 @@ public abstract class DataSchema {
   public static DataSchema getEmptySchema() {
     Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
     Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
-    List<DataSchema> dataSchemas = new ArrayList<>();
+    List<DataSchema> dataSchemas = Collections.unmodifiableList(new ArrayList<>());
 
     return new DataSchema(DataSchema.EMPTY, semanticTypes, enumeration,
       Optional.empty(), dataSchemas) {
@@ -60,6 +62,36 @@ public abstract class DataSchema {
           throw new IllegalArgumentException("JSON element is not empty.");
         }
         return Optional.empty();
+      }
+    };
+  }
+
+  public static DataSchema getSuperSchema(List<DataSchema> dataSchemas) {
+    Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
+    Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
+
+    if (dataSchemas.isEmpty()) {
+      throw new IllegalArgumentException("No subschemas found");
+    }
+
+    return new DataSchema(DataSchema.SUPER, semanticTypes, enumeration,
+      Optional.empty(), Collections.unmodifiableList(dataSchemas)) {
+
+      @Override
+      public Object parseJson(JsonElement element) {
+        Object data = Optional.empty();
+
+        for (DataSchema validSchema : this.getValidSchemas()) {
+          try {
+            data = validSchema.parseJson(element);
+          } catch (IllegalArgumentException e) {
+          }
+        }
+
+        if (data.equals(Optional.empty())) {
+          throw new IllegalArgumentException("JSON element is not valid against any of available subschemas");
+        }
+        return data;
       }
     };
   }
@@ -135,6 +167,14 @@ public abstract class DataSchema {
 
     @SuppressWarnings("unchecked")
     public S oneOf(DataSchema... dataSchemas) {
+      Class<T> type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass())
+        .getActualTypeArguments()[0];
+      for (DataSchema dataSchema : dataSchemas) {
+        if (!type.isInstance(dataSchema)) {
+          throw new IllegalArgumentException("Schema cannot be validated against subschema " +
+            "of type " + dataSchema.getDatatype());
+        }
+      }
       this.dataSchemas.addAll(Arrays.asList(dataSchemas));
       return (S) this;
     }

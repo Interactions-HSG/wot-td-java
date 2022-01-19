@@ -7,6 +7,8 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,28 +32,50 @@ class SchemaGraphReader {
     if (!types.isEmpty()) {
       if (types.contains(rdf.createIRI(JSONSchema.ObjectSchema))) {
         return readObjectSchema(schemaId);
+
       } else if (types.contains(rdf.createIRI(JSONSchema.ArraySchema))) {
         return readArraySchema(schemaId);
+
       } else if (types.contains(rdf.createIRI(JSONSchema.BooleanSchema))) {
         BooleanSchema.Builder builder = new BooleanSchema.Builder();
         readDataSchemaMetadata(builder, schemaId);
         return Optional.of(builder.build());
+
       } else if (types.contains(rdf.createIRI(JSONSchema.NumberSchema))) {
         return readNumberSchema(schemaId);
+
       } else if (types.contains(rdf.createIRI(JSONSchema.IntegerSchema))) {
         return readIntegerSchema(schemaId);
+
       } else if (types.contains(rdf.createIRI(JSONSchema.StringSchema))) {
         StringSchema.Builder builder = new StringSchema.Builder();
         readDataSchemaMetadata(builder, schemaId);
         return Optional.of(builder.build());
+
       } else if (types.contains(rdf.createIRI(JSONSchema.NullSchema))) {
         NullSchema.Builder builder = new NullSchema.Builder();
         readDataSchemaMetadata(builder, schemaId);
         return Optional.of(builder.build());
+
+      } else if (types.contains(rdf.createIRI(JSONSchema.DataSchema))) {
+        return readSuperSchema(schemaId);
       }
     }
 
     return Optional.empty();
+  }
+
+  private Optional<DataSchema> readSuperSchema(Resource schemaId) {
+    List<DataSchema> schemas = new ArrayList<>();
+    Set<Resource> oneOfSchemas = Models.objectResources(model.filter(schemaId,
+      rdf.createIRI(JSONSchema.oneOf), null));
+    for (Resource oneSchemaId : oneOfSchemas) {
+      Optional<DataSchema> oneSchema = readDataSchema(oneSchemaId);
+      if (oneSchema.isPresent()) {
+        schemas.add(oneSchema.get());
+      }
+    }
+    return Optional.of(DataSchema.getSuperSchema(schemas));
   }
 
   private Optional<DataSchema> readObjectSchema(Resource schemaId) {
@@ -187,7 +211,6 @@ class SchemaGraphReader {
         builder.oneOf(oneSchema.get());
       }
     }
-
   }
 
 }

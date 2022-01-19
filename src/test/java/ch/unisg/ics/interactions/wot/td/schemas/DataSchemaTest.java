@@ -1,6 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import org.junit.Test;
 
 import java.util.*;
@@ -390,6 +393,28 @@ public class DataSchemaTest {
   }
 
   @Test
+  public void testOneOfInvalidSubSchema() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder().build();
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      new StringSchema.Builder().oneOf(objectSchema).build();
+    });
+    String expectedMessage = "Schema cannot be validated against subschema of type object";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testOneOfIntegerSubSchema() {
+    IntegerSchema integerSchema = new IntegerSchema.Builder().build();
+    NumberSchema numberSchema = new NumberSchema.Builder().oneOf(integerSchema).build();
+
+    List<DataSchema> dataSchemas = numberSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 1);
+    assertEquals(dataSchemas.get(0), integerSchema);
+  }
+
+  @Test
   public void testGetOneOfBySemanticType() {
     ObjectSchema objectSchema0 = new ObjectSchema.Builder()
       .addSemanticType("sem0").build();
@@ -404,5 +429,75 @@ public class DataSchemaTest {
     assertEquals(dataSchemas.size(), 2);
     assertEquals(dataSchemas.get(0), objectSchema0);
     assertEquals(dataSchemas.get(1), objectSchema1);
+  }
+
+  @Test
+  public void testObjectSchemaPayloadUknownProperties() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("prop", new IntegerSchema.Builder().build())
+      .build();
+
+    Gson gson = new Gson();
+    String invalidJsonStr = "{\"unknown-prop\": 1}";
+    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      objectSchema.parseJson(invalidJsonObject);
+    });
+    String expectedMessage = "The payload contains unknown properties: [unknown-prop]";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testSuperDataSchema() {
+    StringSchema stringSchema0 = new StringSchema.Builder()
+      .addSemanticType("sem0").build();
+
+    ObjectSchema objectSchema1 = new ObjectSchema.Builder()
+      .addProperty("prop", new IntegerSchema.Builder().build())
+      .addSemanticType("sem1").build();
+
+    DataSchema superSchema = DataSchema.getSuperSchema(Arrays.asList(stringSchema0, objectSchema1));
+
+    List<DataSchema> dataSchemas = superSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 2);
+    assertEquals(dataSchemas.get(0), stringSchema0);
+    assertEquals(dataSchemas.get(1), objectSchema1);
+
+    JsonPrimitive jsonPrimitive = new JsonPrimitive("string");
+    Object parsedJsonPrimitiveSub = stringSchema0.parseJson(jsonPrimitive);
+    Object parsedJsonPrimitiveSuper = superSchema.parseJson(jsonPrimitive);
+
+    assertTrue(parsedJsonPrimitiveSub instanceof String);
+    assertTrue(parsedJsonPrimitiveSuper instanceof String);
+    assertEquals(parsedJsonPrimitiveSub, parsedJsonPrimitiveSuper);
+
+    String jsonStr = "{\"prop\": 1}";
+    Gson gson = new Gson();
+    JsonElement jsonObject = gson.fromJson(jsonStr, JsonElement.class);
+    Object parsedJsonObjectSub = objectSchema1.parseJson(jsonObject);
+    Object parsedJsonObjectSuper = superSchema.parseJson(jsonObject);
+    assertTrue(parsedJsonObjectSub instanceof Map);
+    assertTrue(parsedJsonObjectSuper instanceof Map);
+    assertEquals(parsedJsonObjectSub, parsedJsonObjectSuper);
+
+    String invalidJsonStr = "{\"unknown-prop\": 1}";
+    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      superSchema.parseJson(invalidJsonObject);
+    });
+    String expectedMessage = "JSON element is not valid against any of available subschemas";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testSuperDataSchemaWithNoValidSchemas() {
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      DataSchema.getSuperSchema(new ArrayList<>());
+    });
+    String expectedMessage = "No subschemas found";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 }

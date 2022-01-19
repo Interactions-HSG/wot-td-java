@@ -16,6 +16,7 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -285,6 +286,39 @@ public class SchemaGraphReaderTest {
 
     assertEquals(DataSchema.OBJECT, schema0.getDatatype());
     assertEquals(DataSchema.OBJECT, schema1.getDatatype());
+  }
+
+  @Test
+  public void testReadSuperSchema() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testObject =
+      "@prefix td: <http://www.w3.org/ns/td#> .\n" +
+        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+        "@prefix ex: <http://example.org/#> .\n" +
+        "[\n" +
+        "    a js:DataSchema ;\n" +
+        "    js:oneOf [ a js:StringSchema, ex:Schema0 ] ;\n" +
+        "    js:oneOf [ a js:ObjectSchema, ex:Schema1 ] \n" +
+        "] .";
+
+    Model model = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, testObject,
+      IO_BASE_IRI);
+    Optional<Resource> nodeId = Models.subject(model.filter(null, RDF.TYPE,
+      rdf.createIRI(JSONSchema.DataSchema)));
+
+    Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
+
+    assertTrue(schema.isPresent());
+    assertEquals(DataSchema.SUPER, schema.get().getDatatype());
+    assertEquals(schema.get().getValidSchemas().size(), 2);
+
+    List<DataSchema> schemas0 = schema.get().getValidSchemasBySemanticType("http://example.org/#Schema0");
+    List<DataSchema> schemas1 = schema.get().getValidSchemasBySemanticType("http://example.org/#Schema1");
+
+    assertEquals(1, schemas0.size());
+    assertEquals(1, schemas1.size());
+    assertEquals(DataSchema.STRING, schemas0.get(0).getDatatype());
+    assertEquals(DataSchema.OBJECT, schemas1.get(0).getDatatype());
   }
 
   @Test

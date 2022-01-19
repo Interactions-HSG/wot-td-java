@@ -51,6 +51,9 @@ class SchemaGraphWriter {
       case DataSchema.NULL:
         addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.NullSchema));
         break;
+      case DataSchema.SUPER:
+        addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.DataSchema));
+        break;
       case DataSchema.EMPTY:
         break;
       default:
