@@ -35,6 +35,13 @@ public class ObjectSchema extends DataSchema {
     JsonObject objPayload = element.getAsJsonObject();
     Map<String, Object> data = new HashMap<String, Object>();
 
+    List<String> unknownProperties = objPayload.keySet().stream()
+      .filter(e -> !properties.containsKey(e))
+      .collect(Collectors.toList());
+    if (!unknownProperties.isEmpty()) {
+      throw new IllegalArgumentException("The payload contains unknown properties: " + unknownProperties);
+    }
+
     for (String propName : properties.keySet()) {
       JsonElement prop = objPayload.get(propName);
       if (prop == null) {
