@@ -338,7 +338,7 @@ public class TDGraphReader {
       }
 
     } catch (InvalidTDException e) {
-      throw new InvalidTDException("Invalid action definition.", e);
+      throw new InvalidTDException("Invalid event definition.", e);
     }
 
     return eventBuilder.build();
