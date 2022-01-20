@@ -13,7 +13,7 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
   private final TokenLocation in;
   private final Optional<String> name;
 
-  protected TokenBasedSecurityScheme(TokenLocation in, Optional<String> name, String schemeName, Map<String, String> configuration, Set<String> semanticTypes) {
+  protected TokenBasedSecurityScheme(TokenLocation in, Optional<String> name, String schemeName, Map<String, Object> configuration, Set<String> semanticTypes) {
     super(schemeName, configuration, semanticTypes);
     this.in = in;
     this.name = name;
@@ -93,18 +93,18 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public S addConfiguration(Map<String, String> configuration) {
+    public S addConfiguration(Map<String, Object> configuration) {
       this.configuration.putAll(configuration);
       if (configuration.containsKey(WoTSec.in)) {
         try {
-          this.addTokenLocation(TokenLocation.valueOf(configuration.get(WoTSec.in)
+          this.addTokenLocation(TokenLocation.valueOf(String.valueOf(configuration.get(WoTSec.in))
             .toUpperCase(Locale.ENGLISH)));
         } catch (IllegalArgumentException e) {
           throw new InvalidTDException("Invalid token location", e);
         }
       }
       if (configuration.containsKey(WoTSec.name)) {
-        this.addTokenName(configuration.get(WoTSec.name));
+        this.addTokenName((String) configuration.get(WoTSec.name));
       }
       return (S) this;
     }

@@ -10,7 +10,7 @@ public class PSKSecurityScheme extends SecurityScheme {
 
   private final Optional<String> identity;
 
-  protected PSKSecurityScheme(Optional<String> identity, Map<String, String> configuration,
+  protected PSKSecurityScheme(Optional<String> identity, Map<String, Object> configuration,
                               Set<String> semanticTypes) {
     super(SecurityScheme.PSK, configuration, semanticTypes);
     this.identity = identity;
@@ -44,10 +44,10 @@ public class PSKSecurityScheme extends SecurityScheme {
      * @return the builder
      */
     @Override
-    public PSKSecurityScheme.Builder addConfiguration(Map<String, String> configuration) {
+    public PSKSecurityScheme.Builder addConfiguration(Map<String, Object> configuration) {
       super.addConfiguration(configuration);
       if (configuration.containsKey(WoTSec.identity)) {
-        this.addIdentity(configuration.get(WoTSec.identity));
+        this.addIdentity(String.valueOf(configuration.get(WoTSec.identity)));
       }
       return this;
     }

@@ -13,7 +13,7 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
   private final QualityOfProtection qop;
 
   protected DigestSecurityScheme(QualityOfProtection qop, TokenLocation in, Optional<String> name,
-                                 Map<String, String> configuration, Set<String> semanticTypes) {
+                                 Map<String, Object> configuration, Set<String> semanticTypes) {
     super(in, name, SecurityScheme.DIGEST, configuration, semanticTypes);
     this.qop = qop;
   }
@@ -79,11 +79,11 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
      * @return the builder
      */
     @Override
-    public DigestSecurityScheme.Builder addConfiguration(Map<String, String> configuration) {
+    public DigestSecurityScheme.Builder addConfiguration(Map<String, Object> configuration) {
       super.addConfiguration(configuration);
       if (configuration.containsKey(WoTSec.qop)) {
         try {
-          addQoP(QualityOfProtection.fromString(configuration.get(WoTSec.qop)
+          addQoP(QualityOfProtection.fromString(String.valueOf(configuration.get(WoTSec.qop))
             .toUpperCase(Locale.ENGLISH)));
         } catch (IllegalArgumentException e) {
           throw new InvalidTDException("Invalid token location", e);

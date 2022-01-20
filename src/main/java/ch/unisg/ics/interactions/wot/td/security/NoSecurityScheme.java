@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class NoSecurityScheme extends SecurityScheme {
 
-  protected NoSecurityScheme(Map<String, String> configuration, Set<String> semanticTypes) {
+  protected NoSecurityScheme(Map<String, Object> configuration, Set<String> semanticTypes) {
     super(SecurityScheme.NOSEC, configuration, semanticTypes);
   }
 

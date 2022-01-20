@@ -15,7 +15,7 @@ public class BearerSecurityScheme extends TokenBasedSecurityScheme {
   protected BearerSecurityScheme(Optional<String> authorization, String alg,
                                  String format, TokenLocation in,
                                  Optional<String> name,
-                                 Map<String, String> configuration, Set<String> semanticTypes) {
+                                 Map<String, Object> configuration, Set<String> semanticTypes) {
     super(in, name, SecurityScheme.BEARER, configuration, semanticTypes);
     this.authorization = authorization;
     this.alg = alg;
@@ -76,16 +76,16 @@ public class BearerSecurityScheme extends TokenBasedSecurityScheme {
      * @return the builder
      */
     @Override
-    public BearerSecurityScheme.Builder addConfiguration(Map<String, String> configuration) {
+    public BearerSecurityScheme.Builder addConfiguration(Map<String, Object> configuration) {
       super.addConfiguration(configuration);
       if (configuration.containsKey(WoTSec.authorization)) {
-        this.addAuthorization(configuration.get(WoTSec.authorization));
+        this.addAuthorization(String.valueOf(configuration.get(WoTSec.authorization)));
       }
       if (configuration.containsKey(WoTSec.alg)) {
-        this.addAlg(configuration.get(WoTSec.alg));
+        this.addAlg(String.valueOf(configuration.get(WoTSec.alg)));
       }
       if (configuration.containsKey(WoTSec.format)) {
-        this.addFormat(configuration.get(WoTSec.format));
+        this.addFormat(String.valueOf(configuration.get(WoTSec.format)));
       }
       return this;
     }

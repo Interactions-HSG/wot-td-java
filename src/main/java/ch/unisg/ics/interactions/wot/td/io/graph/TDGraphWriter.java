@@ -19,8 +19,7 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A writer for serializing TDs as RDF graphs.
@@ -81,7 +80,7 @@ public class TDGraphWriter extends AbstractTDWriter {
 
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemeId);
 
-      Map<String, String> configuration = scheme.getConfiguration();
+      Map<String, Object> configuration = scheme.getConfiguration();
 
       for (String semanticType : scheme.getSemanticTypes()) {
         graphBuilder.add(schemeId, RDF.TYPE, rdf.createIRI(semanticType));
@@ -91,7 +90,13 @@ public class TDGraphWriter extends AbstractTDWriter {
         if (!(configurationEntry.getKey()).equals("scheme")) {
           try {
             IRI confTypeIri = rdf.createIRI((String) configurationEntry.getKey());
-            graphBuilder.add(schemeId, confTypeIri, configurationEntry.getValue());
+            Object confValue = configurationEntry.getValue();
+            List<?> list = new ArrayList<>();
+            if (confValue.getClass().isArray()) {
+              list = Arrays.asList((Object[]) confValue);
+            }
+             graphBuilder.add(schemeId, confTypeIri, confValue);
+
           } catch (IllegalArgumentException e) {
             throw new InvalidTDException("The type of a security configuration entry must be " +
               "a valid IRI:" + configurationEntry.getKey());

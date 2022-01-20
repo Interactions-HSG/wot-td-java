@@ -16,10 +16,10 @@ public abstract class SecurityScheme {
   public static final String OAUTH2 = "oauth2";
 
   private final String schemeName;
-  private final Map<String, String> configuration;
+  private final Map<String, Object> configuration;
   private final Set<String> semanticTypes;
 
-  protected SecurityScheme(String schemeName, Map<String, String> configuration,
+  protected SecurityScheme(String schemeName, Map<String, Object> configuration,
                            Set<String> semanticTypes) {
     this.schemeName = schemeName;
     this.configuration = configuration;
@@ -43,7 +43,7 @@ public abstract class SecurityScheme {
    *
    * @return the security configuration
    */
-  public Map<String, String> getConfiguration() {
+  public Map<String, Object> getConfiguration() {
     return configuration;
   }
 
@@ -53,7 +53,7 @@ public abstract class SecurityScheme {
 
   public static abstract class Builder<T extends SecurityScheme,
     S extends Builder> {
-    protected Map<String, String> configuration;
+    protected Map<String, Object> configuration;
     protected Set<String> semanticTypes;
 
 
@@ -63,7 +63,7 @@ public abstract class SecurityScheme {
     }
 
     @SuppressWarnings("unchecked")
-    public S addConfiguration(Map<String, String> map) {
+    public S addConfiguration(Map<String, Object> map) {
       this.configuration.putAll(map);
       return (S) this;
     }

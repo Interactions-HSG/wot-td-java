@@ -14,6 +14,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.algebra.Str;
 
 import javax.json.*;
 import java.io.ByteArrayOutputStream;
@@ -129,15 +130,26 @@ public class TDJsonWriter extends AbstractTDWriter {
       JsonObjectBuilder configurationBuilder = Json.createObjectBuilder();
 
       SecurityScheme scheme = definition.getValue();
-      Map<String, String> configurationDetails = scheme.getConfiguration();
+      Map<String, Object> configurationDetails = scheme.getConfiguration();
       for (String configurationName : configurationDetails.keySet()) {
 
+        String shortConfName = getPrefixedAnnotation(configurationName);
         if (JWot.JSON_SECURITY_PARAMS.containsKey(configurationName)) {
-          configurationBuilder.add((String) JWot.JSON_SECURITY_PARAMS.get(configurationName),
-            configurationDetails.get(configurationName));
-        } else {
-          configurationBuilder.add(getPrefixedAnnotation(configurationName),
-            configurationDetails.get(configurationName));
+          shortConfName = String.valueOf(JWot.JSON_SECURITY_PARAMS.get(configurationName));
+        }
+
+        if (configurationDetails.get(configurationName) instanceof String) {
+          configurationBuilder.add(shortConfName,
+            String.valueOf(configurationDetails.get(configurationName)));
+        } else if (configurationDetails.get(configurationName) instanceof Set) {
+          Set confValuesSet = (Set) configurationDetails.get(configurationName);
+          JsonArrayBuilder confValuesBuilder = Json.createArrayBuilder();
+          for (Object confValue : confValuesSet) {
+            if (confValue instanceof String) {
+              confValuesBuilder.add(String.valueOf(confValue));
+            }
+          }
+          configurationBuilder.add(shortConfName,confValuesBuilder.build());
         }
       }
       String definitionName = definition.getKey();

@@ -9,7 +9,7 @@ import java.util.Set;
 public class BasicSecurityScheme extends TokenBasedSecurityScheme {
 
   protected BasicSecurityScheme(TokenLocation in, Optional<String> name,
-                                Map<String, String> configuration, Set<String> semanticTypes) {
+                                Map<String, Object> configuration, Set<String> semanticTypes) {
     super(in, name, SecurityScheme.BASIC, configuration, semanticTypes);
   }
 

@@ -4,12 +4,12 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.io.json.TDJsonWriter;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -24,10 +24,11 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
+import javax.json.JsonObject;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 
@@ -310,6 +311,34 @@ public class TDGraphWriterTest {
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("psk", new PSKSecurityScheme.Builder().build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testOAuth2SecurityScheme() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+      "        wotsec:authorization \"https://example.com/authorization\" ;\n" +
+      "        wotsec:token \"https://example.com/token/1\" ;\n" +
+      "        wotsec:refresh \"https://example.com/token/2\" ;\n" +
+      "        wotsec:scopes \"limited\", \"special\" ;\n" +
+      "        wotsec:flow  \"code\";\n" +
+      "    ] .\n";
+
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("oauth2", new OAuth2SecurityScheme.Builder("code")
+        .addAuthorization("https://example.com/authorization")
+        .addToken("https://example.com/token/1")
+        .addRefresh("https://example.com/token/2")
+        .addScopes(new HashSet<>(Arrays.asList("limited", "special")))
+        .build())
       .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -630,4 +659,5 @@ public class TDGraphWriterTest {
 
     return builder.build();
   }
+
 }

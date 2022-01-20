@@ -13,15 +13,24 @@ public final class WoTSec {
   public static final String DigestSecurityScheme = PREFIX + "DigestSecurityScheme";
   public static final String BearerSecurityScheme = PREFIX + "BearerSecurityScheme";
   public static final String PSKSecurityScheme = PREFIX + "PSKSecurityScheme";
+  public static final String OAuth2SecurityScheme = PREFIX + "OAuth2SecurityScheme";
+
+  /* Object properties */
+  public static final String authorization = PREFIX + "authorization";
+  public static final String token = PREFIX + "token";
+  public static final String refresh = PREFIX + "refresh";
 
   /* Datatype properties */
+  public static final String alg = PREFIX + "alg";
+  public static final String flow = PREFIX + "flow";
+  public static final String format = PREFIX + "format";
+  public static final String identity = PREFIX + "identity";
   public static final String in = PREFIX + "in";
   public static final String name = PREFIX + "name";
   public static final String qop = PREFIX + "qop";
-  public static final String authorization = PREFIX + "authorization";
-  public static final String alg = PREFIX + "alg";
-  public static final String format = PREFIX + "format";
-  public static final String identity = PREFIX + "identity";
+  public static final String scopes = PREFIX + "scopes";
+
+
 
   public static IRI createIRI(String fragment) {
     return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
