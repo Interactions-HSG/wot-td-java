@@ -518,6 +518,30 @@ public class TDGraphReaderTest {
   }
 
   @Test
+  public void testReadPSKSecuritySchemeNonStringValue() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:PSKSecurityScheme ;\n" +
+        "        wotsec:identity 192 ;\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof PSKSecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
+    assertEquals(scheme.getSchemeName(), "psk");
+    assertEquals("192", ((PSKSecurityScheme) scheme).getIdentity().get());
+  }
+
+  @Test
   public void testPSKSecuritySchemeDefaultValues() {
     String testTD =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
@@ -534,6 +558,40 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
     assertEquals(scheme.getSchemeName(), "psk");
     assertFalse(((PSKSecurityScheme) scheme).getIdentity().isPresent());
+  }
+
+  @Test
+  public void testReadOAuth2SecurityScheme() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:authorization \"https://example.com/authorization\" ;\n" +
+        "        wotsec:token \"https://example.com/token/1\" ;\n" +
+        "        wotsec:refresh \"https://example.com/token/2\" ;\n" +
+        "        wotsec:scopes \"limited\", \"special\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof OAuth2SecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals(scheme.getSchemeName(), "oauth2");
+    assertEquals("https://example.com/authorization", ((OAuth2SecurityScheme) scheme).getAuthorization().get());
+    assertEquals("https://example.com/token/1", ((OAuth2SecurityScheme) scheme).getToken().get());
+    assertEquals("https://example.com/token/2", ((OAuth2SecurityScheme) scheme).getRefresh().get());
+    assertEquals(2, ((OAuth2SecurityScheme) scheme).getScopes().get().size());
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("special"));
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("limited"));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
   }
 
   @Test
