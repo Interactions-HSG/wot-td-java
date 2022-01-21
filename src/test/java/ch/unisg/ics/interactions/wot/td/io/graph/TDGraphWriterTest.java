@@ -300,7 +300,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testPSKSecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+  public void testPSKSecuritySchemeNonStringConf() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -338,6 +338,26 @@ public class TDGraphWriterTest {
         .addToken("https://example.com/token/1")
         .addRefresh("https://example.com/token/2")
         .addScopes(new HashSet<>(Arrays.asList("limited", "special")))
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testOAuth2SecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+      "        wotsec:flow  \"code\";\n" +
+      "    ] .\n";
+
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("oauth2", new OAuth2SecurityScheme.Builder("code")
         .build())
       .build();
 

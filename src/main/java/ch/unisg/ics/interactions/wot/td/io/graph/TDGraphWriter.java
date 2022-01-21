@@ -86,17 +86,21 @@ public class TDGraphWriter extends AbstractTDWriter {
         graphBuilder.add(schemeId, RDF.TYPE, rdf.createIRI(semanticType));
       }
 
-      for (Map.Entry configurationEntry : configuration.entrySet()) {
+      for (Map.Entry<String,Object> configurationEntry : configuration.entrySet()) {
         if (!(configurationEntry.getKey()).equals("scheme")) {
           try {
-            IRI confTypeIri = rdf.createIRI((String) configurationEntry.getKey());
+            IRI confTypeIri = rdf.createIRI(configurationEntry.getKey());
             Object confValue = configurationEntry.getValue();
-            List<?> list = new ArrayList<>();
-            if (confValue.getClass().isArray()) {
-              list = Arrays.asList((Object[]) confValue);
+            List<Object> confValues = new ArrayList<>();
+            if (confValue instanceof Set) {
+              confValues.addAll((Collection<?>) confValue);
             }
-             graphBuilder.add(schemeId, confTypeIri, confValue);
-
+            else {
+              confValues.add(confValue);
+            }
+            for (Object objConfValue : confValues) {
+              graphBuilder.add(schemeId, confTypeIri, objConfValue);
+            }
           } catch (IllegalArgumentException e) {
             throw new InvalidTDException("The type of a security configuration entry must be " +
               "a valid IRI:" + configurationEntry.getKey());
