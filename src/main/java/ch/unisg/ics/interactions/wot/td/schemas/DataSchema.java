@@ -58,8 +58,8 @@ public abstract class DataSchema {
 
       @Override
       public Object parseJson(JsonElement element) {
-        if (!element.equals(new JsonObject().entrySet())) {
-          throw new IllegalArgumentException("JSON element is not empty.");
+        if (!element.equals(new JsonObject())) {
+          throw new IllegalArgumentException("JSON element is not an empty JSON object");
         }
         return Optional.empty();
       }

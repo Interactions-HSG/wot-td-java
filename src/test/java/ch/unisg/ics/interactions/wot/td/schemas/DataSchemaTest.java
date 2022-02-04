@@ -3,6 +3,7 @@ package ch.unisg.ics.interactions.wot.td.schemas;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.junit.Test;
 
@@ -52,6 +53,25 @@ public class DataSchemaTest {
     DataSchema schema = DataSchema.getEmptySchema();
     schema.getEnumeration().add("a");
   }
+
+  @Test
+  public void testEmptySchemaPayload() {
+    DataSchema schema = DataSchema.getEmptySchema();
+    Gson gson = new Gson();
+
+    JsonElement emptyElement = new JsonObject();
+    Object emptyParsed = schema.parseJson(emptyElement);
+    assertEquals(Optional.empty(), emptyParsed);
+
+    JsonElement nonEmptyElement = gson.fromJson("true", JsonElement.class);
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      schema.parseJson(nonEmptyElement);
+    });
+    String expectedMessage = "JSON element is not an empty JSON object";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
 
   @Test
   public void testStringSchema() {
