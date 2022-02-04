@@ -192,6 +192,25 @@ public class DataSchemaTest {
   }
 
   @Test
+  public void testObjectSchemaPayloadUknownProperties() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("prop", new IntegerSchema.Builder().build())
+      .build();
+
+    Gson gson = new Gson();
+    String invalidJsonStr = "{\"unknown-prop\": 1, \"prop\": 2}";
+    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
+
+    Object parsedPayload = objectSchema.parseJson(invalidJsonObject);
+    assertTrue(parsedPayload instanceof Map);
+    Map parsedPayloadMap = (Map) parsedPayload;
+    assertTrue(parsedPayloadMap.containsKey("prop"));
+    assertFalse(parsedPayloadMap.containsKey("unknown-prop"));
+    assertEquals(1, parsedPayloadMap.keySet().size());
+    assertEquals(2, (parsedPayloadMap).get("prop"));
+  }
+
+  @Test
   public void testSchemaNestedObjects() {
     assertEquals(2, userGroupSchema.getProperties().size());
     assertEquals(userSchema, userGroupSchema.getProperty("admin").get());
@@ -431,27 +450,6 @@ public class DataSchemaTest {
     assertEquals(dataSchemas.get(1), objectSchema1);
   }
 
-
-  @SuppressWarnings("Unchecked")
-  @Test
-  public void testObjectSchemaPayloadUknownProperties() {
-    ObjectSchema objectSchema = new ObjectSchema.Builder()
-      .addProperty("prop", new IntegerSchema.Builder().build())
-      .build();
-
-    Gson gson = new Gson();
-    String invalidJsonStr = "{\"unknown-prop\": 1, \"prop\": 2}";
-    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
-
-    Object parsedPayload = objectSchema.parseJson(invalidJsonObject);
-    assertTrue(parsedPayload instanceof Map);
-    Map parsedPayloadMap = (Map) parsedPayload;
-    assertTrue(parsedPayloadMap.containsKey("prop"));
-    assertFalse(parsedPayloadMap.containsKey("unknown-prop"));
-    assertEquals(1, parsedPayloadMap.keySet().size());
-    assertEquals(2, (parsedPayloadMap).get("prop"));
-  }
-
   @Test
   public void testSuperDataSchema() {
     StringSchema stringSchema0 = new StringSchema.Builder()
@@ -485,12 +483,21 @@ public class DataSchemaTest {
     assertTrue(parsedJsonObjectSuper instanceof Map);
     assertEquals(parsedJsonObjectSub, parsedJsonObjectSuper);
 
-    String invalidJsonStr = "{\"unknown-prop\": 1}";
-    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
-    Object parsedPayload = superSchema.parseJson(invalidJsonObject);
+    String unknownJsonStr = "{\"unknown-prop\": 1}";
+    JsonElement unknownJsonObject = gson.fromJson(unknownJsonStr, JsonElement.class);
+    Object parsedPayload = superSchema.parseJson(unknownJsonObject);
     assertTrue(parsedPayload instanceof Map);
     Map parsedPayloadMap = (Map) parsedPayload;
     assertEquals(0, parsedPayloadMap.keySet().size());
+
+    String invalidJsonStr = "{\"prop\": \"invalid-value\"}";
+    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      superSchema.parseJson(invalidJsonObject);
+    });
+    String expectedMessage = "JSON element is not valid against any of available subschemas";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test

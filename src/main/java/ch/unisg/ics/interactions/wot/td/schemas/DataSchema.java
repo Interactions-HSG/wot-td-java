@@ -83,7 +83,9 @@ public abstract class DataSchema {
 
         for (DataSchema validSchema : this.getValidSchemas()) {
           try {
+            System.out.println(validSchema.getDatatype());
             data = validSchema.parseJson(element);
+            break;
           } catch (IllegalArgumentException e) {
           }
         }
