@@ -431,6 +431,8 @@ public class DataSchemaTest {
     assertEquals(dataSchemas.get(1), objectSchema1);
   }
 
+
+  @SuppressWarnings("Unchecked")
   @Test
   public void testObjectSchemaPayloadUknownProperties() {
     ObjectSchema objectSchema = new ObjectSchema.Builder()
@@ -438,14 +440,16 @@ public class DataSchemaTest {
       .build();
 
     Gson gson = new Gson();
-    String invalidJsonStr = "{\"unknown-prop\": 1}";
+    String invalidJsonStr = "{\"unknown-prop\": 1, \"prop\": 2}";
     JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      objectSchema.parseJson(invalidJsonObject);
-    });
-    String expectedMessage = "The payload contains unknown properties: [unknown-prop]";
-    String actualMessage = exception.getMessage();
-    assertTrue(actualMessage.contains(expectedMessage));
+
+    Object parsedPayload = objectSchema.parseJson(invalidJsonObject);
+    assertTrue(parsedPayload instanceof Map);
+    Map parsedPayloadMap = (Map) parsedPayload;
+    assertTrue(parsedPayloadMap.containsKey("prop"));
+    assertFalse(parsedPayloadMap.containsKey("unknown-prop"));
+    assertEquals(1, parsedPayloadMap.keySet().size());
+    assertEquals(2, (parsedPayloadMap).get("prop"));
   }
 
   @Test
@@ -483,12 +487,10 @@ public class DataSchemaTest {
 
     String invalidJsonStr = "{\"unknown-prop\": 1}";
     JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      superSchema.parseJson(invalidJsonObject);
-    });
-    String expectedMessage = "JSON element is not valid against any of available subschemas";
-    String actualMessage = exception.getMessage();
-    assertTrue(actualMessage.contains(expectedMessage));
+    Object parsedPayload = superSchema.parseJson(invalidJsonObject);
+    assertTrue(parsedPayload instanceof Map);
+    Map parsedPayloadMap = (Map) parsedPayload;
+    assertEquals(0, parsedPayloadMap.keySet().size());
   }
 
   @Test
