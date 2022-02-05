@@ -4,7 +4,10 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.*;
@@ -14,6 +17,9 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+
+import java.sql.Timestamp;
+import java.util.Date;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -69,7 +75,7 @@ public class TDGraphReader {
       .addProperties(reader.readProperties())
       .addActions(reader.readActions())
       .addEvents(reader.readEvents())
-        .addGraph(reader.getGraph());
+      .addGraph(reader.getGraph());
 
     Optional<String> thingURI = reader.getThingURI();
     if (thingURI.isPresent()) {
@@ -154,26 +160,62 @@ public class TDGraphReader {
     return Optional.empty();
   }
 
-  List<SecurityScheme> readSecuritySchemes() {
-    Set<Resource> nodeIds = Models.objectResources(model.filter(thingId,
-        rdf.createIRI(TD.hasSecurityConfiguration), null));
+  Map<String, SecurityScheme> readSecuritySchemes() {
+    Set<Resource> schemeIds = Models.objectResources(model.filter(thingId,
+      rdf.createIRI(TD.hasSecurityConfiguration), null));
 
-    List<SecurityScheme> schemes = new ArrayList<>();
+    if (schemeIds.isEmpty()) {
+      throw new InvalidTDException("Missing mandatory security configuration.");
+    }
 
-    for (Resource node : nodeIds) {
-      Optional<IRI> securityScheme = Models.objectIRI(model.filter(node, RDF.TYPE, null));
+    Map<String, SecurityScheme> schemes = new HashMap<String, SecurityScheme>();
 
-      if (securityScheme.isPresent()) {
-        Optional<SecurityScheme> scheme = SecurityScheme.fromRDF(securityScheme.get().stringValue(),
-            model, node);
+    for (Resource schemeId : schemeIds) {
+      SecurityScheme scheme;
+      Set<IRI> schemeTypeIRIs = Models.objectIRIs(model.filter(schemeId, RDF.TYPE, null));
 
-        if (scheme.isPresent()) {
-          schemes.add(scheme.get());
+      Set<String> semanticTypes = schemeTypeIRIs.stream()
+        .map(iri -> iri.stringValue())
+        .collect(Collectors.toSet());
+
+      try {
+        if (semanticTypes.contains(WoTSec.NoSecurityScheme)) {
+          scheme = SecurityScheme.getNoSecurityScheme();
         }
+        else if (semanticTypes.contains(WoTSec.APIKeySecurityScheme)) {
+          scheme = readAPIKeySecurityScheme(schemeId, semanticTypes);
+        } else {
+          throw new InvalidTDException("Unknown type of security scheme");
+        }
+
+        String securityName = getUniqueSecurityName(scheme.getSchemeName());
+        schemes.put(securityName, scheme);
+      } catch (Exception e) {
+        throw new InvalidTDException("Invalid security scheme configuration" , e);
       }
     }
 
     return schemes;
+  }
+
+  void readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?,?> schemeBuilder, Resource schemeId) {
+  }
+
+  SecurityScheme readAPIKeySecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+    APIKeySecurityScheme.Builder schemeBuilder = new APIKeySecurityScheme.Builder();
+
+    Optional<Literal> in = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.in), null));
+    if (in.isPresent()) {
+      schemeBuilder.addTokenLocation(TokenLocation.fromString(in.get().stringValue()));
+    }
+
+    Optional<Literal> name = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.name), null));
+    if (name.isPresent()) {
+      schemeBuilder.addTokenName(name.get().stringValue());
+    }
+
+    schemeBuilder.addSemanticTypes(semanticTypes);
+    return schemeBuilder.build();
   }
 
   List<PropertyAffordance> readProperties() {
@@ -468,6 +510,12 @@ public class TDGraphReader {
       newStr = str;
     }
     return new StringReader(newStr);
+  }
+
+  private String getUniqueSecurityName(String securitySchemeName) {
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    Date date = new Date();
+    return securitySchemeName + "_" + timestamp.getTime();
   }
 
 }

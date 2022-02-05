@@ -5,7 +5,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -74,10 +74,10 @@ public class TDHttpRequest {
   }
 
   public TDHttpRequest setAPIKey(APIKeySecurityScheme scheme, String token) {
-    if (scheme.getIn() == TokenLocation.HEADER) {
-      this.request.setHeader(scheme.getName().get(), token);
+    if (scheme.getTokenLocation() == TokenLocation.HEADER) {
+      this.request.setHeader(scheme.getTokenName().get(), token);
     } else {
-      LOGGER.info("API key could not be added in " + scheme.getIn().name());
+      LOGGER.info("API key could not be added in " + scheme.getTokenLocation());
     }
 
     return this;

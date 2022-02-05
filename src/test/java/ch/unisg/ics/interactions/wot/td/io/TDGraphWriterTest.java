@@ -7,8 +7,8 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
@@ -47,6 +47,7 @@ public class TDGraphWriterTest {
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "@prefix saref: <https://saref.etsi.org/core/> .\n" +
+      "@prefix ex: <https://example.org#> .\n" +
       "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
   @Test
@@ -59,7 +60,7 @@ public class TDGraphWriterTest {
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addSecurityScheme(new NoSecurityScheme())
+        .addSecurityScheme("nodec_sc", SecurityScheme.getNoSecurityScheme())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -74,25 +75,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
-        .build();
-
-    assertIsomorphicGraphs(testTD, td);
-  }
-
-  @Test
-  public void testWriteAPIKeySecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
-    String testTD = PREFIXES +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"HEADER\" ;\n" +
-        "        wotsec:name \"X-API-Key\" ;\n" +
-        "    ] .\n";
-
-    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
-        .addThingURI(THING_IRI)
-        .addSecurityScheme(new APIKeySecurityScheme(TokenLocation.HEADER, "X-API-Key"))
+        .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -113,7 +96,7 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://iotschema.org/Light")
-        .addSecurityScheme(new NoSecurityScheme())
+        .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -135,7 +118,7 @@ public class TDGraphWriterTest {
         .addThingURI(THING_IRI)
         .addSemanticType("http://w3id.org/eve#Artifact")
         .addSemanticType("http://w3id.org/eve#Artifact")
-        .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
         .build();
 
     assertIsomorphicGraphs(testTD, td);
@@ -187,7 +170,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
+        .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
         .addProperty(property)
         .build();
 
@@ -222,7 +205,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
-        .addSecurityScheme(new NoSecurityScheme())
+        .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
         .addProperty(property)
         .build();
 
@@ -260,7 +243,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
       .addProperty(property)
       .build();
 
@@ -375,7 +358,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
       .addAction(action)
       .build();
 
@@ -474,7 +457,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
       .addEvent(event)
       .build();
 
@@ -543,7 +526,7 @@ public class TDGraphWriterTest {
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
-      .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
       .addEvent(event)
       .build();
 
@@ -821,6 +804,36 @@ public class TDGraphWriterTest {
     assertIsomorphicGraphs(testTD,td);
   }
 
+  // Test APIKeySecurityScheme
+  @Test
+  public void testWriteAPIKeySecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"X-API-Key\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription tdSimple = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("apikey_sc", new APIKeySecurityScheme.Builder()
+        .addSemanticType("https://example.org#Type")
+        .addToken(TokenLocation.HEADER, "X-API-Key").build())
+      .build();
+
+    ThingDescription tdVerbose = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("apikey_sc", new APIKeySecurityScheme.Builder()
+        .addSemanticType("https://example.org#Type")
+        .addTokenLocation(TokenLocation.HEADER)
+        .addTokenName("X-API-Key").build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, tdSimple);
+    assertIsomorphicGraphs(testTD, tdVerbose);
+  }
+
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,
     RDFHandlerException, IOException {
     Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, IO_BASE_IRI);
@@ -833,6 +846,7 @@ public class TDGraphWriterTest {
       .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
       .setNamespace("dct", "http://purl.org/dc/terms/")
       .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+      .setNamespace("ex", "https://example.org#")
       .setNamespace("saref", "https://saref.etsi.org/core/")
       .write();
 
@@ -848,7 +862,7 @@ public class TDGraphWriterTest {
     ThingDescription.Builder builder = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
         .addBaseURI("http://example.org/")
-        .addSecurityScheme(new NoSecurityScheme());
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme());
 
     for (PropertyAffordance property : properties) {
       builder.addProperty(property);

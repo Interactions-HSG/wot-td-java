@@ -6,13 +6,10 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -23,7 +20,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -39,15 +38,11 @@ public class TDGraphReaderTest {
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "@prefix saref: <https://saref.etsi.org/core/> .\n" +
+      "@prefix ex: <https://example.org#> .\n" +
       "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
   private static final String TEST_SIMPLE_TD =
-    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    PREFIXES +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
@@ -225,12 +220,7 @@ public class TDGraphReaderTest {
       "} ]";
 
   private static final String TEST_IO_HEAD =
-    "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    PREFIXES +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
@@ -271,99 +261,6 @@ public class TDGraphReaderTest {
   }
 
   @Test
-  public void testReadOneSecurityScheme() {
-    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
-
-    assertEquals(1, reader.readSecuritySchemes().size());
-
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme ->
-        scheme.getSchemeType().equals(WoTSec.NoSecurityScheme)));
-  }
-
-  @Test
-  public void testReadAPIKeySecurityScheme() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"header\" ;\n" +
-        "        wotsec:name \"X-API-Key\" ;\n" +
-        "  ] .";
-
-    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
-
-    assertEquals(1, reader.readSecuritySchemes().size());
-
-    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
-    assertTrue(scheme instanceof APIKeySecurityScheme);
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
-    assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getIn());
-    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getName().get());
-  }
-
-  @Test
-  public void testAPIKeySecuritySchemeDefaultValues() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] .";
-
-    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
-    assertEquals(1, reader.readSecuritySchemes().size());
-    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
-    assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getIn());
-    assertFalse(((APIKeySecurityScheme) scheme).getName().isPresent());
-  }
-
-  @Test(expected = InvalidTDException.class)
-  public void testAPIKeySecuritySchemeInvalidTokenLocation() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"bla\" ;\n" +
-        "  ] .";
-
-    new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
-  }
-
-  @Test
-  public void testReadMultipleSecuritySchemes() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> .";
-
-    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
-
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.NoSecurityScheme)));
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.APIKeySecurityScheme)));
-  }
-
-  @Test
   public void testReadOneSimpleProperty() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
 
@@ -384,14 +281,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testReadFormWithHttpAndCoapBindings() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTD = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -604,12 +494,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testFormWithUnknownProtocolBinding() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTD = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -639,14 +524,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testReadSubProtocolStringAndIRI() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix cov: <http://www.example.org/coap-binding#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> . \n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTD = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -712,13 +590,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testReadOnePropertyNoSchema() {
-    String testTD =
-        "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTD = PREFIXES +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
@@ -765,13 +637,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testReadMultipleSimpleActions() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTD = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -1010,8 +876,8 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.NoSecurityScheme)));
+    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSemanticTypes()
+      .contains(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
 
     // Check action metadata
@@ -1044,9 +910,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testMissingMandatoryTitle() {
-    String testTDWithMissingTitle =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+    String testTDWithMissingTitle = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
@@ -1064,13 +928,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testMissingMandatoryPropertyAffordanceName() {
-    String testTDWithMissingAffordanceName =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTDWithMissingAffordanceName = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -1101,13 +959,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testMissingMandatoryActionAffordanceName() {
-    String testTDWithMissingAffordanceName =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String testTDWithMissingAffordanceName = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -1138,12 +990,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testUriVariable(){
-    String TDDescription = "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String TDDescription = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
       "  dct:title \"My Lamp Thing\";\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme\n" +
@@ -1175,12 +1022,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testManyUriVariables(){
-    String TDDescription = "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String TDDescription = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
       "  dct:title \"My Lamp Thing\";\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme\n" +
@@ -1216,13 +1058,7 @@ public class TDGraphReaderTest {
 
   @Test
   public void testUriVariablePropertyAffordance(){
-    String TDDescription =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+    String TDDescription = PREFIXES +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
@@ -1282,11 +1118,125 @@ public class TDGraphReaderTest {
     assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
   }
 
+  //Test security schemes
+  @Test
+  public void testReadOneSecurityScheme() {
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> nosecSchemes = getSecurityNamesforSchemeName(SecurityScheme.NOSEC, schemes);
+    assertEquals(1, nosecSchemes.size());
+
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme ->
+      scheme.getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
+  }
+
+  @Test
+  public void testReadAPIKeySecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"X-API-Key\" ;\n" +
+      "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> apikeySchemes = getSecurityNamesforSchemeName(SecurityScheme.APIKEY, schemes);
+    assertEquals(1, apikeySchemes.size());
+
+    SecurityScheme scheme = schemes.get(apikeySchemes.get(0));
+    assertTrue(scheme instanceof APIKeySecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertEquals(TokenLocation.HEADER,
+      ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertTrue(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
+    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getTokenName().get());
+  }
+
+  @Test
+  public void testAPIKeySecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> apikeySchemes = getSecurityNamesforSchemeName(SecurityScheme.APIKEY, schemes);
+    assertEquals(1, apikeySchemes.size());
+
+    SecurityScheme scheme = schemes.get(apikeySchemes.get(0));
+    assertTrue(scheme instanceof APIKeySecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
+    assertEquals(TokenLocation.QUERY,
+      ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertFalse(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test
+  public void testAPIKeySecuritySchemeInvalidTokenLocation() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+      "        wotsec:in \"bla\" ;\n" +
+      "  ] .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+    });
+    String expectedMessage = "Invalid security scheme configuration";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadMultipleSecuritySchemes() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(2, reader.readSecuritySchemes().size());
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
+      .getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
+      .getSemanticTypes().contains(WoTSec.APIKeySecurityScheme)));
+  }
+
   private void assertForm(Form form, String methodName, String target,
                           String contentType, String operationType) {
     assertEquals(methodName, form.getMethodName().get());
     assertEquals(target, form.getTarget());
     assertEquals(contentType, form.getContentType());
     assertTrue(form.hasOperationType(operationType));
+  }
+
+  private List<String> getSecurityNamesforSchemeName(String schemeName, Map<String, SecurityScheme> schemes) {
+    return schemes.keySet()
+      .stream()
+      .filter(s -> s.startsWith(schemeName))
+      .collect(Collectors.toList());
   }
 }
