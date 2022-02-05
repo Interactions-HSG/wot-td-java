@@ -19,9 +19,9 @@ public abstract class DataSchema {
   public static final String EMPTY = "empty";
   public static final String SUPER = "super";
 
-  final private String datatype;
-  final private Set<String> semanticTypes;
-  final private Set<String> enumeration;
+  private final String datatype;
+  private final Set<String> semanticTypes;
+  private final Set<String> enumeration;
   private final Optional<String> contentMediaType;
   private final List<DataSchema> dataSchemas;
 
