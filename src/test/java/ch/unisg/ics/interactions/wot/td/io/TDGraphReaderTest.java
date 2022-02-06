@@ -1056,7 +1056,7 @@ public class TDGraphReaderTest {
       TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
     });
 
-    String expectedMessage = "Missing mandatory title.";
+    String expectedMessage = "Missing mandatory title";
     String actualMessage = exception.getMessage();
 
     assertTrue(actualMessage.contains(expectedMessage));
@@ -1091,8 +1091,8 @@ public class TDGraphReaderTest {
 
     StringWriter writer = new StringWriter();
     exception.printStackTrace(new PrintWriter(writer));
-    String expectedMessage = "Invalid property definition.";
-    String expectedRootMessage = "Missing mandatory affordance name.";
+    String expectedMessage = "Invalid property definition";
+    String expectedRootMessage = "Missing mandatory affordance name";
     String actualMessage = writer.toString();
 
     assertTrue(actualMessage.contains(expectedMessage));
@@ -1128,8 +1128,8 @@ public class TDGraphReaderTest {
 
     StringWriter writer = new StringWriter();
     exception.printStackTrace(new PrintWriter(writer));
-    String expectedMessage = "Invalid action definition.";
-    String expectedRootMessage = "Missing mandatory affordance name.";
+    String expectedMessage = "Invalid action definition";
+    String expectedRootMessage = "Missing mandatory affordance name";
     String actualMessage = writer.toString();
 
     assertTrue(actualMessage.contains(expectedMessage));

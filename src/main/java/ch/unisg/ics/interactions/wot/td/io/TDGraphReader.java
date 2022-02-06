@@ -15,11 +15,8 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.eclipse.rdf4j.rio.helpers.TurtleParserSettings;
-import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -33,8 +30,8 @@ import java.util.stream.Collectors;
  * method.
  */
 public class TDGraphReader {
-  private static final String[] HTTP_URI_SCHEMES = new String[]{"http", "https"};
-  private static final String[] COAP_URI_SCHEMES = new String[]{"coap", "coaps"};
+  private static final String[] HTTP_URI_SCHEMES = {"http", "https"};
+  private static final String[] COAP_URI_SCHEMES = {"coap", "coaps"};
 
   private final Resource thingId;
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
@@ -96,7 +93,7 @@ public class TDGraphReader {
       thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration),
         null)).get();
     } catch (NoSuchElementException e) {
-      throw new InvalidTDException("Missing mandatory security definitions.", e);
+      throw new InvalidTDException("Missing mandatory security definitions", e);
     }
   }
 
@@ -126,7 +123,7 @@ public class TDGraphReader {
       parser.parse(stringReader);
 
       if (RDFFormat.TURTLE.equals(format)) {
-        validateHref(((TDTurtleParser) parser).getTdBase());
+        validateHref(readBaseURI());
       }
 
     } catch (RDFParseException | RDFHandlerException | IOException e) {
@@ -147,15 +144,12 @@ public class TDGraphReader {
   }
 
   String readThingTitle() {
-  	Literal thingTitle;
-
-    try {
-      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();
-    } catch (NoSuchElementException e) {
-      throw new InvalidTDException("Missing mandatory title.", e);
+    Optional<Literal> thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null));
+    if (thingTitle.isPresent()) {
+      return thingTitle.get().stringValue();
+    } else {
+      throw new InvalidTDException("Missing mandatory title");
     }
-
-    return thingTitle.stringValue();
   }
 
   Set<String> readThingTypes() {
@@ -230,7 +224,7 @@ public class TDGraphReader {
 
         properties.add(builder.build());
       } catch (InvalidTDException e) {
-        throw new InvalidTDException("Invalid property definition.", e);
+        throw new InvalidTDException("Invalid property definition", e);
       }
     }
 
@@ -252,7 +246,7 @@ public class TDGraphReader {
         ActionAffordance action = readAction(affordanceId);
         actions.add(action);
       } catch (InvalidTDException e) {
-        throw new InvalidTDException("Invalid action definition.", e);
+        throw new InvalidTDException("Invalid action definition", e);
       }
     }
 
@@ -278,7 +272,7 @@ public class TDGraphReader {
             actionBuilder.addInputSchema(input.get());
           }
         } catch (InvalidTDException e) {
-          throw new InvalidTDException("Invalid action definition.", e);
+          throw new InvalidTDException("Invalid action definition", e);
         }
       }
 
@@ -292,7 +286,7 @@ public class TDGraphReader {
         }
       }
     } catch (InvalidTDException e) {
-      throw new InvalidTDException("Invalid action definition.", e);
+      throw new InvalidTDException("Invalid action definition", e);
     }
 
     return actionBuilder.build();
@@ -313,7 +307,7 @@ public class TDGraphReader {
         EventAffordance event = readEvent(affordanceId);
         events.add(event);
       } catch (InvalidTDException e) {
-        throw new InvalidTDException("Invalid event definition.", e);
+        throw new InvalidTDException("Invalid event definition", e);
       }
     }
 
@@ -360,23 +354,21 @@ public class TDGraphReader {
       }
 
     } catch (InvalidTDException e) {
-      throw new InvalidTDException("Invalid event definition.", e);
+      throw new InvalidTDException("Invalid event definition", e);
     }
 
     return eventBuilder.build();
   }
 
   private String readAffordanceName(Resource affordanceId) {
-    Literal affordanceName;
+    Optional<Literal> affordanceName = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name),
+      null));
 
-    try {
-      affordanceName = Models.objectLiteral(model.filter(affordanceId, rdf.createIRI(TD.name),
-        null)).get();
-    } catch (NoSuchElementException e) {
-      throw new InvalidTDException("Missing mandatory affordance name.", e);
+    if (affordanceName.isPresent()) {
+      return affordanceName.get().stringValue();
+    } else {
+      throw new InvalidTDException("Missing mandatory affordance name");
     }
-
-    return affordanceName.stringValue();
   }
 
   private void readAffordanceMetadata(InteractionAffordance
@@ -395,16 +387,15 @@ public class TDGraphReader {
     }
   }
 
-  private void validateHref(Optional<IRI> baseURI) {
-    Optional<ParsedIRI> parsedBaseURI = Optional.empty();
+  private void validateHref(Optional<String> baseURI) {
     ValueFactory rdf = SimpleValueFactory.getInstance();
-    List<Statement> validHref = new ArrayList<>();
-    List<Statement> inValidHref = new ArrayList<>();
 
     try {
-      if (baseURI.isPresent()) {
-        parsedBaseURI = Optional.of(new ParsedIRI(baseURI.get().toString()));
-      }
+      List<Statement> validHref = new ArrayList<>();
+      List<Statement> inValidHref = new ArrayList<>();
+
+      Optional<ParsedIRI> parsedBaseURI = baseURI.isPresent() ?
+        Optional.of(new ParsedIRI(baseURI.get())) : Optional.empty();
 
       // Look for hctl:hasTarget predicates
       Model hrefModel = model.filter(null, rdf.createIRI(HCTL.hasTarget), null);
@@ -511,8 +502,8 @@ public class TDGraphReader {
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
       String target = targetOpt.get().stringValue();
       Form.Builder builder = new Form.Builder(target)
-          .setContentType(contentType)
-          .addOperationTypes(ops);
+        .setContentType(contentType)
+        .addOperationTypes(ops);
 
       if (methodNameOpt.isPresent()) {
         builder.setMethodName(methodNameOpt.get().stringValue());
@@ -527,118 +518,10 @@ public class TDGraphReader {
 
     if (forms.isEmpty()) {
       throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have "
-        + "at least one valid form.");
+        + "at least one valid form");
     }
 
     return forms;
   }
-
-  protected class TDTurtleParser extends TurtleParser {
-
-    private final List<IRI> predicates;
-    private Optional<IRI> tdBase;
-
-    protected TDTurtleParser() {
-      super();
-      List<IRI> predicatesAsync = new ArrayList<IRI>();
-      predicates = Collections.synchronizedList(predicatesAsync);
-    }
-
-    @Override
-    public synchronized void parse(Reader reader, String baseURI)
-      throws IOException, RDFParseException, RDFHandlerException {
-      predicates.clear();
-      tdBase = Optional.empty();
-      super.parse(reader, baseURI);
-    }
-
-    @Override
-    protected void parsePredicateObjectList() throws IOException, RDFParseException, RDFHandlerException {
-      predicate = parsePredicate();
-      predicates.add(predicate);
-
-      skipWSC();
-
-      parseObjectList();
-
-      while (skipWSC() == ';') {
-        readCodePoint();
-
-        int c = skipWSC();
-
-        if (c == '.' || // end of triple
-          c == ']' || c == '}') { // end of predicateObjectList inside
-          break;
-        } else if (c == ';') {
-          // empty predicateObjectList, skip to next
-          continue;
-        }
-
-        predicate = parsePredicate();
-        predicates.add(predicate);
-        skipWSC();
-
-        parseObjectList();
-      }
-    }
-
-    @Override
-    protected Value parseValue() throws IOException, RDFParseException, RDFHandlerException {
-      if (getParserConfig().get(TurtleParserSettings.ACCEPT_TURTLESTAR) && peekIsTripleValue()) {
-        return parseTripleValue();
-      }
-
-      int c = peekCodePoint();
-
-      if (c == '<') {
-        return parseTargetOrOtherURI();
-      } else {
-        return super.parseValue();
-      }
-    }
-
-    protected Value parseTargetOrOtherURI() throws IOException {
-      int predicateNum = predicates.size();
-
-      //href values will be later resolved against the base URI of the Thing Description
-      if ((predicateNum > 0) && rdf.createIRI(HCTL.hasTarget).equals(predicates.get(predicateNum - 1))) {
-        return parseFormTargetURI();
-      }
-
-      IRI iri = super.parseURI();
-      if ((predicateNum > 0) && rdf.createIRI(TD.hasBase).equals(predicates.get(predicateNum - 1))) {
-        tdBase = Optional.of(iri);
-      }
-      return iri;
-    }
-
-    private Value parseFormTargetURI() throws IOException {
-      String targetURI = "";
-      int c = readCodePoint();
-      verifyCharacterOrFail(c, "<");
-
-      while (true) {
-        c = readCodePoint();
-
-        if (c == '>') {
-          break;
-        } else if (c == -1) {
-          throwEOFException();
-        }
-        char[] ch = Character.toChars(c);
-        targetURI += String.valueOf(ch);
-      }
-
-      try {
-        return rdf.createIRI(targetURI);
-      } catch (IllegalArgumentException e) {
-        return rdf.createLiteral(targetURI);
-      }
-    }
-
-    protected Optional<IRI> getTdBase() {
-      return tdBase;
-    }
-  }
-
 }
+
