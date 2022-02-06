@@ -410,8 +410,8 @@ public class TDGraphReader {
           // Try to resolve href based on the TD base URI
           String hrefResolved = parsedBaseURI.get().resolve(href);
           // Store valid statement with resolved href
-          Statement hrefResolvedSt = rdf.createStatement(hrefSt.getSubject(), hrefSt.getPredicate(), rdf.createIRI(hrefResolved),
-            hrefSt.getContext());
+          Statement hrefResolvedSt = rdf.createStatement(hrefSt.getSubject(), hrefSt.getPredicate(),
+            rdf.createIRI(hrefResolved));
           validHref.add(hrefResolvedSt);
         } else {
           // Throws an exception if href is not a valid URI
