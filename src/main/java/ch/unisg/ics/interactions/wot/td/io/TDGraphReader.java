@@ -7,6 +7,7 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.apache.hc.client5.http.fluent.Request;
+import org.eclipse.rdf4j.common.net.ParsedIRI;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -14,9 +15,13 @@ import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.helpers.TurtleParserSettings;
+import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -85,28 +90,45 @@ public class TDGraphReader {
   }
 
   TDGraphReader(RDFFormat format, String representation) {
-    loadModel(format, representation, "");
-
-    Optional<String> baseURI = readBaseURI();
-    if (baseURI.isPresent()) {
-      loadModel(format, representation, baseURI.get());
-    }
+    loadModel(format, representation);
 
     try {
       thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration),
-          null)).get();
+        null)).get();
     } catch (NoSuchElementException e) {
       throw new InvalidTDException("Missing mandatory security definitions.", e);
     }
   }
 
-  private void loadModel(RDFFormat format, String representation, String baseURI) {
+  public static boolean isValidIRI(String iri) {
+    try {
+      SimpleValueFactory.getInstance().createIRI(iri);
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  private void loadModel(RDFFormat format, String representation) {
+    RDFParser parser;
+
     this.model = new LinkedHashModel();
 
-    RDFParser parser = Rio.createParser(format);
+    if (RDFFormat.TURTLE.equals(format)) {
+      parser = new TDTurtleParser();
+    } else {
+      parser = Rio.createParser(format);
+    }
+
     parser.setRDFHandler(new StatementCollector(model));
+
     try (StringReader stringReader = conversion(representation, format)) {
-      parser.parse(stringReader, baseURI);
+      parser.parse(stringReader);
+
+      if (RDFFormat.TURTLE.equals(format)) {
+        validateHref(((TDTurtleParser) parser).getTdBase());
+      }
+
     } catch (RDFParseException | RDFHandlerException | IOException e) {
       throw new InvalidTDException("RDF Syntax Error", e);
     }
@@ -373,15 +395,94 @@ public class TDGraphReader {
     }
   }
 
+  private void validateHref(Optional<IRI> baseURI) {
+    Optional<ParsedIRI> parsedBaseURI = Optional.empty();
+    ValueFactory rdf = SimpleValueFactory.getInstance();
+    List<Statement> validHref = new ArrayList<>();
+    List<Statement> inValidHref = new ArrayList<>();
+
+    try {
+      if (baseURI.isPresent()) {
+        parsedBaseURI = Optional.of(new ParsedIRI(baseURI.get().toString()));
+      }
+
+      // Look for hctl:hasTarget predicates
+      Model hrefModel = model.filter(null, rdf.createIRI(HCTL.hasTarget), null);
+      for (Statement hrefSt : hrefModel) {
+        // Get href object
+        String href = hrefSt.getObject().stringValue();
+
+        // If href is not a valid URI and there is a TD base URI, attempt to resolve href
+        if (!isValidIRI(href) && parsedBaseURI.isPresent()) {
+          // Store invalid statement
+          inValidHref.add(hrefSt);
+          // Try to resolve href based on the TD base URI
+          String hrefResolved = parsedBaseURI.get().resolve(href);
+          // Store valid statement with resolved href
+          Statement hrefResolvedSt = rdf.createStatement(hrefSt.getSubject(), hrefSt.getPredicate(), rdf.createIRI(hrefResolved),
+            hrefSt.getContext());
+          validHref.add(hrefResolvedSt);
+        } else {
+          // Throws an exception if href is not a valid URI
+          rdf.createIRI(href);
+        }
+      }
+
+      // Update the model to contain only valid href
+      inValidHref.forEach(model::remove);
+      model.addAll(validHref);
+    } catch (URISyntaxException | IllegalArgumentException e) {
+      throw new InvalidTDException("RDF Syntax Error", e);
+    }
+  }
+
+  private void readUriVariables(InteractionAffordance
+                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
+    Set<Resource> uriVariableIds = Models.objectResources(model.filter(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), null));
+    for (Resource uriVariableId : uriVariableIds) {
+      readUriVariable(builder, uriVariableId);
+    }
+  }
+
+  private void readUriVariable(InteractionAffordance
+                                 .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource uriVariableId) {
+    Optional<DataSchema> opDataSchema = SchemaGraphReader.readDataSchema(uriVariableId, model);
+    Optional<Literal> opNameLiteral = Models.objectLiteral(model.filter(uriVariableId, rdf.createIRI(TD.name), null));
+    if (opDataSchema.isPresent() && opNameLiteral.isPresent()) {
+      String name = opNameLiteral.get().stringValue();
+      DataSchema schema = opDataSchema.get();
+      builder.addUriVariable(name, schema);
+    }
+  }
+
+  private StringReader conversion(String str, RDFFormat format) {
+    String newStr = "";
+    if (format.equals(RDFFormat.TURTLE)) {
+      for (int i = 0; i < str.length(); i++) {
+        char c = str.charAt(i);
+        if (c == '{') {
+          newStr = newStr + "%7B";
+        } else if (c == '}') {
+          newStr = newStr + "%7D";
+        } else {
+          newStr = newStr + c;
+        }
+      }
+    } else {
+      newStr = str;
+    }
+    return new StringReader(newStr);
+  }
+
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
     List<Form> forms = new ArrayList<>();
 
     Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId,
-        rdf.createIRI(TD.hasForm), null));
+      rdf.createIRI(TD.hasForm), null));
 
     for (Resource formId : formIdSet) {
       Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, rdf.createIRI(HCTL.hasTarget),
-          null));
+        null));
 
       if (!targetOpt.isPresent()) {
         continue;
@@ -426,48 +527,118 @@ public class TDGraphReader {
 
     if (forms.isEmpty()) {
       throw new InvalidTDException("[" + affordanceType + "] All interaction affordances should have "
-        + "at least one valid.");
+        + "at least one valid form.");
     }
 
     return forms;
   }
 
-  private void readUriVariables(InteractionAffordance
-                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId){
-    Set<Resource> uriVariableIds = Models.objectResources(model.filter(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), null));
-    for (Resource uriVariableId : uriVariableIds){
-      readUriVariable(builder, uriVariableId);
+  protected class TDTurtleParser extends TurtleParser {
+
+    private final List<IRI> predicates;
+    private Optional<IRI> tdBase;
+
+    protected TDTurtleParser() {
+      super();
+      List<IRI> predicatesAsync = new ArrayList<IRI>();
+      predicates = Collections.synchronizedList(predicatesAsync);
     }
-  }
 
-  private void readUriVariable(InteractionAffordance
-                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource uriVariableId) {
-      Optional<DataSchema> opDataSchema = SchemaGraphReader.readDataSchema(uriVariableId, model);
-      Optional<Literal> opNameLiteral = Models.objectLiteral(model.filter(uriVariableId, rdf.createIRI(TD.name), null));
-      if (opDataSchema.isPresent() && opNameLiteral.isPresent()){
-        String name = opNameLiteral.get().stringValue();
-        DataSchema schema = opDataSchema.get();
-        builder.addUriVariable(name, schema);
-      }
-  }
+    @Override
+    public synchronized void parse(Reader reader, String baseURI)
+      throws IOException, RDFParseException, RDFHandlerException {
+      predicates.clear();
+      tdBase = Optional.empty();
+      super.parse(reader, baseURI);
+    }
 
-  private StringReader conversion(String str, RDFFormat format){
-    String newStr = "";
-    if (format.equals(RDFFormat.TURTLE)) {
-      for (int i = 0; i < str.length(); i++) {
-        char c = str.charAt(i);
-        if (c == '{') {
-          newStr = newStr + "%7B";
-        } else if (c == '}') {
-          newStr = newStr + "%7D";
-        } else {
-          newStr = newStr + c;
+    @Override
+    protected void parsePredicateObjectList() throws IOException, RDFParseException, RDFHandlerException {
+      predicate = parsePredicate();
+      predicates.add(predicate);
+
+      skipWSC();
+
+      parseObjectList();
+
+      while (skipWSC() == ';') {
+        readCodePoint();
+
+        int c = skipWSC();
+
+        if (c == '.' || // end of triple
+          c == ']' || c == '}') { // end of predicateObjectList inside
+          break;
+        } else if (c == ';') {
+          // empty predicateObjectList, skip to next
+          continue;
         }
+
+        predicate = parsePredicate();
+        predicates.add(predicate);
+        skipWSC();
+
+        parseObjectList();
       }
-    } else {
-      newStr = str;
     }
-    return new StringReader(newStr);
+
+    @Override
+    protected Value parseValue() throws IOException, RDFParseException, RDFHandlerException {
+      if (getParserConfig().get(TurtleParserSettings.ACCEPT_TURTLESTAR) && peekIsTripleValue()) {
+        return parseTripleValue();
+      }
+
+      int c = peekCodePoint();
+
+      if (c == '<') {
+        return parseTargetOrOtherURI();
+      } else {
+        return super.parseValue();
+      }
+    }
+
+    protected Value parseTargetOrOtherURI() throws IOException {
+      int predicateNum = predicates.size();
+
+      //href values will be later resolved against the base URI of the Thing Description
+      if ((predicateNum > 0) && rdf.createIRI(HCTL.hasTarget).equals(predicates.get(predicateNum - 1))) {
+        return parseFormTargetURI();
+      }
+
+      IRI iri = super.parseURI();
+      if ((predicateNum > 0) && rdf.createIRI(TD.hasBase).equals(predicates.get(predicateNum - 1))) {
+        tdBase = Optional.of(iri);
+      }
+      return iri;
+    }
+
+    private Value parseFormTargetURI() throws IOException {
+      String targetURI = "";
+      int c = readCodePoint();
+      verifyCharacterOrFail(c, "<");
+
+      while (true) {
+        c = readCodePoint();
+
+        if (c == '>') {
+          break;
+        } else if (c == -1) {
+          throwEOFException();
+        }
+        char[] ch = Character.toChars(c);
+        targetURI += String.valueOf(ch);
+      }
+
+      try {
+        return rdf.createIRI(targetURI);
+      } catch (IllegalArgumentException e) {
+        return rdf.createLiteral(targetURI);
+      }
+    }
+
+    protected Optional<IRI> getTdBase() {
+      return tdBase;
+    }
   }
 
 }
