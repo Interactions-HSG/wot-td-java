@@ -102,7 +102,7 @@ public class TDGraphWriter {
 
   private TDGraphWriter addBaseURI() {
     if (td.getBaseURI().isPresent()) {
-      graphBuilder.add(thingId, rdf.createIRI(TD.hasBase),
+      graphBuilder.add(thingId, rdf.createIRI(TD.baseURI),
         rdf.createIRI(td.getBaseURI().get()));
     }
 

@@ -8,7 +8,7 @@
 <http://example.org/#thing> a td:Thing ;
     dct:title "My Thing" ;
     td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;
-    td:hasBase <http://example.org/> ;
+    td:baseURI <http://example.org/> ;
     td:hasActionAffordance [
         a td:ActionAffordance ;
         td:name "My Action" ;

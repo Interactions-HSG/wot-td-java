@@ -149,7 +149,7 @@ public class TDGraphWriterTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
         "    dct:title \"My Thing\" ;\n" +
-        "    td:hasBase <http://example.org/> .\n";
+        "    td:baseURI <http://example.org/> .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
         .addThingURI(THING_IRI)
@@ -274,7 +274,7 @@ public class TDGraphWriterTest {
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:baseURI <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
       "        td:name \"my_property\" ;\n" +
@@ -307,7 +307,7 @@ public class TDGraphWriterTest {
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:baseURI <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
       "        td:name \"my_property\" ;\n" +
@@ -390,7 +390,7 @@ public class TDGraphWriterTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
+        "    td:baseURI <http://example.org/> ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance, iot:MyAction ;\n" +
         "        td:name \"my_action\" ;\n" +

@@ -53,7 +53,7 @@ public class TDGraphReaderTest {
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:baseURI <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:NumberSchema ;\n" +
       "        td:name \"my_property\" ;\n" +
@@ -217,7 +217,7 @@ public class TDGraphReaderTest {
       "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
       "    \"@id\" : \"_:node1ea75dfphx112\"\n" +
       "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" +
+      "  \"https://www.w3.org/2019/wot/td#baseURI\" : [ {\n" +
       "    \"@id\" : \"http://example.org/\"\n" +
       "  } ],\n" +
       "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" +
@@ -236,7 +236,7 @@ public class TDGraphReaderTest {
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:baseURI <http://example.org/> ;\n" +
       "    td:hasActionAffordance [\n" +
       "        a td:ActionAffordance ;\n" +
       "        td:name \"my_action\" ;\n" +
@@ -354,7 +354,7 @@ public class TDGraphReaderTest {
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> .";
+        "    td:baseURI <http://example.org/> .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
@@ -777,7 +777,7 @@ public class TDGraphReaderTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
+        "    td:baseURI <http://example.org/> ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
         "        td:name \"first_action\" ;\n" +
@@ -1051,7 +1051,7 @@ public class TDGraphReaderTest {
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> .\n";
+        "    td:baseURI <http://example.org/> .\n";
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
       TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
@@ -1228,7 +1228,7 @@ public class TDGraphReaderTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    dct:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
+        "    td:baseURI <http://example.org/> ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:NumberSchema ;\n" +
         "        td:name \"my_property\" ;\n" +
@@ -1312,7 +1312,7 @@ public class TDGraphReaderTest {
       "            hctl:hasOperationType td:readProperty;\n" +
       "        ] ;\n" +
       "    ];\n" +
-      "    td:hasBase <http://example.org/>.\n";
+      "    td:baseURI <http://example.org/>.\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
 
     // Actions
@@ -1387,7 +1387,7 @@ public class TDGraphReaderTest {
       "            hctl:hasTarget <action> ;\n" +
       "        ] ;\n" +
       "    ];\n" +
-      "    td:hasBase <http://example.org/td-base/>.\n";
+      "    td:baseURI <http://example.org/td-base/>.\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
 
     //TD base

@@ -161,7 +161,7 @@ public class TDGraphReader {
   }
 
   final Optional<String> readBaseURI() {
-    Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, rdf.createIRI(TD.hasBase), null));
+    Optional<IRI> baseURI = Models.objectIRI(model.filter(thingId, rdf.createIRI(TD.baseURI), null));
 
     if (baseURI.isPresent()) {
       return Optional.of(baseURI.get().stringValue());
