@@ -14,8 +14,8 @@ import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -24,22 +24,27 @@ import java.util.List;
  * The parser is an extension of {@link TurtleParser} that is lenient in syntax validation of URI values
  * for the object property <a href="https://www.w3.org/2019/wot/hypermedia#hasTarget">hctl:hasTarget</a>.
  */
-public class TDTurtleParser extends TurtleParser {
+class TDTurtleParser extends TurtleParser {
 
-  private final List<IRI> predicates;
+  private final List<IRI> predicates = new ArrayList<>();
+  private final ReentrantLock predicatesLock = new ReentrantLock();
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
 
   protected TDTurtleParser() {
     super();
-    List<IRI> predicatesAsync = new ArrayList<IRI>();
-    predicates = Collections.synchronizedList(predicatesAsync);
   }
 
   @Override
   public synchronized void parse(Reader reader, String baseURI)
     throws IOException, RDFParseException, RDFHandlerException {
-    predicates.clear();
-    super.parse(reader, baseURI);
+    try {
+      predicatesLock.lock();
+      predicates.clear();
+      super.parse(reader, baseURI);
+      predicates.clear();
+    } finally {
+      predicatesLock.unlock();
+    }
   }
 
   @Override
@@ -95,7 +100,7 @@ public class TDTurtleParser extends TurtleParser {
     Value value;
     //href values will be later resolved against the base URI of the Thing Description
     if ((predicateNum > 0) && rdf.createIRI(HCTL.hasTarget).equals(predicates.get(predicateNum - 1))) {
-      value = parseFormTargetURI();
+      value = parseTargetURI();
     } else {
       value = super.parseURI();
     }
@@ -103,7 +108,7 @@ public class TDTurtleParser extends TurtleParser {
     return value;
   }
 
-  private Value parseFormTargetURI() throws IOException {
+  private Value parseTargetURI() throws IOException {
     StringBuilder strBuff = new StringBuilder();
     int c = readCodePoint();
     verifyCharacterOrFail(c, "<");
