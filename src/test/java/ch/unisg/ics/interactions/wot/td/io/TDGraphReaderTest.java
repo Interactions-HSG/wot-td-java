@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -1348,6 +1349,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadFormsRelativeWithNoTDBase() {
     String TDDescription = PREFIXES +
+      "@base <http://example.org/file-base/>." +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    dct:title \"My Thing\" ;\n" +
@@ -1368,6 +1370,41 @@ public class TDGraphReaderTest {
     String actualMessage = exception.getMessage();
 
     assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadRelativeURIsWithBaseAndTDBase() {
+    String TDDescription = PREFIXES +
+      "@base <http://example.org/file-base/>." +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing, <not-an-affordance> ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <action> ;\n" +
+      "        ] ;\n" +
+      "    ];\n" +
+      "    td:hasBase <http://example.org/td-base/>.\n";
+    ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
+
+    //TD base
+    assertTrue(td.getBaseURI().isPresent());
+    assertEquals("http://example.org/td-base/", td.getBaseURI().get());
+
+    // Thing type
+    Set<String> types = td.getSemanticTypes();
+    assertTrue(types.contains("http://example.org/file-base/not-an-affordance"));
+
+    //Action
+    List<ActionAffordance> actions = td.getActions();
+    assertEquals(1, actions.size());
+    ActionAffordance action = actions.get(0);
+    assertEquals(1, action.getForms().size());
+    assertTrue(action.getFirstForm().isPresent());
+    assertEquals("http://example.org/td-base/action", action.getFirstForm().get().getTarget());
   }
 
   private void assertForm(Form form, String methodName, String target,
