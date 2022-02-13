@@ -43,7 +43,7 @@ public class ArraySchema extends DataSchema {
 
   public Optional<DataSchema> getFirstItemSchema(String datatype) {
     for (DataSchema schema : items) {
-      if (schema.getDatatype() == datatype) {
+      if (schema.getDatatype().equals(datatype)) {
         return Optional.of(schema);
       }
     }

@@ -51,10 +51,9 @@ public class DataSchema {
     } else {
       for (DataSchema validSchema : this.getValidSchemas()) {
         try {
-          System.out.println(validSchema.getDatatype());
           data = validSchema.parseJson(element);
           break;
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
       }
       if (data == null) {
@@ -108,10 +107,18 @@ public class DataSchema {
     return schemas;
   }
 
-  public static final class Builder extends JsonSchemaBuilder<DataSchema,DataSchema.Builder> {
+  public static DataSchema getEmptySchema() {
+    Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
+    Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
+    List<DataSchema> dataSchemas = Collections.unmodifiableList(new ArrayList<>());
+
+    return new DataSchema(semanticTypes, enumeration, Optional.empty(), dataSchemas);
+  }
+
+  public static class Builder extends JsonSchemaBuilder<DataSchema,DataSchema.Builder> {
 
     @Override
-    public DataSchema build() {
+    public final DataSchema build() {
       return new DataSchema(semanticTypes, enumeration, contentMediaType, dataSchemas);
     }
   }

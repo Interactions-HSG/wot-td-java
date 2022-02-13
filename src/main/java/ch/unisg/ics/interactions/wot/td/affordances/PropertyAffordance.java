@@ -40,7 +40,7 @@ public class PropertyAffordance extends InteractionAffordance {
         }
       }
 
-      this.schema = new DataSchema.Builder().build();
+      this.schema = DataSchema.getEmptySchema();
       this.observable = false;
     }
 
