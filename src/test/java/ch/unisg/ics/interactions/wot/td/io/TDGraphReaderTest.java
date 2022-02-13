@@ -6,13 +6,13 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.*;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.QualityOfProtection;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -25,7 +25,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -1340,6 +1339,74 @@ public class TDGraphReaderTest {
     String expectedMessage = "Invalid security scheme configuration";
     String actualMessage = exception.getMessage();
     assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadBearerSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "        wotsec:authorization \"server.example.com\" ;\n" +
+      "        wotsec:alg \"ECDSA 256\" ;\n" +
+      "        wotsec:format \"cwt\" ;\n" +
+      "    ] .\n";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> bearerSchemes = getSecurityNamesforSchemeName(SecurityScheme.BEARER, schemes);
+    assertEquals(1, bearerSchemes.size());
+
+    SecurityScheme scheme = schemes.get(bearerSchemes.get(0));
+    assertTrue(scheme instanceof BearerSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+
+    BearerSecurityScheme bearerScheme = (BearerSecurityScheme) scheme;
+    assertEquals(TokenLocation.HEADER, bearerScheme.getTokenLocation());
+    assertEquals("ECDSA 256", bearerScheme.getAlg());
+    assertEquals("cwt", bearerScheme.getFormat());
+    assertTrue(bearerScheme.getAuthorization().isPresent());
+    assertEquals("server.example.com", bearerScheme.getAuthorization().get());
+    assertTrue(bearerScheme.getTokenName().isPresent());
+    assertEquals("Authorization", bearerScheme.getTokenName().get());
+  }
+
+  @Test
+  public void testBearerSecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> digestSchemes = getSecurityNamesforSchemeName(SecurityScheme.BEARER, schemes);
+    assertEquals(1, digestSchemes.size());
+
+    SecurityScheme scheme = schemes.get(digestSchemes.get(0));
+    assertTrue(scheme instanceof BearerSecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+
+
+    BearerSecurityScheme bearerScheme = (BearerSecurityScheme) scheme;
+    assertEquals(TokenLocation.HEADER, bearerScheme.getTokenLocation());
+    assertEquals("ES256", bearerScheme.getAlg());
+    assertEquals("jwt", bearerScheme.getFormat());
+    assertFalse(bearerScheme.getAuthorization().isPresent());
+    assertFalse(bearerScheme.getTokenName().isPresent());
   }
 
   @Test

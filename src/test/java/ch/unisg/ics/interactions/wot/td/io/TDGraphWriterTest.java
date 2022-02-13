@@ -6,10 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -857,7 +854,7 @@ public class TDGraphWriterTest {
     assertIsomorphicGraphs(testTD, td);
   }
 
-  // Test BasicSecurityScheme
+  // Test DigestSecurityScheme
   @Test
   public void testWriteDigestSecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
@@ -875,6 +872,34 @@ public class TDGraphWriterTest {
         .addSemanticType("https://example.org#Type")
         .addToken(TokenLocation.HEADER, "nonce")
         .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH_INT)
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  // Test BearerSecurityScheme
+  @Test
+  public void testWriteBearerSecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "        wotsec:authorization \"server.example.com\" ;\n" +
+      "        wotsec:alg \"ECDSA 256\" ;\n" +
+      "        wotsec:format \"cwt\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("bearer_sc", new BearerSecurityScheme.Builder()
+        .addSemanticType("https://example.org#Type")
+        .addToken(TokenLocation.HEADER, "Authorization")
+        .addAuthorization("server.example.com")
+        .addAlg("ECDSA 256")
+        .addFormat("cwt")
         .build())
       .build();
 

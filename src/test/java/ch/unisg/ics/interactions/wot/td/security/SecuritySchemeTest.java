@@ -1,7 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.QualityOfProtection;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.junit.Test;
 
@@ -135,5 +135,57 @@ public class SecuritySchemeTest {
     assertEquals(2, conf.keySet().size());
     assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
     assertEquals(QualityOfProtection.AUTH, conf.get(WoTSec.qop));
+  }
+
+  @Test
+  public void testBearerSecurityScheme() {
+    BearerSecurityScheme scheme = new BearerSecurityScheme.Builder()
+            .addToken(TokenLocation.HEADER, "tokenName")
+            .addAlg("algName")
+            .addAuthorization("authURI")
+            .addFormat("formatName")
+            .addSemanticType("sem")
+            .build();
+
+    assertEquals(SecurityScheme.BEARER, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("sem"));
+
+    assertEquals(TokenLocation.HEADER, scheme.getTokenLocation());
+    assertEquals("algName", scheme.getAlg());
+    assertEquals("formatName", scheme.getFormat());
+    assertTrue(scheme.getAuthorization().isPresent());
+    assertEquals("authURI", scheme.getAuthorization().get());
+    assertTrue(scheme.getTokenName().isPresent());
+    assertEquals("tokenName", scheme.getTokenName().get());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(5, conf.keySet().size());
+    assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
+    assertEquals("algName", conf.get(WoTSec.alg));
+    assertEquals("formatName", conf.get(WoTSec.format));
+    assertEquals("authURI", conf.get(WoTSec.authorization));
+    assertEquals("tokenName", conf.get(WoTSec.name));
+  }
+
+  @Test
+  public void testBearerSecuritySchemeDefaultValues() {
+    BearerSecurityScheme scheme = new BearerSecurityScheme.Builder()
+            .build();
+
+    assertEquals(SecurityScheme.BEARER, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+
+    assertEquals(TokenLocation.HEADER, scheme.getTokenLocation());
+    assertEquals("ES256", scheme.getAlg());
+    assertEquals("jwt", scheme.getFormat());
+    assertFalse(scheme.getAuthorization().isPresent());
+    assertFalse(scheme.getTokenName().isPresent());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(3, conf.keySet().size());
+    assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
+    assertEquals("ES256", conf.get(WoTSec.alg));
+    assertEquals("jwt", conf.get(WoTSec.format));
   }
 }

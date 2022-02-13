@@ -5,8 +5,8 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.*;
-import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.QualityOfProtection;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.*;
@@ -17,13 +17,11 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -187,6 +185,8 @@ public class TDGraphReader {
           scheme = readBasicSecurityScheme(schemeId, semanticTypes);
         } else if (semanticTypes.contains(WoTSec.DigestSecurityScheme)) {
           scheme = readDigestSecurityScheme(schemeId, semanticTypes);
+        } else if (semanticTypes.contains(WoTSec.BearerSecurityScheme)) {
+          scheme = readBearerSecurityScheme(schemeId, semanticTypes);
         } else {
           throw new InvalidTDException("Unknown type of security scheme");
         }
@@ -238,11 +238,33 @@ public class TDGraphReader {
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 
+  SecurityScheme readBearerSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+    BearerSecurityScheme.Builder schemeBuilder = new BearerSecurityScheme.Builder();
+
+    Optional<Literal> alg = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.alg), null));
+    if (alg.isPresent()) {
+      schemeBuilder.addAlg(alg.get().stringValue());
+    }
+
+    Optional<Literal> authorization = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.authorization),
+      null));
+    if (authorization.isPresent()) {
+      schemeBuilder.addAuthorization(authorization.get().stringValue());
+    }
+
+    Optional<Literal> format = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.format), null));
+    if (format.isPresent()) {
+      schemeBuilder.addFormat(format.get().stringValue());
+    }
+
+    return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
+  }
+
   List<PropertyAffordance> readProperties() {
     List<PropertyAffordance> properties = new ArrayList<>();
 
     Set<Resource> propertyIds = Models.objectResources(model.filter(thingId,
-        rdf.createIRI(TD.hasPropertyAffordance), null));
+      rdf.createIRI(TD.hasPropertyAffordance), null));
 
     for (Resource propertyId : propertyIds) {
       try {
