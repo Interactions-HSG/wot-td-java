@@ -219,6 +219,9 @@ public class ThingDescriptionTest {
     Optional<EventAffordance> event1 = commonTd.getEventByName("smoke-alarm");
     assertTrue(event1.isPresent());
     assertTrue(event1.get().getSemanticTypes().contains("ex:SmokeAlarm"));
+
+    Optional<EventAffordance> event2 = commonTd.getEventByName("unknown-event");
+    assertFalse(event2.isPresent());
   }
 
   @Test

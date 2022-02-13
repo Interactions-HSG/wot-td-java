@@ -991,6 +991,83 @@ public class TDGraphReaderTest {
   }
 
   @Test
+  public void testReadEventNoEventAffordanceType() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<EventAffordance> events = reader.readEvents();
+    assertEquals(0, events.size());
+  }
+
+  @Test
+  public void testReadEventInvalidEventDefinitionNoForm() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance ;\n" +
+      "        td:name \"my_event\" \n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readEvents();
+    });
+
+    String expectedMessage = "Invalid event definition.";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadEventInvalidEventDefinitionInvalidNotificationSchema() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance ;\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/event> ;\n" +
+      "        ] ;\n" +
+      "        td:hasSubscriptionSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"string_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"invalid_value\" ;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readEvents();
+    });
+
+    String expectedMessage = "Invalid event definition.";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
   public void testReadTDFromFile() throws IOException {
     // Read a TD from a File by passing its path as parameter
     ThingDescription simple = TDGraphReader.readFromFile(TDFormat.RDF_TURTLE, "samples/simple_td.ttl");
