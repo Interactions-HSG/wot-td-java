@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
-public abstract class DataSchema {
+public class DataSchema {
   public static final String OBJECT = "object";
   public static final String ARRAY = "array";
 
@@ -16,14 +16,18 @@ public abstract class DataSchema {
   public static final String BOOLEAN = "boolean";
   public static final String NULL = "null";
 
-  public static final String EMPTY = "empty";
-  public static final String SUPER = "super";
+  public static final String DATA = "data";
 
   final private String datatype;
   final private Set<String> semanticTypes;
   final private Set<String> enumeration;
   private final Optional<String> contentMediaType;
   private final List<DataSchema> dataSchemas;
+
+  protected DataSchema(Set<String> semanticTypes, Set<String> enumeration,
+                       Optional<String> contentMediaType, List<DataSchema> dataSchemas) {
+    this(DataSchema.DATA, semanticTypes, enumeration, contentMediaType, dataSchemas);
+  }
 
   protected DataSchema(String datatype, Set<String> semanticTypes, Set<String> enumeration,
                        Optional<String> contentMediaType, List<DataSchema> dataSchemas) {
@@ -34,7 +38,31 @@ public abstract class DataSchema {
     this.dataSchemas = dataSchemas;
   }
 
-  public abstract Object parseJson(JsonElement element);
+  public Object parseJson(JsonElement element) {
+    Object data = null;
+    if (dataSchemas.isEmpty()) {
+      if (element.equals(new JsonObject())) {
+        data = Optional.empty();
+      }
+      else {
+        throw new IllegalArgumentException("JSON element should be an empty JSON object when " +
+          "no subschemas are provided for a generic schema of type data");
+      }
+    } else {
+      for (DataSchema validSchema : this.getValidSchemas()) {
+        try {
+          System.out.println(validSchema.getDatatype());
+          data = validSchema.parseJson(element);
+          break;
+        } catch (IllegalArgumentException e) {
+        }
+      }
+      if (data == null) {
+        throw new IllegalArgumentException("JSON element is not valid against any of available subschemas");
+      }
+    }
+    return data;
+  }
 
   public String getDatatype() {
     return datatype;
@@ -46,56 +74,6 @@ public abstract class DataSchema {
 
   public Set<String> getEnumeration() {
     return enumeration;
-  }
-
-  public static DataSchema getEmptySchema() {
-    Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
-    Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
-    List<DataSchema> dataSchemas = Collections.unmodifiableList(new ArrayList<>());
-
-    return new DataSchema(DataSchema.EMPTY, semanticTypes, enumeration,
-      Optional.empty(), dataSchemas) {
-
-      @Override
-      public Object parseJson(JsonElement element) {
-        if (!element.equals(new JsonObject())) {
-          throw new IllegalArgumentException("JSON element is not an empty JSON object");
-        }
-        return Optional.empty();
-      }
-    };
-  }
-
-  public static DataSchema getSuperSchema(List<DataSchema> dataSchemas) {
-    Set<String> semanticTypes = Collections.unmodifiableSet(new HashSet<String>());
-    Set<String> enumeration = Collections.unmodifiableSet(new HashSet<String>());
-
-    if (dataSchemas.isEmpty()) {
-      throw new IllegalArgumentException("No subschemas found");
-    }
-
-    return new DataSchema(DataSchema.SUPER, semanticTypes, enumeration,
-      Optional.empty(), Collections.unmodifiableList(dataSchemas)) {
-
-      @Override
-      public Object parseJson(JsonElement element) {
-        Object data = Optional.empty();
-
-        for (DataSchema validSchema : this.getValidSchemas()) {
-          try {
-            System.out.println(validSchema.getDatatype());
-            data = validSchema.parseJson(element);
-            break;
-          } catch (IllegalArgumentException e) {
-          }
-        }
-
-        if (data.equals(Optional.empty())) {
-          throw new IllegalArgumentException("JSON element is not valid against any of available subschemas");
-        }
-        return data;
-      }
-    };
   }
 
   public Optional<String> getContentMediaType() {
@@ -130,13 +108,21 @@ public abstract class DataSchema {
     return schemas;
   }
 
-  public static abstract class Builder<T extends DataSchema, S extends Builder<T,S>> {
+  public static class Builder extends JsonSchemaBuilder<DataSchema,DataSchema.Builder> {
+
+    @Override
+    public DataSchema build() {
+      return new DataSchema(semanticTypes, enumeration, contentMediaType, dataSchemas);
+    }
+  }
+
+  public static abstract class JsonSchemaBuilder<T extends DataSchema, S extends JsonSchemaBuilder<T,S>> {
     protected Set<String> semanticTypes;
     protected Set<String> enumeration;
     protected Optional<String> contentMediaType;
     protected List<DataSchema> dataSchemas;
 
-    protected Builder() {
+    protected JsonSchemaBuilder() {
       this.semanticTypes = new HashSet<String>();
       this.enumeration = new HashSet<String>();
       this.contentMediaType = Optional.empty();

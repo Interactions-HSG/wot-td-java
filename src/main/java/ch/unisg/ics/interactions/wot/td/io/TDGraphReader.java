@@ -194,7 +194,7 @@ public class TDGraphReader {
           builder.addDataSchema(schema.get());
         }
         else {
-          builder.addDataSchema(DataSchema.getEmptySchema());
+          builder.addDataSchema(new DataSchema.Builder().build());
         }
 
         readAffordanceMetadata(builder, propertyId);

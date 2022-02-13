@@ -112,7 +112,7 @@ public class ArraySchema extends DataSchema {
     return itemSchema;
   }
 
-  public static class Builder extends DataSchema.Builder<ArraySchema, ArraySchema.Builder> {
+  public static class Builder extends DataSchema.JsonSchemaBuilder<ArraySchema, ArraySchema.Builder> {
     final private List<DataSchema> items;
     private Optional<Integer> minItems;
     private Optional<Integer> maxItems;

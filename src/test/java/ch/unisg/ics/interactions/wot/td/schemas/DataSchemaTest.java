@@ -36,27 +36,15 @@ public class DataSchemaTest {
 
   @Test
   public void testEmptySchema() {
-    DataSchema schema = DataSchema.getEmptySchema();
-    assertEquals(DataSchema.EMPTY, schema.getDatatype());
+    DataSchema schema = new DataSchema.Builder().build();
+    assertEquals(DataSchema.DATA, schema.getDatatype());
     assertTrue(schema.getSemanticTypes().isEmpty());
     assertTrue(schema.getEnumeration().isEmpty());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void testEmptySchemaUnmodifiableSemanticTypes() {
-    DataSchema schema = DataSchema.getEmptySchema();
-    schema.getSemanticTypes().add("sem1");
-  }
-
-  @Test(expected = UnsupportedOperationException.class)
-  public void testEmptySchemaUnmodifiableEnumeration() {
-    DataSchema schema = DataSchema.getEmptySchema();
-    schema.getEnumeration().add("a");
-  }
-
   @Test
   public void testEmptySchemaPayload() {
-    DataSchema schema = DataSchema.getEmptySchema();
+    DataSchema schema = new DataSchema.Builder().build();
     Gson gson = new Gson();
 
     JsonElement emptyElement = new JsonObject();
@@ -67,7 +55,8 @@ public class DataSchemaTest {
     Exception exception = assertThrows(IllegalArgumentException.class, () -> {
       schema.parseJson(nonEmptyElement);
     });
-    String expectedMessage = "JSON element is not an empty JSON object";
+    String expectedMessage = "JSON element should be an empty JSON object when " +
+      "no subschemas are provided for a generic schema of type data";
     String actualMessage = exception.getMessage();
     assertTrue(actualMessage.contains(expectedMessage));
   }
@@ -479,7 +468,9 @@ public class DataSchemaTest {
       .addProperty("prop", new IntegerSchema.Builder().build())
       .addSemanticType("sem1").build();
 
-    DataSchema superSchema = DataSchema.getSuperSchema(Arrays.asList(stringSchema0, objectSchema1));
+    DataSchema superSchema = new DataSchema.Builder()
+      .oneOf(stringSchema0, objectSchema1)
+      .build();
 
     List<DataSchema> dataSchemas = superSchema.getValidSchemas();
     assertEquals(dataSchemas.size(), 2);
@@ -516,16 +507,6 @@ public class DataSchemaTest {
       superSchema.parseJson(invalidJsonObject);
     });
     String expectedMessage = "JSON element is not valid against any of available subschemas";
-    String actualMessage = exception.getMessage();
-    assertTrue(actualMessage.contains(expectedMessage));
-  }
-
-  @Test
-  public void testSuperDataSchemaWithNoValidSchemas() {
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      DataSchema.getSuperSchema(new ArrayList<>());
-    });
-    String expectedMessage = "No subschemas found";
     String actualMessage = exception.getMessage();
     assertTrue(actualMessage.contains(expectedMessage));
   }

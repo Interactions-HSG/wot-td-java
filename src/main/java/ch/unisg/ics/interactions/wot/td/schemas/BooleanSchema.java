@@ -22,7 +22,7 @@ public class BooleanSchema extends DataSchema {
     return element.getAsBoolean();
   }
 
-  public static class Builder extends DataSchema.Builder<BooleanSchema, BooleanSchema.Builder> {
+  public static class Builder extends DataSchema.JsonSchemaBuilder<BooleanSchema, BooleanSchema.Builder> {
 
     @Override
     public BooleanSchema build() {

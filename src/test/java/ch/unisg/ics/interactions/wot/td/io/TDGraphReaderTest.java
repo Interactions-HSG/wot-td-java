@@ -740,7 +740,7 @@ public class TDGraphReaderTest {
     PropertyAffordance property = reader.readProperties().get(0);
 
     DataSchema schema = property.getDataSchema();
-    assertEquals(DataSchema.EMPTY, schema.getDatatype());
+    assertEquals(DataSchema.DATA, schema.getDatatype());
     assertTrue(schema.getSemanticTypes().isEmpty());
     assertTrue(schema.getEnumeration().isEmpty());
   }

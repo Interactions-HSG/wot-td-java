@@ -66,16 +66,16 @@ class SchemaGraphReader {
   }
 
   private Optional<DataSchema> readSuperSchema(Resource schemaId) {
-    List<DataSchema> schemas = new ArrayList<>();
+    DataSchema.Builder schemaBuilder = new DataSchema.Builder();
     Set<Resource> oneOfSchemas = Models.objectResources(model.filter(schemaId,
       rdf.createIRI(JSONSchema.oneOf), null));
     for (Resource oneSchemaId : oneOfSchemas) {
       Optional<DataSchema> oneSchema = readDataSchema(oneSchemaId);
       if (oneSchema.isPresent()) {
-        schemas.add(oneSchema.get());
+        schemaBuilder.oneOf(oneSchema.get());
       }
     }
-    return Optional.of(DataSchema.getSuperSchema(schemas));
+    return Optional.of(schemaBuilder.build());
   }
 
   private Optional<DataSchema> readObjectSchema(Resource schemaId) {
@@ -180,7 +180,7 @@ class SchemaGraphReader {
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  private void readDataSchemaMetadata(DataSchema.Builder builder, Resource schemaId) {
+  private void readDataSchemaMetadata(DataSchema.JsonSchemaBuilder builder, Resource schemaId) {
     /* Read semantic types (IRIs) */
     Set<IRI> semIRIs = Models.objectIRIs(model.filter(schemaId, RDF.TYPE, null));
     builder.addSemanticTypes(semIRIs.stream().map(iri -> iri.stringValue())

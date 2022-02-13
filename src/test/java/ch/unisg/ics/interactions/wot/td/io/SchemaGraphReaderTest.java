@@ -309,7 +309,7 @@ public class SchemaGraphReaderTest {
     Optional<DataSchema> schema = SchemaGraphReader.readDataSchema(nodeId.get(), model);
 
     assertTrue(schema.isPresent());
-    assertEquals(DataSchema.SUPER, schema.get().getDatatype());
+    assertEquals(DataSchema.DATA, schema.get().getDatatype());
     assertEquals(schema.get().getValidSchemas().size(), 2);
 
     List<DataSchema> schemas0 = schema.get().getValidSchemasBySemanticType("http://example.org/#Schema0");

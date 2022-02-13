@@ -22,7 +22,7 @@ public class NullSchema extends DataSchema {
     return null;
   }
 
-  public static class Builder extends DataSchema.Builder<NullSchema, NullSchema.Builder> {
+  public static class Builder extends DataSchema.JsonSchemaBuilder<NullSchema, NullSchema.Builder> {
 
     @Override
     public NullSchema build() {

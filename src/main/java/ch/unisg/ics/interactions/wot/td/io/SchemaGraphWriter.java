@@ -51,10 +51,8 @@ class SchemaGraphWriter {
       case DataSchema.NULL:
         addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.NullSchema));
         break;
-      case DataSchema.SUPER:
-        addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.DataSchema));
-        break;
-      case DataSchema.EMPTY:
+      case DataSchema.DATA:
+        addBaseSchema(nodeId, schema);
         break;
       default:
         LOGGER.info("Ignoring a DataSchema of unknown type: " + schema.getDatatype());
@@ -122,6 +120,12 @@ class SchemaGraphWriter {
       BNode itemId = rdf.createBNode();
       graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.items), itemId);
       addDataSchema(itemId, item);
+    }
+  }
+
+  private void addBaseSchema(Resource nodeId, DataSchema schema) {
+    if (!schema.getValidSchemas().isEmpty()){
+      addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.DataSchema));
     }
   }
 

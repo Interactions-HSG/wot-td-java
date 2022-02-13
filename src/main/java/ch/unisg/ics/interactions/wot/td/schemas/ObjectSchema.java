@@ -123,7 +123,7 @@ public class ObjectSchema extends DataSchema {
     return required.contains(propName);
   }
 
-  public static class Builder extends DataSchema.Builder<ObjectSchema, ObjectSchema.Builder> {
+  public static class Builder extends DataSchema.JsonSchemaBuilder<ObjectSchema, ObjectSchema.Builder> {
     final private Map<String, DataSchema> properties;
     final private List<String> required;
 
