@@ -109,10 +109,8 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
      */
     @SuppressWarnings("unchecked")
     public S addToken(TokenLocation in, String name) {
-      this.in = in;
-      this.name = Optional.of(name);
-      this.configuration.put(WoTSec.in, in);
-      this.configuration.put(WoTSec.name, name);
+      addTokenLocation(in);
+      addTokenName(name);
       return (S) this;
     }
 

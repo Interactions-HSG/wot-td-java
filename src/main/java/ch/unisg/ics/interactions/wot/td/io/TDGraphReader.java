@@ -4,11 +4,9 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.QualityOfProtection;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.apache.hc.client5.http.fluent.Request;
 import org.eclipse.rdf4j.model.*;
@@ -187,6 +185,8 @@ public class TDGraphReader {
           scheme = readAPIKeySecurityScheme(schemeId, semanticTypes);
         } else if (semanticTypes.contains(WoTSec.BasicSecurityScheme)) {
           scheme = readBasicSecurityScheme(schemeId, semanticTypes);
+        } else if (semanticTypes.contains(WoTSec.DigestSecurityScheme)) {
+          scheme = readDigestSecurityScheme(schemeId, semanticTypes);
         } else {
           throw new InvalidTDException("Unknown type of security scheme");
         }
@@ -224,6 +224,17 @@ public class TDGraphReader {
 
   SecurityScheme readBasicSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
     BasicSecurityScheme.Builder schemeBuilder = new BasicSecurityScheme.Builder();
+    return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
+  }
+
+  SecurityScheme readDigestSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+    DigestSecurityScheme.Builder schemeBuilder = new DigestSecurityScheme.Builder();
+
+    Optional<Literal> qop = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.qop), null));
+    if (qop.isPresent()) {
+      schemeBuilder.addQoP(QualityOfProtection.fromString(qop.get().stringValue()));
+    }
+
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 

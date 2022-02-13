@@ -9,8 +9,10 @@ import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.QualityOfProtection;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -1260,6 +1262,84 @@ public class TDGraphReaderTest {
     assertEquals(TokenLocation.HEADER,
       ((BasicSecurityScheme) scheme).getTokenLocation());
     assertFalse(((BasicSecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test
+  public void testReadDigestSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth-int\" ;\n" +
+      "    ] .\n";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> digestSchemes = getSecurityNamesforSchemeName(SecurityScheme.DIGEST, schemes);
+    assertEquals(1, digestSchemes.size());
+
+    SecurityScheme scheme = schemes.get(digestSchemes.get(0));
+    assertTrue(scheme instanceof DigestSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertEquals(TokenLocation.HEADER,
+      ((DigestSecurityScheme) scheme).getTokenLocation());
+    assertEquals(QualityOfProtection.AUTH_INT,
+      ((DigestSecurityScheme) scheme).getQoP());
+    assertTrue(((DigestSecurityScheme) scheme).getTokenName().isPresent());
+    assertEquals("nonce", ((DigestSecurityScheme) scheme).getTokenName().get());
+  }
+
+  @Test
+  public void testDigestSecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> digestSchemes = getSecurityNamesforSchemeName(SecurityScheme.DIGEST, schemes);
+    assertEquals(1, digestSchemes.size());
+
+    SecurityScheme scheme = schemes.get(digestSchemes.get(0));
+    assertTrue(scheme instanceof DigestSecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((DigestSecurityScheme) scheme).getTokenLocation());
+    assertEquals(QualityOfProtection.AUTH,
+      ((DigestSecurityScheme) scheme).getQoP());
+    assertFalse(((DigestSecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test
+  public void testDigestSecuritySchemeInvalidQualityOfProtection() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ;\n" +
+      "        wotsec:qop \"bla\" ;\n" +
+      "  ] .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+    });
+    String expectedMessage = "Invalid security scheme configuration";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test

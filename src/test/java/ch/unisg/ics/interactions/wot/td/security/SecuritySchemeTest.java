@@ -1,6 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme.QualityOfProtection;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.junit.Test;
 
@@ -92,5 +93,47 @@ public class SecuritySchemeTest {
     Map<String, Object> conf = scheme.getConfiguration();
     assertEquals(1, conf.keySet().size());
     assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
+  }
+
+  @Test
+  public void testDigestSecurityScheme() {
+    DigestSecurityScheme scheme = new DigestSecurityScheme.Builder()
+      .addToken(TokenLocation.HEADER, "tokenName")
+      .addQoP(QualityOfProtection.AUTH_INT)
+      .addSemanticType("sem")
+      .build();
+
+    assertEquals(SecurityScheme.DIGEST, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("sem"));
+
+    assertEquals(TokenLocation.HEADER, scheme.getTokenLocation());
+    assertEquals(QualityOfProtection.AUTH_INT, scheme.getQoP());
+    assertTrue(scheme.getTokenName().isPresent());
+    assertEquals("tokenName", scheme.getTokenName().get());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(3, conf.keySet().size());
+    assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
+    assertEquals("tokenName", conf.get(WoTSec.name));
+    assertEquals(QualityOfProtection.AUTH_INT, conf.get(WoTSec.qop));
+  }
+
+  @Test
+  public void testDigestSecuritySchemeDefaultValues() {
+    DigestSecurityScheme scheme = new DigestSecurityScheme.Builder()
+      .build();
+
+    assertEquals(SecurityScheme.DIGEST, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
+
+    assertEquals(TokenLocation.HEADER, scheme.getTokenLocation());
+    assertEquals(QualityOfProtection.AUTH, scheme.getQoP());
+    assertFalse(scheme.getTokenName().isPresent());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(2, conf.keySet().size());
+    assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
+    assertEquals(QualityOfProtection.AUTH, conf.get(WoTSec.qop));
   }
 }
