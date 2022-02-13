@@ -188,4 +188,23 @@ public class SecuritySchemeTest {
     assertEquals("ES256", conf.get(WoTSec.alg));
     assertEquals("jwt", conf.get(WoTSec.format));
   }
+
+  @Test
+  public void testPSKSecurityScheme() {
+    PSKSecurityScheme scheme = new PSKSecurityScheme.Builder()
+            .addIdentity("192.0.2.1")
+            .addSemanticType("sem")
+            .build();
+
+    assertEquals(SecurityScheme.PSK, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("sem"));
+
+    assertTrue(scheme.getIdentity().isPresent());
+    assertEquals("192.0.2.1", scheme.getIdentity().get());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(1, conf.keySet().size());
+    assertEquals("192.0.2.1", conf.get(WoTSec.identity));
+  }
 }

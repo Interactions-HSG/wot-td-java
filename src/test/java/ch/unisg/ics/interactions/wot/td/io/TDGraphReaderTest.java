@@ -1410,6 +1410,33 @@ public class TDGraphReaderTest {
   }
 
   @Test
+  public void testReadPSKSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:PSKSecurityScheme, ex:Type ;\n" +
+      "        wotsec:identity \"192.0.2.1\" ;\n" +
+      "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> apikeySchemes = getSecurityNamesforSchemeName(SecurityScheme.PSK, schemes);
+    assertEquals(1, apikeySchemes.size());
+
+    SecurityScheme scheme = schemes.get(apikeySchemes.get(0));
+    assertTrue(scheme instanceof PSKSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertTrue(((PSKSecurityScheme) scheme).getIdentity().isPresent());
+    assertEquals("192.0.2.1", ((PSKSecurityScheme) scheme).getIdentity().get());
+  }
+
+  @Test
   public void testReadMultipleSecuritySchemes() {
     String testTD = PREFIXES +
       "\n" +

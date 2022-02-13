@@ -906,6 +906,27 @@ public class TDGraphWriterTest {
     assertIsomorphicGraphs(testTD, td);
   }
 
+  // Test PSKSecurityScheme
+  @Test
+  public void testWritePSKSecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:PSKSecurityScheme, ex:Type ;\n" +
+      "        wotsec:identity \"192.0.2.1\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("psk_sc", new PSKSecurityScheme.Builder()
+        .addSemanticType("https://example.org#Type")
+        .addIdentity("192.0.2.1")
+        .build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,
     RDFHandlerException, IOException {
     Model expectedModel = ReadWriteUtils.readModelFromString(RDFFormat.TURTLE, expectedTD, IO_BASE_IRI);

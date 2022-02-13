@@ -12,6 +12,7 @@ public final class WoTSec {
   public static final String BasicSecurityScheme = PREFIX + "BasicSecurityScheme";
   public static final String DigestSecurityScheme = PREFIX + "DigestSecurityScheme";
   public static final String BearerSecurityScheme = PREFIX + "BearerSecurityScheme";
+  public static final String PSKSecurityScheme = PREFIX + "PSKSecurityScheme";
 
   /* Datatype properties */
   public static final String in = PREFIX + "in";
@@ -20,6 +21,7 @@ public final class WoTSec {
   public static final String authorization = PREFIX + "authorization";
   public static final String alg = PREFIX + "alg";
   public static final String format = PREFIX + "format";
+  public static final String identity = PREFIX + "identity";
 
   public static IRI createIRI(String fragment) {
     return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);

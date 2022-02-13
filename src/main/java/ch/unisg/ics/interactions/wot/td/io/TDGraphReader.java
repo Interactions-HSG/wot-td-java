@@ -187,6 +187,8 @@ public class TDGraphReader {
           scheme = readDigestSecurityScheme(schemeId, semanticTypes);
         } else if (semanticTypes.contains(WoTSec.BearerSecurityScheme)) {
           scheme = readBearerSecurityScheme(schemeId, semanticTypes);
+        } else if (semanticTypes.contains(WoTSec.PSKSecurityScheme)) {
+          scheme = readPSKSecurityScheme(schemeId, semanticTypes);
         } else {
           throw new InvalidTDException("Unknown type of security scheme");
         }
@@ -258,6 +260,19 @@ public class TDGraphReader {
     }
 
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
+  }
+
+  SecurityScheme readPSKSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+    PSKSecurityScheme.Builder schemeBuilder = new PSKSecurityScheme.Builder();
+
+    Optional<Literal> identity = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.identity),
+      null));
+    if (identity.isPresent()) {
+      schemeBuilder.addIdentity(identity.get().stringValue());
+    }
+
+    schemeBuilder.addSemanticTypes(semanticTypes);
+    return schemeBuilder.build();
   }
 
   List<PropertyAffordance> readProperties() {
