@@ -92,7 +92,7 @@ public class BearerSecurityScheme extends TokenBasedSecurityScheme {
     }
 
     /**
-     * Specifies the  format of security authentication information
+     * Specifies the format of security authentication information
      * (e.g., jwt, cwt, jwe, or jws).
      *
      * @param format the format
