@@ -18,7 +18,9 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
   }
 
   /**
-   * Gets the quality of protection, i.e. auth, or auth-int.
+   * Gets the quality of protection (QoP). The QoP
+   * must be one of those specified in the enum
+   * {@link QualityOfProtection}, i.e. auth, or auth-int.
    *
    * @return the quality of protection
    */
@@ -59,6 +61,15 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
       this.addTokenLocation(TokenLocation.HEADER);
     }
 
+    /**
+     * Specifies the quality of protection (QoP). The QoP
+     * must be one of those specified in the enum
+     * {@link QualityOfProtection},
+     * i.e. auth or auth-int.
+     *
+     * @param qop the quality of protection
+     * @return the builder
+     */
     public DigestSecurityScheme.Builder addQoP(QualityOfProtection qop) {
       this.qop = qop;
       this.configuration.put(WoTSec.qop, qop);
