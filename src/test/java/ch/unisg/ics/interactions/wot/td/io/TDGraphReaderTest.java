@@ -3,6 +3,7 @@ package ch.unisg.ics.interactions.wot.td.io;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
@@ -22,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -93,6 +93,41 @@ public class TDGraphReaderTest {
       "            js:required \"number_value\" ;\n" +
       "        ] ;\n" +
       "        td:hasOutputSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:BooleanSchema ;\n" +
+      "                js:propertyName \"boolean_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"boolean_value\" ;\n" +
+      "        ]\n" +
+      "    ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance ;\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        dct:title \"My Event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:subscribeEvent, td:unsubscribeEvent;\n" +
+      "        ] ;\n" +
+      "        td:hasSubscriptionSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"string_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"string_value\" ;\n" +
+      "        ] ;\n" +
+      "        td:hasNotificationSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:IntegerSchema ;\n" +
+      "                js:propertyName \"integer_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"integer_value\" ;\n" +
+      "        ] ;\n" +
+      "        td:hasCancellationSchema [\n" +
       "            a js:ObjectSchema ;\n" +
       "            js:properties [\n" +
       "                a js:BooleanSchema ;\n" +
@@ -705,7 +740,7 @@ public class TDGraphReaderTest {
     PropertyAffordance property = reader.readProperties().get(0);
 
     DataSchema schema = property.getDataSchema();
-    assertEquals(DataSchema.EMPTY, schema.getDatatype());
+    assertEquals(DataSchema.DATA, schema.getDatatype());
     assertTrue(schema.getSemanticTypes().isEmpty());
     assertTrue(schema.getEnumeration().isEmpty());
   }
@@ -854,6 +889,182 @@ public class TDGraphReaderTest {
     assertEquals(2, schema.getRequiredProperties().size());
     assertTrue(schema.getRequiredProperties().contains("integer_value"));
     assertTrue(schema.getRequiredProperties().contains("number_value"));
+  }
+
+  @Test
+  public void testReadOneEvent() {
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
+
+    List<EventAffordance> events = reader.readEvents();
+    assertEquals(1, events.size());
+
+    EventAffordance event = events.get(0);
+    assertEquals("my_event", event.getName());
+    assertEquals("My Event", event.getTitle().get());
+    assertEquals(1, event.getSemanticTypes().size());
+    assertEquals(1, event.getForms().size());
+
+    Optional<Form> form = event.getFirstFormForOperationType(TD.subscribeEvent);
+    assertTrue(form.isPresent());
+
+    /* Test subscription schema */
+    Optional<DataSchema> subscription = event.getSubscriptionSchema();
+    assertTrue(subscription.isPresent());
+    assertEquals(DataSchema.OBJECT, subscription.get().getDatatype());
+
+    ObjectSchema subscriptionSchema = (ObjectSchema) subscription.get();
+    assertEquals(1, subscriptionSchema.getProperties().size());
+
+    DataSchema stringProperty = subscriptionSchema.getProperties().get("string_value");
+    assertEquals(DataSchema.STRING, stringProperty.getDatatype());
+
+    /* Test notification schema */
+    Optional<DataSchema> notification = event.getNotificationSchema();
+    assertTrue(notification.isPresent());
+    assertEquals(DataSchema.OBJECT, notification.get().getDatatype());
+
+    ObjectSchema notificationSchema = (ObjectSchema) notification.get();
+    assertEquals(1, notificationSchema.getProperties().size());
+
+    DataSchema integerProperty = notificationSchema.getProperties().get("integer_value");
+    assertEquals(DataSchema.INTEGER, integerProperty.getDatatype());
+
+    /* Test cancellation schema */
+    Optional<DataSchema> cancellation = event.getCancellationSchema();
+    assertTrue(cancellation.isPresent());
+    assertEquals(DataSchema.OBJECT, cancellation.get().getDatatype());
+
+    ObjectSchema cancellationSchema = (ObjectSchema) cancellation.get();
+    assertEquals(1, cancellationSchema.getProperties().size());
+
+    DataSchema booleanProperty = cancellationSchema.getProperties().get("boolean_value");
+    assertEquals(DataSchema.BOOLEAN, booleanProperty.getDatatype());
+  }
+
+  @Test
+  public void testReadEventDefaultValues() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance ;\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<EventAffordance> events = reader.readEvents();
+    assertEquals(1, events.size());
+
+    EventAffordance event = events.get(0);
+
+    assertEquals(1, event.getForms().size());
+
+    Optional<Form> subscribeForm = event.getFirstFormForOperationType(TD.subscribeEvent);
+    Optional<Form> unsubscribeForm = event.getFirstFormForOperationType(TD.unsubscribeEvent);
+
+    assertTrue(subscribeForm.isPresent());
+    assertTrue(unsubscribeForm.isPresent());
+
+    assertFalse(subscribeForm.get().getMethodName().isPresent());
+    assertFalse(unsubscribeForm.get().getMethodName().isPresent());
+
+    assertTrue(subscribeForm.get().getMethodName(TD.subscribeEvent).isPresent());
+    assertTrue(unsubscribeForm.get().getMethodName(TD.unsubscribeEvent).isPresent());
+
+    assertEquals("GET", subscribeForm.get().getMethodName(TD.subscribeEvent).get());
+    assertEquals("GET", unsubscribeForm.get().getMethodName(TD.unsubscribeEvent).get());
+
+    assertFalse(subscribeForm.get().getSubProtocol().isPresent());
+    assertFalse(unsubscribeForm.get().getSubProtocol().isPresent());
+
+    assertTrue(subscribeForm.get().getSubProtocol(TD.subscribeEvent).isPresent());
+    assertTrue(unsubscribeForm.get().getSubProtocol(TD.unsubscribeEvent).isPresent());
+
+    assertEquals(COV.observe, subscribeForm.get().getSubProtocol(TD.subscribeEvent).get());
+    assertEquals(COV.observe, unsubscribeForm.get().getSubProtocol(TD.unsubscribeEvent).get());
+  }
+
+  @Test
+  public void testReadEventNoEventAffordanceType() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <coap://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    List<EventAffordance> events = reader.readEvents();
+    assertEquals(0, events.size());
+  }
+
+  @Test
+  public void testReadEventInvalidEventDefinitionNoForm() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance ;\n" +
+      "        td:name \"my_event\" \n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readEvents();
+    });
+
+    String expectedMessage = "Invalid event definition.";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadEventInvalidEventDefinitionInvalidNotificationSchema() {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance ;\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/event> ;\n" +
+      "        ] ;\n" +
+      "        td:hasSubscriptionSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"string_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"invalid_value\" ;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readEvents();
+    });
+
+    String expectedMessage = "Invalid event definition.";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test

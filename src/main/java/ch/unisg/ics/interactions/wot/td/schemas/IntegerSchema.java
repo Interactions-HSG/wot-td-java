@@ -1,15 +1,18 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import com.google.gson.JsonElement;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.gson.JsonElement;
 
 public class IntegerSchema extends NumberSchema {
 
   protected IntegerSchema(Set<String> semanticTypes, Set<String> enumeration,
-      Optional<Double> minimum, Optional<Double> maximum) {
-    super(DataSchema.INTEGER, semanticTypes, enumeration, minimum, maximum);
+                          Optional<String> contentMediaType, List<DataSchema> dataSchemas,
+                          Optional<Double> minimum, Optional<Double> maximum) {
+    super(DataSchema.INTEGER, semanticTypes, enumeration, contentMediaType,
+      dataSchemas, minimum, maximum);
   }
 
   public Optional<Integer> getMinimumAsInteger() {
@@ -29,7 +32,7 @@ public class IntegerSchema extends NumberSchema {
     return element.getAsInt();
   }
 
-  public static class Builder extends DataSchema.Builder<IntegerSchema, IntegerSchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<IntegerSchema, IntegerSchema.Builder> {
     private Optional<Double> minimum;
     private Optional<Double> maximum;
 
@@ -50,7 +53,7 @@ public class IntegerSchema extends NumberSchema {
 
     @Override
     public IntegerSchema build() {
-      return new IntegerSchema(semanticTypes, enumeration, minimum, maximum);
+      return new IntegerSchema(semanticTypes, enumeration, contentMediaType, dataSchemas, minimum, maximum);
     }
   }
 }

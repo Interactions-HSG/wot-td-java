@@ -10,6 +10,7 @@ public final class TD {
   public static final String Thing = PREFIX + "Thing";
   public static final String ActionAffordance = PREFIX + "ActionAffordance";
   public static final String PropertyAffordance = PREFIX + "PropertyAffordance";
+  public static final String EventAffordance = PREFIX + "EventAffordance";
 
   /* Object properties */
   public static final String hasBase = PREFIX + "hasBase";
@@ -18,6 +19,7 @@ public final class TD {
   public static final String hasInteractionAffordance = PREFIX + "hasInteractionAffordance";
   public static final String hasActionAffordance = PREFIX + "hasActionAffordance";
   public static final String hasPropertyAffordance = PREFIX + "hasPropertyAffordance";
+  public static final String hasEventAffordance = PREFIX + "hasEventAffordance";
 
   public static final String hasSecurityConfiguration = PREFIX + "hasSecurityConfiguration";
 
@@ -26,9 +28,13 @@ public final class TD {
   public static final String hasInputSchema = PREFIX + "hasInputSchema";
   public static final String hasOutputSchema = PREFIX + "hasOutputSchema";
 
+  public static final String hasSubscriptionSchema = PREFIX + "hasSubscriptionSchema";
+  public static final String hasNotificationSchema = PREFIX + "hasNotificationSchema";
+  public static final String hasCancellationSchema = PREFIX + "hasCancellationSchema";
+
   public static final String hasForm = PREFIX + "hasForm";
 
-  public static final String hasUriTemplateSchema= PREFIX+"hasUriTemplateSchema";
+  public static final String hasUriTemplateSchema = PREFIX + "hasUriTemplateSchema";
 
   /* Named individuals */
   public static final String readProperty = PREFIX + "readProperty";
@@ -36,10 +42,13 @@ public final class TD {
   public static final String invokeAction = PREFIX + "invokeAction";
   public static final String observeProperty = PREFIX + "observeProperty";
   public static final String unobserveProperty = PREFIX + "unobserveProperty";
+  public static final String subscribeEvent = PREFIX + "subscribeEvent";
+  public static final String unsubscribeEvent = PREFIX + "unsubscribeEvent";
 
   public static IRI createIRI(String fragment) {
     return SimpleValueFactory.getInstance().createIRI(PREFIX + fragment);
   }
 
-  private TD() { }
+  private TD() {
+  }
 }

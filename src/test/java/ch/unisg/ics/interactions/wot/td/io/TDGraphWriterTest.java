@@ -1,24 +1,16 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import ch.unisg.ics.interactions.wot.td.schemas.*;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
-
+import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -32,6 +24,14 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 public class TDGraphWriterTest {
   private static final String THING_TITLE = "My Thing";
@@ -423,43 +423,152 @@ public class TDGraphWriterTest {
             new Form.Builder( "http://example.org/action")
               .setMethodName("PUT")
               .build())
-        .addTitle("My Action")
-        .addSemanticType("http://iotschema.org/MyAction")
-        .addInputSchema(new ObjectSchema.Builder()
-            .addProperty("number_value", new NumberSchema.Builder().build())
-            .addRequiredProperties("number_value")
-            .build())
-        .addOutputSchema(new ObjectSchema.Builder()
-            .addProperty("boolean_value", new BooleanSchema.Builder().build())
-            .addRequiredProperties("boolean_value")
-            .build())
-        .build();
+      .addTitle("My Action")
+      .addSemanticType("http://iotschema.org/MyAction")
+      .addInputSchema(new ObjectSchema.Builder()
+        .addProperty("number_value", new NumberSchema.Builder().build())
+        .addRequiredProperties("number_value")
+        .build())
+      .addOutputSchema(new ObjectSchema.Builder()
+        .addProperty("boolean_value", new BooleanSchema.Builder().build())
+        .addRequiredProperties("boolean_value")
+        .build())
+      .build();
 
     ThingDescription td = constructThingDescription(new ArrayList<>(),
-        new ArrayList<>(Collections.singletonList(simpleAction)));
+      new ArrayList<>(Collections.singletonList(simpleAction)));
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteEventDefaultOperationTypes() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance, iot:MyEvent ;\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:subscribeEvent, td:unsubscribeEvent;\n" +
+      "        ] ,[\n" +
+      "            hctl:hasTarget <coap://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:subscribeEvent, td:unsubscribeEvent;\n" +
+      "        ] \n" +
+      "    ] .";
+
+    Form httpForm = new Form.Builder("http://example.org/event")
+      .build();
+
+    Form coapForm = new Form.Builder("coap://example.org/event")
+      .build();
+
+    EventAffordance event = new EventAffordance.Builder("my_event", Arrays.asList(httpForm, coapForm))
+      .addSemanticType("http://iotschema.org/MyEvent")
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addEvent(event)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  @Test
+  public void testWriteEvent() throws IOException {
+    String testTD = PREFIXES +
+      "@prefix iot: <http://iotschema.org/> .\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasEventAffordance [\n" +
+      "        a td:EventAffordance, iot:MyEvent ;\n" +
+      "        td:name \"my_event\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/event> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:subscribeEvent, td:unsubscribeEvent;\n" +
+      "        ];\n" +
+      "        td:hasSubscriptionSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:NumberSchema ;\n" +
+      "                js:propertyName \"number_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"number_value\" ;\n" +
+      "        ] ;\n" +
+      "        td:hasNotificationSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:BooleanSchema ;\n" +
+      "                js:propertyName \"boolean_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"boolean_value\" ;\n" +
+      "        ] ;\n" +
+      "        td:hasCancellationSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:StringSchema ;\n" +
+      "                js:propertyName \"string_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"string_value\" ;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    Form form = new Form.Builder("http://example.org/event")
+      .build();
+
+    EventAffordance event = new EventAffordance.Builder("my_event", form)
+      .addSemanticType("http://iotschema.org/MyEvent")
+      .addSubscriptionSchema(new ObjectSchema.Builder()
+        .addProperty("number_value", new NumberSchema.Builder().build())
+        .addRequiredProperties("number_value")
+        .build())
+      .addNotificationSchema(new ObjectSchema.Builder()
+        .addProperty("boolean_value", new BooleanSchema.Builder().build())
+        .addRequiredProperties("boolean_value")
+        .build())
+      .addCancellationSchema(new ObjectSchema.Builder()
+        .addProperty("string_value", new StringSchema.Builder().build())
+        .addRequiredProperties("string_value")
+        .build())
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme(new NoSecurityScheme())
+      .addEvent(event)
+      .build();
 
     assertIsomorphicGraphs(testTD, td);
   }
 
   @Test
   public void testWriteAdditionalMetadata() throws RDFParseException, RDFHandlerException, IOException {
-  	String testTD = PREFIXES +
-  	    "@prefix eve: <http://w3id.org/eve#> .\n" +
-  	    "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
-  	    "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-  	    "    dct:title \"My Lamp Thing\" ;\n" +
-  	    "    eve:hasManual [ a eve:Manual;\n" +
-  	    "        dct:title \"My Lamp Manual\";\n" +
-  	    "        eve:hasUsageProtocol [ a eve:UsageProtocol;\n" +
-  	    "            dct:title \"Party Light\";\n" +
-  	    "            eve:hasLanguage <http://jason.sourceforge.net/wp/description/>\n" +
-  	    "        ]\n" +
-  	    "    ].\n" ;
+    String testTD = PREFIXES +
+      "@prefix eve: <http://w3id.org/eve#> .\n" +
+      "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
+      "    dct:title \"My Lamp Thing\" ;\n" +
+      "    eve:hasManual [ a eve:Manual;\n" +
+      "        dct:title \"My Lamp Manual\";\n" +
+      "        eve:hasUsageProtocol [ a eve:UsageProtocol;\n" +
+      "            dct:title \"Party Light\";\n" +
+      "            eve:hasLanguage <http://jason.sourceforge.net/wp/description/>\n" +
+      "        ]\n" +
+      "    ].\n";
 
-  	ValueFactory rdf = SimpleValueFactory.getInstance();
-  	Model metadata = new LinkedHashModel();
+    ValueFactory rdf = SimpleValueFactory.getInstance();
+    Model metadata = new LinkedHashModel();
 
-  	final String NS = "http://w3id.org/eve#";
+    final String NS = "http://w3id.org/eve#";
   	metadata.setNamespace("eve", NS);
 
     BNode manualId = rdf.createBNode();

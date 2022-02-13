@@ -1,22 +1,23 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 
 public class ArraySchema extends DataSchema {
   final private List<DataSchema> items;
   final private Optional<Integer> minItems;
   final private Optional<Integer> maxItems;
 
-  protected ArraySchema(Set<String> semanticTypes, Set<String> enumeration, List<DataSchema> items,
-      Optional<Integer> minItems, Optional<Integer> maxItems) {
-    super(DataSchema.ARRAY, semanticTypes, enumeration);
+  protected ArraySchema(Set<String> semanticTypes, Set<String> enumeration,
+                        Optional<String> contentMediaType, List<DataSchema> dataSchemas,
+                        List<DataSchema> items, Optional<Integer> minItems, Optional<Integer> maxItems) {
+    super(DataSchema.ARRAY, semanticTypes, enumeration, contentMediaType, dataSchemas);
 
     this.items = items;
     this.minItems = minItems;
@@ -42,7 +43,7 @@ public class ArraySchema extends DataSchema {
 
   public Optional<DataSchema> getFirstItemSchema(String datatype) {
     for (DataSchema schema : items) {
-      if (schema.getDatatype() == datatype) {
+      if (schema.getDatatype().equals(datatype)) {
         return Optional.of(schema);
       }
     }
@@ -111,7 +112,7 @@ public class ArraySchema extends DataSchema {
     return itemSchema;
   }
 
-  public static class Builder extends DataSchema.Builder<ArraySchema, ArraySchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<ArraySchema, ArraySchema.Builder> {
     final private List<DataSchema> items;
     private Optional<Integer> minItems;
     private Optional<Integer> maxItems;
@@ -147,7 +148,8 @@ public class ArraySchema extends DataSchema {
 
     @Override
     public ArraySchema build() {
-      return new ArraySchema(semanticTypes, enumeration, items, minItems, maxItems);
+      return new ArraySchema(semanticTypes, enumeration, contentMediaType, dataSchemas,
+        items, minItems, maxItems);
     }
   }
 }
