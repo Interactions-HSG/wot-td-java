@@ -108,7 +108,7 @@ public class DataSchema {
     return schemas;
   }
 
-  public static class Builder extends JsonSchemaBuilder<DataSchema,DataSchema.Builder> {
+  public static final class Builder extends JsonSchemaBuilder<DataSchema,DataSchema.Builder> {
 
     @Override
     public DataSchema build() {

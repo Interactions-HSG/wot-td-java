@@ -41,7 +41,7 @@ public class NumberSchema extends DataSchema {
     return element.getAsDouble();
   }
 
-  public static class Builder extends DataSchema.JsonSchemaBuilder<NumberSchema, NumberSchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<NumberSchema, NumberSchema.Builder> {
     private Optional<Double> minimum;
     private Optional<Double> maximum;
 
