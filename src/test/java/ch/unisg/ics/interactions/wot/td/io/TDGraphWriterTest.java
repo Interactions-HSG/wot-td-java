@@ -8,8 +8,9 @@ import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.DigestSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
@@ -851,6 +852,30 @@ public class TDGraphWriterTest {
       .addSecurityScheme("basic_sc", new BasicSecurityScheme.Builder()
         .addSemanticType("https://example.org#Type")
         .addToken(TokenLocation.HEADER, "Authorization").build())
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
+  }
+
+  // Test BasicSecurityScheme
+  @Test
+  public void testWriteDigestSecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth-int\" ;\n" +
+      "    ] .\n";
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("digest_sc", new DigestSecurityScheme.Builder()
+        .addSemanticType("https://example.org#Type")
+        .addToken(TokenLocation.HEADER, "nonce")
+        .addQoP(DigestSecurityScheme.QualityOfProtection.AUTH_INT)
+        .build())
       .build();
 
     assertIsomorphicGraphs(testTD, td);

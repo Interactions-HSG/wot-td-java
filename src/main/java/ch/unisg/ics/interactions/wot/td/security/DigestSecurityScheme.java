@@ -1,6 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
 import java.util.Locale;
@@ -32,7 +31,9 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
 
     @Override
     public String toString() {
-      return name().toLowerCase(Locale.ENGLISH);
+      return name()
+        .replace("_", "-")
+        .toLowerCase(Locale.ENGLISH);
     }
 
     public static QualityOfProtection fromString(String value) {
