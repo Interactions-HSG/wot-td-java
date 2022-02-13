@@ -5,6 +5,7 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
@@ -184,6 +185,8 @@ public class TDGraphReader {
         }
         else if (semanticTypes.contains(WoTSec.APIKeySecurityScheme)) {
           scheme = readAPIKeySecurityScheme(schemeId, semanticTypes);
+        } else if (semanticTypes.contains(WoTSec.BasicSecurityScheme)) {
+          scheme = readBasicSecurityScheme(schemeId, semanticTypes);
         } else {
           throw new InvalidTDException("Unknown type of security scheme");
         }
@@ -198,12 +201,8 @@ public class TDGraphReader {
     return schemes;
   }
 
-  void readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?,?> schemeBuilder, Resource schemeId) {
-  }
-
-  SecurityScheme readAPIKeySecurityScheme(Resource schemeId, Set<String> semanticTypes) {
-    APIKeySecurityScheme.Builder schemeBuilder = new APIKeySecurityScheme.Builder();
-
+  SecurityScheme readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?,?> schemeBuilder, Resource schemeId,
+                                              Set<String> semanticTypes) {
     Optional<Literal> in = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.in), null));
     if (in.isPresent()) {
       schemeBuilder.addTokenLocation(TokenLocation.fromString(in.get().stringValue()));
@@ -216,6 +215,16 @@ public class TDGraphReader {
 
     schemeBuilder.addSemanticTypes(semanticTypes);
     return schemeBuilder.build();
+  }
+
+  SecurityScheme readAPIKeySecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+    APIKeySecurityScheme.Builder schemeBuilder = new APIKeySecurityScheme.Builder();
+    return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
+  }
+
+  SecurityScheme readBasicSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+    BasicSecurityScheme.Builder schemeBuilder = new BasicSecurityScheme.Builder();
+    return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 
   List<PropertyAffordance> readProperties() {

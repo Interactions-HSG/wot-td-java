@@ -8,6 +8,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
+import ch.unisg.ics.interactions.wot.td.security.BasicSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
@@ -1204,6 +1205,61 @@ public class TDGraphReaderTest {
     String expectedMessage = "Invalid security scheme configuration";
     String actualMessage = exception.getMessage();
     assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadBasicSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> basicSchemes = getSecurityNamesforSchemeName(SecurityScheme.BASIC, schemes);
+    assertEquals(1, basicSchemes.size());
+
+    SecurityScheme scheme = schemes.get(basicSchemes.get(0));
+    assertTrue(scheme instanceof BasicSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertEquals(TokenLocation.HEADER,
+      ((BasicSecurityScheme) scheme).getTokenLocation());
+    assertTrue(((BasicSecurityScheme) scheme).getTokenName().isPresent());
+    assertEquals("Authorization", ((BasicSecurityScheme) scheme).getTokenName().get());
+  }
+
+  @Test
+  public void testBasicSecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> basicSchemes = getSecurityNamesforSchemeName(SecurityScheme.BASIC, schemes);
+    assertEquals(1, basicSchemes.size());
+
+    SecurityScheme scheme = schemes.get(basicSchemes.get(0));
+    assertTrue(scheme instanceof BasicSecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((BasicSecurityScheme) scheme).getTokenLocation());
+    assertFalse(((BasicSecurityScheme) scheme).getTokenName().isPresent());
   }
 
   @Test

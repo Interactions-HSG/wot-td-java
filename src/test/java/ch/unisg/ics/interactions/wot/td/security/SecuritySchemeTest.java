@@ -1,7 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.junit.Test;
 
 import java.util.Map;
@@ -55,5 +55,42 @@ public class SecuritySchemeTest {
     Map<String, Object> conf = scheme.getConfiguration();
     assertEquals(1, conf.keySet().size());
     assertEquals(TokenLocation.QUERY, conf.get(WoTSec.in));
+  }
+
+  @Test
+  public void testBasicSecurityScheme() {
+    BasicSecurityScheme scheme = new BasicSecurityScheme.Builder()
+      .addToken(TokenLocation.BODY, "tokenName")
+      .addSemanticType("sem")
+      .build();
+
+    assertEquals(SecurityScheme.BASIC, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("sem"));
+
+    assertEquals(TokenLocation.BODY, scheme.getTokenLocation());
+    assertTrue(scheme.getTokenName().isPresent());
+    assertEquals("tokenName", scheme.getTokenName().get());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(2, conf.keySet().size());
+    assertEquals(TokenLocation.BODY, conf.get(WoTSec.in));
+    assertEquals("tokenName", conf.get(WoTSec.name));
+  }
+
+  @Test
+  public void testBasicSecuritySchemeDefaultValues() {
+    BasicSecurityScheme scheme = new BasicSecurityScheme.Builder()
+      .build();
+
+    assertEquals(SecurityScheme.BASIC, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+
+    assertEquals(TokenLocation.HEADER, scheme.getTokenLocation());
+    assertFalse(scheme.getTokenName().isPresent());
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(1, conf.keySet().size());
+    assertEquals(TokenLocation.HEADER, conf.get(WoTSec.in));
   }
 }
