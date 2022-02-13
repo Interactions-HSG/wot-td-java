@@ -10,7 +10,8 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
   private final TokenLocation in;
   private final Optional<String> name;
 
-  protected TokenBasedSecurityScheme(TokenLocation in, Optional<String> name, String schemeName, Map<String, Object> configuration, Set<String> semanticTypes) {
+  protected TokenBasedSecurityScheme(String schemeName, Map<String, Object> configuration, Set<String> semanticTypes,
+                                     TokenLocation in, Optional<String> name) {
     super(schemeName, configuration, semanticTypes);
     this.in = in;
     this.name = name;
@@ -129,5 +130,4 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
 
     public abstract T build();
   }
-
 }
