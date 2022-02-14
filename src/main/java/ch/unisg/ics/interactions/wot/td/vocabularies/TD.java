@@ -13,7 +13,7 @@ public final class TD {
   public static final String EventAffordance = PREFIX + "EventAffordance";
 
   /* Object properties */
-  public static final String hasBase = PREFIX + "hasBase";
+  public static final String baseURI = PREFIX + "baseURI";
   public static final String name = PREFIX + "name";
 
   public static final String hasInteractionAffordance = PREFIX + "hasInteractionAffordance";
