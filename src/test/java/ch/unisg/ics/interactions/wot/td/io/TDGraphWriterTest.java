@@ -55,7 +55,7 @@ public class TDGraphWriterTest {
         PREFIXES +
         "\n" +
         "[] a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -69,7 +69,7 @@ public class TDGraphWriterTest {
   public void testWriteTitle() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n" ;
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -84,7 +84,7 @@ public class TDGraphWriterTest {
   public void testWriteAPIKeySecurityScheme() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
         "        wotsec:in \"HEADER\" ;\n" +
         "        wotsec:name \"X-API-Key\" ;\n" +
@@ -106,7 +106,7 @@ public class TDGraphWriterTest {
         "@prefix iot: <http://iotschema.org/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing, eve:Artifact, iot:Light ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -128,7 +128,7 @@ public class TDGraphWriterTest {
         "@prefix eve: <http://w3id.org/eve#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing, eve:Artifact ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -148,7 +148,7 @@ public class TDGraphWriterTest {
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasBase <http://example.org/> .\n";
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)
@@ -165,7 +165,7 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
         "@prefix iot: <http://iotschema.org/> .\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
@@ -199,7 +199,7 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
         "@prefix iot: <http://iotschema.org/> .\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, iot:MyProperty ;\n" +
@@ -236,7 +236,7 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema, iot:MyProperty ;\n" +
@@ -272,7 +272,7 @@ public class TDGraphWriterTest {
     IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
@@ -305,7 +305,7 @@ public class TDGraphWriterTest {
   public void testWritePropertySubprotocolIRI() throws RDFParseException, RDFHandlerException, IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
@@ -343,7 +343,7 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasActionAffordance [\n" +
       "        a td:ActionAffordance, iot:MyAction ;\n" +
@@ -388,13 +388,13 @@ public class TDGraphWriterTest {
         "@prefix iot: <http://iotschema.org/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance, iot:MyAction ;\n" +
         "        td:name \"my_action\" ;\n" +
-        "        dct:title \"My Action\" ;\n" +
+        "        td:title \"My Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
         "            hctl:hasTarget <http://example.org/action> ;\n" +
@@ -446,7 +446,7 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasEventAffordance [\n" +
       "        a td:EventAffordance, iot:MyEvent ;\n" +
@@ -486,7 +486,7 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasEventAffordance [\n" +
       "        a td:EventAffordance, iot:MyEvent ;\n" +
@@ -556,7 +556,7 @@ public class TDGraphWriterTest {
       "@prefix eve: <http://w3id.org/eve#> .\n" +
       "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-      "    dct:title \"My Lamp Thing\" ;\n" +
+      "    td:title \"My Lamp Thing\" ;\n" +
       "    eve:hasManual [ a eve:Manual;\n" +
       "        dct:title \"My Lamp Manual\";\n" +
       "        eve:hasUsageProtocol [ a eve:UsageProtocol;\n" +
@@ -597,10 +597,10 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
         "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
         "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-        "  dct:title \"My Lamp Thing\" ;\n" +
+        "  td:title \"My Lamp Thing\" ;\n" +
         "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
         "      td:name \"toggle\";\n" +
-        "      dct:title \"Toggle\";\n" +
+        "      td:title \"Toggle\";\n" +
         "      td:hasForm [\n" +
         "          htv:methodName \"PUT\";\n" +
         "          hctl:forContentType \"application/json\";\n" +
@@ -644,12 +644,12 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:title \"My Lamp Thing\" ;\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
       "  td:name   \"toggleAffordance\";  "+
       "  td:hasUriTemplateSchema [ a js:StringSchema;\n"+
       "  td:name  \"name\" ];  "+
-      "      dct:title \"Toggle\";\n" +
+      "      td:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
       "          hctl:forContentType \"application/json\";\n" +
@@ -692,10 +692,10 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, saref:LightSwitch;\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:title \"My Lamp Thing\" ;\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;\n" +
       "  td:name   \"toggleAffordance\";  "+
-      "      dct:title \"Toggle\";\n" +
+      "      td:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
       "          hctl:forContentType \"application/json\";\n" +
@@ -745,11 +745,11 @@ public class TDGraphWriterTest {
     String testTD = PREFIXES +
       "<http://example.org/lamp123> a td:Thing;\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ];\n" +
-      "  dct:title \"My Lamp Thing\" ;\n" +
+      "  td:title \"My Lamp Thing\" ;\n" +
       "  td:hasPropertyAffordance [ a td:PropertyAffordance, js:StringSchema;\n" +
       "  td:name  \"lightAffordance\"; "+
       "       td:isObservable false;  "+
-      "      dct:title \"Light\";\n" +
+      "      td:title \"Light\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"GET\";\n" +
       "          hctl:forContentType \"application/json\";\n" +
@@ -792,7 +792,7 @@ public class TDGraphWriterTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:IntegerSchema ;\n" +

@@ -50,13 +50,13 @@ public class TDGraphReaderTest {
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:NumberSchema ;\n" +
       "        td:name \"my_property\" ;\n" +
-      "        dct:title \"My Property\" ;\n" +
+      "        td:title \"My Property\" ;\n" +
       "        td:isObservable true ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
@@ -75,7 +75,7 @@ public class TDGraphReaderTest {
       "    td:hasActionAffordance [\n" +
       "        a td:ActionAffordance ;\n" +
       "        td:name \"my_action\" ;\n" +
-      "        dct:title \"My Action\" ;\n" +
+      "        td:title \"My Action\" ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
       "            hctl:hasTarget <http://example.org/action> ;\n" +
@@ -104,7 +104,7 @@ public class TDGraphReaderTest {
       "    td:hasEventAffordance [\n" +
       "        a td:EventAffordance ;\n" +
       "        td:name \"my_event\" ;\n" +
-      "        dct:title \"My Event\" ;\n" +
+      "        td:title \"My Event\" ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
       "            hctl:hasTarget <http://example.org/event> ;\n" +
@@ -143,7 +143,7 @@ public class TDGraphReaderTest {
       "}, {\n" +
       "  \"@id\" : \"_:node1ea75dfphx112\",\n" +
       "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#ActionAffordance\" ],\n" +
-      "  \"http://purl.org/dc/terms/title\" : [ {\n" +
+      "  \"https://www.w3.org/2019/wot/td#title\" : [ {\n" +
       "    \"@value\" : \"My Action\"\n" +
       "  } ],\n" +
       "  \"https://www.w3.org/2019/wot/td#hasForm\" : [ {\n" +
@@ -210,7 +210,7 @@ public class TDGraphReaderTest {
       "}, {\n" +
       "  \"@id\" : \"http://example.org/#thing\",\n" +
       "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#Thing\" ],\n" +
-      "  \"http://purl.org/dc/terms/title\" : [ {\n" +
+      "  \"https://www.w3.org/2019/wot/td#title\" : [ {\n" +
       "    \"@value\" : \"My Thing\"\n" +
       "  } ],\n" +
       "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
@@ -233,13 +233,13 @@ public class TDGraphReaderTest {
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasBase <http://example.org/> ;\n" +
       "    td:hasActionAffordance [\n" +
       "        a td:ActionAffordance ;\n" +
       "        td:name \"my_action\" ;\n" +
-      "        dct:title \"My Action\" ;\n" +
+      "        td:title \"My Action\" ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
       "            hctl:hasTarget <http://example.org/action> ;\n" +
@@ -288,7 +288,7 @@ public class TDGraphReaderTest {
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
         "        wotsec:in \"header\" ;\n" +
         "        wotsec:name \"X-API-Key\" ;\n" +
@@ -313,7 +313,7 @@ public class TDGraphReaderTest {
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
@@ -332,7 +332,7 @@ public class TDGraphReaderTest {
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
         "        wotsec:in \"bla\" ;\n" +
         "  ] .";
@@ -350,7 +350,7 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> .";
@@ -394,7 +394,7 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -436,7 +436,7 @@ public class TDGraphReaderTest {
   public void testReadReadPropertyDefaultMethodValues() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -483,7 +483,7 @@ public class TDGraphReaderTest {
   public void testReadWritePropertyDefaultMethodValues() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -530,7 +530,7 @@ public class TDGraphReaderTest {
   public void testReadObservePropertyDefaultMethodValues() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -568,7 +568,7 @@ public class TDGraphReaderTest {
   public void testReadUnobservePropertyDefaultMethodValues() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -612,7 +612,7 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -649,7 +649,7 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -684,7 +684,7 @@ public class TDGraphReaderTest {
   public void testReadSubProtocolUnknownOperationType() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
@@ -720,7 +720,7 @@ public class TDGraphReaderTest {
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance ;\n" +
@@ -774,13 +774,13 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
         "        td:name \"first_action\" ;\n" +
-        "        dct:title \"First Action\" ;\n" +
+        "        td:title \"First Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
         "            hctl:hasTarget <http://example.org/action1> ;\n" +
@@ -791,7 +791,7 @@ public class TDGraphReaderTest {
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
         "        td:name \"second_action\" ;\n" +
-        "        dct:title \"Second Action\" ;\n" +
+        "        td:title \"Second Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
         "            hctl:hasTarget <http://example.org/action2> ;\n" +
@@ -802,7 +802,7 @@ public class TDGraphReaderTest {
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
         "        td:name \"third_action\" ;\n" +
-        "        dct:title \"Third Action\" ;\n" +
+        "        td:title \"Third Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
         "            hctl:hasTarget <http://example.org/action3> ;\n" +
@@ -945,7 +945,7 @@ public class TDGraphReaderTest {
   public void testReadEventDefaultValues() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasEventAffordance [\n" +
       "        a td:EventAffordance ;\n" +
@@ -994,7 +994,7 @@ public class TDGraphReaderTest {
   public void testReadEventNoEventAffordanceType() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasEventAffordance [\n" +
       "        td:name \"my_event\" ;\n" +
@@ -1014,7 +1014,7 @@ public class TDGraphReaderTest {
   public void testReadEventInvalidEventDefinitionNoForm() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasEventAffordance [\n" +
       "        a td:EventAffordance ;\n" +
@@ -1037,7 +1037,7 @@ public class TDGraphReaderTest {
   public void testReadEventInvalidEventDefinitionInvalidNotificationSchema() {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
-      "    dct:title \"My Thing\" ;\n" +
+      "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
       "    td:hasEventAffordance [\n" +
       "        a td:EventAffordance ;\n" +
@@ -1150,7 +1150,7 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:NumberSchema ;\n" +
@@ -1187,7 +1187,7 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
@@ -1222,7 +1222,7 @@ public class TDGraphReaderTest {
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
-      "  dct:title \"My Lamp Thing\";\n" +
+      "  td:title \"My Lamp Thing\";\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme\n" +
       "    ];\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
@@ -1230,7 +1230,7 @@ public class TDGraphReaderTest {
       "  td:name   \"toggleAffordance\"; "+
       "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
       "      td:name \"token\"    ];"+
-      "      dct:title \"Toggle\";\n" +
+      "      td:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
       "          hctl:hasTarget <http://mylamp.example.org/toggle/{token}>;\n" +
@@ -1259,7 +1259,7 @@ public class TDGraphReaderTest {
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
-      "  dct:title \"My Lamp Thing\";\n" +
+      "  td:title \"My Lamp Thing\";\n" +
       "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme\n" +
       "    ];\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
@@ -1269,7 +1269,7 @@ public class TDGraphReaderTest {
       "      td:name     \"name\" ];   "+
       "      td:hasUriTemplateSchema [ a js:NumberSchema;\n"+
       "      td:name     \"number\" ];   "+
-      "      dct:title \"Toggle\";\n" +
+      "      td:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
       "          hctl:hasTarget <http://mylamp.example.org/{name}/{number}/toggle>;\n" +
@@ -1302,13 +1302,13 @@ public class TDGraphReaderTest {
         "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
+        "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
         "    td:hasBase <http://example.org/> ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:NumberSchema ;\n" +
         "        td:name \"my_property\" ;\n" +
-        "        dct:title \"My Property\" ;\n" +
+        "        td:title \"My Property\" ;\n" +
         "        td:isObservable true ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
@@ -1328,7 +1328,7 @@ public class TDGraphReaderTest {
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
         "        td:name \"my_action\" ;\n" +
-        "        dct:title \"My Action\" ;\n" +
+        "        td:title \"My Action\" ;\n" +
         "        td:hasForm [\n" +
         "            htv:methodName \"PUT\" ;\n" +
         "            hctl:hasTarget <http://example.org/action> ;\n" +

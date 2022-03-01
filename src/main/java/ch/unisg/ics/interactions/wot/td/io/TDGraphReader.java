@@ -128,7 +128,7 @@ public class TDGraphReader {
   	Literal thingTitle;
 
     try {
-      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();
+      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(TD.title), null)).get();
     } catch (NoSuchElementException e) {
       throw new InvalidTDException("Missing mandatory title.", e);
     }
@@ -366,7 +366,7 @@ public class TDGraphReader {
 
     /* Read title */
     Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId,
-      rdf.createIRI(DCT.title), null));
+      rdf.createIRI(TD.title), null));
 
     if (title.isPresent()) {
       builder.addTitle(title.get().stringValue());

@@ -96,7 +96,7 @@ public class TDGraphWriter {
   }
 
   private TDGraphWriter addTitle() {
-    graphBuilder.add(thingId, rdf.createIRI(DCT.title), td.getTitle());
+    graphBuilder.add(thingId, rdf.createIRI(TD.title), td.getTitle());
     return this;
   }
 
@@ -218,7 +218,7 @@ public class TDGraphWriter {
     }
 
     if (affordance.getTitle().isPresent()) {
-      graphBuilder.add(affordanceId, rdf.createIRI(DCT.title), affordance.getTitle().get());
+      graphBuilder.add(affordanceId, rdf.createIRI(TD.title), affordance.getTitle().get());
     }
 
     addFormsForInteraction(affordanceId, affordance);

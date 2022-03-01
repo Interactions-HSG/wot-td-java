@@ -15,6 +15,7 @@ public final class TD {
   /* Object properties */
   public static final String hasBase = PREFIX + "hasBase";
   public static final String name = PREFIX + "name";
+  public static final String title = PREFIX + "title";
 
   public static final String hasInteractionAffordance = PREFIX + "hasInteractionAffordance";
   public static final String hasActionAffordance = PREFIX + "hasActionAffordance";
