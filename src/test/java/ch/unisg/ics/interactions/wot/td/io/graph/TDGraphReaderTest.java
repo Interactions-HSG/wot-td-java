@@ -562,20 +562,20 @@ public class TDGraphReaderTest {
 
   @Test
   public void testReadOAuth2SecurityScheme() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
-        "        wotsec:authorization \"https://example.com/authorization\" ;\n" +
-        "        wotsec:token \"https://example.com/token/1\" ;\n" +
-        "        wotsec:refresh \"https://example.com/token/2\" ;\n" +
-        "        wotsec:scopes \"limited\", \"special\" ;\n" +
-        "        wotsec:flow  \"code\";\n" +
-        "  ] .";
+   String testTD =
+     "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+       "\n" +
+       "<http://example.org/#thing> a td:Thing ;\n" +
+       "    dct:title \"My Thing\" ;\n" +
+       "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+       "        wotsec:authorization \"https://example.com/authorization\" ;\n" +
+       "        wotsec:token \"https://example.com/token/1\" ;\n" +
+       "        wotsec:refresh \"https://example.com/token/2\" ;\n" +
+       "        wotsec:scopes \"limited\", \"special\", \"c\" ;\n" +
+       "        wotsec:flow  \"code\";\n" +
+       "  ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
@@ -588,10 +588,36 @@ public class TDGraphReaderTest {
     assertEquals("https://example.com/authorization", ((OAuth2SecurityScheme) scheme).getAuthorization().get());
     assertEquals("https://example.com/token/1", ((OAuth2SecurityScheme) scheme).getToken().get());
     assertEquals("https://example.com/token/2", ((OAuth2SecurityScheme) scheme).getRefresh().get());
-    assertEquals(2, ((OAuth2SecurityScheme) scheme).getScopes().get().size());
+    assertEquals(3, ((OAuth2SecurityScheme) scheme).getScopes().get().size());
     assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("special"));
     assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("limited"));
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("c"));
     assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+
+  }
+
+  @Test
+  public void testReadOAuth2SecuritySchemeMissingFlow() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readSecuritySchemes();
+    });
+
+    String expectedMessage = "Missing or invalid configuration value of type " + WoTSec.flow +
+      " on defining security scheme";
+
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test

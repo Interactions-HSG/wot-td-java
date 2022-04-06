@@ -2,6 +2,7 @@ package ch.unisg.ics.interactions.wot.td.security;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -78,6 +79,8 @@ public class BearerSecurityScheme extends TokenBasedSecurityScheme {
     @Override
     public BearerSecurityScheme.Builder addConfiguration(Map<String, Object> configuration) {
       super.addConfiguration(configuration);
+      validateConfiguration(Arrays.asList(WoTSec.authorization, WoTSec.alg, WoTSec.format));
+
       if (configuration.containsKey(WoTSec.authorization)) {
         this.addAuthorization(String.valueOf(configuration.get(WoTSec.authorization)));
       }

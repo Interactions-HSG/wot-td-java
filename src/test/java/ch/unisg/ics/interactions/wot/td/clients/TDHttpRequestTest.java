@@ -423,7 +423,7 @@ public class TDHttpRequestTest {
   }
 
   @Test
-  public void testSetBeraerAuth() throws ProtocolException {
+  public void testSetBearerAuth() throws ProtocolException {
     assertEquals(1, td.getProperties().size());
     Optional<PropertyAffordance> property = td.getFirstPropertyBySemanticType(PREFIX + "Status");
     assertTrue(property.isPresent());

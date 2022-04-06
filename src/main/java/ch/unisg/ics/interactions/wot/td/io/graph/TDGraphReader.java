@@ -19,12 +19,14 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
@@ -173,13 +175,22 @@ public class TDGraphReader {
 
     for (Resource node : nodeIds) {
       SecurityScheme.Builder schemeBuilder;
-      Map<String, String> configuration = new HashMap<>();
+      Map<String, Object> configuration = new HashMap<>();
       Set<String> semanticTypes = new HashSet<>();
 
       Iterable<Statement> configurationModel = model.getStatements(node, null, null);
+
       for (Statement s : configurationModel) {
-        if (!s.getPredicate().equals(RDF.TYPE)) {
+
+        List<String> samePredObjects = StreamSupport.stream(configurationModel.spliterator(), false)
+          .filter(statement -> s.getPredicate().equals(statement.getPredicate()))
+          .map(statement -> statement.getObject().stringValue())
+          .collect(Collectors.toList());
+
+        if (samePredObjects.size() == 1) {
           configuration.put(s.getPredicate().stringValue(), s.getObject().stringValue());
+        } else {
+          configuration.put(s.getPredicate().stringValue(), samePredObjects);
         }
       }
 
@@ -207,6 +218,14 @@ public class TDGraphReader {
       } else if (schemeTypes.contains(WoTSec.PSKSecurityScheme)) {
         schemeBuilder = new PSKSecurityScheme.Builder();
         schemeTypes.remove(WoTSec.PSKSecurityScheme);
+      } else if (schemeTypes.contains(WoTSec.OAuth2SecurityScheme)) {
+        if (!configuration.containsKey(WoTSec.flow) || !(configuration.get(WoTSec.flow) instanceof String)) {
+          throw new InvalidTDException("Missing or invalid configuration value of type " + WoTSec.flow
+            + " on defining security scheme");
+        } else {
+          schemeBuilder = new OAuth2SecurityScheme.Builder((String) configuration.get(WoTSec.flow));
+          schemeTypes.remove(WoTSec.OAuth2SecurityScheme);
+        }
       } else {
         throw new InvalidTDException("Unknown type of security scheme");
       }
@@ -382,4 +401,8 @@ public class TDGraphReader {
 
     return forms;
   }
+
+
+
+
 }

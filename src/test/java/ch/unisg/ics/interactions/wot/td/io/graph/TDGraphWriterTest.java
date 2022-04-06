@@ -4,12 +4,12 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.io.json.TDJsonWriter;
-import ch.unisg.ics.interactions.wot.td.schemas.*;
+import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -24,9 +24,6 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.junit.Test;
 
-import javax.json.JsonObject;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -209,7 +206,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testDigestSecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+  public void testDigestSecuritySchemeDefaultValues() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -259,7 +256,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testBearerSecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+  public void testBearerSecuritySchemeDefaultValues() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -345,7 +342,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testOAuth2SecuritySchemeDefault() throws RDFParseException, RDFHandlerException,
+  public void testOAuth2SecuritySchemeDefaultValues() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "<http://example.org/#thing> a td:Thing ;\n" +
@@ -424,7 +421,7 @@ public class TDGraphWriterTest {
   }
 
   @Test
-  public void testWriteOnePropertyDefaultValues() throws RDFParseException, RDFHandlerException,
+  public void testWriteOnePropertyDefaultValuesValues() throws RDFParseException, RDFHandlerException,
     IOException {
     String testTD = PREFIXES +
       "@prefix iot: <http://iotschema.org/> .\n" +

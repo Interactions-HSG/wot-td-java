@@ -3,10 +3,7 @@ package ch.unisg.ics.interactions.wot.td.security;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public abstract class TokenBasedSecurityScheme extends SecurityScheme {
 
@@ -95,6 +92,8 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
     @SuppressWarnings("unchecked")
     public S addConfiguration(Map<String, Object> configuration) {
       this.configuration.putAll(configuration);
+      validateConfiguration(Arrays.asList(WoTSec.name));
+
       if (configuration.containsKey(WoTSec.in)) {
         try {
           this.addTokenLocation(TokenLocation.valueOf(String.valueOf(configuration.get(WoTSec.in))

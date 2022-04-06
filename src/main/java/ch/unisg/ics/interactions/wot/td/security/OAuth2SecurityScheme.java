@@ -2,9 +2,7 @@ package ch.unisg.ics.interactions.wot.td.security;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class OAuth2SecurityScheme extends SecurityScheme {
 
@@ -84,8 +82,20 @@ public class OAuth2SecurityScheme extends SecurityScheme {
     }
 
     public OAuth2SecurityScheme.Builder addScopes(Set<String> scopes) {
-      this.scopes = Optional.of(scopes);
-      this.configuration.put(WoTSec.scopes, scopes);
+      if (!this.scopes.isPresent()) {
+        this.scopes = Optional.of(new HashSet<>());
+      }
+      this.scopes.get().addAll(scopes);
+      this.configuration.put(WoTSec.scopes, this.scopes.get());
+      return this;
+    }
+
+    public OAuth2SecurityScheme.Builder addScope(String scope) {
+      if (!this.scopes.isPresent()) {
+        this.scopes = Optional.of(new HashSet<>());
+      }
+      this.scopes.get().add(scope);
+      this.configuration.put(WoTSec.scopes, this.scopes.get());
       return this;
     }
 
@@ -99,8 +109,30 @@ public class OAuth2SecurityScheme extends SecurityScheme {
     @Override
     public OAuth2SecurityScheme.Builder addConfiguration(Map<String, Object> configuration) {
       super.addConfiguration(configuration);
-      if (configuration.containsKey(WoTSec.identity)) {
-        //this.addIdentity(configuration.get(WoTSec.identity));
+      validateConfiguration(Arrays.asList(WoTSec.authorization, WoTSec.token, WoTSec.refresh));
+
+      if (configuration.containsKey(WoTSec.authorization)) {
+        this.addAuthorization(String.valueOf(configuration.get(WoTSec.authorization)));
+      }
+      if (configuration.containsKey(WoTSec.token)) {
+        this.addToken(String.valueOf(configuration.get(WoTSec.token)));
+      }
+      if (configuration.containsKey(WoTSec.refresh)) {
+        this.addRefresh(String.valueOf(configuration.get(WoTSec.refresh)));
+      }
+      if (configuration.containsKey(WoTSec.scopes)) {
+        if (configuration.get(WoTSec.scopes) instanceof Collection<?>) {
+          Collection<?> scopes = (Collection<?>) configuration.get(WoTSec.scopes);
+          for (Object scope : scopes) {
+            if (scope instanceof String) {
+              this.addScope(String.valueOf(scope));
+            } else {
+              throwInvalidConfigurationException(WoTSec.scopes);
+            }
+          }
+        } else {
+          throwInvalidConfigurationException(WoTSec.scopes);
+        }
       }
       return this;
     }

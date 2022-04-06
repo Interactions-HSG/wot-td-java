@@ -1,9 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class SecurityScheme {
 
@@ -78,6 +76,25 @@ public abstract class SecurityScheme {
     public S addSemanticTypes(Set<String> type) {
       this.semanticTypes.addAll(type);
       return (S) this;
+    }
+
+    protected void throwInvalidConfigurationException(String... configurationTypes) {
+      throw new IllegalArgumentException("Invalid configuration value of types " + configurationTypes
+        + " on defining security scheme");
+    }
+
+    protected void validateConfiguration(List<String> configurationTypes) {
+      List<String> knownConfigurationTypes = configurationTypes.stream()
+        .filter(configuration.keySet()::contains)
+        .collect(Collectors.toList());
+
+      List<String> invalidConf = knownConfigurationTypes.stream()
+        .filter(confType -> !(configuration.get(confType) instanceof String))
+        .collect(Collectors.toList());
+
+      if (!invalidConf.isEmpty()) {
+        throwInvalidConfigurationException(invalidConf.toArray(new String[0]));
+      }
     }
 
     public abstract T build();

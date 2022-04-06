@@ -2,6 +2,7 @@ package ch.unisg.ics.interactions.wot.td.security;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -46,11 +47,13 @@ public class PSKSecurityScheme extends SecurityScheme {
     @Override
     public PSKSecurityScheme.Builder addConfiguration(Map<String, Object> configuration) {
       super.addConfiguration(configuration);
+      validateConfiguration(Arrays.asList(WoTSec.identity));
       if (configuration.containsKey(WoTSec.identity)) {
         this.addIdentity(String.valueOf(configuration.get(WoTSec.identity)));
       }
       return this;
     }
+
 
     @Override
     public PSKSecurityScheme build() {
