@@ -739,6 +739,44 @@ public class TDGraphReaderTest {
   }
 
   @Test
+  public void testReadUnknownSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a ex:UnknownSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readSecuritySchemes();
+    });
+
+    String expectedMessage = "Unknown type of security scheme";
+
+    String actualMessage = String.valueOf(exception.getCause());
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadMissingSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasBase <http://example.org/> .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTD);
+    });
+
+    String expectedMessage = "Missing mandatory security definitions.";
+
+    String actualMessage = String.valueOf(exception.getMessage());
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
   public void testReadMultipleSecuritySchemes() {
     String testTD = PREFIXES +
       "\n" +

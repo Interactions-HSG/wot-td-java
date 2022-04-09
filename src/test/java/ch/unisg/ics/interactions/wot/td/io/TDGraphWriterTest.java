@@ -90,7 +90,6 @@ public class TDGraphWriterTest {
       "        wotsec:name \"X-API-Key\" ;\n" +
       "    ] .\n";
 
-    System.out.println(testTD);
     ThingDescription tdSimple = new ThingDescription.Builder(THING_TITLE)
       .addThingURI(THING_IRI)
       .addSecurityScheme("apikey_sc", new APIKeySecurityScheme.Builder()

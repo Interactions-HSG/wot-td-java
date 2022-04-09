@@ -217,7 +217,9 @@ public class SecuritySchemeTest {
       .addAuthorization("https://example.com/authorization")
       .addToken("https://example.com/token/1")
       .addRefresh("https://example.com/token/2")
+      .addScope("firstScope")
       .addScopes(new HashSet<>(Arrays.asList("limited", "special")))
+      .addScope("lastScope")
       .addSemanticType("sem")
       .build();
 
@@ -237,9 +239,11 @@ public class SecuritySchemeTest {
     assertEquals("https://example.com/token/2", scheme.getRefresh().get());
 
     assertTrue(scheme.getScopes().isPresent());
-    assertEquals(2, scheme.getScopes().get().size());
+    assertEquals(4, scheme.getScopes().get().size());
+    assertTrue(scheme.getScopes().get().contains("firstScope"));
     assertTrue(scheme.getScopes().get().contains("limited"));
     assertTrue(scheme.getScopes().get().contains("special"));
+    assertTrue(scheme.getScopes().get().contains("lastScope"));
 
     Map<String, Object> conf = scheme.getConfiguration();
     assertEquals(5, conf.keySet().size());
@@ -248,7 +252,7 @@ public class SecuritySchemeTest {
     assertEquals("https://example.com/token/1", conf.get(WoTSec.token));
     assertEquals("https://example.com/token/2", conf.get(WoTSec.refresh));
 
-    Set<String> scopes = new HashSet<>(Arrays.asList("limited", "special"));
+    Set<String> scopes = new HashSet<>(Arrays.asList("firstScope", "limited", "special", "lastScope"));
     assertEquals(scopes, conf.get(WoTSec.scopes));
   }
 }

@@ -204,7 +204,7 @@ public class TDGraphReader {
     return schemes;
   }
 
-  SecurityScheme readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?, ?> schemeBuilder, Resource schemeId,
+  private SecurityScheme readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?, ?> schemeBuilder, Resource schemeId,
                                               Set<String> semanticTypes) {
     Optional<Literal> in = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.in), null));
     if (in.isPresent()) {
@@ -220,17 +220,17 @@ public class TDGraphReader {
     return schemeBuilder.build();
   }
 
-  SecurityScheme readAPIKeySecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+  private SecurityScheme readAPIKeySecurityScheme(Resource schemeId, Set<String> semanticTypes) {
     APIKeySecurityScheme.Builder schemeBuilder = new APIKeySecurityScheme.Builder();
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 
-  SecurityScheme readBasicSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+  private SecurityScheme readBasicSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
     BasicSecurityScheme.Builder schemeBuilder = new BasicSecurityScheme.Builder();
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 
-  SecurityScheme readDigestSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+  private SecurityScheme readDigestSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
     DigestSecurityScheme.Builder schemeBuilder = new DigestSecurityScheme.Builder();
 
     Optional<Literal> qop = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.qop), null));
@@ -241,7 +241,7 @@ public class TDGraphReader {
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 
-  SecurityScheme readBearerSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+  private SecurityScheme readBearerSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
     BearerSecurityScheme.Builder schemeBuilder = new BearerSecurityScheme.Builder();
 
     Optional<Literal> alg = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.alg), null));
@@ -263,7 +263,7 @@ public class TDGraphReader {
     return readTokenBasedSecurityScheme(schemeBuilder, schemeId, semanticTypes);
   }
 
-  SecurityScheme readPSKSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+  private SecurityScheme readPSKSecurityScheme(Resource schemeId, Set<String> semanticTypes) {
     PSKSecurityScheme.Builder schemeBuilder = new PSKSecurityScheme.Builder();
 
     Optional<Literal> identity = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.identity),
@@ -276,7 +276,7 @@ public class TDGraphReader {
     return schemeBuilder.build();
   }
 
-  SecurityScheme readOAuth2SecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+  private SecurityScheme readOAuth2SecurityScheme(Resource schemeId, Set<String> semanticTypes) {
 
     Optional<Literal> flow = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.flow),
       null));
