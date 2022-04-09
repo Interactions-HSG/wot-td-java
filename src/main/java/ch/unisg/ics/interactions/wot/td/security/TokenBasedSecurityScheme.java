@@ -65,7 +65,8 @@ public abstract class TokenBasedSecurityScheme extends SecurityScheme {
 
     protected Builder() {
       this.name = Optional.empty();
-      this.addTokenLocation(TokenLocation.HEADER);
+      this.in = TokenLocation.HEADER;
+      this.configuration.put(WoTSec.in, TokenLocation.HEADER);
     }
 
     /**

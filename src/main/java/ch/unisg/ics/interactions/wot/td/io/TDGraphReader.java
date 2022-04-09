@@ -305,7 +305,7 @@ public class TDGraphReader {
         .map(scope -> scope.stringValue())
         .collect(Collectors.toSet());
 
-      if (scopes.size() > 0) {
+      if (!scopes.isEmpty()) {
         schemeBuilder.addScopes(scopes);
       }
 

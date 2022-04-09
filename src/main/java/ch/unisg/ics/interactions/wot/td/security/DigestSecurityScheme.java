@@ -57,7 +57,8 @@ public class DigestSecurityScheme extends TokenBasedSecurityScheme {
     public Builder() {
       this.name = Optional.empty();
       this.semanticTypes.add(WoTSec.DigestSecurityScheme);
-      this.addQoP(QualityOfProtection.AUTH);
+      this.qop = QualityOfProtection.AUTH;
+      this.configuration.put(WoTSec.qop, QualityOfProtection.AUTH);
       this.addTokenLocation(TokenLocation.HEADER);
     }
 

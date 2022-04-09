@@ -97,7 +97,7 @@ public class TDGraphWriter {
               graphBuilder.add(schemeId, confTypeIri, rdf.createIRI((String) objConfValue));
             } catch (IllegalArgumentException e) {
               throw new InvalidTDException("Invalid security scheme configuration. " + confTypeIri + " value should" +
-                " be a valid IRI.");
+                " be a valid IRI.", e);
             }
           } else {
             graphBuilder.add(schemeId, confTypeIri, objConfValue);
