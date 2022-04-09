@@ -19,7 +19,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -219,12 +218,12 @@ public class TDGraphReader {
         schemeBuilder = new PSKSecurityScheme.Builder();
         schemeTypes.remove(WoTSec.PSKSecurityScheme);
       } else if (schemeTypes.contains(WoTSec.OAuth2SecurityScheme)) {
-        if (!configuration.containsKey(WoTSec.flow) || !(configuration.get(WoTSec.flow) instanceof String)) {
-          throw new InvalidTDException("Missing or invalid configuration value of type " + WoTSec.flow
-            + " on defining security scheme");
-        } else {
+        if (configuration.containsKey(WoTSec.flow) && (configuration.get(WoTSec.flow) instanceof String)) {
           schemeBuilder = new OAuth2SecurityScheme.Builder((String) configuration.get(WoTSec.flow));
           schemeTypes.remove(WoTSec.OAuth2SecurityScheme);
+        } else {
+          throw new InvalidTDException("Missing or invalid configuration value of type " + WoTSec.flow
+            + " on defining security scheme");
         }
       } else {
         throw new InvalidTDException("Unknown type of security scheme");
@@ -401,8 +400,6 @@ public class TDGraphReader {
 
     return forms;
   }
-
-
 
 
 }
