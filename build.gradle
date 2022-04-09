@@ -23,6 +23,12 @@ dependencies {
   implementation 'org.eclipse.californium:californium-core:2.6.3'
   implementation 'com.google.code.gson:gson:2.8.9'
   implementation 'org.slf4j:slf4j-api:2.0.0-alpha5'
+  // https://mvnrepository.com/artifact/org.springframework/spring-websocket
+  implementation 'org.springframework:spring-websocket:5.3.18'
+  // https://mvnrepository.com/artifact/org.springframework/spring-messaging
+  implementation 'org.springframework:spring-messaging:5.3.18'
+
+
 
   implementation('org.eclipse.rdf4j:rdf4j-runtime:3.7.4@pom') {
     transitive = true;

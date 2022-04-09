@@ -5,7 +5,10 @@ import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenL
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -140,12 +143,12 @@ public class SecuritySchemeTest {
   @Test
   public void testBearerSecurityScheme() {
     BearerSecurityScheme scheme = new BearerSecurityScheme.Builder()
-            .addToken(TokenLocation.HEADER, "tokenName")
-            .addAlg("algName")
-            .addAuthorization("authURI")
-            .addFormat("formatName")
-            .addSemanticType("sem")
-            .build();
+      .addToken(TokenLocation.HEADER, "tokenName")
+      .addAlg("algName")
+      .addAuthorization("authURI")
+      .addFormat("formatName")
+      .addSemanticType("sem")
+      .build();
 
     assertEquals(SecurityScheme.BEARER, scheme.getSchemeName());
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
@@ -171,7 +174,7 @@ public class SecuritySchemeTest {
   @Test
   public void testBearerSecuritySchemeDefaultValues() {
     BearerSecurityScheme scheme = new BearerSecurityScheme.Builder()
-            .build();
+      .build();
 
     assertEquals(SecurityScheme.BEARER, scheme.getSchemeName());
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
@@ -192,9 +195,9 @@ public class SecuritySchemeTest {
   @Test
   public void testPSKSecurityScheme() {
     PSKSecurityScheme scheme = new PSKSecurityScheme.Builder()
-            .addIdentity("192.0.2.1")
-            .addSemanticType("sem")
-            .build();
+      .addIdentity("192.0.2.1")
+      .addSemanticType("sem")
+      .build();
 
     assertEquals(SecurityScheme.PSK, scheme.getSchemeName());
     assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
@@ -206,5 +209,46 @@ public class SecuritySchemeTest {
     Map<String, Object> conf = scheme.getConfiguration();
     assertEquals(1, conf.keySet().size());
     assertEquals("192.0.2.1", conf.get(WoTSec.identity));
+  }
+
+  @Test
+  public void testOAuth2SecurityScheme() {
+    OAuth2SecurityScheme scheme = new OAuth2SecurityScheme.Builder("code")
+      .addAuthorization("https://example.com/authorization")
+      .addToken("https://example.com/token/1")
+      .addRefresh("https://example.com/token/2")
+      .addScopes(new HashSet<>(Arrays.asList("limited", "special")))
+      .addSemanticType("sem")
+      .build();
+
+    assertEquals(SecurityScheme.OAUTH2, scheme.getSchemeName());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("sem"));
+
+    assertEquals("code", scheme.getFlow());
+
+    assertTrue(scheme.getAuthorization().isPresent());
+    assertEquals("https://example.com/authorization", scheme.getAuthorization().get());
+
+    assertTrue(scheme.getToken().isPresent());
+    assertEquals("https://example.com/token/1", scheme.getToken().get());
+
+    assertTrue(scheme.getRefresh().isPresent());
+    assertEquals("https://example.com/token/2", scheme.getRefresh().get());
+
+    assertTrue(scheme.getScopes().isPresent());
+    assertEquals(2, scheme.getScopes().get().size());
+    assertTrue(scheme.getScopes().get().contains("limited"));
+    assertTrue(scheme.getScopes().get().contains("special"));
+
+    Map<String, Object> conf = scheme.getConfiguration();
+    assertEquals(5, conf.keySet().size());
+    assertEquals("code", conf.get(WoTSec.flow));
+    assertEquals("https://example.com/authorization", conf.get(WoTSec.authorization));
+    assertEquals("https://example.com/token/1", conf.get(WoTSec.token));
+    assertEquals("https://example.com/token/2", conf.get(WoTSec.refresh));
+
+    Set<String> scopes = new HashSet<>(Arrays.asList("limited", "special"));
+    assertEquals(scopes, conf.get(WoTSec.scopes));
   }
 }

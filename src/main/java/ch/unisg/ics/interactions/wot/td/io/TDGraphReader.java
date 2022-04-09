@@ -38,6 +38,22 @@ public class TDGraphReader {
   private final ValueFactory rdf = SimpleValueFactory.getInstance();
   private Model model;
 
+  TDGraphReader(RDFFormat format, String representation) {
+    loadModel(format, representation, "");
+
+    Optional<String> baseURI = readBaseURI();
+    if (baseURI.isPresent()) {
+      loadModel(format, representation, baseURI.get());
+    }
+
+    try {
+      thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration),
+        null)).get();
+    } catch (NoSuchElementException e) {
+      throw new InvalidTDException("Missing mandatory security definitions.", e);
+    }
+  }
+
   public static ThingDescription readFromURL(TDFormat format, String url) throws IOException {
     String representation = Request.get(url).execute().returnContent().asString();
     return readFromString(format, representation);
@@ -47,10 +63,10 @@ public class TDGraphReader {
    * Returns a ThingDescription object based on the path parameter that points to a file. Should the path be invalid
    * or if the file does not exist, an IOException is thrown.
    *
-   * @param	format	the file's thing description
-   * @param path	the location of the file that contains the thing description
-   * @return	the thing description
+   * @param path the location of the file that contains the thing description
    * @throws IOException if an I/O error occurs reading from the stream
+   * @param  format  the file's thing description
+   * @return the thing description
    */
   public static ThingDescription readFromFile(TDFormat format, String path) throws IOException {
     String content = new String(Files.readAllBytes(Paths.get(path)));
@@ -87,22 +103,6 @@ public class TDGraphReader {
     return tdBuilder.build();
   }
 
-  TDGraphReader(RDFFormat format, String representation) {
-    loadModel(format, representation, "");
-
-    Optional<String> baseURI = readBaseURI();
-    if (baseURI.isPresent()) {
-      loadModel(format, representation, baseURI.get());
-    }
-
-    try {
-      thingId = Models.subject(model.filter(null, rdf.createIRI(TD.hasSecurityConfiguration),
-          null)).get();
-    } catch (NoSuchElementException e) {
-      throw new InvalidTDException("Missing mandatory security definitions.", e);
-    }
-  }
-
   private void loadModel(RDFFormat format, String representation, String baseURI) {
     this.model = new LinkedHashModel();
 
@@ -128,7 +128,7 @@ public class TDGraphReader {
   }
 
   String readThingTitle() {
-  	Literal thingTitle;
+    Literal thingTitle;
 
     try {
       thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();
@@ -178,8 +178,7 @@ public class TDGraphReader {
       try {
         if (semanticTypes.contains(WoTSec.NoSecurityScheme)) {
           scheme = SecurityScheme.getNoSecurityScheme();
-        }
-        else if (semanticTypes.contains(WoTSec.APIKeySecurityScheme)) {
+        } else if (semanticTypes.contains(WoTSec.APIKeySecurityScheme)) {
           scheme = readAPIKeySecurityScheme(schemeId, semanticTypes);
         } else if (semanticTypes.contains(WoTSec.BasicSecurityScheme)) {
           scheme = readBasicSecurityScheme(schemeId, semanticTypes);
@@ -189,6 +188,8 @@ public class TDGraphReader {
           scheme = readBearerSecurityScheme(schemeId, semanticTypes);
         } else if (semanticTypes.contains(WoTSec.PSKSecurityScheme)) {
           scheme = readPSKSecurityScheme(schemeId, semanticTypes);
+        } else if (semanticTypes.contains(WoTSec.OAuth2SecurityScheme)) {
+          scheme = readOAuth2SecurityScheme(schemeId, semanticTypes);
         } else {
           throw new InvalidTDException("Unknown type of security scheme");
         }
@@ -196,14 +197,14 @@ public class TDGraphReader {
         String securityName = getUniqueSecurityName(scheme.getSchemeName());
         schemes.put(securityName, scheme);
       } catch (Exception e) {
-        throw new InvalidTDException("Invalid security scheme configuration" , e);
+        throw new InvalidTDException("Invalid security scheme configuration", e);
       }
     }
 
     return schemes;
   }
 
-  SecurityScheme readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?,?> schemeBuilder, Resource schemeId,
+  SecurityScheme readTokenBasedSecurityScheme(TokenBasedSecurityScheme.Builder<?, ?> schemeBuilder, Resource schemeId,
                                               Set<String> semanticTypes) {
     Optional<Literal> in = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.in), null));
     if (in.isPresent()) {
@@ -248,7 +249,7 @@ public class TDGraphReader {
       schemeBuilder.addAlg(alg.get().stringValue());
     }
 
-    Optional<Literal> authorization = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.authorization),
+    Optional<IRI> authorization = Models.objectIRI(model.filter(schemeId, rdf.createIRI(WoTSec.authorization),
       null));
     if (authorization.isPresent()) {
       schemeBuilder.addAuthorization(authorization.get().stringValue());
@@ -275,6 +276,46 @@ public class TDGraphReader {
     return schemeBuilder.build();
   }
 
+  SecurityScheme readOAuth2SecurityScheme(Resource schemeId, Set<String> semanticTypes) {
+
+    Optional<Literal> flow = Models.objectLiteral(model.filter(schemeId, rdf.createIRI(WoTSec.flow),
+      null));
+
+    if (flow.isPresent()) {
+      OAuth2SecurityScheme.Builder schemeBuilder = new OAuth2SecurityScheme.Builder(flow.get().stringValue());
+
+      Optional<IRI> authorization = Models.objectIRI(model.filter(schemeId, rdf.createIRI(WoTSec.authorization), null));
+      if (authorization.isPresent()) {
+        schemeBuilder.addAuthorization(authorization.get().stringValue());
+      }
+
+      Optional<IRI> token = Models.objectIRI(model.filter(schemeId, rdf.createIRI(WoTSec.token), null));
+      if (token.isPresent()) {
+        schemeBuilder.addToken(token.get().stringValue());
+      }
+
+      Optional<IRI> refresh = Models.objectIRI(model.filter(schemeId, rdf.createIRI(WoTSec.refresh), null));
+      if (refresh.isPresent()) {
+        schemeBuilder.addRefresh(refresh.get().stringValue());
+      }
+
+      Set<String> scopes = Models.objectLiterals(model.filter(schemeId, rdf.createIRI(WoTSec.scopes),
+          null))
+        .stream()
+        .map(scope -> scope.stringValue())
+        .collect(Collectors.toSet());
+
+      if (scopes.size() > 0) {
+        schemeBuilder.addScopes(scopes);
+      }
+
+      return schemeBuilder.build();
+    } else {
+      throw new InvalidTDException("Missing or invalid configuration value of type " + WoTSec.flow +
+        " on defining security scheme");
+    }
+  }
+
   List<PropertyAffordance> readProperties() {
     List<PropertyAffordance> properties = new ArrayList<>();
 
@@ -291,8 +332,7 @@ public class TDGraphReader {
 
         if (schema.isPresent()) {
           builder.addDataSchema(schema.get());
-        }
-        else {
+        } else {
           builder.addDataSchema(DataSchema.getEmptySchema());
         }
 
@@ -318,7 +358,7 @@ public class TDGraphReader {
     List<ActionAffordance> actions = new ArrayList<>();
 
     Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId,
-        rdf.createIRI(TD.hasActionAffordance), null));
+      rdf.createIRI(TD.hasActionAffordance), null));
 
     for (Resource affordanceId : affordanceIds) {
       if (!model.contains(affordanceId, RDF.TYPE, rdf.createIRI(TD.ActionAffordance))) {
@@ -346,7 +386,7 @@ public class TDGraphReader {
 
     try {
       Optional<Resource> inputSchemaId = Models.objectResource(model.filter(affordanceId,
-          rdf.createIRI(TD.hasInputSchema), null));
+        rdf.createIRI(TD.hasInputSchema), null));
 
       if (inputSchemaId.isPresent()) {
         try {
@@ -360,7 +400,7 @@ public class TDGraphReader {
       }
 
       Optional<Resource> outSchemaId = Models.objectResource(model.filter(affordanceId,
-          rdf.createIRI(TD.hasOutputSchema), null));
+        rdf.createIRI(TD.hasOutputSchema), null));
 
       if (outSchemaId.isPresent()) {
         Optional<DataSchema> output = SchemaGraphReader.readDataSchema(outSchemaId.get(), model);
@@ -476,11 +516,11 @@ public class TDGraphReader {
     List<Form> forms = new ArrayList<>();
 
     Set<Resource> formIdSet = Models.objectResources(model.filter(affordanceId,
-        rdf.createIRI(TD.hasForm), null));
+      rdf.createIRI(TD.hasForm), null));
 
     for (Resource formId : formIdSet) {
       Optional<IRI> targetOpt = Models.objectIRI(model.filter(formId, rdf.createIRI(HCTL.hasTarget),
-          null));
+        null));
 
       if (!targetOpt.isPresent()) {
         continue;
@@ -509,8 +549,8 @@ public class TDGraphReader {
       Set<String> ops = opsIRIs.stream().map(op -> op.stringValue()).collect(Collectors.toSet());
       String target = targetOpt.get().stringValue();
       Form.Builder builder = new Form.Builder(target)
-          .setContentType(contentType)
-          .addOperationTypes(ops);
+        .setContentType(contentType)
+        .addOperationTypes(ops);
 
       if (methodNameOpt.isPresent()) {
         builder.setMethodName(methodNameOpt.get().stringValue());
@@ -532,25 +572,25 @@ public class TDGraphReader {
   }
 
   private void readUriVariables(InteractionAffordance
-                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId){
+                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource affordanceId) {
     Set<Resource> uriVariableIds = Models.objectResources(model.filter(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), null));
-    for (Resource uriVariableId : uriVariableIds){
+    for (Resource uriVariableId : uriVariableIds) {
       readUriVariable(builder, uriVariableId);
     }
   }
 
   private void readUriVariable(InteractionAffordance
-                                  .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource uriVariableId) {
-      Optional<DataSchema> opDataSchema = SchemaGraphReader.readDataSchema(uriVariableId, model);
-      Optional<Literal> opNameLiteral = Models.objectLiteral(model.filter(uriVariableId, rdf.createIRI(TD.name), null));
-      if (opDataSchema.isPresent() && opNameLiteral.isPresent()){
-        String name = opNameLiteral.get().stringValue();
-        DataSchema schema = opDataSchema.get();
-        builder.addUriVariable(name, schema);
-      }
+                                 .Builder<?, ? extends InteractionAffordance.Builder<?, ?>> builder, Resource uriVariableId) {
+    Optional<DataSchema> opDataSchema = SchemaGraphReader.readDataSchema(uriVariableId, model);
+    Optional<Literal> opNameLiteral = Models.objectLiteral(model.filter(uriVariableId, rdf.createIRI(TD.name), null));
+    if (opDataSchema.isPresent() && opNameLiteral.isPresent()) {
+      String name = opNameLiteral.get().stringValue();
+      DataSchema schema = opDataSchema.get();
+      builder.addUriVariable(name, schema);
+    }
   }
 
-  private StringReader conversion(String str, RDFFormat format){
+  private StringReader conversion(String str, RDFFormat format) {
     String newStr = "";
     if (format.equals(RDFFormat.TURTLE)) {
       for (int i = 0; i < str.length(); i++) {

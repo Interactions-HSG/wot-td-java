@@ -69,6 +69,9 @@ public class TDGraphWriter {
   private TDGraphWriter addSecurity() {
     Map<String, SecurityScheme> securitySchemes = td.getSecurityDefinitions();
 
+    List<IRI> confTypesForIris = new ArrayList<>(Arrays.asList(rdf.createIRI(WoTSec.authorization),
+      rdf.createIRI(WoTSec.token), rdf.createIRI(WoTSec.refresh)));
+
     for (SecurityScheme scheme : securitySchemes.values()) {
       BNode schemeId = rdf.createBNode();
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemeId);
@@ -79,18 +82,26 @@ public class TDGraphWriter {
         graphBuilder.add(schemeId, RDF.TYPE, rdf.createIRI(semanticType));
       }
 
-      for (Map.Entry<String,Object> configurationEntry : configuration.entrySet()) {
+      for (Map.Entry<String, Object> configurationEntry : configuration.entrySet()) {
         IRI confTypeIri = rdf.createIRI(configurationEntry.getKey());
         Object confValue = configurationEntry.getValue();
         List<Object> confValues = new ArrayList<>();
         if (confValue instanceof Set) {
           confValues.addAll((Collection<?>) confValue);
-        }
-        else {
+        } else {
           confValues.add(confValue);
         }
         for (Object objConfValue : confValues) {
-          graphBuilder.add(schemeId, confTypeIri, objConfValue);
+          if (confTypesForIris.contains(confTypeIri)) {
+            try {
+              graphBuilder.add(schemeId, confTypeIri, rdf.createIRI((String) objConfValue));
+            } catch (IllegalArgumentException e) {
+              throw new InvalidTDException("Invalid security scheme configuration. " + confTypeIri + " value should" +
+                " be a valid IRI.");
+            }
+          } else {
+            graphBuilder.add(schemeId, confTypeIri, objConfValue);
+          }
         }
       }
     }
@@ -217,10 +228,10 @@ public class TDGraphWriter {
       graphBuilder.add(affordanceId, RDF.TYPE, rdf.createIRI(type));
     }
 
-    Optional<Map<String,DataSchema>> uriVariable = affordance.getUriVariables();
-    if (uriVariable.isPresent()){
-      Map<String,DataSchema> map=uriVariable.get();
-      for (String key: map.keySet()){
+    Optional<Map<String, DataSchema>> uriVariable = affordance.getUriVariables();
+    if (uriVariable.isPresent()) {
+      Map<String, DataSchema> map = uriVariable.get();
+      for (String key : map.keySet()) {
         DataSchema value = map.get(key);
         Resource uriId = rdf.createBNode();
         graphBuilder.add(affordanceId, rdf.createIRI(TD.hasUriTemplateSchema), uriId);
@@ -281,17 +292,15 @@ public class TDGraphWriter {
     return ReadWriteUtils.writeToString(format, getModel());
   }
 
-  private String conversion(String str){
+  private String conversion(String str) {
     String newStr = "";
-    for (int i = 0; i<str.length();i++){
+    for (int i = 0; i < str.length(); i++) {
       char c = str.charAt(i);
-      if (c == '{'){
+      if (c == '{') {
         newStr = newStr + "%7B";
-      }
-      else if (c == '}'){
+      } else if (c == '}') {
         newStr = newStr + "%7D";
-      }
-      else {
+      } else {
         newStr = newStr + c;
       }
     }

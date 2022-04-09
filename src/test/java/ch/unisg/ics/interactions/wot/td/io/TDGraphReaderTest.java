@@ -132,94 +132,94 @@ public class TDGraphReaderTest {
       "            ] ;\n" +
       "            js:required \"boolean_value\" ;\n" +
       "        ]\n" +
-      "    ] ." ;
+      "    ] .";
 
   private static final String TEST_SIMPLE_TD_JSONLD = "[ {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx111\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/security#NoSecurityScheme\" ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx112\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#ActionAffordance\" ],\n" +
-      "  \"http://purl.org/dc/terms/title\" : [ {\n" +
-      "    \"@value\" : \"My Action\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasForm\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx113\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasInputSchema\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx114\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasOutputSchema\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx116\"\n" +
-      "  } ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx113\",\n" +
-      "  \"http://www.w3.org/2011/http#methodName\" : [ {\n" +
-      "    \"@value\" : \"PUT\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/hypermedia#forContentType\" : [ {\n" +
-      "    \"@value\" : \"application/json\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/hypermedia#hasOperationType\" : [ {\n" +
-      "    \"@id\" : \"https://www.w3.org/2019/wot/td#invokeAction\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/hypermedia#hasTarget\" : [ {\n" +
-      "    \"@id\" : \"http://example.org/action/\"\n" +
-      "  } ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx114\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx115\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
-      "    \"@value\" : \"number_value\"\n" +
-      "  } ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx115\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#NumberSchema\" ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#maximum\" : [ {\n" +
-      "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
-      "    \"@value\" : \"100.05\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#minimum\" : [ {\n" +
-      "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
-      "    \"@value\" : \"-100.05\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
-      "    \"@value\" : \"number_value\"\n" +
-      "  } ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx116\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx117\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
-      "    \"@value\" : \"boolean_value\"\n" +
-      "  } ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"_:node1ea75dfphx117\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#BooleanSchema\" ],\n" +
-      "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
-      "    \"@value\" : \"boolean_value\"\n" +
-      "  } ]\n" +
-      "}, {\n" +
-      "  \"@id\" : \"http://example.org/#thing\",\n" +
-      "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#Thing\" ],\n" +
-      "  \"http://purl.org/dc/terms/title\" : [ {\n" +
-      "    \"@value\" : \"My Thing\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx112\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" +
-      "    \"@id\" : \"http://example.org/\"\n" +
-      "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" +
-      "    \"@id\" : \"_:node1ea75dfphx111\"\n" +
-      "  } ]\n" +
-      "} ]";
+    "  \"@id\" : \"_:node1ea75dfphx111\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/security#NoSecurityScheme\" ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"_:node1ea75dfphx112\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#ActionAffordance\" ],\n" +
+    "  \"http://purl.org/dc/terms/title\" : [ {\n" +
+    "    \"@value\" : \"My Action\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/td#hasForm\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx113\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/td#hasInputSchema\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx114\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/td#hasOutputSchema\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx116\"\n" +
+    "  } ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"_:node1ea75dfphx113\",\n" +
+    "  \"http://www.w3.org/2011/http#methodName\" : [ {\n" +
+    "    \"@value\" : \"PUT\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/hypermedia#forContentType\" : [ {\n" +
+    "    \"@value\" : \"application/json\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/hypermedia#hasOperationType\" : [ {\n" +
+    "    \"@id\" : \"https://www.w3.org/2019/wot/td#invokeAction\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/hypermedia#hasTarget\" : [ {\n" +
+    "    \"@id\" : \"http://example.org/action/\"\n" +
+    "  } ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"_:node1ea75dfphx114\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx115\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
+    "    \"@value\" : \"number_value\"\n" +
+    "  } ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"_:node1ea75dfphx115\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#NumberSchema\" ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#maximum\" : [ {\n" +
+    "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
+    "    \"@value\" : \"100.05\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#minimum\" : [ {\n" +
+    "    \"@type\" : \"http://www.w3.org/2001/XMLSchema#decimal\",\n" +
+    "    \"@value\" : \"-100.05\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
+    "    \"@value\" : \"number_value\"\n" +
+    "  } ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"_:node1ea75dfphx116\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#ObjectSchema\" ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#properties\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx117\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#required\" : [ {\n" +
+    "    \"@value\" : \"boolean_value\"\n" +
+    "  } ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"_:node1ea75dfphx117\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/json-schema#BooleanSchema\" ],\n" +
+    "  \"https://www.w3.org/2019/wot/json-schema#propertyName\" : [ {\n" +
+    "    \"@value\" : \"boolean_value\"\n" +
+    "  } ]\n" +
+    "}, {\n" +
+    "  \"@id\" : \"http://example.org/#thing\",\n" +
+    "  \"@type\" : [ \"https://www.w3.org/2019/wot/td#Thing\" ],\n" +
+    "  \"http://purl.org/dc/terms/title\" : [ {\n" +
+    "    \"@value\" : \"My Thing\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx112\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" +
+    "    \"@id\" : \"http://example.org/\"\n" +
+    "  } ],\n" +
+    "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" +
+    "    \"@id\" : \"_:node1ea75dfphx111\"\n" +
+    "  } ]\n" +
+    "} ]";
 
   private static final String TEST_IO_HEAD =
     PREFIXES +
@@ -284,27 +284,27 @@ public class TDGraphReaderTest {
   @Test
   public void testReadFormWithHttpAndCoapBindings() {
     String testTD = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        td:isObservable true ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"GET\" ;\n" +
-        "            hctl:hasTarget <http://example.org/property> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty;\n" +
-        "        ] ;\n" +
-        "        td:hasForm [\n" +
-        "            cov:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <coap://example.org/property> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:writeProperty;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"GET\" ;\n" +
+      "            hctl:hasTarget <http://example.org/property> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] ;\n" +
+      "        td:hasForm [\n" +
+      "            cov:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <coap://example.org/property> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
@@ -497,19 +497,19 @@ public class TDGraphReaderTest {
   @Test
   public void testFormWithUnknownProtocolBinding() {
     String testTD = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        td:hasForm [\n" +
-        "            hctl:hasTarget <x://example.org/property> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <x://example.org/property> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
@@ -527,29 +527,29 @@ public class TDGraphReaderTest {
   @Test
   public void testReadSubProtocolStringAndIRI() {
     String testTD = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        td:isObservable true ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"GET\" ;\n" +
-        "            hctl:hasTarget <http://example.org/property> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty;\n" +
-        "            hctl:forSubProtocol \"websub\";\n" +
-        "        ] ;\n" +
-        "        td:hasForm [\n" +
-        "            cov:methodName \"GET\" ;\n" +
-        "            hctl:hasTarget <coap://example.org/property> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:observeProperty;\n" +
-        "            hctl:forSubProtocol cov:observe;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"GET\" ;\n" +
+      "            hctl:hasTarget <http://example.org/property> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "            hctl:forSubProtocol \"websub\";\n" +
+      "        ] ;\n" +
+      "        td:hasForm [\n" +
+      "            cov:methodName \"GET\" ;\n" +
+      "            hctl:hasTarget <coap://example.org/property> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:observeProperty;\n" +
+      "            hctl:forSubProtocol cov:observe;\n" +
+      "        ] ;\n" +
+      "    ] .";
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
     PropertyAffordance property = reader.readProperties().get(0);
@@ -593,19 +593,19 @@ public class TDGraphReaderTest {
   @Test
   public void testReadOnePropertyNoSchema() {
     String testTD = PREFIXES +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        td:isObservable false ;\n" +
-        "        td:hasForm [\n" +
-        "            hctl:hasTarget <http://example.org/count> ;\n" +
-        "            hctl:forContentType \"video/mpeg\";\n" +
-        "            hctl:hasOperationType td:readProperty;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:isObservable false ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"video/mpeg\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
@@ -640,51 +640,51 @@ public class TDGraphReaderTest {
   @Test
   public void testReadMultipleSimpleActions() {
     String testTD = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
-        "    td:hasActionAffordance [\n" +
-        "        a td:ActionAffordance ;\n" +
-        "        td:name \"first_action\" ;\n" +
-        "        dct:title \"First Action\" ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/action1> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:invokeAction;\n" +
-        "        ] ;\n" +
-        "    ] ;\n" +
-        "    td:hasActionAffordance [\n" +
-        "        a td:ActionAffordance ;\n" +
-        "        td:name \"second_action\" ;\n" +
-        "        dct:title \"Second Action\" ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/action2> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:invokeAction;\n" +
-        "        ] ;\n" +
-        "    ] ;\n" +
-        "    td:hasActionAffordance [\n" +
-        "        a td:ActionAffordance ;\n" +
-        "        td:name \"third_action\" ;\n" +
-        "        dct:title \"Third Action\" ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/action3> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:invokeAction;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"first_action\" ;\n" +
+      "        dct:title \"First Action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/action1> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "    ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"second_action\" ;\n" +
+      "        dct:title \"Second Action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/action2> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "    ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"third_action\" ;\n" +
+      "        dct:title \"Third Action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/action3> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
     assertEquals(3, reader.readActions().size());
 
     List<String> actionTitles = reader.readActions().stream().map(action -> action.getTitle().get())
-        .collect(Collectors.toList());
+      .collect(Collectors.toList());
 
     assertTrue(actionTitles.contains("First Action"));
     assertTrue(actionTitles.contains("Second Action"));
@@ -694,7 +694,7 @@ public class TDGraphReaderTest {
   @Test
   public void testReadOneActionOneObjectInput() {
     String testSimpleObject =
-        "        td:hasInputSchema [\n" +
+      "        td:hasInputSchema [\n" +
         "            a js:ObjectSchema ;\n" +
         "            js:properties [\n" +
         "                a js:BooleanSchema ;\n" +
@@ -724,7 +724,7 @@ public class TDGraphReaderTest {
         "        ]\n";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_IO_HEAD + testSimpleObject
-        + TEST_IO_TAIL);
+      + TEST_IO_TAIL);
 
     ActionAffordance action = reader.readActions().get(0);
 
@@ -913,10 +913,10 @@ public class TDGraphReaderTest {
   @Test
   public void testMissingMandatoryTitle() {
     String testTDWithMissingTitle = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> .\n";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> .\n";
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
       TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
@@ -931,19 +931,19 @@ public class TDGraphReaderTest {
   @Test
   public void testMissingMandatoryPropertyAffordanceName() {
     String testTDWithMissingAffordanceName = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:NumberSchema ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/property> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:writeProperty;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/property> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
       TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingAffordanceName);
@@ -962,19 +962,19 @@ public class TDGraphReaderTest {
   @Test
   public void testMissingMandatoryActionAffordanceName() {
     String testTDWithMissingAffordanceName = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasActionAffordance [\n" +
-        "        a td:ActionAffordance ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/action> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:invokeAction;\n" +
-        "        ] ;\n" +
-        "    ] .";
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/action> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "    ] .";
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
       TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingAffordanceName);
@@ -991,7 +991,7 @@ public class TDGraphReaderTest {
   }
 
   @Test
-  public void testUriVariable(){
+  public void testUriVariable() {
     String TDDescription = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
       "  dct:title \"My Lamp Thing\";\n" +
@@ -999,9 +999,9 @@ public class TDGraphReaderTest {
       "    ];\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
       "        <https://saref.etsi.org/core/ToggleCommand>;\n" +
-      "  td:name   \"toggleAffordance\"; "+
-      "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
-      "      td:name \"token\"    ];"+
+      "  td:name   \"toggleAffordance\"; " +
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n" +
+      "      td:name \"token\"    ];" +
       "      dct:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
@@ -1019,11 +1019,11 @@ public class TDGraphReaderTest {
       "    ] .\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
     String s = td.getActions().get(0).getUriVariables().get().get("token").getDatatype();
-    assertEquals(DataSchema.STRING,s);
+    assertEquals(DataSchema.STRING, s);
   }
 
   @Test
-  public void testManyUriVariables(){
+  public void testManyUriVariables() {
     String TDDescription = PREFIXES +
       "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
       "  dct:title \"My Lamp Thing\";\n" +
@@ -1031,11 +1031,11 @@ public class TDGraphReaderTest {
       "    ];\n" +
       "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
       "        <https://saref.etsi.org/core/ToggleCommand>;\n" +
-      "td:name    \"toggleAffordance\";  "+
-      "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
-      "      td:name     \"name\" ];   "+
-      "      td:hasUriTemplateSchema [ a js:NumberSchema;\n"+
-      "      td:name     \"number\" ];   "+
+      "td:name    \"toggleAffordance\";  " +
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n" +
+      "      td:name     \"name\" ];   " +
+      "      td:hasUriTemplateSchema [ a js:NumberSchema;\n" +
+      "      td:name     \"number\" ];   " +
       "      dct:title \"Toggle\";\n" +
       "      td:hasForm [\n" +
       "          htv:methodName \"PUT\";\n" +
@@ -1053,71 +1053,71 @@ public class TDGraphReaderTest {
       "    ] .\n";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
     DataSchema uriVariableSchema1 = td.getActions().get(0).getUriVariables().get().get("name");
-    assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
-    DataSchema uriVariableSchema2=td.getActions().get(0).getUriVariables().get().get("number");
-    assertEquals(DataSchema.NUMBER,uriVariableSchema2.getDatatype());
+    assertEquals(DataSchema.STRING, uriVariableSchema1.getDatatype());
+    DataSchema uriVariableSchema2 = td.getActions().get(0).getUriVariables().get().get("number");
+    assertEquals(DataSchema.NUMBER, uriVariableSchema2.getDatatype());
   }
 
   @Test
-  public void testUriVariablePropertyAffordance(){
+  public void testUriVariablePropertyAffordance() {
     String TDDescription = PREFIXES +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    dct:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
-        "    td:hasPropertyAffordance [\n" +
-        "        a td:PropertyAffordance, js:NumberSchema ;\n" +
-        "        td:name \"my_property\" ;\n" +
-        "        dct:title \"My Property\" ;\n" +
-        "        td:isObservable true ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/property/{name}> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:writeProperty;\n" +
-        "        ] ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"GET\" ;\n" +
-        "            hctl:hasTarget <http://example.org/property/{name}> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:readProperty;\n" +
-        "            hctl:forSubProtocol \"websub\";\n" +
-        "        ] ;\n" +
-        "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
-        "      td:name    \"name\"  ]; ]; "+
-        "    td:hasActionAffordance [\n" +
-        "        a td:ActionAffordance ;\n" +
-        "        td:name \"my_action\" ;\n" +
-        "        dct:title \"My Action\" ;\n" +
-        "        td:hasForm [\n" +
-        "            htv:methodName \"PUT\" ;\n" +
-        "            hctl:hasTarget <http://example.org/action> ;\n" +
-        "            hctl:forContentType \"application/json\";\n" +
-        "            hctl:hasOperationType td:invokeAction;\n" +
-        "        ] ;\n" +
-        "        td:hasInputSchema [\n" +
-        "            a js:ObjectSchema ;\n" +
-        "            js:properties [\n" +
-        "                a js:NumberSchema ;\n" +
-        "                js:propertyName \"number_value\";\n" +
-        "                js:maximum 100.05 ;\n" +
-        "                js:minimum -100.05 ;\n" +
-        "            ] ;\n" +
-        "            js:required \"number_value\" ;\n" +
-        "        ] ;\n" +
-        "        td:hasOutputSchema [\n" +
-        "            a js:ObjectSchema ;\n" +
-        "            js:properties [\n" +
-        "                a js:BooleanSchema ;\n" +
-        "                js:propertyName \"boolean_value\";\n" +
-        "            ] ;\n" +
-        "            js:required \"boolean_value\" ;\n" +
-        "        ]\n" +
-        "    ] ." ;
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:NumberSchema ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        dct:title \"My Property\" ;\n" +
+      "        td:isObservable true ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/property/{name}> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"GET\" ;\n" +
+      "            hctl:hasTarget <http://example.org/property/{name}> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "            hctl:forSubProtocol \"websub\";\n" +
+      "        ] ;\n" +
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n" +
+      "      td:name    \"name\"  ]; ]; " +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        dct:title \"My Action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            htv:methodName \"PUT\" ;\n" +
+      "            hctl:hasTarget <http://example.org/action> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:invokeAction;\n" +
+      "        ] ;\n" +
+      "        td:hasInputSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:NumberSchema ;\n" +
+      "                js:propertyName \"number_value\";\n" +
+      "                js:maximum 100.05 ;\n" +
+      "                js:minimum -100.05 ;\n" +
+      "            ] ;\n" +
+      "            js:required \"number_value\" ;\n" +
+      "        ] ;\n" +
+      "        td:hasOutputSchema [\n" +
+      "            a js:ObjectSchema ;\n" +
+      "            js:properties [\n" +
+      "                a js:BooleanSchema ;\n" +
+      "                js:propertyName \"boolean_value\";\n" +
+      "            ] ;\n" +
+      "            js:required \"boolean_value\" ;\n" +
+      "        ]\n" +
+      "    ] .";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
     DataSchema uriVariableSchema1 = td.getProperties().get(0).getUriVariables().get().get("name");
-    assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
+    assertEquals(DataSchema.STRING, uriVariableSchema1.getDatatype());
   }
 
   //Test security schemes
@@ -1350,7 +1350,7 @@ public class TDGraphReaderTest {
       "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme, ex:Type ;\n" +
       "        wotsec:in \"header\" ;\n" +
       "        wotsec:name \"Authorization\" ;\n" +
-      "        wotsec:authorization \"server.example.com\" ;\n" +
+      "        wotsec:authorization <http://server.example.com> ;\n" +
       "        wotsec:alg \"ECDSA 256\" ;\n" +
       "        wotsec:format \"cwt\" ;\n" +
       "    ] .\n";
@@ -1374,7 +1374,7 @@ public class TDGraphReaderTest {
     assertEquals("ECDSA 256", bearerScheme.getAlg());
     assertEquals("cwt", bearerScheme.getFormat());
     assertTrue(bearerScheme.getAuthorization().isPresent());
-    assertEquals("server.example.com", bearerScheme.getAuthorization().get());
+    assertEquals("http://server.example.com", bearerScheme.getAuthorization().get());
     assertTrue(bearerScheme.getTokenName().isPresent());
     assertEquals("Authorization", bearerScheme.getTokenName().get());
   }
@@ -1410,6 +1410,28 @@ public class TDGraphReaderTest {
   }
 
   @Test
+  public void testBearerSecuritySchemeInvalidAuth() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme ;\n" +
+        "        wotsec:authorization \"invalidIRI\" ;\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((BearerSecurityScheme) scheme).getTokenLocation());
+    assertFalse(((BearerSecurityScheme) scheme).getAuthorization().isPresent());
+  }
+
+  @Test
   public void testReadPSKSecurityScheme() {
     String testTD = PREFIXES +
       "\n" +
@@ -1434,6 +1456,133 @@ public class TDGraphReaderTest {
     assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
     assertTrue(((PSKSecurityScheme) scheme).getIdentity().isPresent());
     assertEquals("192.0.2.1", ((PSKSecurityScheme) scheme).getIdentity().get());
+  }
+
+  @Test
+  public void testReadOAuth2SecurityScheme() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:authorization <https://example.com/authorization> ;\n" +
+        "        wotsec:token <https://example.com/token/1> ;\n" +
+        "        wotsec:refresh <https://example.com/token/2> ;\n" +
+        "        wotsec:scopes \"limited\", \"special\", \"c\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof OAuth2SecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals(scheme.getSchemeName(), "oauth2");
+    assertEquals("https://example.com/authorization", ((OAuth2SecurityScheme) scheme).getAuthorization().get());
+    assertEquals("https://example.com/token/1", ((OAuth2SecurityScheme) scheme).getToken().get());
+    assertEquals("https://example.com/token/2", ((OAuth2SecurityScheme) scheme).getRefresh().get());
+    assertEquals(3, ((OAuth2SecurityScheme) scheme).getScopes().get().size());
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("special"));
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("limited"));
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("c"));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+
+  }
+
+  @Test
+  public void testReadOAuth2SecuritySchemeMissingFlow() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "  ] .";
+
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readSecuritySchemes();
+    });
+
+    String expectedMessage = "Missing or invalid configuration value of type " + WoTSec.flow +
+      " on defining security scheme";
+
+    String actualMessage = String.valueOf(exception.getCause());
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testOAuthSecuritySchemeInvalidAuth() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:authorization \"invalidIRI\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+    assertFalse(((OAuth2SecurityScheme) scheme).getAuthorization().isPresent());
+  }
+
+  @Test
+  public void testOAuthSecuritySchemeInvalidToken() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:token \"invalidIRI\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+    assertFalse(((OAuth2SecurityScheme) scheme).getToken().isPresent());
+  }
+
+  @Test
+  public void testOAuthSecuritySchemeInvalidRefresh() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:refresh \"invalidIRI\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+    assertFalse(((OAuth2SecurityScheme) scheme).getRefresh().isPresent());
   }
 
   @Test
