@@ -14,6 +14,8 @@ public class UriTemplate {
   }
 
   static List<String> extract(String path) {
+    path = path.replaceAll("%7B", "{");
+    path = path.replaceAll("%7D", "}");
     List<String> extracted = new ArrayList<>();
     int n = path.length();
     String s = "";
