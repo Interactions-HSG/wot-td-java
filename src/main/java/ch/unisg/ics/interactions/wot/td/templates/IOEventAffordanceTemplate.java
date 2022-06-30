@@ -1,12 +1,14 @@
 package ch.unisg.ics.interactions.wot.td.templates;
 
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.templates.InteractionAffordanceTemplate;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 import java.util.*;
 
-public class IOEventAffordanceTemplate extends InteractionAffordanceTemplate {
+public class IOEventAffordanceTemplate extends InteractionAffordanceTemplate implements Template{
   private final Optional<DataSchema> subscription;
   private final Optional<DataSchema> notification;
   private final Optional<DataSchema> cancellation;
@@ -29,6 +31,19 @@ public class IOEventAffordanceTemplate extends InteractionAffordanceTemplate {
 
   public Optional<DataSchema> getCancellationSchema() {
     return cancellation;
+  }
+
+  @Override
+  public boolean isTemplateOf(Object obj) {
+    boolean b = false;
+    if ( obj instanceof EventAffordance){
+      EventAffordance event = (EventAffordance) obj;
+      if ( this.title.equals(event.getTitle()) && getNotificationSchema().equals(event.getNotificationSchema()) &&
+        getCancellationSchema().equals(event.getCancellationSchema()) && getSubscriptionSchema().equals(event.getSubscriptionSchema())){
+        b = true;
+      }
+    }
+    return b;
   }
 
   public static class Builder

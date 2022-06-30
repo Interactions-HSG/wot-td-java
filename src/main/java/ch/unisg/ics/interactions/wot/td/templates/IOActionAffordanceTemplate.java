@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.templates;
 
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.util.*;
@@ -9,7 +10,7 @@ import java.util.*;
  *
  * @author Jérémy Lemée
  */
-public class IOActionAffordanceTemplate extends InteractionAffordanceTemplate {
+public class IOActionAffordanceTemplate extends InteractionAffordanceTemplate implements Template {
   final private Optional<DataSchema> input;
   final private Optional<DataSchema> output;
 
@@ -29,6 +30,18 @@ public class IOActionAffordanceTemplate extends InteractionAffordanceTemplate {
 
   public Optional<DataSchema> getOutputSchema() {
     return output;
+  }
+
+  @Override
+  public boolean isTemplateOf(Object obj) {
+    boolean b = false;
+    if ( obj instanceof ActionAffordance){
+      ActionAffordance action = (ActionAffordance) obj;
+      if ( this.title.equals(action.getTitle()) && getInputSchema().equals(action.getInputSchema()) && getOutputSchema().equals(action.getOutputSchema())){
+        b = true;
+      }
+    }
+    return b;
   }
 
   public static class Builder

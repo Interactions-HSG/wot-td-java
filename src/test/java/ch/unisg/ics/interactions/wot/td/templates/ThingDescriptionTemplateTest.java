@@ -1,64 +1,57 @@
-package ch.unisg.ics.interactions.wot.td;
+package ch.unisg.ics.interactions.wot.td.templates;
 
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.templates.IOActionAffordanceTemplate;
-import ch.unisg.ics.interactions.wot.td.templates.IOEventAffordanceTemplate;
-import ch.unisg.ics.interactions.wot.td.templates.IOPropertyAffordanceTemplate;
-import ch.unisg.ics.interactions.wot.td.templates.PropertyAffordanceTemplate;
+import ch.unisg.ics.interactions.wot.td.templates.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-public class IOThingDescriptionTemplateTest {
+public class ThingDescriptionTemplateTest {
 
-  private IOThingDescriptionTemplate commonIOTDT;
+  private ThingDescriptionTemplate commonTDT;
 
   @Before
   public void init() {
-    IOPropertyAffordanceTemplate prop0 = new IOPropertyAffordanceTemplate.Builder("temp")
+    PropertyAffordanceTemplate prop0 = new PropertyAffordanceTemplate.Builder("temp")
       .addSemanticType("ex:Temp")
       .addSemanticType("ex:Value")
       .build();
 
-    IOPropertyAffordanceTemplate prop1 = new IOPropertyAffordanceTemplate.Builder("air-quality")
+    PropertyAffordanceTemplate prop1 = new PropertyAffordanceTemplate.Builder("air-quality")
       .addSemanticType("ex:AirQuality")
       .addSemanticType("ex:Value")
       .build();
 
-    IOActionAffordanceTemplate action0 = new IOActionAffordanceTemplate.Builder("setTemp")
+    ActionAffordanceTemplate action0 = new ActionAffordanceTemplate.Builder("setTemp")
       .addSemanticType("ex:SetTemp")
       .addSemanticType("ex:ModifyEnv")
       .build();
 
-    IOActionAffordanceTemplate action1 = new IOActionAffordanceTemplate.Builder("openVentilator")
+    ActionAffordanceTemplate action1 = new ActionAffordanceTemplate.Builder("openVentilator")
       .addSemanticType("ex:OpenVentilator")
       .addSemanticType("ex:ModifyEnv")
       .build();
 
-    IOEventAffordanceTemplate event0 = new IOEventAffordanceTemplate.Builder("overheating")
+    EventAffordanceTemplate event0 = new EventAffordanceTemplate.Builder("overheating")
       .addSemanticType("ex:Overheating")
       .addSemanticType("ex:Alarm")
       .build();
 
-    IOEventAffordanceTemplate event1 = new IOEventAffordanceTemplate.Builder("smoke-alarm")
+    EventAffordanceTemplate event1 = new EventAffordanceTemplate.Builder("smoke-alarm")
       .addSemanticType("ex:SmokeAlarm")
       .addSemanticType("ex:Alarm")
       .build();
 
-    commonIOTDT = new IOThingDescriptionTemplate.Builder("A Thing")
+    commonTDT = new ThingDescriptionTemplate.Builder("A Thing")
       .addProperty(prop0)
       .addProperty(prop1)
       .addAction(action0)
@@ -137,11 +130,11 @@ public class IOThingDescriptionTemplateTest {
 
   @Test
   public void testGetPropertyByName() {
-    Optional<IOPropertyAffordanceTemplate> prop0 = commonIOTDT.getPropertyByName("temp");
+    Optional<PropertyAffordanceTemplate> prop0 = commonTDT.getPropertyByName("temp");
     assertTrue(prop0.isPresent());
     assertTrue(prop0.get().getSemanticTypes().contains("ex:Temp"));
 
-    Optional<IOPropertyAffordanceTemplate> prop1 = commonIOTDT.getPropertyByName("air-quality");
+    Optional<PropertyAffordanceTemplate> prop1 = commonTDT.getPropertyByName("air-quality");
     assertTrue(prop1.isPresent());
     assertTrue(prop1.get().getSemanticTypes().contains("ex:AirQuality"));
   }
@@ -150,21 +143,21 @@ public class IOThingDescriptionTemplateTest {
 
   @Test
   public void testGetFirstPropertyBySemanticType() {
-    Optional<IOPropertyAffordanceTemplate> existingProp = commonIOTDT.getFirstPropertyBySemanticType("ex:Value");
+    Optional<PropertyAffordanceTemplate> existingProp = commonTDT.getFirstPropertyBySemanticType("ex:Value");
     assertTrue(existingProp.isPresent());
     assertTrue(existingProp.get().getSemanticTypes().contains("ex:Value"));
 
-    Optional<IOPropertyAffordanceTemplate> unknownProp = commonIOTDT.getFirstPropertyBySemanticType("ex:NoValue");
+    Optional<PropertyAffordanceTemplate> unknownProp = commonTDT.getFirstPropertyBySemanticType("ex:NoValue");
     assertFalse(unknownProp.isPresent());
   }
 
   @Test
   public void testGetActionByName() {
-    Optional<IOActionAffordanceTemplate> action0 = commonIOTDT.getActionByName("setTemp");
+    Optional<ActionAffordanceTemplate> action0 = commonTDT.getActionByName("setTemp");
     assertTrue(action0.isPresent());
     assertTrue(action0.get().getSemanticTypes().contains("ex:SetTemp"));
 
-    Optional<IOActionAffordanceTemplate> action1 = commonIOTDT.getActionByName("openVentilator");
+    Optional<ActionAffordanceTemplate> action1 = commonTDT.getActionByName("openVentilator");
     assertTrue(action1.isPresent());
     assertTrue(action1.get().getSemanticTypes().contains("ex:OpenVentilator"));
   }
@@ -173,36 +166,36 @@ public class IOThingDescriptionTemplateTest {
 
   @Test
   public void testGetFirstActionBySemanticType() {
-    Optional<IOActionAffordanceTemplate> existingAction = commonIOTDT.getFirstActionBySemanticType("ex:ModifyEnv");
+    Optional<ActionAffordanceTemplate> existingAction = commonTDT.getFirstActionBySemanticType("ex:ModifyEnv");
     assertTrue(existingAction.isPresent());
     assertTrue(existingAction.get().getSemanticTypes().contains("ex:ModifyEnv"));
 
-    Optional<IOActionAffordanceTemplate> unknownAction = commonIOTDT.getFirstActionBySemanticType("ex:NoModifyEnv");
+    Optional<ActionAffordanceTemplate> unknownAction = commonTDT.getFirstActionBySemanticType("ex:NoModifyEnv");
     assertFalse(unknownAction.isPresent());
   }
 
   @Test
   public void testGetEventByName() {
-    Optional<IOEventAffordanceTemplate> event0 = commonIOTDT.getEventByName("overheating");
+    Optional<EventAffordanceTemplate> event0 = commonTDT.getEventByName("overheating");
     assertTrue(event0.isPresent());
     assertTrue(event0.get().getSemanticTypes().contains("ex:Overheating"));
 
-    Optional<IOEventAffordanceTemplate> event1 = commonIOTDT.getEventByName("smoke-alarm");
+    Optional<EventAffordanceTemplate> event1 = commonTDT.getEventByName("smoke-alarm");
     assertTrue(event1.isPresent());
     assertTrue(event1.get().getSemanticTypes().contains("ex:SmokeAlarm"));
 
-    Optional<IOEventAffordanceTemplate> event2 = commonIOTDT.getEventByName("unknown-event");
+    Optional<EventAffordanceTemplate> event2 = commonTDT.getEventByName("unknown-event");
     assertFalse(event2.isPresent());
   }
 
 
   @Test
   public void testGetFirstEventBySemanticType() {
-    Optional<IOEventAffordanceTemplate> existingEvent = commonIOTDT.getFirstEventBySemanticType("ex:Alarm");
+    Optional<EventAffordanceTemplate> existingEvent = commonTDT.getFirstEventBySemanticType("ex:Alarm");
     assertTrue(existingEvent.isPresent());
     assertTrue(existingEvent.get().getSemanticTypes().contains("ex:Alarm"));
 
-    Optional<IOEventAffordanceTemplate> unknownEvent = commonIOTDT.getFirstEventBySemanticType("ex:NoAlarm");
+    Optional<EventAffordanceTemplate> unknownEvent = commonTDT.getFirstEventBySemanticType("ex:NoAlarm");
     assertFalse(unknownEvent.isPresent());
   }
 }

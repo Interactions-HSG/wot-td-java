@@ -1,11 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.templates;
 
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 import java.util.*;
 
-public class IOPropertyAffordanceTemplate extends InteractionAffordanceTemplate {
+public class IOPropertyAffordanceTemplate extends InteractionAffordanceTemplate implements Template {
   private final DataSchema schema;
   private final boolean observable;
 
@@ -22,6 +24,18 @@ public class IOPropertyAffordanceTemplate extends InteractionAffordanceTemplate 
 
   public boolean isObservable() {
     return observable;
+  }
+
+  @Override
+  public boolean isTemplateOf(Object obj) {
+    boolean b = false;
+    if ( obj instanceof PropertyAffordance){
+      PropertyAffordance property = (PropertyAffordance) obj;
+      if ( this.title.equals(property.getTitle()) && getName().equals(property.getName()) && getDataSchema().equals(property.getDataSchema()) && isObservable() == property.isObservable()){
+        b = true;
+      }
+    }
+    return b;
   }
 
   public static class Builder
