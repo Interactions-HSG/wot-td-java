@@ -1,13 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import java.io.IOException;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Link;
 import ch.unisg.ics.interactions.wot.td.bindings.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 /**
  * Wrapper for an HTTP response received when performing a
@@ -31,6 +32,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
  */
 public class TDHttpResponse implements Response {
   private final static Logger LOGGER = Logger.getLogger(TDHttpResponse.class.getCanonicalName());
+
+  private final static Pattern LINK_HEADER_PATTERN = Pattern.compile("\\w*<(?<target>.*)>;\\w*rel=\"(?<rel>.*)\"");
 
   private final ClassicHttpResponse response;
   private Optional<String> payload;
@@ -70,8 +73,33 @@ public class TDHttpResponse implements Response {
     return headerMap;
   }
 
+  @Override
+  public ResponseStatus getStatus() {
+    if (response.getCode() >= 200 && response.getCode() < 300) return ResponseStatus.OK;
+    else if (response.getCode() >= 400 && response.getCode() < 500) return ResponseStatus.CONSUMER_ERROR;
+    else if (response.getCode() >= 500 && response.getCode() < 500) return ResponseStatus.THING_ERROR;
+    else return ResponseStatus.UNKNOWN_ERROR;
+  }
+
+  @Override
   public Optional<String> getPayload() {
     return payload;
+  }
+
+  @Override
+  public Collection<Link> getLinks() {
+    HashSet<Link> links = new HashSet<>();
+
+    for (Header h : response.getHeaders()) {
+      if (h.getName().equals("Location") && response.getCode() == 201) {
+        links.add(new Link(h.getValue(), ""));
+      } else if (h.getName().equals("Link")) {
+        Matcher m = LINK_HEADER_PATTERN.matcher(h.getValue());
+        if (m.matches()) links.add(new Link(m.group("target"), m.group("rel")));
+      }
+    };
+
+    return links;
   }
 
   public Boolean getPayloadAsBoolean() {

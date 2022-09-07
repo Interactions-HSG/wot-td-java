@@ -1,5 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
+import ch.unisg.ics.interactions.wot.td.bindings.BindingNotFoundException;
+import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
+
 import java.util.*;
 
 public class Form {
@@ -44,7 +47,11 @@ public class Form {
       return methodName;
     }
 
-    return ProtocolBinding.getDefaultMethod(target, operationType);
+    try {
+      return ProtocolBindings.getBinding(this).getDefaultMethod(operationType);
+    } catch (BindingNotFoundException e) {
+      return Optional.empty();
+    }
   }
 
   public String getTarget() {
@@ -93,16 +100,27 @@ public class Form {
       return subProtocol;
     }
 
-    return ProtocolBinding.getDefaultSubProtocol(target, operationType);
+    try {
+      return ProtocolBindings.getBinding(this).getDefaultSubProtocol(operationType);
+    } catch (BindingNotFoundException e) {
+      return Optional.empty();
+    }
   }
 
   public boolean hasProtocol(String protocol) {
-    Optional<String> targetProtocol = ProtocolBinding.getProtocol(target);
-    return targetProtocol.isPresent() && protocol.equals(targetProtocol.get());
+    try {
+      return protocol.equals(ProtocolBindings.getBinding(this).getProtocol());
+    } catch (BindingNotFoundException e) {
+      return false;
+    }
   }
 
   public Optional<String> getProtocol() {
-    return ProtocolBinding.getProtocol(target);
+    try {
+      return Optional.of(ProtocolBindings.getBinding(this).getProtocol());
+    } catch (BindingNotFoundException e) {
+      return Optional.empty();
+    }
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation

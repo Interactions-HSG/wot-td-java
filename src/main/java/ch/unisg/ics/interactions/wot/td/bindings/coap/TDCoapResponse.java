@@ -1,19 +1,18 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Link;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionNumberRegistry;
 import org.eclipse.californium.core.coap.Response;
 
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -57,8 +56,31 @@ public class TDCoapResponse implements ch.unisg.ics.interactions.wot.td.bindings
     return response.getCode().name();
   }
 
+  @Override
+  public ResponseStatus getStatus() {
+    if (response.getRawCode() >= 200 && response.getRawCode() < 300) return ResponseStatus.OK;
+    if (response.getRawCode() >= 400 && response.getRawCode() < 500) return ResponseStatus.CONSUMER_ERROR;
+    if (response.getRawCode() >= 500 && response.getRawCode() < 600) return ResponseStatus.THING_ERROR;
+    else return ResponseStatus.UNKNOWN_ERROR;
+  }
+
   public Optional<String> getPayload() {
     return payload;
+  }
+
+  @Override
+  public Collection<Link> getLinks() {
+    Set<Link> links = new HashSet<>();
+
+    if (response.getRawCode() == 201) {
+      String p = response.getOptions().getLocationPathString();
+      String q = response.getOptions().getLocationQueryString();
+
+      Link link = new Link(String.format("%s?%s", p, q), "");
+      links.add(link);
+    }
+
+    return links;
   }
 
   public Boolean getPayloadAsBoolean() {

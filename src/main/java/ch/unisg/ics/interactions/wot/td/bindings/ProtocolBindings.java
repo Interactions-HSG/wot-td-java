@@ -1,7 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapBinding;
 import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapRequest;
+import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpBinding;
 import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
 
 import java.net.URI;
@@ -17,31 +19,35 @@ public class ProtocolBindings {
 
   private static final Map<String, ProtocolBinding> registeredBindings = new HashMap<>();
 
-  private static final ProtocolBinding httpBinding = (form, operationType) -> new TDHttpRequest(form, operationType);
-
-  private static final ProtocolBinding coapBinding = (form, operationType) -> new TDCoapRequest(form, operationType);
-
   static {
-    // register HTTP binding
-    registerBinding("http", httpBinding);
-    registerBinding("https", httpBinding);
-    // register CoAP binding
-    registerBinding("coap", coapBinding);
-    registerBinding("coaps", coapBinding);
+    TDHttpBinding httpBinding = new TDHttpBinding();
+
+    ProtocolBindings.registerBinding("http", httpBinding);
+    ProtocolBindings.registerBinding("https", httpBinding);
+
+    TDCoapBinding coapBinding = new TDCoapBinding();
+
+    ProtocolBindings.registerBinding("coap", coapBinding);
+    ProtocolBindings.registerBinding("coaps", coapBinding);
   }
 
-  public static Operation bind(Form form, String operationType) {
-    String scheme = URI.create(form.getTarget()).getScheme();
+  public static ProtocolBinding getBinding(Form form) {
+    String scheme = getScheme(form.getTarget());
 
     if (!registeredBindings.containsKey(scheme)) throw new BindingNotFoundException();
-
-    ProtocolBinding b = registeredBindings.get(scheme);
-    return b.bind(form, operationType);
+    else return registeredBindings.get(scheme);
   }
 
   public static void registerBinding(String scheme, ProtocolBinding binding) {
     // TODO check binding isn't already registered
     registeredBindings.put(scheme, binding);
+  }
+
+  private static String getScheme(String uriOrTemplate) {
+    int i = uriOrTemplate.indexOf(":");
+
+    if (i < 0) return null;
+    else return uriOrTemplate.substring(0, i);
   }
 
   private ProtocolBindings() {};
