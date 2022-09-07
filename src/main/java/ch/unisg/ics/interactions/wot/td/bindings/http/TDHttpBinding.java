@@ -3,10 +3,11 @@ package ch.unisg.ics.interactions.wot.td.bindings.http;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBinding;
-import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class TDHttpBinding implements ProtocolBinding {
 

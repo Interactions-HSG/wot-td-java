@@ -3,7 +3,6 @@ package ch.unisg.ics.interactions.wot.td.bindings.coap;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBinding;
-import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 

@@ -2,14 +2,9 @@ package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapBinding;
-import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapRequest;
 import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpBinding;
-import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
