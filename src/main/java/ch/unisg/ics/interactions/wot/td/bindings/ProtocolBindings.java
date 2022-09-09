@@ -26,7 +26,7 @@ public class ProtocolBindings {
     ProtocolBindings.registerBinding("coaps", coapBindingClass);
   }
 
-  public static ProtocolBinding getBinding(Form form) {
+  public static ProtocolBinding getBinding(Form form) throws BindingNotFoundException {
     String scheme = getScheme(form.getTarget());
 
     if (!registeredBindings.containsKey(scheme)) throw new BindingNotFoundException();
