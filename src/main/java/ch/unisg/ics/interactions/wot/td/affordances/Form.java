@@ -145,6 +145,15 @@ public class Form {
       this.additionalProperties = new HashMap<>();
     }
 
+    public Builder(String target, Form model) {
+      this.target = target;
+      this.methodName = model.getMethodName();
+      this.contentType = model.getContentType();
+      this.operationTypes = model.getOperationTypes();
+      this.subProtocol = model.getSubProtocol();
+      this.additionalProperties = model.getAdditionalProperties();
+    }
+
     public Builder addOperationType(String operationType) {
       this.operationTypes.add(operationType);
       return this;

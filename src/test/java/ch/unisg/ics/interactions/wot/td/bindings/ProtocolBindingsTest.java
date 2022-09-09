@@ -16,7 +16,7 @@ public class ProtocolBindingsTest {
 
   public static final String DUMMY_URI = "dummy://example.org/property";
 
-  private static class DummyBinding implements ProtocolBinding {
+  public static class DummyBinding extends BaseProtocolBinding {
 
     public static final String DUMMY_PROTOCOL = "Dummy";
 
@@ -86,7 +86,7 @@ public class ProtocolBindingsTest {
 
   @Test
   public void testRegisteredBinding() {
-    ProtocolBindings.registerBinding("dummy", new DummyBinding());
+    ProtocolBindings.registerBinding("dummy", DummyBinding.class.getName());
 
     Form f = new Form.Builder(DUMMY_URI).build();
 

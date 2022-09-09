@@ -15,15 +15,15 @@ public class ProtocolBindings {
   private static final Map<String, ProtocolBinding> registeredBindings = new HashMap<>();
 
   static {
-    TDHttpBinding httpBinding = new TDHttpBinding();
+    String httpBindingClass = TDHttpBinding.class.getName();
 
-    ProtocolBindings.registerBinding("http", httpBinding);
-    ProtocolBindings.registerBinding("https", httpBinding);
+    ProtocolBindings.registerBinding("http", httpBindingClass);
+    ProtocolBindings.registerBinding("https", httpBindingClass);
 
-    TDCoapBinding coapBinding = new TDCoapBinding();
+    String coapBindingClass = TDCoapBinding.class.getName();
 
-    ProtocolBindings.registerBinding("coap", coapBinding);
-    ProtocolBindings.registerBinding("coaps", coapBinding);
+    ProtocolBindings.registerBinding("coap", coapBindingClass);
+    ProtocolBindings.registerBinding("coaps", coapBindingClass);
   }
 
   public static ProtocolBinding getBinding(Form form) {
@@ -33,9 +33,25 @@ public class ProtocolBindings {
     else return registeredBindings.get(scheme);
   }
 
-  public static void registerBinding(String scheme, ProtocolBinding binding) {
-    // TODO check binding isn't already registered
-    registeredBindings.put(scheme, binding);
+  public static void registerBinding(String scheme, String bindingClass) throws BindingNotRegisteredException {
+    if (registeredBindings.containsKey(scheme)) {
+      // TODO log warning
+    }
+
+    for (Map.Entry<String, ProtocolBinding> entry : registeredBindings.entrySet()) {
+      if (entry.getValue().getClass().getName().equals(bindingClass)) {
+        // reuse existing instance of the given class
+        registeredBindings.put(scheme, entry.getValue());
+        return;
+      }
+    }
+
+    try {
+      ProtocolBinding binding = (ProtocolBinding) Class.forName(bindingClass).newInstance();
+      registeredBindings.put(scheme, binding);
+    } catch (Exception e) {
+      throw new BindingNotRegisteredException(e);
+    }
   }
 
   private static String getScheme(String uriOrTemplate) {

@@ -1,7 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
+import java.util.Map;
 import java.util.Optional;
 
 public interface ProtocolBinding {
@@ -14,6 +16,6 @@ public interface ProtocolBinding {
 
   Operation bind(Form form, String operationType);
 
-  // TODO add bind method with URI template variables
+  Operation bind(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values);
 
 }

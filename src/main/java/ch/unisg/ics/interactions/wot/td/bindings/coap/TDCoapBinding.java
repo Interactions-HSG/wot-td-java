@@ -1,8 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.BaseProtocolBinding;
 import ch.unisg.ics.interactions.wot.td.bindings.Operation;
-import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBinding;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class TDCoapBinding implements ProtocolBinding {
+public class TDCoapBinding extends BaseProtocolBinding {
 
   private final static String COAP_PROTOCOL = "CoAP";
 
