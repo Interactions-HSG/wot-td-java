@@ -14,8 +14,8 @@ public interface ProtocolBinding {
 
   Optional<String> getDefaultSubProtocol(String operationType);
 
-  Operation bind(Form form, String operationType);
+  Operation bind(Form form, String operationType) throws InvalidFormException;
 
-  Operation bind(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values);
+  Operation bind(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values) throws InvalidFormException;
 
 }
