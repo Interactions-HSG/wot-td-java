@@ -13,19 +13,20 @@ import java.io.IOException;
 public interface Operation {
 
   /**
-   * Start the operation by sending a message to the Thing with payload.
-   * When the method returns, the Consumer may assume the request was received by the Thing.
-   * This doesn't imply that a response was sent by the Thing, though.
-   * To synchronously wait for a response, use {@link Operation#getResponse()}.
+   * Fill out the form with a payload that should be a proper instance of the given (JSON) schema.
    *
    * @param schema JSON schema of the payload
    * @param payload payload to send to the Thing
-   * @throws IOException if connection to the Thing is lost or if the request is never received the Thing.
    */
-  void sendRequest(DataSchema schema, Object payload) throws IOException;
+  void setPayload(DataSchema schema, Object payload);
 
   /**
-   * Equivalent to {@link Operation#sendRequest(DataSchema, Object)} with empty payload.
+   * Start the operation by sending a message to the Thing with payload.
+   * When the method returns, the Consumer may assume the request was received by the Thing.
+   * This doesn't imply that the Thing already responded, though.
+   * To synchronously wait for a response, use {@link Operation#getResponse()}.
+   *
+   * @throws IOException if connection to the Thing is lost or if the request is never received the Thing.
    */
   void sendRequest() throws IOException;
 

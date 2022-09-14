@@ -15,7 +15,6 @@ import org.eclipse.californium.core.coap.Request;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -145,28 +144,6 @@ public class TDCoapRequestTest {
       TD.readProperty);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testAsyncObserveRelationWithNoSubprotocol() {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .setMethodName("PUT")
-      .addOperationType(TD.writeProperty)
-      .build(),
-      TD.writeProperty);
-
-    // TODO
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testSyncObserveRelationWithNoSubprotocol() throws IOException {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .setMethodName("PUT")
-      .addOperationType(TD.writeProperty)
-      .build(),
-      TD.writeProperty);
-
-    // TODO
-  }
-
   @Test
   public void testWriteProperty() throws UnsupportedOperationException {
     assertEquals(1, td.getProperties().size());
@@ -175,9 +152,10 @@ public class TDCoapRequestTest {
     Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
     assertTrue(form.isPresent());
 
-    Request request = new TDCoapRequest(form.get(), TD.writeProperty)
-      .setPrimitivePayload(property.get().getDataSchema(), true)
-      .getRequest();
+    TDCoapRequest r = new TDCoapRequest(form.get(), TD.writeProperty);
+    r.setPayload(property.get().getDataSchema(), true);
+
+    Request request = r.getRequest();
 
     assertEquals("PUT", request.getCode().name());
 
@@ -195,12 +173,12 @@ public class TDCoapRequestTest {
     assertTrue(form.isPresent());
 
     Map<String, Object> payloadVariables = new HashMap<>();
-    payloadVariables.put(PREFIX + "SourcePosition", Arrays.asList(30, 50, 70));
-    payloadVariables.put(PREFIX + "TargetPosition", Arrays.asList(30, 60, 70));
+    payloadVariables.put("sourcePosition", Arrays.asList(30, 50, 70));
+    payloadVariables.put("targetPosition", Arrays.asList(30, 60, 70));
 
-    Request request = new TDCoapRequest(form.get(), TD.invokeAction)
-      .setObjectPayload((ObjectSchema) action.get().getInputSchema().get(), payloadVariables)
-      .getRequest();
+    TDCoapRequest r = new TDCoapRequest(form.get(), TD.invokeAction);
+    r.setPayload(action.get().getInputSchema().get(), payloadVariables);
+    Request request = r.getRequest();
 
     assertEquals("PUT", request.getCode().name());
 
@@ -235,47 +213,29 @@ public class TDCoapRequestTest {
     payloadVariables.put("first_name", "Andrei");
     payloadVariables.put("last_name", "Ciortea");
 
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setObjectPayload(payloadSchema, payloadVariables)
-      .getRequest();
+    TDCoapRequest r = new TDCoapRequest(FORM, TD.invokeAction);
+    r.setPayload(payloadSchema, payloadVariables);
+    Request request = r.getRequest();
 
-    assertUserSchemaPayload(request);
-  }
-
-  @Test
-  public void testSimpleSemanticObjectPayload() throws JsonSyntaxException {
-    Map<String, Object> payloadVariables = new HashMap<>();
-    payloadVariables.put(PREFIX + "FirstName", "Andrei");
-    payloadVariables.put(PREFIX + "LastName", "Ciortea");
-
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setObjectPayload(USER_SCHEMA, payloadVariables)
-      .getRequest();
-
-    assertEquals("PUT", request.getCode().name());
-    assertEquals(0, request.getURI().compareTo("coap://example.org/toggle"));
     assertUserSchemaPayload(request);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidBooleanPayload() {
     new TDCoapRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
-      .getRequest();
+      .setPayload(new BooleanSchema.Builder().build(), "string");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidIntegerPayload() {
     new TDCoapRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
-      .getRequest();
+      .setPayload(new IntegerSchema.Builder().build(), 0.5);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
     new TDCoapRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new StringSchema.Builder().build(), true)
-      .getRequest();
+      .setPayload(new StringSchema.Builder().build(), true);
   }
 
   @Test
@@ -289,9 +249,9 @@ public class TDCoapRequestTest {
     payloadVariables.add(3);
     payloadVariables.add(5);
 
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setArrayPayload(payloadSchema, payloadVariables)
-      .getRequest();
+    TDCoapRequest r = new TDCoapRequest(FORM, TD.invokeAction);
+    r.setPayload(payloadSchema, payloadVariables);
+    Request request = r.getRequest();
 
     JsonArray payload = JsonParser.parseString(request.getPayloadString()).getAsJsonArray();
     assertEquals(3, payload.size());
@@ -318,12 +278,12 @@ public class TDCoapRequestTest {
     coordinates.add(70);
 
     Map<String, Object> payloadVariables = new HashMap<>();
-    payloadVariables.put(PREFIX + "Speed", 3.5);
-    payloadVariables.put(PREFIX + "3DCoordinates", coordinates);
+    payloadVariables.put("speed", 3.5);
+    payloadVariables.put("coordinates", coordinates);
 
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setObjectPayload(payloadSchema, payloadVariables)
-      .getRequest();
+    TDCoapRequest r = new TDCoapRequest(FORM, TD.invokeAction);
+    r.setPayload(payloadSchema, payloadVariables);
+    Request request = r.getRequest();
 
     JsonObject payload = JsonParser.parseString(request.getPayloadString()).getAsJsonObject();
     assertEquals(3.5, payload.get("speed").getAsDouble(), 0.01);
@@ -333,35 +293,6 @@ public class TDCoapRequestTest {
     assertEquals(30, coordinatesArray.get(0).getAsInt());
     assertEquals(50, coordinatesArray.get(1).getAsInt());
     assertEquals(70, coordinatesArray.get(2).getAsInt());
-  }
-
-  @Test
-  public void testArrayOfSemanticObjectsPayload() {
-    // TODO
-  }
-
-  @Test
-  public void testSemanticObjectWithArrayOfSemanticObjectsPayload() {
-    // TODO
-  }
-
-  @Test
-  public void testValidateArrayPayload() {
-    // TODO
-  }
-
-  @Test
-  public void testPathVariable() {
-    Form form = new Form.Builder("coap://example.org/{subscriptionId}")
-      .setMethodName("PUT")
-      .addOperationType(TD.invokeAction)
-      .build();
-    Map<String, DataSchema> uriVariables = new HashMap();
-    uriVariables.put("subscriptionId", new StringSchema.Builder().build());
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("subscriptionId", "abc");
-    TDCoapRequest request = new TDCoapRequest(form, TD.invokeAction, uriVariables, parameters);
-    assertEquals("coap://example.org/abc", request.getTarget());
   }
 
   private void assertUserSchemaPayload(Request request)

@@ -45,7 +45,7 @@ public class ProtocolBindingsTest {
   private static class DummyOperation implements Operation {
 
     @Override
-    public void sendRequest(DataSchema schema, Object payload) throws IOException {
+    public void setPayload(DataSchema schema, Object payload) {
       // do nothing
     }
 

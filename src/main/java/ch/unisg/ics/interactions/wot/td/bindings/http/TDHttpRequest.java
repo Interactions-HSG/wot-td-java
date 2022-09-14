@@ -1,14 +1,10 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.bindings.NoResponseException;
-import ch.unisg.ics.interactions.wot.td.bindings.Operation;
+import ch.unisg.ics.interactions.wot.td.bindings.BaseOperation;
 import ch.unisg.ics.interactions.wot.td.bindings.Response;
-import ch.unisg.ics.interactions.wot.td.bindings.ResponseCallback;
 import ch.unisg.ics.interactions.wot.td.clients.UriTemplate;
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
 import com.google.gson.Gson;
@@ -34,7 +30,7 @@ import java.util.logging.Logger;
  * Wrapper for constructing and executing an HTTP request based on a given <code>ThingDescription</code>.
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
  */
-public class TDHttpRequest implements Operation {
+public class TDHttpRequest extends BaseOperation {
   private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
 
   private final Form form;
@@ -89,36 +85,16 @@ public class TDHttpRequest implements Operation {
 
   @Override
   public void sendRequest() throws IOException {
-    // do nothing (request already built)
-  }
-
-  @Override
-  public void sendRequest(DataSchema schema, Object payload) throws IOException {
-    setPayload(schema, payload);
-    sendRequest();
-  }
-
-  @Override
-  public Response getResponse() throws NoResponseException {
     HttpClient client = HttpClients.createDefault();
     try {
       // TODO use async API instead
       // https://github.com/apache/httpcomponents-client/blob/5.1.x/httpclient5/src/test/java/org/apache/hc/client5/http/examples/AsyncClientHttpExchange.java
       HttpResponse httpResponse = client.execute(request);
-      return new TDHttpResponse((ClassicHttpResponse) httpResponse);
+      Response r = new TDHttpResponse((ClassicHttpResponse) httpResponse);
+      onResponse(r);
     } catch (IOException e) {
-      throw new NoResponseException(e);
+      onError();
     }
-  }
-
-  @Override
-  public void registerResponseCallback(ResponseCallback callback) {
-    // TODO (if async call)
-  }
-
-  @Override
-  public void unregisterResponseCallback(ResponseCallback callback) {
-    // TODO
   }
 
   public TDHttpRequest setAPIKey(APIKeySecurityScheme scheme, String token) {
@@ -136,108 +112,36 @@ public class TDHttpRequest implements Operation {
     return this;
   }
 
-  public void setPayload(DataSchema schema, Object payload) {
-    if (payload instanceof Map) setObjectPayload((ObjectSchema) schema, (Map<String, Object>) payload);
-    else if (payload instanceof List) setArrayPayload((ArraySchema) schema, (List<Object>) payload);
-    else if (payload instanceof String) setPrimitivePayload(schema, (String) payload);
-    else if (payload instanceof Boolean) setPrimitivePayload(schema, (Boolean) payload);
-    else if (payload instanceof Long) setPrimitivePayload(schema, (Long) payload);
-    else if (payload instanceof Double) setPrimitivePayload(schema, (Double) payload);
-    // TODO else, throw payload type error
+  @Override
+  protected void setBooleanPayload(Boolean value) {
+    request.setEntity(new StringEntity(String.valueOf(value), ContentType.create(form.getContentType())));
   }
 
-  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value)
-    throws IllegalArgumentException {
-    if (dataSchema.getDatatype().equals(DataSchema.BOOLEAN)) {
-      request.setEntity(new StringEntity(String.valueOf(value),
-        ContentType.create(form.getContentType())));
-    } else {
-      throw new IllegalArgumentException("The payload's datatype does not match BooleanSchema "
-        + "(payload datatype: " + dataSchema.getDatatype() + ")");
-    }
-
-    return this;
+  @Override
+  protected void setStringPayload(String value) {
+    request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
   }
 
-  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, String value)
-    throws IllegalArgumentException {
-    if (dataSchema.getDatatype().equals(DataSchema.STRING)) {
-      request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
-    } else {
-      throw new IllegalArgumentException("The payload's datatype does not match StringSchema "
-        + "(payload datatype: " + dataSchema.getDatatype() + ")");
-    }
-
-    return this;
+  @Override
+  protected void setIntegerPayload(Long value) {
+    request.setEntity(new StringEntity(String.valueOf(value), ContentType.create(form.getContentType())));
   }
 
-  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, long value)
-    throws IllegalArgumentException {
-    if (dataSchema.getDatatype().equals(DataSchema.INTEGER)
-      || dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
-      request.setEntity(new StringEntity(String.valueOf(value),
-        ContentType.create(form.getContentType())));
-    } else {
-      throw new IllegalArgumentException("The payload's datatype does not match IntegerSchema or "
-        + "NumberSchema (payload datatype: " + dataSchema.getDatatype() + ")");
-    }
-
-    return this;
+  @Override
+  protected void setNumberPayload(Double value) {
+    request.setEntity(new StringEntity(String.valueOf(value), ContentType.create(form.getContentType())));
   }
 
-  public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, double value)
-    throws IllegalArgumentException {
-    if (dataSchema.getDatatype().equals(DataSchema.NUMBER)) {
-      request.setEntity(new StringEntity(String.valueOf(value),
-        ContentType.create(form.getContentType())));
-    } else {
-      throw new IllegalArgumentException("The payload's datatype does not match NumberSchema "
-        + "(payload datatype: " + dataSchema.getDatatype() + ")");
-    }
-
-    return this;
+  @Override
+  protected void setObjectPayload(Map<String, Object> payload) {
+    String body = new Gson().toJson(payload);
+    request.setEntity(new StringEntity(body, ContentType.create(form.getContentType())));
   }
 
-  /**
-   * Sets a payload of type <code>ObjectSchema</code>. The object payload is given as a map where:
-   * <ul>
-   * <li>a key is a string that represents either a semantic type or an object property name</li>
-   * <li>a value can be a primitive, an object represented as a <code>Map&lt;String,Object&gt;</code>
-   * (that is, a nested object), or an ordered list of values of type <code>List&lt;Object&gt;</code></li>
-   * </ul>
-   *
-   * @param objectSchema schema to be used for validating the payload and constructing the body of
-   *                     the request
-   * @param payload      the actual payload
-   * @return this <code>TDHttpRequest</code>
-   */
-  public TDHttpRequest setObjectPayload(ObjectSchema objectSchema, Map<String, Object> payload) {
-    if (objectSchema.validate(payload)) {
-      Map<String, Object> instance = objectSchema.instantiate(payload);
-      String body = new Gson().toJson(instance);
-      request.setEntity(new StringEntity(body, ContentType.create(form.getContentType())));
-    }
-
-    return this;
-  }
-
-  /**
-   * Sets a payload of type <code>ArraySchema</code>. The payload is given as an ordered list of
-   * values of type <code>List&lt;Object&gt;</code>. Values can be primitives, objects represented
-   * as <code>Map&lt;String,Object&gt;</code>, or lists of values (that is, nested lists).
-   *
-   * @param arraySchema schema used for validating the payload and constructing the body of
-   *                    the request
-   * @param payload     the actual payload
-   * @return this <code>TDHttpRequest</code>
-   */
-  public TDHttpRequest setArrayPayload(ArraySchema arraySchema, List<Object> payload) {
-    if (arraySchema.validate(payload)) {
-      String body = new Gson().toJson(payload);
-      request.setEntity(new StringEntity(body, ContentType.create(form.getContentType())));
-    }
-
-    return this;
+  @Override
+  protected void setArrayPayload(List<Object> payload) {
+    String body = new Gson().toJson(payload);
+    request.setEntity(new StringEntity(body, ContentType.create(form.getContentType())));
   }
 
   public String getPayloadAsString() throws ParseException, IOException {
@@ -271,4 +175,5 @@ public class TDHttpRequest implements Operation {
   BasicClassicHttpRequest getRequest() {
     return this.request;
   }
+
 }
