@@ -81,7 +81,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload(USER_PAYLOAD);
 
-    ObjectSchema schema = TDCoapRequestTest.USER_SCHEMA;
+    ObjectSchema schema = TDCoapOperationTest.USER_SCHEMA;
     TDCoapResponse testResponse = new TDCoapResponse(response);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
@@ -98,7 +98,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("{\"first_name\" : \"Andrei\"}");
 
-    ObjectSchema schema = TDCoapRequestTest.USER_SCHEMA;
+    ObjectSchema schema = TDCoapOperationTest.USER_SCHEMA;
 
     new TDCoapResponse(response).getPayloadAsObject(schema);
   }
@@ -111,7 +111,7 @@ public class TDCoapResponseTest {
       .addProperty("count", new IntegerSchema.Builder()
         .addSemanticType(prefix + "Count")
         .build())
-      .addProperty("user", TDCoapRequestTest.USER_SCHEMA)
+      .addProperty("user", TDCoapOperationTest.USER_SCHEMA)
       .build();
 
     Response response = new Response(ResponseCode.VALID);
@@ -191,7 +191,7 @@ public class TDCoapResponseTest {
 
     String prefix = "http://example.org/";
     ArraySchema schema = new ArraySchema.Builder()
-      .addItem(TDCoapRequestTest.USER_SCHEMA)
+      .addItem(TDCoapOperationTest.USER_SCHEMA)
       .build();
 
     Response response = new Response(ResponseCode.VALID);

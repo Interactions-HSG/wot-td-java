@@ -48,7 +48,7 @@ public class TDCoapBinding extends BaseProtocolBinding {
 
   @Override
   public Operation bind(Form form, String operationType) {
-    return new TDCoapRequest(form, operationType);
+    return new TDCoapOperation(form, operationType);
   }
 
 }

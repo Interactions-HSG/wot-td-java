@@ -39,7 +39,7 @@ public class TDHttpBinding extends BaseProtocolBinding {
 
   @Override
   public Operation bind(Form form, String operationType) {
-    return new TDHttpRequest(form, operationType);
+    return new TDHttpOperation(form, operationType);
   }
 
 }

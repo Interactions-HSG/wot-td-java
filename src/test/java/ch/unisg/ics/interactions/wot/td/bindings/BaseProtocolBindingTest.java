@@ -1,7 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
+import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpOperation;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -27,7 +27,7 @@ public class BaseProtocolBindingTest {
     Map<String, Object> values = new HashMap<>();
     values.put("p", "temp");
 
-    TDHttpRequest op = (TDHttpRequest) b.bind(f, TD.readProperty, schemas, values);
+    TDHttpOperation op = (TDHttpOperation) b.bind(f, TD.readProperty, schemas, values);
 
     assertEquals("http://example.org/properties/temp", op.getTarget());
   }

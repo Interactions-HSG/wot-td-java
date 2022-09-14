@@ -1,8 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapRequest;
-import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
+import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapOperation;
+import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpOperation;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.junit.Test;
@@ -77,7 +77,7 @@ public class ProtocolBindingsTest {
 
     ProtocolBinding b = ProtocolBindings.getBinding(f);
     Operation op = b.bind(f, TD.invokeAction);
-    assertEquals(op.getClass(), TDHttpRequest.class);
+    assertEquals(op.getClass(), TDHttpOperation.class);
   }
 
   @Test
@@ -87,7 +87,7 @@ public class ProtocolBindingsTest {
 
     ProtocolBinding b = ProtocolBindings.getBinding(f);
     Operation op = b.bind(f, TD.invokeAction);
-    assertEquals(op.getClass(), TDCoapRequest.class);
+    assertEquals(op.getClass(), TDCoapOperation.class);
   }
 
   @Test(expected = BindingNotFoundException.class)

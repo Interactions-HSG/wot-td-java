@@ -2,7 +2,7 @@ package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.bindings.BaseOperation;
-import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
+import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpOperation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.Gson;
@@ -25,20 +25,20 @@ import java.util.logging.Logger;
  * Wrapper for constructing and executing a CoAP request based on a given <code>ThingDescription</code>.
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
  */
-public class TDCoapRequest extends BaseOperation {
-  private final static Logger LOGGER = Logger.getLogger(TDHttpRequest.class.getCanonicalName());
+public class TDCoapOperation extends BaseOperation {
+  private final static Logger LOGGER = Logger.getLogger(TDHttpOperation.class.getCanonicalName());
 
   private class TDCoapHandler implements CoapHandler {
 
     @Override
     public void onLoad(CoapResponse response) {
-      TDCoapRequest.this.onResponse(new TDCoapResponse(response.advanced()));
+      TDCoapOperation.this.onResponse(new TDCoapResponse(response.advanced()));
     }
 
     @Override
     public void onError() {
       // TODO not if the server rejected the request (server error to be notified as response)?
-      TDCoapRequest.this.onError();
+      TDCoapOperation.this.onError();
     }
 
   }
@@ -52,7 +52,7 @@ public class TDCoapRequest extends BaseOperation {
 
   private final String target;
 
-  public TDCoapRequest(Form form, String operationType) {
+  public TDCoapOperation(Form form, String operationType) {
     this.handler = new TDCoapHandler();
     this.target = form.getTarget();
 
@@ -103,7 +103,7 @@ public class TDCoapRequest extends BaseOperation {
     }
   }
 
-  public TDCoapRequest addOption(String key, String value) {
+  public TDCoapOperation addOption(String key, String value) {
     // TODO Support CoAP options e.g. for observation flag
     return null;
   }

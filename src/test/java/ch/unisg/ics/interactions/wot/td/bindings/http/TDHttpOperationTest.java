@@ -9,23 +9,20 @@ import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.*;
-import org.apache.commons.io.IOUtils;
+import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ProtocolException;
-import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 import org.apache.http.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class TDHttpRequestTest {
+public class TDHttpOperationTest {
   private static final String PREFIX = "http://example.org/";
 
   static final ObjectSchema USER_SCHEMA = new ObjectSchema.Builder()
@@ -102,7 +99,7 @@ public class TDHttpRequestTest {
 
   @Test
   public void testToStringNullEntity() {
-    TDHttpRequest request = new TDHttpRequest(new Form.Builder("http://example.org/action")
+    TDHttpOperation request = new TDHttpOperation(new Form.Builder("http://example.org/action")
       .addOperationType(TD.invokeAction).build(),
       TD.invokeAction);
 
@@ -118,15 +115,13 @@ public class TDHttpRequestTest {
     Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
     assertTrue(form.isPresent());
 
-    TDHttpRequest r = new TDHttpRequest(form.get(), TD.writeProperty);
+    TDHttpOperation r = new TDHttpOperation(form.get(), TD.writeProperty);
     r.setPayload(property.get().getDataSchema(), true);
-    BasicClassicHttpRequest request = r.getRequest();
+    SimpleHttpRequest request = r.getRequest();
 
     assertEquals("PUT", request.getMethod());
 
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
-    JsonElement payload = JsonParser.parseString(writer.toString());
+    JsonElement payload = JsonParser.parseString(request.getBodyText());
 
     assertTrue(payload.isJsonPrimitive());
     assertTrue(payload.getAsBoolean());
@@ -143,15 +138,13 @@ public class TDHttpRequestTest {
     payloadVariables.put("sourcePosition", Arrays.asList(30, 50, 70));
     payloadVariables.put("targetPosition", Arrays.asList(30, 60, 70));
 
-    TDHttpRequest r = new TDHttpRequest(form.get(), TD.invokeAction);
+    TDHttpOperation r = new TDHttpOperation(form.get(), TD.invokeAction);
     r.setPayload(action.get().getInputSchema().get(), payloadVariables);
-    BasicClassicHttpRequest request = r.getRequest();
+    SimpleHttpRequest request = r.getRequest();
 
     assertEquals("POST", request.getMethod());
 
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
-    JsonObject payload = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    JsonObject payload = JsonParser.parseString(request.getBodyText()).getAsJsonObject();
 
     JsonArray sourcePosition = payload.get("sourcePosition").getAsJsonArray();
     assertEquals(30, sourcePosition.get(0).getAsInt());
@@ -166,9 +159,9 @@ public class TDHttpRequestTest {
 
   @Test
   public void testNoPayload() {
-    BasicClassicHttpRequest request = new TDHttpRequest(FORM, TD.invokeAction)
+    SimpleHttpRequest request = new TDHttpOperation(FORM, TD.invokeAction)
       .getRequest();
-    assertNull(request.getEntity());
+    assertNull(request.getBodyText());
   }
 
   @Test
@@ -183,28 +176,28 @@ public class TDHttpRequestTest {
     payloadVariables.put("first_name", "Andrei");
     payloadVariables.put("last_name", "Ciortea");
 
-    TDHttpRequest r = new TDHttpRequest(FORM, TD.invokeAction);
+    TDHttpOperation r = new TDHttpOperation(FORM, TD.invokeAction);
     r.setPayload(payloadSchema, payloadVariables);
-    BasicClassicHttpRequest request = r.getRequest();
+    SimpleHttpRequest request = r.getRequest();
 
     assertUserSchemaPayload(request);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidBooleanPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
+    new TDHttpOperation(FORM, TD.invokeAction)
       .setPayload(new BooleanSchema.Builder().build(), "string");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidIntegerPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
+    new TDHttpOperation(FORM, TD.invokeAction)
       .setPayload(new IntegerSchema.Builder().build(), 0.5);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
-    new TDHttpRequest(FORM, TD.invokeAction)
+    new TDHttpOperation(FORM, TD.invokeAction)
       .setPayload(new StringSchema.Builder().build(), true);
   }
 
@@ -219,14 +212,11 @@ public class TDHttpRequestTest {
     payloadVariables.add(3);
     payloadVariables.add(5);
 
-    TDHttpRequest r = new TDHttpRequest(FORM, TD.invokeAction);
+    TDHttpOperation r = new TDHttpOperation(FORM, TD.invokeAction);
     r.setPayload(payloadSchema, payloadVariables);
-    BasicClassicHttpRequest request = r.getRequest();
+    SimpleHttpRequest request = r.getRequest();
 
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
-
-    JsonArray payload = JsonParser.parseString(writer.toString()).getAsJsonArray();
+    JsonArray payload = JsonParser.parseString(request.getBodyText()).getAsJsonArray();
     assertEquals(3, payload.size());
     assertEquals(1, payload.get(0).getAsInt());
     assertEquals(3, payload.get(1).getAsInt());
@@ -255,14 +245,11 @@ public class TDHttpRequestTest {
     payloadVariables.put("speed", 3.5);
     payloadVariables.put("coordinates", coordinates);
 
-    TDHttpRequest r = new TDHttpRequest(FORM, TD.invokeAction);
+    TDHttpOperation r = new TDHttpOperation(FORM, TD.invokeAction);
     r.setPayload(payloadSchema, payloadVariables);
-    BasicClassicHttpRequest request = r.getRequest();
+    SimpleHttpRequest request = r.getRequest();
 
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
-
-    JsonObject payload = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    JsonObject payload = JsonParser.parseString(request.getBodyText()).getAsJsonObject();
     assertEquals(3.5, payload.get("speed").getAsDouble(), 0.01);
 
     JsonArray coordinatesArray = payload.getAsJsonArray("coordinates");
@@ -287,28 +274,11 @@ public class TDHttpRequestTest {
     // TODO
   }
 
-  @Test
-  public void testPathVariable() {
-    Form form = new Form.Builder(PREFIX + "{subscriptionId}")
-      .setMethodName("PUT")
-      .addOperationType(TD.invokeAction)
-      .build();
-    Map<String, DataSchema> uriVariables = new HashMap();
-    uriVariables.put("subscriptionId", new StringSchema.Builder().build());
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("subscriptionId", "abc");
-    TDHttpRequest request = new TDHttpRequest(form, TD.invokeAction, uriVariables, parameters);
-    assertEquals(PREFIX + "abc", request.getTarget());
-  }
-
-  private void assertUserSchemaPayload(BasicClassicHttpRequest request)
+  private void assertUserSchemaPayload(SimpleHttpRequest request)
     throws UnsupportedOperationException, IOException, ProtocolException {
-    StringWriter writer = new StringWriter();
-    IOUtils.copy(request.getEntity().getContent(), writer, StandardCharsets.UTF_8.name());
-
     assertEquals("application/json", request.getHeader(HttpHeaders.CONTENT_TYPE).getValue());
 
-    JsonObject payload = JsonParser.parseString(writer.toString()).getAsJsonObject();
+    JsonObject payload = JsonParser.parseString(request.getBodyText()).getAsJsonObject();
     assertEquals("Andrei", payload.get("first_name").getAsString());
     assertEquals("Ciortea", payload.get("last_name").getAsString());
   }

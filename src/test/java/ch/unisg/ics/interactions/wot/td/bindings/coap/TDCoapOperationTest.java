@@ -19,7 +19,7 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class TDCoapRequestTest {
+public class TDCoapOperationTest {
   private static final String PREFIX = "http://example.org/";
 
   static final ObjectSchema USER_SCHEMA = new ObjectSchema.Builder()
@@ -99,14 +99,14 @@ public class TDCoapRequestTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNoDefaultMethodName() {
-    new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .addOperationType("http://example.org#observeProperty").build(),
       TD.invokeAction);
   }
 
   @Test
   public void testObserveOption() {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    TDCoapOperation coapRequest = new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .setMethodName("GET")
       .addOperationType(TD.observeProperty)
       .addSubProtocol(COV.observe).build(),
@@ -117,7 +117,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testObserveWithDefaultBinding() {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    TDCoapOperation coapRequest = new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .addOperationType(TD.observeProperty).build(),
       TD.observeProperty);
 
@@ -127,7 +127,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testToStringNoPayload() {
-    TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    TDCoapOperation request = new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .setMethodName("POST")
       .addOperationType(TD.invokeAction).build(),
       TD.invokeAction);
@@ -139,7 +139,7 @@ public class TDCoapRequestTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNoDefaultBindingForOperationType() {
-    new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .addOperationType(TD.invokeAction).build(),
       TD.readProperty);
   }
@@ -152,7 +152,7 @@ public class TDCoapRequestTest {
     Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
     assertTrue(form.isPresent());
 
-    TDCoapRequest r = new TDCoapRequest(form.get(), TD.writeProperty);
+    TDCoapOperation r = new TDCoapOperation(form.get(), TD.writeProperty);
     r.setPayload(property.get().getDataSchema(), true);
 
     Request request = r.getRequest();
@@ -176,7 +176,7 @@ public class TDCoapRequestTest {
     payloadVariables.put("sourcePosition", Arrays.asList(30, 50, 70));
     payloadVariables.put("targetPosition", Arrays.asList(30, 60, 70));
 
-    TDCoapRequest r = new TDCoapRequest(form.get(), TD.invokeAction);
+    TDCoapOperation r = new TDCoapOperation(form.get(), TD.invokeAction);
     r.setPayload(action.get().getInputSchema().get(), payloadVariables);
     Request request = r.getRequest();
 
@@ -197,7 +197,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testNoPayload() {
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
+    Request request = new TDCoapOperation(FORM, TD.invokeAction)
       .getRequest();
     assertNull(request.getPayload());
   }
@@ -213,7 +213,7 @@ public class TDCoapRequestTest {
     payloadVariables.put("first_name", "Andrei");
     payloadVariables.put("last_name", "Ciortea");
 
-    TDCoapRequest r = new TDCoapRequest(FORM, TD.invokeAction);
+    TDCoapOperation r = new TDCoapOperation(FORM, TD.invokeAction);
     r.setPayload(payloadSchema, payloadVariables);
     Request request = r.getRequest();
 
@@ -222,19 +222,19 @@ public class TDCoapRequestTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidBooleanPayload() {
-    new TDCoapRequest(FORM, TD.invokeAction)
+    new TDCoapOperation(FORM, TD.invokeAction)
       .setPayload(new BooleanSchema.Builder().build(), "string");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidIntegerPayload() {
-    new TDCoapRequest(FORM, TD.invokeAction)
+    new TDCoapOperation(FORM, TD.invokeAction)
       .setPayload(new IntegerSchema.Builder().build(), 0.5);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
-    new TDCoapRequest(FORM, TD.invokeAction)
+    new TDCoapOperation(FORM, TD.invokeAction)
       .setPayload(new StringSchema.Builder().build(), true);
   }
 
@@ -249,7 +249,7 @@ public class TDCoapRequestTest {
     payloadVariables.add(3);
     payloadVariables.add(5);
 
-    TDCoapRequest r = new TDCoapRequest(FORM, TD.invokeAction);
+    TDCoapOperation r = new TDCoapOperation(FORM, TD.invokeAction);
     r.setPayload(payloadSchema, payloadVariables);
     Request request = r.getRequest();
 
@@ -281,7 +281,7 @@ public class TDCoapRequestTest {
     payloadVariables.put("speed", 3.5);
     payloadVariables.put("coordinates", coordinates);
 
-    TDCoapRequest r = new TDCoapRequest(FORM, TD.invokeAction);
+    TDCoapOperation r = new TDCoapOperation(FORM, TD.invokeAction);
     r.setPayload(payloadSchema, payloadVariables);
     Request request = r.getRequest();
 

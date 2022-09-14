@@ -1,10 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import ch.unisg.ics.interactions.wot.td.schemas.*;
-import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.junit.Test;
 
 import java.util.List;
@@ -19,40 +18,40 @@ public class TDHttpResponseTest {
 
   @Test
   public void testNoPayload() {
-    ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
+    SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
     Optional<Object> payload = new TDHttpResponse(response).getPayload();
     assertFalse(payload.isPresent());
   }
 
   @Test
   public void testBooleanPayload() {
-    ClassicHttpResponse response = constructHttpResponse(false);
+    SimpleHttpResponse response = constructHttpResponse(false);
     assertFalse(new TDHttpResponse(response).getPayloadAsBoolean());
   }
 
   @Test
   public void testStringPayload() {
-    ClassicHttpResponse response = constructHttpResponse("test");
+    SimpleHttpResponse response = constructHttpResponse("test");
     assertEquals("test", new TDHttpResponse(response).getPayloadAsString());
   }
 
   @Test
   public void testIntegerPayload() {
-    ClassicHttpResponse response = constructHttpResponse("101");
+    SimpleHttpResponse response = constructHttpResponse("101");
     assertEquals(101, new TDHttpResponse(response).getPayloadAsInteger().intValue());
   }
 
   @Test
   public void testDoublePayload() {
-    ClassicHttpResponse response = constructHttpResponse("101.005");
+    SimpleHttpResponse response = constructHttpResponse("101.005");
     assertEquals(101.005, new TDHttpResponse(response).getPayloadAsDouble().doubleValue(), 0.001);
   }
 
   @Test
   public void testObjectPayload() {
-    ClassicHttpResponse response = constructHttpResponse(USER_PAYLOAD);
+    SimpleHttpResponse response = constructHttpResponse(USER_PAYLOAD);
 
-    ObjectSchema schema = TDHttpRequestTest.USER_SCHEMA;
+    ObjectSchema schema = TDHttpOperationTest.USER_SCHEMA;
     Map<String, Object> payload = new TDHttpResponse(response).getPayloadAsObject(schema);
 
     assertEquals(2, payload.size());
@@ -62,14 +61,14 @@ public class TDHttpResponseTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testObjectRequiredPayload() {
-    ClassicHttpResponse response = constructHttpResponse("{\"first_name\" : \"Andrei\"}");
-    ObjectSchema schema = TDHttpRequestTest.USER_SCHEMA;
+    SimpleHttpResponse response = constructHttpResponse("{\"first_name\" : \"Andrei\"}");
+    ObjectSchema schema = TDHttpOperationTest.USER_SCHEMA;
     new TDHttpResponse(response).getPayloadAsObject(schema);
   }
 
   @Test
   public void testNestedObjectPayload() {
-    ClassicHttpResponse response = constructHttpResponse("{\n" +
+    SimpleHttpResponse response = constructHttpResponse("{\n" +
         "  \"count\" : 1,\n" +
         "  \"user\" : " + USER_PAYLOAD + "\n" +
         "}");
@@ -79,7 +78,7 @@ public class TDHttpResponseTest {
         .addProperty("count", new IntegerSchema.Builder()
             .addSemanticType(prefix + "Count")
             .build())
-        .addProperty("user", TDHttpRequestTest.USER_SCHEMA)
+        .addProperty("user", TDHttpOperationTest.USER_SCHEMA)
         .build();
 
     Map<String, Object> payload = new TDHttpResponse(response).getPayloadAsObject(schema);
@@ -95,7 +94,7 @@ public class TDHttpResponseTest {
 
   @Test
   public void testPrimitiveArrayPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[\"my_string\", 1.5, 2, true, null]");
+    SimpleHttpResponse response = constructHttpResponse("[\"my_string\", 1.5, 2, true, null]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new StringSchema.Builder().build())
@@ -116,7 +115,7 @@ public class TDHttpResponseTest {
 
   @Test
   public void testIntegerArrayPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[1, 2, 3]");
+    SimpleHttpResponse response = constructHttpResponse("[1, 2, 3]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new IntegerSchema.Builder().build())
@@ -131,11 +130,11 @@ public class TDHttpResponseTest {
 
   @Test
   public void testObjectArrayPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[" + USER_PAYLOAD + "]");
+    SimpleHttpResponse response = constructHttpResponse("[" + USER_PAYLOAD + "]");
 
     String prefix = "http://example.org/";
     ArraySchema schema = new ArraySchema.Builder()
-        .addItem(TDHttpRequestTest.USER_SCHEMA)
+        .addItem(TDHttpOperationTest.USER_SCHEMA)
         .build();
 
     List<Object> payload = new TDHttpResponse(response).getPayloadAsArray(schema);
@@ -149,7 +148,7 @@ public class TDHttpResponseTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testArrayMinItemsPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[1, 2]");
+    SimpleHttpResponse response = constructHttpResponse("[1, 2]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new IntegerSchema.Builder().build())
@@ -161,7 +160,7 @@ public class TDHttpResponseTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testArrayMaxItemsPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[1, 2, 3]");
+    SimpleHttpResponse response = constructHttpResponse("[1, 2, 3]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new IntegerSchema.Builder().build())
@@ -173,17 +172,16 @@ public class TDHttpResponseTest {
 
   @Test
   public void testHeaders(){
-    ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
+    SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
     response.addHeader("Content-Type", "application/json");
     TDHttpResponse tdHttpResponse = new TDHttpResponse(response);
     Map<String, String> headers = tdHttpResponse.getHeaders();
     assertEquals("application/json", headers.get("Content-Type"));
-
   }
 
-  private ClassicHttpResponse constructHttpResponse(Object payload) {
-    ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
-    response.setEntity(new StringEntity(String.valueOf(payload)));
+  private SimpleHttpResponse constructHttpResponse(Object payload) {
+    SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
+    response.setBody(String.valueOf(payload), ContentType.APPLICATION_JSON);
     return response;
   }
 

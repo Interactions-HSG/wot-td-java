@@ -8,22 +8,17 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.apache.commons.io.IOUtils;
-import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Wrapper for an HTTP response received when performing a
- * {@link TDHttpRequest}. The payload of the response is
+ * {@link TDHttpOperation}. The payload of the response is
  * deserialized based on a <code>DataSchema</code> from a given <code>ThingDescription</code>.
  *
  */
@@ -32,26 +27,16 @@ public class TDHttpResponse implements Response {
 
   private final static Pattern LINK_HEADER_PATTERN = Pattern.compile("\\w*<(?<target>.*)>;\\w*rel=\"(?<rel>.*)\"");
 
-  private final ClassicHttpResponse response;
+  private final SimpleHttpResponse response;
   private Optional<String> payload;
 
-  public TDHttpResponse(ClassicHttpResponse response) {
-
+  public TDHttpResponse(SimpleHttpResponse response) {
     this.response = response;
 
-    HttpEntity entity = response.getEntity();
-
-    if (entity == null) {
+    if (response.getBodyText() == null) {
       this.payload = Optional.empty();
     } else {
-      String encoding = entity.getContentEncoding() == null ? "UTF-8" : entity.getContentEncoding();
-
-      try {
-        this.payload = Optional.of(IOUtils.toString(entity.getContent(), encoding));
-        EntityUtils.consume(entity);
-      } catch (IOException e) {
-        LOGGER.log(Level.WARNING, e.getMessage());
-      }
+      this.payload = Optional.of(response.getBodyText());
     }
   }
 
@@ -80,7 +65,9 @@ public class TDHttpResponse implements Response {
 
   @Override
   public Optional<Object> getPayload() {
-    return Optional.of(payload);
+    // TODO parse JSON if proper Content-Type
+    if (payload.isPresent()) return Optional.of(payload.get());
+    else return Optional.empty();
   }
 
   @Override
