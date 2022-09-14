@@ -1,6 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
-public class InvalidFormException extends RuntimeException {
+public class InvalidFormException extends IllegalArgumentException {
 
   public InvalidFormException(String message) {
     super(message);

@@ -3,6 +3,7 @@ package ch.unisg.ics.interactions.wot.td.bindings;
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface Response {
 
@@ -15,7 +16,7 @@ public interface Response {
 
   ResponseStatus getStatus();
 
-  Object getPayload();
+  Optional<Object> getPayload();
 
   Collection<Link> getLinks();
 

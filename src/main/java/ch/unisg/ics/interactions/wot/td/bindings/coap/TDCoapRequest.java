@@ -1,8 +1,10 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.NoResponseException;
 import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.bindings.Response;
+import ch.unisg.ics.interactions.wot.td.bindings.ResponseCallback;
 import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpRequest;
 import ch.unisg.ics.interactions.wot.td.clients.UriTemplate;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
@@ -12,14 +14,10 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.Gson;
 import org.eclipse.californium.core.CoapClient;
-import org.eclipse.californium.core.CoapObserveRelation;
-import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
-import org.eclipse.californium.elements.exception.ConnectorException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +35,8 @@ public class TDCoapRequest implements Operation {
 
   private final Form form;
   private final Request request;
+
+  private final TDCoapHandler handler;
 
   private final List<CoapClient> executors = new ArrayList<>();
   private final ReentrantLock executorsLock = new ReentrantLock();
@@ -57,6 +57,8 @@ public class TDCoapRequest implements Operation {
       throw new IllegalArgumentException("No default binding for the given operation type: "
         + operationType);
     }
+
+    this.handler = new TDCoapHandler();
 
     if (subProtocol.isPresent() && subProtocol.get().equals(COV.observe)) {
       if (operationType.equals(TD.observeProperty)) {
@@ -84,6 +86,8 @@ public class TDCoapRequest implements Operation {
         + operationType);
     }
 
+    this.handler = new TDCoapHandler();
+
     if (subProtocol.isPresent() && subProtocol.get().equals(COV.observe)) {
       if (operationType.equals(TD.observeProperty)) {
         this.request.setObserve();
@@ -99,83 +103,35 @@ public class TDCoapRequest implements Operation {
     return target;
   }
 
-  /**
-   * Sends a synchronous CoAP request.
-   *
-   * @return the CoAP response
-   * @throws IOException if any issue occurred
-   */
   @Override
-  public Response execute() throws IOException {
+  public void sendRequest() {
     CoapClient client = new CoapClient();
-    CoapResponse response = null;
-
-    try {
-      response = client.advanced(request);
-    } catch (ConnectorException e) {
-      throw new IOException(e);
-    }
-    addExecutor(client);
-    return new TDCoapResponse(response.advanced());
-  }
-
-  /**
-   * Sends an asynchronous CoAP request and invokes the specified
-   * <code>TDCoAPHandler</code> each time a notification arrives.
-   *
-   * @param handler the Response handler
-   */
-  public void execute(TDCoapHandler handler) {
-    CoapClient client = new CoapClient();
-    client.advanced(handler.getCoapHandler(), request);
+    client.advanced(handler, request);
     addExecutor(client);
   }
 
-  /**
-   * Sends an asynchronous observe CoAP request and invokes the specified
-   * <code>TDCoAPHandler</code> each time a notification arrives.
-   *
-   * @param handler the CoAP Response handler
-   * @return the CoAP observe relation
-   * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
-   */
-  public TDCoapObserveRelation establishRelation(TDCoapHandler handler) {
-
-    if (!request.getOptions().hasObserve()) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe
-        + "for the given operation type.");
-    }
-
-    CoapClient client = new CoapClient(form.getTarget());
-    CoapObserveRelation relation = client.observe(request, handler.getCoapHandler());
-    TDCoapObserveRelation establishedRelation = new TDCoapObserveRelation(relation);
-    addExecutor(client);
-    return establishedRelation;
+  @Override
+  public void sendRequest(DataSchema schema, Object payload) {
+    setPayload(schema, payload);
+    sendRequest();
   }
 
-  /**
-   * Sends a synchronous observe request and waits until it has been established
-   * whereupon the specified CoAP handler is invoked when a notification arrives.
-   *
-   * @param handler the CoAP Response handler
-   * @return the CoAP observe relation
-   * @throws IllegalArgumentException if no form is found for the subprotocol "cov:observe"
-   * @throws IOException              if any other issue occurred
-   */
-  public TDCoapObserveRelation establishRelationAndWait(TDCoapHandler handler) throws IOException {
-    if (!request.getOptions().hasObserve()) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
-    }
+  @Override
+  public Response getResponse() throws NoResponseException {
+    Optional<TDCoapResponse> r = handler.getLastResponse();
 
-    CoapObserveRelation relation;
-    CoapClient client = new CoapClient(form.getTarget());
-    try {
-      relation = client.observeAndWait(request, handler.getCoapHandler());
-    } catch (ConnectorException e) {
-      throw new IOException(e);
-    }
-    addExecutor(client);
-    return new TDCoapObserveRelation(relation);
+    if (r.isPresent()) return r.get();
+    else throw new NoResponseException();
+  }
+
+  @Override
+  public void registerResponseCallback(ResponseCallback callback) {
+    handler.registerResponseCallback(callback);
+  }
+
+  @Override
+  public void unregisterResponseCallback(ResponseCallback callback) {
+    handler.unregisterResponseCallback(callback);
   }
 
   public void shutdownExecutors() {
@@ -190,7 +146,6 @@ public class TDCoapRequest implements Operation {
     } finally {
       executorsLock.unlock();
     }
-
   }
 
   public TDCoapRequest addOption(String key, String value) {
@@ -198,7 +153,6 @@ public class TDCoapRequest implements Operation {
     return null;
   }
 
-  @Override
   public void setPayload(DataSchema schema, Object payload) {
     if (payload instanceof Map) setObjectPayload((ObjectSchema) schema, (Map<String, Object>) payload);
     else if (payload instanceof List) setArrayPayload((ArraySchema) schema, (List<Object>) payload);
@@ -327,6 +281,8 @@ public class TDCoapRequest implements Operation {
   Request getRequest() {
     return this.request;
   }
+
+  // TODO expose CoapObserveRelation if cov:observe declared in form
 
   private void addExecutor(CoapClient client) {
     try {

@@ -45,15 +45,29 @@ public class ProtocolBindingsTest {
   private static class DummyOperation implements Operation {
 
     @Override
-    public void setPayload(DataSchema schema, Object payload) {
+    public void sendRequest(DataSchema schema, Object payload) throws IOException {
       // do nothing
     }
 
     @Override
-    public Response execute() throws IOException {
+    public void sendRequest() throws IOException {
+      // do nothing
+    }
+
+    @Override
+    public Response getResponse() throws NoResponseException {
       return null;
     }
 
+    @Override
+    public void registerResponseCallback(ResponseCallback callback) {
+      // do nothing
+    }
+
+    @Override
+    public void unregisterResponseCallback(ResponseCallback callback) {
+      // do nothing
+    }
   }
 
   @Test

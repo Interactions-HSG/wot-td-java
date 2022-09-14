@@ -1,26 +1,17 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import ch.unisg.ics.interactions.wot.td.schemas.*;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.junit.Test;
 
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NullSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.Assert.*;
 
 public class TDHttpResponseTest {
   private static final String PREFIX = "http://example.org/";
@@ -29,7 +20,7 @@ public class TDHttpResponseTest {
   @Test
   public void testNoPayload() {
     ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
-    Optional<String> payload = new TDHttpResponse(response).getPayload();
+    Optional<Object> payload = new TDHttpResponse(response).getPayload();
     assertFalse(payload.isPresent());
   }
 

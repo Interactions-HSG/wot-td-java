@@ -1,14 +1,11 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
-import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapHandler;
-import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapResponse;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.Response;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,25 +22,21 @@ public class TDCoapHandlerTest {
     assertNotNull(responseMock);
     when(responseMock.advanced()).thenReturn(response);
 
-    TDCoapHandler handler = new TDCoapHandler() {
-      @Override
-      public void handleLoad(TDCoapResponse response) {
-        testValue[0] = response.getPayloadAsString();
+    TDCoapHandler handler = new TDCoapHandler();
+    handler.registerResponseCallback(r -> {
+      if (r.getStatus().equals(ch.unisg.ics.interactions.wot.td.bindings.Response.ResponseStatus.OK)) {
+        testValue[0] = (String) r.getPayload().get();
       }
-
-      @Override
-      public void handleError() {
-        testValue[0] = "handle_error";
-      }
-    };
+    });
 
     assertEquals("initial", testValue[0]);
 
-    handler.getCoapHandler().onLoad(responseMock);
+    handler.onLoad(responseMock);
     assertEquals("handle_load", testValue[0]);
+    assertTrue(handler.getLastResponse().isPresent());
 
-    handler.getCoapHandler().onError();
-    assertEquals("handle_error", testValue[0]);
+    handler.onError();
+    assertFalse(handler.getLastResponse().isPresent());
   }
 
 }

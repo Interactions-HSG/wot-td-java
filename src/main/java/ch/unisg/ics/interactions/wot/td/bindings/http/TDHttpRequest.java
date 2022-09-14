@@ -1,8 +1,10 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.NoResponseException;
 import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.bindings.Response;
+import ch.unisg.ics.interactions.wot.td.bindings.ResponseCallback;
 import ch.unisg.ics.interactions.wot.td.clients.UriTemplate;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
@@ -55,6 +57,14 @@ public class TDHttpRequest implements Operation {
     this.request.setHeader(HttpHeaders.CONTENT_TYPE, form.getContentType());
   }
 
+  /**
+   * TODO redundant with {@link ch.unisg.ics.interactions.wot.td.bindings.BaseProtocolBinding}
+   *
+   * @param form
+   * @param operationType
+   * @param uriVariables
+   * @param values
+   */
   public TDHttpRequest(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values) {
     this.form = form;
     this.target = new UriTemplate(form.getTarget()).createUri(uriVariables, values);
@@ -78,10 +88,37 @@ public class TDHttpRequest implements Operation {
   }
 
   @Override
-  public Response execute() throws IOException {
+  public void sendRequest() throws IOException {
+    // do nothing (request already built)
+  }
+
+  @Override
+  public void sendRequest(DataSchema schema, Object payload) throws IOException {
+    setPayload(schema, payload);
+    sendRequest();
+  }
+
+  @Override
+  public Response getResponse() throws NoResponseException {
     HttpClient client = HttpClients.createDefault();
-    HttpResponse response = client.execute(request);
-    return new TDHttpResponse((ClassicHttpResponse) response);
+    try {
+      // TODO use async API instead
+      // https://github.com/apache/httpcomponents-client/blob/5.1.x/httpclient5/src/test/java/org/apache/hc/client5/http/examples/AsyncClientHttpExchange.java
+      HttpResponse httpResponse = client.execute(request);
+      return new TDHttpResponse((ClassicHttpResponse) httpResponse);
+    } catch (IOException e) {
+      throw new NoResponseException(e);
+    }
+  }
+
+  @Override
+  public void registerResponseCallback(ResponseCallback callback) {
+    // TODO (if async call)
+  }
+
+  @Override
+  public void unregisterResponseCallback(ResponseCallback callback) {
+    // TODO
   }
 
   public TDHttpRequest setAPIKey(APIKeySecurityScheme scheme, String token) {
@@ -99,7 +136,6 @@ public class TDHttpRequest implements Operation {
     return this;
   }
 
-  @Override
   public void setPayload(DataSchema schema, Object payload) {
     if (payload instanceof Map) setObjectPayload((ObjectSchema) schema, (Map<String, Object>) payload);
     else if (payload instanceof List) setArrayPayload((ArraySchema) schema, (List<Object>) payload);

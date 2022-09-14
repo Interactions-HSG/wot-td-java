@@ -57,14 +57,17 @@ public class TDCoapResponse implements ch.unisg.ics.interactions.wot.td.bindings
 
   @Override
   public ResponseStatus getStatus() {
-    if (response.getRawCode() >= 200 && response.getRawCode() < 300) return ResponseStatus.OK;
-    if (response.getRawCode() >= 400 && response.getRawCode() < 500) return ResponseStatus.CONSUMER_ERROR;
-    if (response.getRawCode() >= 500 && response.getRawCode() < 600) return ResponseStatus.THING_ERROR;
-    else return ResponseStatus.UNKNOWN_ERROR;
+    switch (response.getCode().codeClass) {
+      case 2: return ResponseStatus.OK;
+      case 4: return ResponseStatus.CONSUMER_ERROR;
+      case 5: return ResponseStatus.THING_ERROR;
+      default: return ResponseStatus.UNKNOWN_ERROR;
+    }
   }
 
-  public Optional<String> getPayload() {
-    return payload;
+  public Optional<Object> getPayload() {
+    if (payload.isPresent()) return Optional.of(payload.get());
+    else return Optional.empty();
   }
 
   @Override

@@ -7,6 +7,9 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import java.util.HashMap;
 import java.util.Optional;
 
+/**
+ * TODO remove class
+ */
 public final class ProtocolBinding {
 
   private static final HashMap<String, String> URI_SCHEMES = new HashMap<>();

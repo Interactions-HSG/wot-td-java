@@ -6,6 +6,9 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.util.Map;
 
+/**
+ * Implementation of basic binding mechanisms, such as URI template instantiation.
+ */
 abstract public class BaseProtocolBinding implements ProtocolBinding {
 
   @Override
