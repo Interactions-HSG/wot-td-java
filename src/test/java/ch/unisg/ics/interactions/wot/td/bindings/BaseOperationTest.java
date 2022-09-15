@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BaseOperationTest {
 
@@ -14,13 +15,33 @@ public class BaseOperationTest {
 
     private Object payload;
 
+    private long delay = 1000;
+
     public Object getPayload() {
       return payload;
     }
 
+    public void setDelay(long d) {
+      delay = d;
+    }
+
+    public long getDelay() {
+      return delay;
+    }
+
     @Override
     public void sendRequest() throws IOException {
-      // do nothing
+      new Thread(() -> {
+        Response r = new DummyResponse();
+
+        try {
+          Thread.sleep(delay);
+          onResponse(r);
+        } catch (InterruptedException e) {
+          // hoping enough time has elapsed to properly test blocking...
+          onResponse(r);
+        }
+      }).start();
     }
 
     @Override
@@ -110,6 +131,32 @@ public class BaseOperationTest {
     BaseOperation op = new DummyOperation();
     op.onError();
     op.getResponse();
+  }
+
+  @Test
+  public void testGetResponse() throws IOException {
+    DummyOperation op = new DummyOperation();
+    long delay = op.getDelay();
+    op.setTimeout(2 * delay / 1000);
+
+    long t1 = System.currentTimeMillis();
+    op.sendRequest();
+    Response r = op.getResponse();
+    long t2 = System.currentTimeMillis();
+
+    assertEquals(Response.ResponseStatus.OK, r.getStatus());
+    assertTrue(t2 - t1 > 0.8 * delay);
+    assertTrue(t2 - t1 < 1.2 * 2 * delay);
+  }
+
+  @Test(expected = NoResponseException.class)
+  public void testGetNoResponse() throws IOException {
+    DummyOperation op = new DummyOperation();
+    op.setTimeout(1);
+    op.setDelay(2000);
+
+    op.sendRequest();
+    op.getResponse(); // should time out
   }
 
   @Test

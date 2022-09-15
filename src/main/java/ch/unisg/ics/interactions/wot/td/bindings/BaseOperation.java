@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of basic operation features, including:
@@ -17,6 +18,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 public abstract class BaseOperation implements Operation {
 
   /**
+   * Default value for {@link BaseOperation#timeout}
+   */
+  public static final long DEFAULT_TIMEOUT = 60l;
+
+  /**
    * Semaphore to block getter if no response sent before call
    * (if an error occurs, an empty value is passed to the semaphore)
    */
@@ -26,6 +32,21 @@ public abstract class BaseOperation implements Operation {
    * Callbacks registered for the pending request
    */
   private Collection<ResponseCallback> callbacks = new LinkedList<>();
+
+  /**
+   * Response timeout (in seconds): after request was sent,
+   * the Thing has {@code timeout} seconds to send a response
+   */
+  private long timeout = DEFAULT_TIMEOUT;
+
+  /**
+   * Set timeout between request and (first) response.
+   *
+   * @param timeout timeout (in seconds)
+   */
+  public void setTimeout(long timeout) {
+    this.timeout = timeout;
+  }
 
   /**
    * Validate the given payload against its schema and call an internal method to set the payload
@@ -54,10 +75,14 @@ public abstract class BaseOperation implements Operation {
    */
   @Override
   public Response getResponse() throws NoResponseException {
-    Optional<Response> r = lastResponse.poll();
+    try {
+      Optional<Response> r = lastResponse.poll(timeout, TimeUnit.SECONDS);
 
-    if (r.isPresent()) return r.get();
-    else throw new NoResponseException();
+      if (r != null && r.isPresent()) return r.get();
+      else throw new NoResponseException();
+    } catch (InterruptedException e) {
+      throw new NoResponseException(e);
+    }
   }
 
   @Override
@@ -126,7 +151,7 @@ public abstract class BaseOperation implements Operation {
    * @param r a response received by the Thing during the operation
    */
   protected void onResponse(Response r) {
-    if (!lastResponse.isEmpty()) lastResponse.poll();
+    lastResponse.clear();
 
     lastResponse.push(Optional.of(r));
     callbacks.forEach(cb -> cb.onResponse(r));
@@ -136,7 +161,7 @@ public abstract class BaseOperation implements Operation {
    * Pass an empty value to the semaphore and notify registered callbacks of an error.
    */
   protected void onError() {
-    if (!lastResponse.isEmpty()) lastResponse.poll();
+    lastResponse.clear();
 
     lastResponse.push(Optional.empty());
     callbacks.forEach(cb -> cb.onError());
