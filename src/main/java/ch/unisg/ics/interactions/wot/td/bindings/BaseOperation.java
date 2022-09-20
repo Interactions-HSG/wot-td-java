@@ -3,6 +3,8 @@ package ch.unisg.ics.interactions.wot.td.bindings;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -102,8 +104,14 @@ public abstract class BaseOperation implements Operation {
       case DataSchema.ARRAY: return payload instanceof List;
       case DataSchema.STRING: return payload instanceof String;
       case DataSchema.BOOLEAN: return payload instanceof Boolean;
-      case DataSchema.INTEGER: return payload instanceof Integer;
-      case DataSchema.NUMBER: return payload instanceof Double;
+      case DataSchema.INTEGER: return payload instanceof BigInteger
+                                   || payload instanceof Long
+                                   || payload instanceof Integer
+                                   || payload instanceof Short
+                                   || payload instanceof Byte;
+      case DataSchema.NUMBER: return payload instanceof BigDecimal
+                                  || payload instanceof Double
+                                  || payload instanceof Float;
       case DataSchema.EMPTY: return true;
       default: return false;
     }
@@ -128,8 +136,16 @@ public abstract class BaseOperation implements Operation {
     else if (payload instanceof List) setArrayPayload((List<Object>) payload);
     else if (payload instanceof String) setStringPayload((String) payload);
     else if (payload instanceof Boolean) setBooleanPayload((Boolean) payload);
-    else if (payload instanceof Long) setIntegerPayload((Long) payload);
-    else if (payload instanceof Double) setNumberPayload((Double) payload);
+    else if (payload instanceof BigInteger
+          || payload instanceof Long
+          || payload instanceof Integer
+          || payload instanceof Short
+          || payload instanceof Byte)
+      setIntegerPayload(((Number) payload).longValue());
+    else if (payload instanceof BigDecimal
+          || payload instanceof Double
+          || payload instanceof Float)
+      setNumberPayload(((Number) payload).doubleValue());
     else throw new IllegalArgumentException(String.format("Given payload type isn't supported: %s", payload.getClass()));
   }
 

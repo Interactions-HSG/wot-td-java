@@ -1,9 +1,12 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
+import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
+import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -171,6 +174,21 @@ public class BaseOperationTest {
 
     op.onError();
     assertEquals("error", cb.getState());
+  }
+
+  @Test
+  public void testNumberCasting() throws IOException {
+    BaseOperation intOp = new DummyOperation();
+    intOp.setPayload(new IntegerSchema.Builder().build(), (short) 2);
+    intOp.sendRequest();
+
+    assertEquals(Response.ResponseStatus.OK, intOp.getResponse().getStatus());
+
+    BaseOperation nbOp = new DummyOperation();
+    nbOp.setPayload(new NumberSchema.Builder().build(), BigDecimal.valueOf(225657456, 4367));
+    nbOp.sendRequest();
+
+    assertEquals(Response.ResponseStatus.OK, nbOp.getResponse().getStatus());
   }
 
 }
