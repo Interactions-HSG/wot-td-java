@@ -24,6 +24,12 @@ public final class JWot {
 
   public static final String ACTIONS = "actions";
   public static final String INPUT = "input";
+
+  public static final String CANCELLATION = "cancellation";
+
+  public static final String NOTIFICATION = "notification";
+
+  public static final String SUBSCRIPTION= "subscription";
   public static final String OUTPUT = "output";
   public static final String SAFE = "safe";
   public static final String IDEMPOTENT = "idempotent";

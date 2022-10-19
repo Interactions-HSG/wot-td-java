@@ -1,10 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.io.json;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -58,6 +55,7 @@ public class TDJsonWriter extends AbstractTDWriter {
       .addBaseURI()
       .addProperties()
       .addActions()
+      .addEvents()
       .addGraph();
     return document.build();
   }
@@ -146,6 +144,13 @@ public class TDJsonWriter extends AbstractTDWriter {
   protected TDJsonWriter addActions() {
     if (!td.getActions().isEmpty()) {
       document.add(JWot.ACTIONS, this.getAffordancesObject(td.getActions(), this::getAction));
+    }
+    return this;
+  }
+
+  protected TDJsonWriter addEvents(){
+    if (!td.getEvents().isEmpty()){
+      document.add(JWot.EVENTS, this.getAffordancesObject(td.getEvents(), this::getEvent));
     }
     return this;
   }
@@ -285,6 +290,20 @@ public class TDJsonWriter extends AbstractTDWriter {
     return actionObj;
   }
 
+  private JsonObjectBuilder getEvent(EventAffordance event){
+    JsonObjectBuilder eventObj = getAffordance(event);
+    event.getCancellationSchema().ifPresent(d ->
+      eventObj.add(JWot.CANCELLATION, SchemaJsonWriter.getDataSchema(d))
+      );
+    event.getNotificationSchema().ifPresent(d ->
+      eventObj.add(JWot.NOTIFICATION, SchemaJsonWriter.getDataSchema(d))
+    );
+    event.getSubscriptionSchema().ifPresent(d ->
+      eventObj.add(JWot.SUBSCRIPTION, SchemaJsonWriter.getDataSchema(d))
+    );
+    return eventObj;
+  }
+
 
   private JsonArrayBuilder getSemanticTypes(List<String> semanticTypes) {
     JsonArrayBuilder types = Json.createArrayBuilder();
@@ -317,10 +336,8 @@ public class TDJsonWriter extends AbstractTDWriter {
       Map<String, DataSchema> uriVariables = opUriVariables.get();
       JsonObjectBuilder uriVariableJson = Json.createObjectBuilder();
       for (String key: uriVariables.keySet()){
-        JsonObjectBuilder oneUriVariable = Json.createObjectBuilder();
         DataSchema schema = uriVariables.get(key);
-        oneUriVariable.add("type", schema.getDatatype());
-        uriVariableJson.add(key, oneUriVariable);
+        uriVariableJson.add(key, SchemaJsonWriter.getDataSchema(schema));
       }
       affordanceObj.add(JWot.URI_VARIABLES, uriVariableJson);
     }
