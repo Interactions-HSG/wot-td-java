@@ -33,6 +33,8 @@ public final class JWot {
   public static final String SEMANTIC_TYPE = "@type";
   public static final String TYPE = "type";
 
+  public static final String URI_VARIABLES = "uriVariables";
+
   public static final String FORMS = "forms";
   public static final String TARGET = "href";
   public static final String METHOD = "htv:methodName";

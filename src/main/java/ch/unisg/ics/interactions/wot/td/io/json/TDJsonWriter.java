@@ -6,6 +6,7 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.AbstractTDWriter;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -310,6 +311,19 @@ public class TDJsonWriter extends AbstractTDWriter {
 
     //add forms
     affordanceObj.add(JWot.FORMS, this.getFormsArray(affordance.getForms()));
+
+    Optional<Map<String, DataSchema>> opUriVariables = affordance.getUriVariables();
+    if (opUriVariables.isPresent()){
+      Map<String, DataSchema> uriVariables = opUriVariables.get();
+      JsonObjectBuilder uriVariableJson = Json.createObjectBuilder();
+      for (String key: uriVariables.keySet()){
+        JsonObjectBuilder oneUriVariable = Json.createObjectBuilder();
+        DataSchema schema = uriVariables.get(key);
+        oneUriVariable.add("type", schema.getDatatype());
+        uriVariableJson.add(key, oneUriVariable);
+      }
+      affordanceObj.add(JWot.URI_VARIABLES, uriVariableJson);
+    }
 
     return affordanceObj;
   }
