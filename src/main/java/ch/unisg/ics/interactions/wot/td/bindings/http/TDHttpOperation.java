@@ -65,6 +65,8 @@ public class TDHttpOperation extends BaseOperation {
     this.handler = new TDHttpHandler();
     this.client = HttpAsyncClients.createDefault();
 
+    this.client.start();
+
     Optional<String> methodName = form.getMethodName(operationType);
 
     if (methodName.isPresent()) {
