@@ -17,13 +17,13 @@ public class ProtocolBindings {
   static {
     String httpBindingClass = TDHttpBinding.class.getName();
 
-    ProtocolBindings.registerBinding("http", httpBindingClass);
-    ProtocolBindings.registerBinding("https", httpBindingClass);
+    ProtocolBindings.registerBinding(httpBindingClass);
+    ProtocolBindings.registerBinding(httpBindingClass);
 
     String coapBindingClass = TDCoapBinding.class.getName();
 
-    ProtocolBindings.registerBinding("coap", coapBindingClass);
-    ProtocolBindings.registerBinding("coaps", coapBindingClass);
+    ProtocolBindings.registerBinding(coapBindingClass);
+    ProtocolBindings.registerBinding(coapBindingClass);
   }
 
   public static ProtocolBinding getBinding(Form form) throws BindingNotFoundException {
@@ -33,25 +33,31 @@ public class ProtocolBindings {
     else return registeredBindings.get(scheme);
   }
 
-  public static void registerBinding(String scheme, String bindingClass) throws BindingNotRegisteredException {
-    if (registeredBindings.containsKey(scheme)) {
-      // TODO log warning
-    }
-
+  public static void registerBinding(String bindingClass) throws BindingNotRegisteredException {
     for (Map.Entry<String, ProtocolBinding> entry : registeredBindings.entrySet()) {
       if (entry.getValue().getClass().getName().equals(bindingClass)) {
-        // reuse existing instance of the given class
-        registeredBindings.put(scheme, entry.getValue());
+        // TODO warn that no change is performed
         return;
       }
     }
 
+    Map<String, ProtocolBinding> newBindings = new HashMap<>();
+
     try {
       ProtocolBinding binding = (ProtocolBinding) Class.forName(bindingClass).newInstance();
-      registeredBindings.put(scheme, binding);
+
+      for (String scheme : binding.getSupportedSchemes()) {
+        if (registeredBindings.containsKey(scheme)) {
+          // TODO warn that bindings have conflict
+        }
+
+        newBindings.put(scheme, binding);
+      }
     } catch (Exception e) {
       throw new BindingNotRegisteredException(e);
     }
+
+    registeredBindings.putAll(newBindings);
   }
 
   private static String getScheme(String uriOrTemplate) {

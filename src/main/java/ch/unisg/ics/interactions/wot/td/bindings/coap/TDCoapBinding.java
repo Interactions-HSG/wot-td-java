@@ -6,19 +6,22 @@ import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class TDCoapBinding extends BaseProtocolBinding {
 
   private final static String COAP_PROTOCOL = "CoAP";
+
+  private final static Collection<String> SUPPORTED_SCHEMES = new HashSet<>();
 
   private final static Map<String, String> DEFAULT_METHODS = new HashMap<>();
 
   private final static Map<String, String> DEFAULT_SUBPROTOCOLS = new HashMap<>();
 
   static {
+    SUPPORTED_SCHEMES.add("coap");
+    SUPPORTED_SCHEMES.add("coaps");
+
     DEFAULT_METHODS.put(TD.readProperty, "GET");
     DEFAULT_METHODS.put(TD.observeProperty, "GET");
     DEFAULT_METHODS.put(TD.unobserveProperty, "GET");
@@ -32,6 +35,11 @@ public class TDCoapBinding extends BaseProtocolBinding {
   @Override
   public String getProtocol() {
     return COAP_PROTOCOL;
+  }
+
+  @Override
+  public Collection<String> getSupportedSchemes() {
+    return SUPPORTED_SCHEMES;
   }
 
   @Override

@@ -8,7 +8,10 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +26,14 @@ public class ProtocolBindingsTest {
     @Override
     public String getProtocol() {
       return DUMMY_PROTOCOL;
+    }
+
+    @Override
+    public Collection<String> getSupportedSchemes() {
+      Set<String> singleton = new HashSet<>();
+      singleton.add("dummy");
+
+      return singleton;
     }
 
     @Override
@@ -100,7 +111,7 @@ public class ProtocolBindingsTest {
 
   @Test
   public void testRegisteredBinding() {
-    ProtocolBindings.registerBinding("dummy", DummyBinding.class.getName());
+    ProtocolBindings.registerBinding(DummyBinding.class.getName());
 
     Form f = new Form.Builder(DUMMY_URI).build();
 
