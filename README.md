@@ -55,7 +55,7 @@ Maven:
 
 Gradle:
 ```groovy
-implementation 'com.github.Interactions-HSG:wot-td-java:v0.1.1'
+implementation 'com.github.Interactions-HSG:wot-td-java:v0.1.2'
 ```
 
 Maven:
@@ -63,7 +63,7 @@ Maven:
 <dependency>
   <groupId>com.github.Interactions-HSG</groupId>
   <artifactId>wot-td-java</artifactId>
-  <version>v0.1.1</version>
+  <version>v0.1.2</version>
 </dependency>
 ```
 
