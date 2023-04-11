@@ -27,9 +27,13 @@ public final class ProtocolBinding {
     DEFAULT_METHOD_BINDING.put("CoAP", TD.invokeAction, "POST");
     DEFAULT_METHOD_BINDING.put("CoAP", TD.observeProperty, "GET");
     DEFAULT_METHOD_BINDING.put("CoAP", TD.unobserveProperty, "GET");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.subscribeEvent, "GET");
+    DEFAULT_METHOD_BINDING.put("CoAP", TD.unsubscribeEvent, "GET");
 
     DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.observeProperty, COV.observe);
     DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.unobserveProperty, COV.observe);
+    DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.subscribeEvent, COV.observe);
+    DEFAULT_SUBPROTOCOL_BINDING.put("CoAP", TD.unsubscribeEvent, COV.observe);
   }
 
   private ProtocolBinding() {

@@ -1,9 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
+import ch.unisg.ics.interactions.wot.td.schemas.*;
+import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
@@ -12,12 +10,9 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.JSONSchema;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 class SchemaGraphWriter {
   private final static Logger LOGGER = Logger.getLogger(SchemaGraphWriter.class.getCanonicalName());
@@ -56,7 +51,8 @@ class SchemaGraphWriter {
       case DataSchema.NULL:
         addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.NullSchema));
         break;
-      case DataSchema.EMPTY:
+      case DataSchema.DATA:
+        addBaseSchema(nodeId, schema);
         break;
       default:
         LOGGER.info("Ignoring a DataSchema of unknown type: " + schema.getDatatype());
@@ -65,8 +61,23 @@ class SchemaGraphWriter {
   }
 
   private void addDataSchemaMetadata(Resource nodeId, DataSchema schema) {
+    /* Add semantic types */
     addObjectIRIs(nodeId, RDF.TYPE, schema.getSemanticTypes());
+
+    /* Add enumeration */
     addObjectIRIs(nodeId, rdf.createIRI(JSONSchema.enumeration), schema.getEnumeration());
+
+    /* Add content media type */
+    if (schema.getContentMediaType().isPresent()) {
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.contentMediaType), schema.getContentMediaType().get());
+    }
+
+    /* Add one of schemas */
+    for (DataSchema oneSchema : schema.getValidSchemas()) {
+      Resource oneSchemaId = rdf.createBNode();
+      graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.oneOf), oneSchemaId);
+      addDataSchema(oneSchemaId, oneSchema);
+    }
   }
 
   private void addObjectSchema(Resource nodeId, ObjectSchema schema) {
@@ -109,6 +120,12 @@ class SchemaGraphWriter {
       BNode itemId = rdf.createBNode();
       graphBuilder.add(nodeId, rdf.createIRI(JSONSchema.items), itemId);
       addDataSchema(itemId, item);
+    }
+  }
+
+  private void addBaseSchema(Resource nodeId, DataSchema schema) {
+    if (!schema.getValidSchemas().isEmpty()){
+      addSimpleSchema(nodeId, schema, rdf.createIRI(JSONSchema.DataSchema));
     }
   }
 

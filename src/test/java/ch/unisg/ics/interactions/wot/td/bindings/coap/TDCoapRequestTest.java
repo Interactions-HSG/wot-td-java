@@ -37,7 +37,7 @@ public class TDCoapRequestTest {
     .addRequiredProperties("last_name")
     .build();
 
-  private static final Form FORM = new Form.Builder("coap://example.org/" + "toggle")
+  private static final Form FORM = new Form.Builder("coap://example.org/toggle")
     .setMethodName("PUT")
     .addOperationType(TD.invokeAction)
     .build();
@@ -51,7 +51,7 @@ public class TDCoapRequestTest {
     "@prefix ex: <http://example.org/> .\n" +
     "\n" +
     "ex:forkliftRobot a td:Thing ; \n" +
-    "    dct:title \"forkliftRobot\" ;\n" +
+    "    td:title \"forkliftRobot\" ;\n" +
     "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
     "    td:hasPropertyAffordance [\n" +
     "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
@@ -65,7 +65,7 @@ public class TDCoapRequestTest {
     "    td:hasActionAffordance [\n" +
     "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
     "        td:name \"carry\" ;\n" +
-    "        dct:title \"carry\" ; \n" +
+    "        td:title \"carry\" ; \n" +
     "        td:hasForm [\n" +
     "            hctl:hasTarget <coap://example.org/forkliftRobot/carry> ; \n" +
     "            cov:methodName \"PUT\" ; \n" +
@@ -155,33 +155,40 @@ public class TDCoapRequestTest {
       , request.toString());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testNoDefaultBindingForOperationType() {
-    new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .addOperationType(TD.invokeAction).build(),
-      TD.readProperty);
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDCoapRequest(FORM, TD.readProperty);
+    });
+
+    String expectedMessage = "Unknown operation type: https://www.w3.org/2019/wot/td#readProperty";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testAsyncObserveRelationWithNoSubprotocol() {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .setMethodName("PUT")
-      .addOperationType(TD.writeProperty)
-      .build(),
-      TD.writeProperty);
+    TDCoapRequest coapRequest = new TDCoapRequest(FORM, TD.invokeAction);
 
-    coapRequest.establishRelation(getEmptyTDCoAPHandler());
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      coapRequest.establishRelation(getEmptyTDCoAPHandler());
+    });
+
+    String expectedMessage = "No form for subprotocol: http://www.example" +
+      ".org/coap-binding#observe for the given operation type";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testSyncObserveRelationWithNoSubprotocol() throws IOException {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
-      .setMethodName("PUT")
-      .addOperationType(TD.writeProperty)
-      .build(),
-      TD.writeProperty);
+    TDCoapRequest coapRequest = new TDCoapRequest(FORM, TD.invokeAction);
 
-    coapRequest.establishRelationAndWait(getEmptyTDCoAPHandler());
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      coapRequest.establishRelationAndWait(getEmptyTDCoAPHandler());
+    });
+
+    String expectedMessage = "No form for subprotocol: http://www.example" +
+      ".org/coap-binding#observe for the given operation type";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
   @Test
@@ -260,6 +267,34 @@ public class TDCoapRequestTest {
   }
 
   @Test
+  public void testMissingProtocolBinding() {
+    Form form = new Form.Builder("x://example.org/toggle")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDCoapRequest(form, TD.invokeAction);
+    });
+
+    String expectedMessage = "The CoAP protocol binding cannot be applied with the given form";
+    assertTrue(ex.getMessage().contains(expectedMessage));
+  }
+
+  @Test
+  public void testMismatchedProtocolBinding() {
+    Form form = new Form.Builder("http://example.org/toggle")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDCoapRequest(form, TD.invokeAction);
+    });
+
+    String expectedMessage = "The CoAP protocol binding cannot be applied with the given form";
+    assertTrue(ex.getMessage().contains(expectedMessage));
+  }
+
+  @Test
   public void testSimpleSemanticObjectPayload() throws JsonSyntaxException {
     Map<String, Object> payloadVariables = new HashMap<>();
     payloadVariables.put(PREFIX + "FirstName", "Andrei");
@@ -274,25 +309,40 @@ public class TDCoapRequestTest {
     assertUserSchemaPayload(request);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidBooleanPayload() {
-    new TDCoapRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new BooleanSchema.Builder().build(), "string")
-      .getRequest();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDCoapRequest(FORM, TD.invokeAction)
+        .setPrimitivePayload(new BooleanSchema.Builder().build(), "string");
+    });
+
+    String expectedMessage = "The payload's datatype does not match StringSchema " +
+      "(payload datatype: boolean)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidIntegerPayload() {
-    new TDCoapRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5)
-      .getRequest();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDCoapRequest(FORM, TD.invokeAction)
+        .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5);
+    });
+
+    String expectedMessage = "The payload's datatype does not match NumberSchema " +
+      "(payload datatype: integer)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidStringPayload() {
-    new TDCoapRequest(FORM, TD.invokeAction)
-      .setPrimitivePayload(new StringSchema.Builder().build(), true)
-      .getRequest();
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDCoapRequest(FORM, TD.invokeAction)
+        .setPrimitivePayload(new StringSchema.Builder().build(), true);
+    });
+
+    String expectedMessage = "The payload's datatype does not match BooleanSchema " +
+      "(payload datatype: string)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
   @Test
@@ -373,7 +423,7 @@ public class TDCoapRequestTest {
       .setMethodName("PUT")
       .addOperationType(TD.invokeAction)
       .build();
-    Map<String, DataSchema> uriVariables = new HashMap();
+    Map<String, DataSchema> uriVariables = new HashMap<>();
     uriVariables.put("subscriptionId", new StringSchema.Builder().build());
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("subscriptionId", "abc");

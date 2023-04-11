@@ -1,6 +1,7 @@
 package ch.unisg.ics.interactions.wot.td;
 
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
@@ -32,12 +33,13 @@ public class ThingDescription {
 
   private final List<PropertyAffordance> properties;
   private final List<ActionAffordance> actions;
+  private final List<EventAffordance> events;
 
   private final Optional<Model> graph;
 
   protected ThingDescription(String title, List<SecurityScheme> security, Optional<String> uri,
                              Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties,
-                             List<ActionAffordance> actions, Optional<Model> graph) {
+                             List<ActionAffordance> actions, List<EventAffordance> events, Optional<Model> graph) {
 
     if (title == null) {
       throw new InvalidTDException("The title of a Thing cannot be null.");
@@ -55,6 +57,7 @@ public class ThingDescription {
 
     this.properties = properties;
     this.actions = actions;
+    this.events = events;
 
     this.graph = graph;
   }
@@ -142,7 +145,7 @@ public class ThingDescription {
   /**
    * Gets the first {@link PropertyAffordance} annotated with a given semantic type.
    *
-   * @param propertyType the semantic type, typically and IRI defined in some ontology
+   * @param propertyType the semantic type, typically an IRI defined in some ontology
    * @return an <code>Optional</code> with the property affordance (empty if not found)
    */
   public Optional<PropertyAffordance> getFirstPropertyBySemanticType(String propertyType) {
@@ -182,7 +185,7 @@ public class ThingDescription {
    * simplified in future iterations.
    *
    * @param operationType a string that captures the operation type
-   * @return the list of property affordances
+   * @return the list of action affordances
    */
   public List<ActionAffordance> getActionsByOperationType(String operationType) {
     return actions.stream().filter(action -> action.hasFormWithOperationType(operationType))
@@ -192,7 +195,7 @@ public class ThingDescription {
   /**
    * Gets the first {@link ActionAffordance} annotated with a given semantic type.
    *
-   * @param actionType the semantic type, typically and IRI defined in some ontology
+   * @param actionType the semantic type, typically an IRI defined in some ontology
    * @return an <code>Optional</code> with the action affordance (empty if not found)
    */
   public Optional<ActionAffordance> getFirstActionBySemanticType(String actionType) {
@@ -205,12 +208,66 @@ public class ThingDescription {
     return Optional.empty();
   }
 
+  /**
+   * Gets an event affordance by name, which is specified using the <code>td:name</code> data
+   * property defined by the TD vocabulary. Names are mandatory in JSON-based representations. If a
+   * name is present, it is unique within the scope of a TD.
+   *
+   * @param name the name of the event affordance
+   * @return an <code>Optional</code> with the event affordance (empty if not found)
+   */
+  public Optional<EventAffordance> getEventByName(String name) {
+    for (EventAffordance event : events) {
+      String eventName = event.getName();
+      if (eventName.equals(name)) {
+        return Optional.of(event);
+      }
+    }
+
+    return Optional.empty();
+  }
+
+  /**
+   * Gets a list of event affordances that have a {@link ch.unisg.ics.interactions.wot.td.affordances.Form}
+   * hypermedia control for the given operation type.
+   * <p>
+   * The current implementation supports two operation types for properties: <code>td:subscribeEvent</code>
+   * and <code>td:unsubscribeEvent</code>.
+   *
+   * @param operationType a string that captures the operation type
+   * @return the list of event affordances
+   */
+  public List<EventAffordance> getEventsByOperationType(String operationType) {
+    return events.stream().filter(event -> event.hasFormWithOperationType(operationType))
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Gets the first {@link EventAffordance} annotated with a given semantic type.
+   *
+   * @param eventType the semantic type, typically an IRI defined in some ontology
+   * @return an <code>Optional</code> with the event affordance (empty if not found)
+   */
+  public Optional<EventAffordance> getFirstEventBySemanticType(String eventType) {
+    for (EventAffordance event : events) {
+      if (event.getSemanticTypes().contains(eventType)) {
+        return Optional.of(event);
+      }
+    }
+
+    return Optional.empty();
+  }
+
   public List<PropertyAffordance> getProperties() {
     return this.properties;
   }
 
   public List<ActionAffordance> getActions() {
     return this.actions;
+  }
+
+  public List<EventAffordance> getEvents() {
+    return this.events;
   }
 
   public Optional<Model> getGraph() {
@@ -239,6 +296,7 @@ public class ThingDescription {
     private final Set<String> types;
     private final List<PropertyAffordance> properties;
     private final List<ActionAffordance> actions;
+    private final List<EventAffordance> events;
     private Optional<String> uri;
     private Optional<String> baseURI;
     private Optional<Model> graph;
@@ -253,6 +311,7 @@ public class ThingDescription {
 
       this.properties = new ArrayList<PropertyAffordance>();
       this.actions = new ArrayList<ActionAffordance>();
+      this.events = new ArrayList<EventAffordance>();
 
       this.graph = Optional.empty();
     }
@@ -307,6 +366,16 @@ public class ThingDescription {
       return this;
     }
 
+    public Builder addEvent(EventAffordance event) {
+      this.events.add(event);
+      return this;
+    }
+
+    public Builder addEvents(List<EventAffordance> events) {
+      this.events.addAll(events);
+      return this;
+    }
+
     /**
      * Adds an RDF graph. If an RDF graph is already present, it will be merged with the new graph.
      *
@@ -348,7 +417,7 @@ public class ThingDescription {
      * @return the constructed <code>ThingDescription</code>
      */
     public ThingDescription build() {
-      return new ThingDescription(title, security, uri, types, baseURI, properties, actions, graph);
+      return new ThingDescription(title, security, uri, types, baseURI, properties, actions, events, graph);
     }
   }
 }

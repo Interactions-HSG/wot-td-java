@@ -55,7 +55,7 @@ Maven:
 
 Gradle:
 ```groovy
-implementation 'com.github.Interactions-HSG:wot-td-java:v0.1.1'
+implementation 'com.github.Interactions-HSG:wot-td-java:v0.1.2'
 ```
 
 Maven:
@@ -63,7 +63,7 @@ Maven:
 <dependency>
   <groupId>com.github.Interactions-HSG</groupId>
   <artifactId>wot-td-java</artifactId>
-  <version>v0.1.1</version>
+  <version>v0.1.2</version>
 </dependency>
 ```
 
@@ -155,12 +155,12 @@ The generated TD is:
 @prefix saref: <https://saref.etsi.org/core/> .
 
 <http://example.org/lamp123> a td:Thing, saref:LightSwitch;
-  dct:title "My Lamp Thing";
+  td:title "My Lamp Thing";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme
     ];
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
       td:name "toggle";
-      dct:title "Toggle";
+      td:title "Toggle";
       td:hasForm [
           htv:methodName "PUT";
           hctl:hasTarget <http://mylamp.example.org/toggle>;
@@ -307,7 +307,7 @@ affordance is specified by the device's TD as follows:
 ```text
 [ a td:ActionAffordance, onto:LogIn;
   td:name "logIn";
-  dct:title "Log In";
+  td:title "Log In";
   td:hasForm [
     htv:methodName "POST";
     hctl:hasTarget <https://api.interactions.ics.unisg.ch/xarm/user>;
@@ -375,7 +375,7 @@ Given the following property affordance for reading a humidity value using a CoA
 ```text
 [ a td:PropertyAffordance, miro:Humidity, js:ObjectSchema;
   td:name "humidity";
-  dct:title "Humidity";
+  td:title "Humidity";
   td:hasForm [
       cov:methodName "GET";
       hctl:hasTarget <coap://130.82.171.10:5683/humidity>;

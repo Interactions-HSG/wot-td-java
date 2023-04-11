@@ -3,7 +3,6 @@ package ch.unisg.ics.interactions.wot.td.affordances;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 

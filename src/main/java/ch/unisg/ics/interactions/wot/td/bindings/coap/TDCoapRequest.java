@@ -44,34 +44,21 @@ public class TDCoapRequest implements Operation {
   private final String target;
 
   public TDCoapRequest(Form form, String operationType) {
-    this.form = form;
-    this.target = form.getTarget();
-
-    Optional<String> methodName = form.getMethodName(operationType);
-    Optional<String> subProtocol = form.getSubProtocol(operationType);
-
-    if (methodName.isPresent()) {
-      this.request = new Request(CoAP.Code.valueOf(methodName.get()));
-      this.request.setURI(this.target);
-    } else {
-      throw new IllegalArgumentException("No default binding for the given operation type: "
-        + operationType);
-    }
-
-    if (subProtocol.isPresent() && subProtocol.get().equals(COV.observe)) {
-      if (operationType.equals(TD.observeProperty)) {
-        this.request.setObserve();
-      }
-      if (operationType.equals(TD.unobserveProperty)) {
-        this.request.setObserveCancel();
-      }
-    }
-    this.request.getOptions().setContentFormat(MediaTypeRegistry.parse(form.getContentType()));
+    this(form, form.getTarget(), operationType);
   }
 
-  public TDCoapRequest(Form form, String operationType, Map<String, DataSchema> uriVariables, Map<String, Object> values) {
+  public TDCoapRequest(Form form, String operationType, Map<String, DataSchema> uriVariables,
+                       Map<String, Object> values) {
+    this(form, new UriTemplate(form.getTarget()).createUri(uriVariables, values), operationType);
+  }
+
+  private TDCoapRequest(Form form, String target, String operationType) {
+    if (!form.getProtocol().isPresent() || !"CoAP".equals(form.getProtocol().get())) {
+      throw new IllegalArgumentException("The CoAP protocol binding cannot be applied with the " +
+        "given form");
+    }
     this.form = form;
-    this.target = new UriTemplate(form.getTarget()).createUri(uriVariables, values);
+    this.target = target;
 
     Optional<String> methodName = form.getMethodName(operationType);
     Optional<String> subProtocol = form.getSubProtocol(operationType);
@@ -143,7 +130,7 @@ public class TDCoapRequest implements Operation {
 
     if (!request.getOptions().hasObserve()) {
       throw new IllegalArgumentException("No form for subprotocol: " + COV.observe
-        + "for the given operation type.");
+        + " for the given operation type.");
     }
 
     CoapClient client = new CoapClient(form.getTarget());
@@ -164,7 +151,8 @@ public class TDCoapRequest implements Operation {
    */
   public TDCoapObserveRelation establishRelationAndWait(TDCoapHandler handler) throws IOException {
     if (!request.getOptions().hasObserve()) {
-      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + "for the given operation type.");
+      throw new IllegalArgumentException("No form for subprotocol: " + COV.observe + " for the " +
+        "given operation type.");
     }
 
     CoapObserveRelation relation;
