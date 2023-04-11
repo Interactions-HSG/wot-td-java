@@ -5,12 +5,15 @@ import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
 import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.*;
+import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.http.ParseException;
 import org.junit.Before;
@@ -50,7 +53,7 @@ public class TDHttpOperationTest {
     "@prefix ex: <http://example.org/> .\n" +
     "\n" +
     "ex:forkliftRobot a td:Thing ; \n" +
-    "    dct:title \"forkliftRobot\" ;\n" +
+    "    td:title \"forkliftRobot\" ;\n" +
     "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
     "    td:hasPropertyAffordance [\n" +
     "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
@@ -61,7 +64,7 @@ public class TDHttpOperationTest {
     "    ] ;\n" +
     "    td:hasActionAffordance [\n" +
     "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
-    "        dct:title \"carry\" ; \n" +
+    "        td:title \"carry\" ; \n" +
     "        td:name \"carry\" ; \n" +
     "        td:hasForm [\n" +
     "            hctl:hasTarget <http://example.org/forkliftRobot/carry> ; \n" +
@@ -183,22 +186,68 @@ public class TDHttpOperationTest {
     assertUserSchemaPayload(request);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  /*
+  @Test
+  public void testMissingProtocolBinding() {
+    Form form = new Form.Builder("x://example.org/toggle")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(form, TD.invokeAction);
+    });
+
+    String expectedMessage = "The HTTP protocol binding cannot be applied with the given form";
+    assertTrue(ex.getMessage().contains(expectedMessage));
+  }
+
+  @Test
+  public void testMismatchedProtocolBinding() {
+    Form form = new Form.Builder("coap://example.org/toggle")
+      .addOperationType(TD.invokeAction)
+      .build();
+
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpRequest(form, TD.invokeAction);
+    });
+
+    String expectedMessage = "The HTTP protocol binding cannot be applied with the given form";
+    assertTrue(ex.getMessage().contains(expectedMessage));
+  }
+  */
+
+  @Test
   public void testInvalidBooleanPayload() {
-    new TDHttpOperation(FORM, TD.invokeAction)
-      .setPayload(new BooleanSchema.Builder().build(), "string");
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpOperation(FORM, TD.invokeAction)
+        .setPayload(new BooleanSchema.Builder().build(), "string");
+    });
+
+    String expectedMessage = "The payload's datatype does not match StringSchema " +
+      "(payload datatype: boolean)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
   public void testInvalidIntegerPayload() {
-    new TDHttpOperation(FORM, TD.invokeAction)
-      .setPayload(new IntegerSchema.Builder().build(), 0.5);
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpOperation(FORM, TD.invokeAction)
+        .setPayload(new IntegerSchema.Builder().build(), 0.5);
+    });
+
+    String expectedMessage = "The payload's datatype does not match NumberSchema " +
+      "(payload datatype: integer)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
-  @Test(expected = IllegalArgumentException.class)
   public void testInvalidStringPayload() {
-    new TDHttpOperation(FORM, TD.invokeAction)
-      .setPayload(new StringSchema.Builder().build(), true);
+    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+      new TDHttpOperation(FORM, TD.invokeAction)
+        .setPayload(new StringSchema.Builder().build(), true);
+    });
+
+    String expectedMessage = "The payload's datatype does not match BooleanSchema " +
+      "(payload datatype: string)";
+    assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
   @Test
@@ -272,6 +321,20 @@ public class TDHttpOperationTest {
   @Test
   public void testValidateArrayPayload() {
     // TODO
+  }
+
+  @Test
+  public void testPathVariable() {
+    Form form = new Form.Builder(PREFIX + "{subscriptionId}")
+      .setMethodName("PUT")
+      .addOperationType(TD.invokeAction)
+      .build();
+    Map<String, DataSchema> uriVariables = new HashMap<>();
+    uriVariables.put("subscriptionId", new StringSchema.Builder().build());
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put("subscriptionId", "abc");
+    TDHttpOperation op = (TDHttpOperation) ProtocolBindings.getBinding(form).bind(form, TD.invokeAction, uriVariables, parameters);
+    assertEquals(PREFIX + "abc", op.getTarget());
   }
 
   private void assertUserSchemaPayload(SimpleHttpRequest request)

@@ -1,19 +1,10 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.affordances.*;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
-import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.DCT;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HTV;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-
+import ch.unisg.ics.interactions.wot.td.vocabularies.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
@@ -69,6 +60,7 @@ public class TDGraphWriter {
       .addBaseURI()
       .addProperties()
       .addActions()
+      .addEvents()
       .addGraph()
       .write(RDFFormat.TURTLE);
   }
@@ -104,7 +96,7 @@ public class TDGraphWriter {
   }
 
   private TDGraphWriter addTitle() {
-    graphBuilder.add(thingId, rdf.createIRI(DCT.title), td.getTitle());
+    graphBuilder.add(thingId, rdf.createIRI(TD.title), td.getTitle());
     return this;
   }
 
@@ -154,6 +146,41 @@ public class TDGraphWriter {
     return this;
   }
 
+  private TDGraphWriter addEvents() {
+    for (EventAffordance event : td.getEvents()) {
+      Resource eventId = addAffordance(event, TD.hasEventAffordance, TD.EventAffordance);
+
+      if (event.getSubscriptionSchema().isPresent()) {
+        DataSchema schema = event.getSubscriptionSchema().get();
+
+        Resource subscriptionId = rdf.createBNode();
+        graphBuilder.add(eventId, rdf.createIRI(TD.hasSubscriptionSchema), subscriptionId);
+
+        SchemaGraphWriter.write(graphBuilder, subscriptionId, schema);
+      }
+
+      if (event.getNotificationSchema().isPresent()) {
+        DataSchema schema = event.getNotificationSchema().get();
+
+        Resource notificationId = rdf.createBNode();
+        graphBuilder.add(eventId, rdf.createIRI(TD.hasNotificationSchema), notificationId);
+
+        SchemaGraphWriter.write(graphBuilder, notificationId, schema);
+      }
+
+      if (event.getCancellationSchema().isPresent()) {
+        DataSchema schema = event.getCancellationSchema().get();
+
+        Resource cancellationId = rdf.createBNode();
+        graphBuilder.add(eventId, rdf.createIRI(TD.hasCancellationSchema), cancellationId);
+
+        SchemaGraphWriter.write(graphBuilder, cancellationId, schema);
+      }
+    }
+
+    return this;
+  }
+
   private TDGraphWriter addGraph() {
     if (td.getGraph().isPresent()) {
       getModel().addAll(td.getGraph().get());
@@ -191,7 +218,7 @@ public class TDGraphWriter {
     }
 
     if (affordance.getTitle().isPresent()) {
-      graphBuilder.add(affordanceId, rdf.createIRI(DCT.title), affordance.getTitle().get());
+      graphBuilder.add(affordanceId, rdf.createIRI(TD.title), affordance.getTitle().get());
     }
 
     addFormsForInteraction(affordanceId, affordance);

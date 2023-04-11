@@ -6,36 +6,36 @@
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
 @prefix ex: <http://example.org/> .
 
-ex:forkliftRobot a td:Thing ; 
-    dct:title "forkliftRobot" ;
+ex:forkliftRobot a td:Thing ;
+    td:title "forkliftRobot" ;
     td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;
         wotsec:in "header" ;
         wotsec:name "X-API-Key" ;
     ] ;
     td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; 
+        a td:PropertyAffordance, js:BooleanSchema, ex:Status ;
         td:name "status" ;
         td:hasForm [
-            hctl:hasTarget <http://localhost:1080/forklift-robot/busy> ; 
-        ] ; 
+            hctl:hasTarget <http://localhost:1080/forklift-robot/busy> ;
+        ] ;
     ] ;
     td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ArraySchema, ex:Position, ex:3DCoordinates ; 
+        a td:PropertyAffordance, js:ArraySchema, ex:Position, ex:3DCoordinates ;
         td:name "position" ;
         td:hasForm [
-            hctl:hasTarget <http://localhost:1080/forklift-robot/position> ; 
-        ] ; 
+            hctl:hasTarget <http://localhost:1080/forklift-robot/position> ;
+        ] ;
         js:items [
             a js:NumberSchema ;
         ] ;
     ] ;
     td:hasPropertyAffordance [
-        a td:PropertyAffordance, js:ObjectSchema, ex:LastCarry ; 
+        a td:PropertyAffordance, js:ObjectSchema, ex:LastCarry ;
         td:name "lastCarry" ;
         td:hasForm [
-            hctl:hasTarget <http://localhost:1080/forklift-robot/lastCarry> ; 
-        ] ; 
-        js:properties [ 
+            hctl:hasTarget <http://localhost:1080/forklift-robot/lastCarry> ;
+        ] ;
+        js:properties [
             a js:ArraySchema, ex:SourcePosition ;
             js:propertyName "sourcePosition";
             js:minItems 3 ;
@@ -58,11 +58,11 @@ ex:forkliftRobot a td:Thing ;
         a td:ActionAffordance, ex:CarryFromTo ;
         td:name "carryFromTo" ;
         td:hasForm [
-            hctl:hasTarget <http://localhost:1080/forklift-robot/carry> ; 
-        ] ; 
-        td:hasInputSchema [ 
+            hctl:hasTarget <http://localhost:1080/forklift-robot/carry> ;
+        ] ;
+        td:hasInputSchema [
             a js:ObjectSchema ;
-            js:properties [ 
+            js:properties [
                 a js:ArraySchema, ex:SourcePosition, ex:3DCordinates ;
                 js:propertyName "sourcePosition";
                 js:minItems 3 ;
@@ -81,21 +81,21 @@ ex:forkliftRobot a td:Thing ;
                 ] ;
             ] ;
             js:required "sourcePosition", "targetPosition" ;
-        ] ; 
+        ] ;
     ] ;
     td:hasActionAffordance [
         a td:ActionAffordance, ex:MoveTo ;
         td:name "moveTo" ;
         td:hasForm [
-            hctl:hasTarget <http://localhost:1080/forklift-robot/moveTo> ; 
-        ] ; 
-        td:hasInputSchema [ 
+            hctl:hasTarget <http://localhost:1080/forklift-robot/moveTo> ;
+        ] ;
+        td:hasInputSchema [
             a js:ArraySchema, ex:3DCordinates ;
             js:minItems 3 ;
             js:maxItems 3 ;
             js:items [
                 a js:NumberSchema ;
             ] ;
-        ] ; 
+        ] ;
     ] .
 

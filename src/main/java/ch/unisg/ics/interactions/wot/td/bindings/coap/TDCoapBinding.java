@@ -27,9 +27,13 @@ public class TDCoapBinding extends BaseProtocolBinding {
     DEFAULT_METHODS.put(TD.unobserveProperty, "GET");
     DEFAULT_METHODS.put(TD.writeProperty, "PUT");
     DEFAULT_METHODS.put(TD.invokeAction, "POST");
+    DEFAULT_METHODS.put(TD.subscribeEvent, "GET");
+    DEFAULT_METHODS.put(TD.unsubscribeEvent, "GET");
 
     DEFAULT_SUBPROTOCOLS.put(TD.observeProperty, COV.observe);
     DEFAULT_SUBPROTOCOLS.put(TD.unobserveProperty, COV.observe);
+    DEFAULT_SUBPROTOCOLS.put(TD.subscribeEvent, COV.observe);
+    DEFAULT_SUBPROTOCOLS.put(TD.unsubscribeEvent, COV.observe);
   }
 
   @Override

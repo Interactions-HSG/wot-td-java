@@ -13,8 +13,9 @@ public class ObjectSchema extends DataSchema {
   final private List<String> required;
 
   protected ObjectSchema(Set<String> semanticTypes, Set<String> enumeration,
+                         Optional<String> contentMediaType, List<DataSchema> dataSchemas,
                          Map<String, DataSchema> properties, List<String> required) {
-    super(DataSchema.OBJECT, semanticTypes, enumeration);
+    super(DataSchema.OBJECT, semanticTypes, enumeration, contentMediaType, dataSchemas);
 
     this.properties = properties;
     this.required = required;
@@ -122,7 +123,7 @@ public class ObjectSchema extends DataSchema {
     return required.contains(propName);
   }
 
-  public static class Builder extends DataSchema.Builder<ObjectSchema, ObjectSchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<ObjectSchema, ObjectSchema.Builder> {
     final private Map<String, DataSchema> properties;
     final private List<String> required;
 
@@ -141,6 +142,7 @@ public class ObjectSchema extends DataSchema {
       return this;
     }
 
+    @Override
     public ObjectSchema build() throws InvalidTDException {
       for (String propertyName : required) {
         if (!properties.containsKey(propertyName)) {
@@ -149,7 +151,7 @@ public class ObjectSchema extends DataSchema {
         }
       }
 
-      return new ObjectSchema(semanticTypes, enumeration, properties, required);
+      return new ObjectSchema(semanticTypes, enumeration, contentMediaType, dataSchemas, properties, required);
     }
   }
 }

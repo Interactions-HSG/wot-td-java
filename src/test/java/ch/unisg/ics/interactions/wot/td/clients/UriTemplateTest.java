@@ -71,7 +71,7 @@ public class UriTemplateTest {
   @Test(expected = IllegalArgumentException.class)
   public void testGetValueEmpty() {
     Object object = new Object();
-    String datatype = DataSchema.EMPTY;
+    String datatype = DataSchema.DATA;
     UriTemplate.getValue(object, datatype);
   }
 

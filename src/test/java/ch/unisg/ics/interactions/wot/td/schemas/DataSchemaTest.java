@@ -1,12 +1,13 @@
 package ch.unisg.ics.interactions.wot.td.schemas;
 
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -35,23 +36,31 @@ public class DataSchemaTest {
 
   @Test
   public void testEmptySchema() {
-    DataSchema schema = DataSchema.getEmptySchema();
-    assertEquals(DataSchema.EMPTY, schema.getDatatype());
+    DataSchema schema = new DataSchema.Builder().build();
+    assertEquals(DataSchema.DATA, schema.getDatatype());
     assertTrue(schema.getSemanticTypes().isEmpty());
     assertTrue(schema.getEnumeration().isEmpty());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void testEmptySchemaUnmodifiableSemanticTypes() {
-    DataSchema schema = DataSchema.getEmptySchema();
-    schema.getSemanticTypes().add("sem1");
+  @Test
+  public void testEmptySchemaPayload() {
+    DataSchema schema = new DataSchema.Builder().build();
+    Gson gson = new Gson();
+
+    JsonElement emptyElement = new JsonObject();
+    Object emptyParsed = schema.parseJson(emptyElement);
+    assertEquals(Optional.empty(), emptyParsed);
+
+    JsonElement nonEmptyElement = gson.fromJson("true", JsonElement.class);
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      schema.parseJson(nonEmptyElement);
+    });
+    String expectedMessage = "JSON element should be an empty JSON object when " +
+      "no subschemas are provided for a generic schema of type data";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void testEmptySchemaUnmodifiableEnumeration() {
-    DataSchema schema = DataSchema.getEmptySchema();
-    schema.getEnumeration().add("a");
-  }
 
   @Test
   public void testStringSchema() {
@@ -192,6 +201,25 @@ public class DataSchemaTest {
   }
 
   @Test
+  public void testObjectSchemaPayloadUknownProperties() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .addProperty("prop", new IntegerSchema.Builder().build())
+      .build();
+
+    Gson gson = new Gson();
+    String invalidJsonStr = "{\"unknown-prop\": 1, \"prop\": 2}";
+    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
+
+    Object parsedPayload = objectSchema.parseJson(invalidJsonObject);
+    assertTrue(parsedPayload instanceof Map);
+    Map parsedPayloadMap = (Map) parsedPayload;
+    assertTrue(parsedPayloadMap.containsKey("prop"));
+    assertFalse(parsedPayloadMap.containsKey("unknown-prop"));
+    assertEquals(1, parsedPayloadMap.keySet().size());
+    assertEquals(2, (parsedPayloadMap).get("prop"));
+  }
+
+  @Test
   public void testSchemaNestedObjects() {
     assertEquals(2, userGroupSchema.getProperties().size());
     assertEquals(userSchema, userGroupSchema.getProperty("admin").get());
@@ -329,5 +357,157 @@ public class DataSchemaTest {
     assertEquals(DataSchema.INTEGER, userGroup.getProperty("count").get().getDatatype());
     assertEquals(DataSchema.ARRAY, userGroup.getProperty("users").get().getDatatype());
     assertEquals(userSchema, ((ArraySchema) userGroup.getProperty("users").get()).getItems().get(0));
+  }
+
+  @Test
+  public void testContentMediaType() {
+    IntegerSchema integerSchema = new IntegerSchema.Builder()
+      .setContentMediaType("application/json").build();
+    NumberSchema numberSchema = new NumberSchema.Builder()
+      .setContentMediaType("application/json").build();
+    StringSchema stringSchema = new StringSchema.Builder()
+      .setContentMediaType("application/json").build();
+    ArraySchema arraySchema = new ArraySchema.Builder()
+      .setContentMediaType("application/json").build();
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .setContentMediaType("application/json").build();
+    BooleanSchema booleanSchema = new BooleanSchema.Builder()
+      .setContentMediaType("application/json").build();
+
+    assertTrue(integerSchema.getContentMediaType().isPresent());
+    assertTrue(numberSchema.getContentMediaType().isPresent());
+    assertTrue(stringSchema.getContentMediaType().isPresent());
+    assertTrue(arraySchema.getContentMediaType().isPresent());
+    assertTrue(objectSchema.getContentMediaType().isPresent());
+    assertTrue(booleanSchema.getContentMediaType().isPresent());
+
+    assertEquals("application/json", integerSchema.getContentMediaType().get());
+    assertEquals("application/json", numberSchema.getContentMediaType().get());
+    assertEquals("application/json", stringSchema.getContentMediaType().get());
+    assertEquals("application/json", arraySchema.getContentMediaType().get());
+    assertEquals("application/json", objectSchema.getContentMediaType().get());
+    assertEquals("application/json", booleanSchema.getContentMediaType().get());
+  }
+
+  @Test
+  public void testOneOf() {
+    ObjectSchema objectSchema0 = new ObjectSchema.Builder()
+      .addSemanticType("sem0")
+      .setContentMediaType("application/0+json")
+      .build();
+
+    ObjectSchema objectSchema1 = new ObjectSchema.Builder()
+      .addSemanticType("sem1")
+      .setContentMediaType("application/1+json")
+      .build();
+
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .oneOf(objectSchema0, objectSchema1).build();
+
+    List<DataSchema> dataSchemas = objectSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 2);
+    assertEquals(dataSchemas.get(0), objectSchema0);
+    assertEquals(dataSchemas.get(1), objectSchema1);
+
+    List<DataSchema> dataSchemasBySemanticType = objectSchema.getValidSchemasBySemanticType("sem0");
+    assertEquals(1, dataSchemasBySemanticType.size());
+    assertEquals(objectSchema0, dataSchemasBySemanticType.get(0));
+
+    List<DataSchema> dataSchemasByContentMediaType =
+      objectSchema.getValidSchemasByContentMediaType("application/1+json");
+    assertEquals(1, dataSchemasByContentMediaType.size());
+    assertEquals(objectSchema1, dataSchemasByContentMediaType.get(0));
+
+  }
+
+  @Test
+  public void testOneOfInvalidSubSchema() {
+    ObjectSchema objectSchema = new ObjectSchema.Builder().build();
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      new StringSchema.Builder().oneOf(objectSchema).build();
+    });
+    String expectedMessage = "Schema cannot be validated against subschema of type object";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testOneOfIntegerSubSchema() {
+    IntegerSchema integerSchema = new IntegerSchema.Builder().build();
+    NumberSchema numberSchema = new NumberSchema.Builder().oneOf(integerSchema).build();
+
+    List<DataSchema> dataSchemas = numberSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 1);
+    assertEquals(dataSchemas.get(0), integerSchema);
+  }
+
+  @Test
+  public void testGetOneOfBySemanticType() {
+    ObjectSchema objectSchema0 = new ObjectSchema.Builder()
+      .addSemanticType("sem0").build();
+
+    ObjectSchema objectSchema1 = new ObjectSchema.Builder()
+      .addSemanticType("sem1").build();
+
+    ObjectSchema objectSchema = new ObjectSchema.Builder()
+      .oneOf(objectSchema0, objectSchema1).build();
+
+    List<DataSchema> dataSchemas = objectSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 2);
+    assertEquals(dataSchemas.get(0), objectSchema0);
+    assertEquals(dataSchemas.get(1), objectSchema1);
+  }
+
+  @Test
+  public void testSuperDataSchema() {
+    StringSchema stringSchema0 = new StringSchema.Builder()
+      .addSemanticType("sem0").build();
+
+    ObjectSchema objectSchema1 = new ObjectSchema.Builder()
+      .addProperty("prop", new IntegerSchema.Builder().build())
+      .addSemanticType("sem1").build();
+
+    DataSchema superSchema = new DataSchema.Builder()
+      .oneOf(stringSchema0, objectSchema1)
+      .build();
+
+    List<DataSchema> dataSchemas = superSchema.getValidSchemas();
+    assertEquals(dataSchemas.size(), 2);
+    assertEquals(dataSchemas.get(0), stringSchema0);
+    assertEquals(dataSchemas.get(1), objectSchema1);
+
+    JsonPrimitive jsonPrimitive = new JsonPrimitive("string");
+    Object parsedJsonPrimitiveSub = stringSchema0.parseJson(jsonPrimitive);
+    Object parsedJsonPrimitiveSuper = superSchema.parseJson(jsonPrimitive);
+
+    assertTrue(parsedJsonPrimitiveSub instanceof String);
+    assertTrue(parsedJsonPrimitiveSuper instanceof String);
+    assertEquals(parsedJsonPrimitiveSub, parsedJsonPrimitiveSuper);
+
+    String jsonStr = "{\"prop\": 1}";
+    Gson gson = new Gson();
+    JsonElement jsonObject = gson.fromJson(jsonStr, JsonElement.class);
+    Object parsedJsonObjectSub = objectSchema1.parseJson(jsonObject);
+    Object parsedJsonObjectSuper = superSchema.parseJson(jsonObject);
+    assertTrue(parsedJsonObjectSub instanceof Map);
+    assertTrue(parsedJsonObjectSuper instanceof Map);
+    assertEquals(parsedJsonObjectSub, parsedJsonObjectSuper);
+
+    String unknownJsonStr = "{\"unknown-prop\": 1}";
+    JsonElement unknownJsonObject = gson.fromJson(unknownJsonStr, JsonElement.class);
+    Object parsedPayload = superSchema.parseJson(unknownJsonObject);
+    assertTrue(parsedPayload instanceof Map);
+    Map parsedPayloadMap = (Map) parsedPayload;
+    assertEquals(0, parsedPayloadMap.keySet().size());
+
+    String invalidJsonStr = "{\"prop\": \"invalid-value\"}";
+    JsonElement invalidJsonObject = gson.fromJson(invalidJsonStr, JsonElement.class);
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      superSchema.parseJson(invalidJsonObject);
+    });
+    String expectedMessage = "JSON element is not valid against any of available subschemas";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 }

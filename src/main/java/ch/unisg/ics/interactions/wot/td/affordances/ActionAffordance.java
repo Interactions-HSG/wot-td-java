@@ -70,6 +70,7 @@ public class ActionAffordance extends InteractionAffordance {
       return this;
     }
 
+    @Override
     public ActionAffordance build() {
       return new ActionAffordance(name, title, types, forms, uriVariables, inputSchema, outputSchema);
     }

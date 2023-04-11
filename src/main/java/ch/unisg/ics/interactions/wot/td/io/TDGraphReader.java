@@ -2,16 +2,11 @@ package ch.unisg.ics.interactions.wot.td.io;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.ThingDescription.TDFormat;
-import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.affordances.InteractionAffordance;
-import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
-import ch.unisg.ics.interactions.wot.td.schemas.*;
+import ch.unisg.ics.interactions.wot.td.affordances.*;
+import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.*;
-
 import org.apache.hc.client5.http.fluent.Request;
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -26,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
@@ -70,10 +64,11 @@ public class TDGraphReader {
     }
 
     ThingDescription.Builder tdBuilder = new ThingDescription.Builder(reader.readThingTitle())
-        .addSemanticTypes(reader.readThingTypes())
-        .addSecuritySchemes(reader.readSecuritySchemes())
-        .addProperties(reader.readProperties())
-        .addActions(reader.readActions())
+      .addSemanticTypes(reader.readThingTypes())
+      .addSecuritySchemes(reader.readSecuritySchemes())
+      .addProperties(reader.readProperties())
+      .addActions(reader.readActions())
+      .addEvents(reader.readEvents())
         .addGraph(reader.getGraph());
 
     Optional<String> thingURI = reader.getThingURI();
@@ -133,7 +128,7 @@ public class TDGraphReader {
   	Literal thingTitle;
 
     try {
-      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(DCT.title), null)).get();
+      thingTitle = Models.objectLiteral(model.filter(thingId, rdf.createIRI(TD.title), null)).get();
     } catch (NoSuchElementException e) {
       throw new InvalidTDException("Missing mandatory title.", e);
     }
@@ -199,7 +194,7 @@ public class TDGraphReader {
           builder.addDataSchema(schema.get());
         }
         else {
-          builder.addDataSchema(DataSchema.getEmptySchema());
+          builder.addDataSchema(new DataSchema.Builder().build());
         }
 
         readAffordanceMetadata(builder, propertyId);
@@ -281,6 +276,74 @@ public class TDGraphReader {
     return actionBuilder.build();
   }
 
+  List<EventAffordance> readEvents() {
+    List<EventAffordance> events = new ArrayList<>();
+
+    Set<Resource> affordanceIds = Models.objectResources(model.filter(thingId,
+      rdf.createIRI(TD.hasEventAffordance), null));
+
+    for (Resource affordanceId : affordanceIds) {
+      if (!model.contains(affordanceId, RDF.TYPE, rdf.createIRI(TD.EventAffordance))) {
+        continue;
+      }
+
+      try {
+        EventAffordance event = readEvent(affordanceId);
+        events.add(event);
+      } catch (InvalidTDException e) {
+        throw new InvalidTDException("Invalid event definition.", e);
+      }
+    }
+
+    return events;
+  }
+
+  private EventAffordance readEvent(Resource affordanceId) {
+    List<Form> forms = readForms(affordanceId, InteractionAffordance.EVENT);
+    String name = readAffordanceName(affordanceId);
+    EventAffordance.Builder eventBuilder = new EventAffordance.Builder(name, forms);
+
+    readAffordanceMetadata(eventBuilder, affordanceId);
+    readUriVariables(eventBuilder, affordanceId);
+
+    try {
+      Optional<Resource> subscriptionSchemaId = Models.objectResource(model.filter(affordanceId,
+        rdf.createIRI(TD.hasSubscriptionSchema), null));
+
+      if (subscriptionSchemaId.isPresent()) {
+        Optional<DataSchema> subscription = SchemaGraphReader.readDataSchema(subscriptionSchemaId.get(), model);
+        if (subscription.isPresent()) {
+          eventBuilder.addSubscriptionSchema(subscription.get());
+        }
+      }
+
+      Optional<Resource> notificationSchemaId = Models.objectResource(model.filter(affordanceId,
+        rdf.createIRI(TD.hasNotificationSchema), null));
+
+      if (notificationSchemaId.isPresent()) {
+        Optional<DataSchema> notification = SchemaGraphReader.readDataSchema(notificationSchemaId.get(), model);
+        if (notification.isPresent()) {
+          eventBuilder.addNotificationSchema(notification.get());
+        }
+      }
+
+      Optional<Resource> cancellationSchemaId = Models.objectResource(model.filter(affordanceId,
+        rdf.createIRI(TD.hasCancellationSchema), null));
+
+      if (cancellationSchemaId.isPresent()) {
+        Optional<DataSchema> cancellation = SchemaGraphReader.readDataSchema(cancellationSchemaId.get(), model);
+        if (cancellation.isPresent()) {
+          eventBuilder.addCancellationSchema(cancellation.get());
+        }
+      }
+
+    } catch (InvalidTDException e) {
+      throw new InvalidTDException("Invalid event definition.", e);
+    }
+
+    return eventBuilder.build();
+  }
+
   private String readAffordanceName(Resource affordanceId) {
     Literal affordanceName;
 
@@ -303,7 +366,7 @@ public class TDGraphReader {
 
     /* Read title */
     Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId,
-      rdf.createIRI(DCT.title), null));
+      rdf.createIRI(TD.title), null));
 
     if (title.isPresent()) {
       builder.addTitle(title.get().stringValue());
