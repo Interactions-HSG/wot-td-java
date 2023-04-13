@@ -57,7 +57,8 @@ public abstract class BaseOperation implements Operation {
   @Override
   public void setPayload(DataSchema schema, Object payload) {
     if (!validatePayload(schema, payload)) {
-      String msg = String.format("Given payload is of type %s but expected %s", payload.getClass(), schema.getDatatype());
+      String msg = String.format("The payload (of type %s) does not validate against the provided %s",
+        payload.getClass().getCanonicalName(), schema.getClass().getSimpleName());
       throw new IllegalArgumentException(msg);
     }
 
@@ -112,7 +113,6 @@ public abstract class BaseOperation implements Operation {
       case DataSchema.NUMBER: return payload instanceof BigDecimal
                                   || payload instanceof Double
                                   || payload instanceof Float;
-      case DataSchema.EMPTY: return true;
       default: return false;
     }
   }

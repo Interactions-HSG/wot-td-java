@@ -2,7 +2,6 @@ package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.bindings.BaseOperation;
-import ch.unisg.ics.interactions.wot.td.bindings.http.TDHttpOperation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.Gson;
@@ -26,7 +25,7 @@ import java.util.logging.Logger;
  * When constructing the request, clients can set payloads that conform to a <code>DataSchema</code>.
  */
 public class TDCoapOperation extends BaseOperation {
-  private final static Logger LOGGER = Logger.getLogger(TDHttpOperation.class.getCanonicalName());
+  private final static Logger LOGGER = Logger.getLogger(TDCoapOperation.class.getCanonicalName());
 
   private class TDCoapHandler implements CoapHandler {
 

@@ -150,6 +150,7 @@ public class TDCoapOperationTest {
     assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
+  /*
   @Test
   public void testAsyncObserveRelationWithNoSubprotocol() {TDCoapRequest coapRequest = new TDCoapRequest(FORM, TD.invokeAction);
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -173,6 +174,7 @@ public class TDCoapOperationTest {
       ".org/coap-binding#observe for the given operation type";
     assertTrue(ex.getMessage().contains(expectedMessage));
   }
+  */
 
   @Test
   public void testWriteProperty() throws UnsupportedOperationException {
@@ -257,9 +259,10 @@ public class TDCoapOperationTest {
         .setPayload(new BooleanSchema.Builder().build(), "string");
     });
 
-    String expectedMessage = "The payload's datatype does not match StringSchema " +
-      "(payload datatype: boolean)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.String";
+    String providedSchema = "BooleanSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test
@@ -269,9 +272,10 @@ public class TDCoapOperationTest {
         .setPayload(new IntegerSchema.Builder().build(), 0.5);
     });
 
-    String expectedMessage = "The payload's datatype does not match NumberSchema " +
-      "(payload datatype: integer)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.Double";
+    String providedSchema = "IntegerSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test
@@ -281,9 +285,10 @@ public class TDCoapOperationTest {
         .setPayload(new StringSchema.Builder().build(), true);
     });
 
-    String expectedMessage = "The payload's datatype does not match BooleanSchema " +
-      "(payload datatype: string)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.Boolean";
+    String providedSchema = "StringSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test

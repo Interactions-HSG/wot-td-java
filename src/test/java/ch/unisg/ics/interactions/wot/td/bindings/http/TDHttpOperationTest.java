@@ -10,10 +10,8 @@ import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import com.google.gson.*;
-import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.http.ParseException;
 import org.junit.Before;
@@ -186,36 +184,6 @@ public class TDHttpOperationTest {
     assertUserSchemaPayload(request);
   }
 
-  /*
-  @Test
-  public void testMissingProtocolBinding() {
-    Form form = new Form.Builder("x://example.org/toggle")
-      .addOperationType(TD.invokeAction)
-      .build();
-
-    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDHttpRequest(form, TD.invokeAction);
-    });
-
-    String expectedMessage = "The HTTP protocol binding cannot be applied with the given form";
-    assertTrue(ex.getMessage().contains(expectedMessage));
-  }
-
-  @Test
-  public void testMismatchedProtocolBinding() {
-    Form form = new Form.Builder("coap://example.org/toggle")
-      .addOperationType(TD.invokeAction)
-      .build();
-
-    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDHttpRequest(form, TD.invokeAction);
-    });
-
-    String expectedMessage = "The HTTP protocol binding cannot be applied with the given form";
-    assertTrue(ex.getMessage().contains(expectedMessage));
-  }
-  */
-
   @Test
   public void testInvalidBooleanPayload() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
@@ -223,31 +191,36 @@ public class TDHttpOperationTest {
         .setPayload(new BooleanSchema.Builder().build(), "string");
     });
 
-    String expectedMessage = "The payload's datatype does not match StringSchema " +
-      "(payload datatype: boolean)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.String";
+    String providedSchema = "BooleanSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
+  @Test
   public void testInvalidIntegerPayload() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
       new TDHttpOperation(FORM, TD.invokeAction)
         .setPayload(new IntegerSchema.Builder().build(), 0.5);
     });
 
-    String expectedMessage = "The payload's datatype does not match NumberSchema " +
-      "(payload datatype: integer)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.Double";
+    String providedSchema = "IntegerSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
+  @Test
   public void testInvalidStringPayload() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
       new TDHttpOperation(FORM, TD.invokeAction)
         .setPayload(new StringSchema.Builder().build(), true);
     });
 
-    String expectedMessage = "The payload's datatype does not match BooleanSchema " +
-      "(payload datatype: string)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.Boolean";
+    String providedSchema = "StringSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test
