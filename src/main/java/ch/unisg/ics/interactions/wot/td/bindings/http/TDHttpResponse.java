@@ -59,7 +59,7 @@ public class TDHttpResponse implements Response {
   public ResponseStatus getStatus() {
     if (response.getCode() >= 200 && response.getCode() < 300) return ResponseStatus.OK;
     else if (response.getCode() >= 400 && response.getCode() < 500) return ResponseStatus.CONSUMER_ERROR;
-    else if (response.getCode() >= 500 && response.getCode() < 500) return ResponseStatus.THING_ERROR;
+    else if (response.getCode() >= 500 && response.getCode() < 600) return ResponseStatus.THING_ERROR;
     else return ResponseStatus.UNKNOWN_ERROR;
   }
 
