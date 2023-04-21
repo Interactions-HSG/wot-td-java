@@ -15,6 +15,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 
+import java.awt.geom.Area;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
@@ -88,6 +89,11 @@ public class TDHttpRequest {
     return this;
   }
 
+  public TDHttpRequest setPayload(String payload){
+    request.setEntity(new StringEntity(payload, ContentType.create(form.getContentType())));
+    return this;
+  }
+
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, boolean value)
     throws IllegalArgumentException {
     if (dataSchema.getDatatype().equals(DataSchema.BOOLEAN)) {
@@ -103,6 +109,8 @@ public class TDHttpRequest {
 
   public TDHttpRequest setPrimitivePayload(DataSchema dataSchema, String value)
     throws IllegalArgumentException {
+    System.out.println("value: "+ value);
+    System.out.println("value class: "+ value.getClass().getCanonicalName());
     if (dataSchema.getDatatype().equals(DataSchema.STRING)) {
       request.setEntity(new StringEntity(value, ContentType.create(form.getContentType())));
     } else {

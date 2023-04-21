@@ -99,6 +99,9 @@ public class UriTemplate {
   }
 
   static String getValue(Object object, String datatype) {
+    String type = object.getClass().getCanonicalName();
+    System.out.println("get value type: "+ type);
+    System.out.println("expected datatype: "+ datatype);
     String value;
     try {
       switch (datatype) {
@@ -112,7 +115,16 @@ public class UriTemplate {
           value = String.valueOf((double) object);
           break;
         case DataSchema.BOOLEAN:
-          value = String.valueOf((boolean) object);
+          System.out.println("is boolean");
+          if (object instanceof String){
+            if (object.equals("true")||object.equals("false")){
+              value = (String) object;
+            } else {
+              throw new IllegalArgumentException("String does not represent a boolean");
+            }
+          } else {
+            value = String.valueOf((boolean) object);
+          }
           break;
         case DataSchema.NULL:
           if (object == null) {
@@ -155,11 +167,13 @@ public class UriTemplate {
       DataSchema schema = uriVariables.get(key);
       Object value = values.get(key);
       String datatype = schema.getDatatype();
+      System.out.println("expected datatype: "+datatype);
       String valueType = getType(value);
-      b = ((valueType.equals(DataSchema.INTEGER) && datatype.equals(DataSchema.NUMBER))
+      System.out.println("value type: "+valueType);
+      b = ((valueType.equals(DataSchema.INTEGER) && datatype.equals(DataSchema.NUMBER)) || (valueType.equals(DataSchema.STRING) && datatype.equals(DataSchema.BOOLEAN) && ((String) value).equals("true")||((String) value).equals("false"))
         || datatype.equals(valueType));
     }
-    return b;
+    return b; //To change
   }
 
   public String createUri(Map<String, DataSchema> uriVariables, Map<String, Object> values) {
