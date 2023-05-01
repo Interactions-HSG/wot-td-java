@@ -4,8 +4,8 @@ import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
+import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
  */
 public class ThingDescription {
   private final String title;
-  private final List<SecurityScheme> security;
+  private final Set<SecurityScheme> security;
+  private final Map<String, SecurityScheme> securityDefinitions;
 
   private final Optional<String> uri;
   private final Set<String> types;
@@ -37,19 +38,29 @@ public class ThingDescription {
 
   private final Optional<Model> graph;
 
-  protected ThingDescription(String title, List<SecurityScheme> security, Optional<String> uri,
-                             Set<String> types, Optional<String> baseURI, List<PropertyAffordance> properties,
-                             List<ActionAffordance> actions, List<EventAffordance> events, Optional<Model> graph) {
+  protected ThingDescription(String title, Set<SecurityScheme> security, Map<String,
+    SecurityScheme> securityDefinitions, Optional<String> uri, Set<String> types, Optional<String> baseURI,
+                             List<PropertyAffordance> properties, List<ActionAffordance> actions,
+                             List<EventAffordance> events, Optional<Model> graph) {
 
     if (title == null) {
       throw new InvalidTDException("The title of a Thing cannot be null.");
     }
     this.title = title;
 
-    if (security.isEmpty()) {
-      security.add(new NoSecurityScheme());
-    }
     this.security = security;
+    this.securityDefinitions = securityDefinitions;
+
+    // Set up nosec security
+    if (this.security.isEmpty()) {
+      if (getFirstSecuritySchemeByType(WoTSec.NoSecurityScheme).isPresent()) {
+        this.security.add(getFirstSecuritySchemeByType(WoTSec.NoSecurityScheme).get());
+      } else {
+        SecurityScheme nosec = SecurityScheme.getNoSecurityScheme();
+        this.security.add(nosec);
+        this.securityDefinitions.put("nosec", nosec);
+      }
+    }
 
     this.uri = uri;
     this.types = types;
@@ -66,18 +77,57 @@ public class ThingDescription {
     return title;
   }
 
-  public List<SecurityScheme> getSecuritySchemes() {
+  public Set<SecurityScheme> getSecuritySchemes() {
     return security;
+  }
+
+  public Map<String, SecurityScheme> getSecurityDefinitions() {
+    return securityDefinitions;
+  }
+
+  /**
+   * Gets the {@link SecurityScheme} that matches a given security definition name.
+   *
+   * @param name the name of the security definition
+   * @return an <code>Optional</code> with the security scheme (empty if not found)
+   */
+  public Optional<SecurityScheme> getSecuritySchemeByDefinition(String name) {
+    if (securityDefinitions.containsKey(name)) {
+      return Optional.of(securityDefinitions.get(name));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Gets the {@link SecurityScheme} that matches a given security scheme name.
+   *
+   * @param name the name of the security scheme
+   * @return an <code>Optional</code> with the security scheme (empty if not found)
+   */
+  public Optional<SecurityScheme> getFirstSecuritySchemeByName(String name) {
+    for (SecurityScheme securityScheme : securityDefinitions.values()) {
+
+      if (securityScheme.getSchemeName().equals(name)) {
+        return Optional.of(securityScheme);
+      }
+    }
+    return Optional.empty();
   }
 
   /**
    * Gets the first {@link SecurityScheme} that matches a given semantic type.
    *
-   * @param type the type of the security scheme
+   * @param type the semantic type of the security scheme
    * @return an <code>Optional</code> with the security scheme (empty if not found)
    */
   public Optional<SecurityScheme> getFirstSecuritySchemeByType(String type) {
-    return security.stream().filter(security -> security.getSchemeType().equals(type)).findFirst();
+    for (SecurityScheme securityScheme : securityDefinitions.values()) {
+
+      if (securityScheme.getSemanticTypes().contains(type)) {
+        return Optional.of(securityScheme);
+      }
+    }
+    return Optional.empty();
   }
 
   public Optional<String> getThingURI() {
@@ -292,7 +342,8 @@ public class ThingDescription {
    */
   public static class Builder {
     private final String title;
-    private final List<SecurityScheme> security;
+    private final Set<SecurityScheme> security;
+    private final HashMap<String, SecurityScheme> securityDefinitions;
     private final Set<String> types;
     private final List<PropertyAffordance> properties;
     private final List<ActionAffordance> actions;
@@ -303,7 +354,8 @@ public class ThingDescription {
 
     public Builder(String title) {
       this.title = title;
-      this.security = new ArrayList<SecurityScheme>();
+      this.security = new HashSet<SecurityScheme>();
+      this.securityDefinitions = new HashMap<String, SecurityScheme>();
 
       this.uri = Optional.empty();
       this.baseURI = Optional.empty();
@@ -316,14 +368,28 @@ public class ThingDescription {
       this.graph = Optional.empty();
     }
 
-    public Builder addSecurityScheme(SecurityScheme security) {
-      this.security.add(security);
+    public Builder addSecurityScheme(String name, SecurityScheme security, boolean applied) {
+      if (applied) {
+        this.security.add(security);
+      }
+      this.securityDefinitions.put(name, security);
       return this;
     }
 
-    public Builder addSecuritySchemes(List<SecurityScheme> security) {
-      this.security.addAll(security);
+    public Builder addSecurityScheme(String name, SecurityScheme security) {
+      return addSecurityScheme(name, security, true);
+    }
+
+    public Builder addSecuritySchemes(Map<String, SecurityScheme> security, boolean applied) {
+      if (applied) {
+        this.security.addAll(security.values());
+      }
+      this.securityDefinitions.putAll(security);
       return this;
+    }
+
+    public Builder addSecuritySchemes(Map<String, SecurityScheme> security) {
+      return addSecuritySchemes(security, true);
     }
 
     public Builder addThingURI(String uri) {
@@ -417,7 +483,8 @@ public class ThingDescription {
      * @return the constructed <code>ThingDescription</code>
      */
     public ThingDescription build() {
-      return new ThingDescription(title, security, uri, types, baseURI, properties, actions, events, graph);
+      return new ThingDescription(title, security, securityDefinitions, uri, types, baseURI, properties, actions,
+        events, graph);
     }
   }
 }
