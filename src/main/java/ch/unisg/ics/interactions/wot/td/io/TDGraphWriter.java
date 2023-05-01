@@ -11,10 +11,7 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A writer for serializing TDs as RDF graphs. Provides a fluent API for adding prefix bindings to be
@@ -70,15 +67,42 @@ public class TDGraphWriter {
   }
 
   private TDGraphWriter addSecurity() {
-    List<SecurityScheme> securitySchemes = td.getSecuritySchemes();
+    Map<String, SecurityScheme> securitySchemes = td.getSecurityDefinitions();
 
-    for (SecurityScheme scheme : securitySchemes) {
+    List<IRI> confTypesForIris = new ArrayList<>(Arrays.asList(rdf.createIRI(WoTSec.authorization),
+      rdf.createIRI(WoTSec.token), rdf.createIRI(WoTSec.refresh)));
+
+    for (SecurityScheme scheme : securitySchemes.values()) {
       BNode schemeId = rdf.createBNode();
       graphBuilder.add(thingId, rdf.createIRI(TD.hasSecurityConfiguration), schemeId);
 
-      Model schemeGraph = scheme.toRDF(schemeId);
-      for (Statement s : schemeGraph) {
-        graphBuilder.add(s.getSubject(), s.getPredicate(), s.getObject());
+      Map<String, Object> configuration = scheme.getConfiguration();
+
+      for (String semanticType : scheme.getSemanticTypes()) {
+        graphBuilder.add(schemeId, RDF.TYPE, rdf.createIRI(semanticType));
+      }
+
+      for (Map.Entry<String, Object> configurationEntry : configuration.entrySet()) {
+        IRI confTypeIri = rdf.createIRI(configurationEntry.getKey());
+        Object confValue = configurationEntry.getValue();
+        List<Object> confValues = new ArrayList<>();
+        if (confValue instanceof Set) {
+          confValues.addAll((Collection<?>) confValue);
+        } else {
+          confValues.add(confValue);
+        }
+        for (Object objConfValue : confValues) {
+          if (confTypesForIris.contains(confTypeIri)) {
+            try {
+              graphBuilder.add(schemeId, confTypeIri, rdf.createIRI((String) objConfValue));
+            } catch (IllegalArgumentException e) {
+              throw new InvalidTDException("Invalid security scheme configuration. " + confTypeIri + " value should" +
+                " be a valid IRI.", e);
+            }
+          } else {
+            graphBuilder.add(schemeId, confTypeIri, objConfValue);
+          }
+        }
       }
     }
 
