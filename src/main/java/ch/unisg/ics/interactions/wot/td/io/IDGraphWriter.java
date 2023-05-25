@@ -1,12 +1,14 @@
 package ch.unisg.ics.interactions.wot.td.io;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.interaction.InteractionDescription;
 import ch.unisg.ics.interactions.wot.td.interaction.InteractionTypes;
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.HCTL;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -15,7 +17,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * A writer for serializing Interaction Descriptions as RDF graphs.
@@ -23,7 +24,6 @@ import java.util.Optional;
  */
 public class IDGraphWriter {
   private static final String[] HTTP_URI_SCHEMES = new String[]{"http:", "https:"};
-  private static final String[] COAP_URI_SCHEMES = new String[]{"coap:", "coaps:"};
   private final static String tdNS = TD.PREFIX;
   private final static String hctlNS = "https://www.w3.org/2019/wot/hypermedia#";
   private final static String htvNS = "http://www.w3.org/2011/http#";
@@ -47,8 +47,8 @@ public class IDGraphWriter {
     // Default namespace bindings
     graphBuilder.setNamespace("td", tdNS);
     graphBuilder.setNamespace("hctl", hctlNS);
-    graphBuilder.setNamespace("log", logNS);
     graphBuilder.setNamespace("htv", htvNS);
+    graphBuilder.setNamespace("log", logNS);
   }
 
   /**
@@ -74,6 +74,18 @@ public class IDGraphWriter {
     return ReadWriteUtils.writeToString(format, getModel());
   }
 
+  /**
+   * Sets a prefix binding for a given namespace.
+   *
+   * @param prefix    the prefix to be used in the serialized representation
+   * @param namespace the given namespace
+   * @return this <code>IDGraphWriter</code>
+   */
+  public IDGraphWriter setNamespace(String prefix, String namespace) {
+    this.graphBuilder.setNamespace(prefix, namespace);
+    return this;
+  }
+
   private IDGraphWriter addTitle() {
     graphBuilder.add(intdId, rdf.createIRI(TD.title), intd.getTitle());
     return this;
@@ -89,25 +101,47 @@ public class IDGraphWriter {
 
   private IDGraphWriter addTimestamp() {
     OffsetDateTime dateTime = OffsetDateTime.now();
-    String formattedTime = dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    String formattedTime = dateTime.format(formatter);
     graphBuilder.add(intdId, rdf.createIRI(logNS, "created"), formattedTime);
     return this;
   }
 
+  /**
+   * Adds the interaction input to the graph.
+   * @return this <code>IDGraphWriter</code>
+   */
   private IDGraphWriter addInput() {
+    if(intd.getInput() == null) {
+      return this;
+    }
+
     BNode inputId = rdf.createBNode();
     graphBuilder.add(intdId, rdf.createIRI(tdNS, "hasInput"), inputId);
-    graphBuilder.add(inputId, rdf.createIRI(tdNS, "value"), intd.getInput().getValue());
-    addForm(inputId, intd.getInput().getForm());
-    addSchema(inputId, intd.getInput().getSchema());
+
+    // Not all requests have a request body with a data schema
+    if(intd.getInput().getValue() != null) {
+      graphBuilder.add(inputId, rdf.createIRI(tdNS, "value"), intd.getInput().getValue());
+      addSchema(inputId, intd.getInput().getSchema());
+    }
+
+    addFormForInput(inputId, intd.getInput().getForm());
     return this;
   }
 
+  /**
+   * Adds the interaction output to the graph.
+   * @return this <code>IDGraphWriter</code>
+   */
   private IDGraphWriter addOutput() {
+    if(intd.getOutput() == null) {
+      return this;
+    }
+
     Resource outputId = rdf.createBNode();
     graphBuilder.add(intdId, rdf.createIRI(tdNS, "hasOutput"), outputId);
-    graphBuilder.add(outputId, rdf.createIRI(tdNS, "value"), intd.getInput().getValue());
-    addSchema(outputId, intd.getInput().getSchema());
+    graphBuilder.add(outputId, rdf.createIRI(tdNS, "value"), intd.getOutput().getValue());
+    addSchema(outputId, intd.getOutput().getSchema());
     return this;
   }
 
@@ -115,7 +149,11 @@ public class IDGraphWriter {
     SchemaGraphWriter.write(graphBuilder, nodeId, schema);
   }
 
-  private void addForm(BNode inputId, Form form) {
+  /**
+   * @param inputId the id of the input node
+   * @param form form of the interaction (e.g. HTTP GET Request)
+   */
+  private void addFormForInput(BNode inputId, Form form) {
     BNode formId = rdf.createBNode();
     graphBuilder.add(inputId, rdf.createIRI(TD.hasForm), formId);
 
@@ -125,33 +163,17 @@ public class IDGraphWriter {
         graphBuilder.add(formId, rdf.createIRI(htvNS, "methodName"), form.getMethodName().get());
       }
     }
-    graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(conversion(form.getTarget())));
-    graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
-
-    for (String opType : form.getOperationTypes()) {
-      try {
-        IRI opTypeIri = rdf.createIRI(opType);
-        graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opTypeIri);
-      } catch (IllegalArgumentException e) {
-        graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opType);
-      }
-    }
-
-    Optional<String> subProtocol = form.getSubProtocol();
-    if (subProtocol.isPresent()) {
-      try {
-        IRI subProtocolIri = rdf.createIRI(subProtocol.get());
-        graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocolIri);
-      } catch (IllegalArgumentException e) {
-        graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocol.get());
-      }
-    }
+    FormGraphWriter.write(graphBuilder, formId, form);
   }
 
   private Model getModel() {
     return graphBuilder.build();
   }
 
+  /**
+   * Adds the type of the interaction to the graph.
+   * @return this <code>IDGraphWriter</code>
+   */
   private IDGraphWriter addType() {
     if (intd.getType() != null) {
       if (intd.getType().equals(InteractionTypes.PROPERTY)) {
@@ -163,21 +185,5 @@ public class IDGraphWriter {
       }
     }
     return this;
-  }
-
-
-  private String conversion(String str) {
-    StringBuilder newStr = new StringBuilder();
-    for (int i = 0; i < str.length(); i++) {
-      char c = str.charAt(i);
-      if (c == '{') {
-        newStr.append("%7B");
-      } else if (c == '}') {
-        newStr.append("%7D");
-      } else {
-        newStr.append(c);
-      }
-    }
-    return newStr.toString();
   }
 }

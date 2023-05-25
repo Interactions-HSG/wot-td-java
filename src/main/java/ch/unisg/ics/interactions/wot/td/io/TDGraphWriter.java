@@ -264,48 +264,12 @@ public class TDGraphWriter {
           graphBuilder.add(formId, rdf.createIRI(COV.methodName), form.getMethodName().get());
         }
       }
-      graphBuilder.add(formId, rdf.createIRI(HCTL.hasTarget), rdf.createIRI(conversion(form.getTarget())));
-      graphBuilder.add(formId, rdf.createIRI(HCTL.forContentType), form.getContentType());
 
-      for (String opType : form.getOperationTypes()) {
-        try {
-          IRI opTypeIri = rdf.createIRI(opType);
-          graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opTypeIri);
-        } catch (IllegalArgumentException e) {
-          graphBuilder.add(formId, rdf.createIRI(HCTL.hasOperationType), opType);
-        }
-      }
-
-      Optional<String> subProtocol = form.getSubProtocol();
-      if (subProtocol.isPresent()) {
-        try {
-          IRI subProtocolIri = rdf.createIRI(subProtocol.get());
-          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocolIri);
-        } catch (IllegalArgumentException e) {
-          graphBuilder.add(formId, rdf.createIRI(HCTL.forSubProtocol), subProtocol.get());
-        }
-      }
+      FormGraphWriter.write(graphBuilder, formId, form);
     }
   }
 
   private String write(RDFFormat format) {
     return ReadWriteUtils.writeToString(format, getModel());
-  }
-
-  private String conversion(String str){
-    String newStr = "";
-    for (int i = 0; i<str.length();i++){
-      char c = str.charAt(i);
-      if (c == '{'){
-        newStr = newStr + "%7B";
-      }
-      else if (c == '}'){
-        newStr = newStr + "%7D";
-      }
-      else {
-        newStr = newStr + c;
-      }
-    }
-    return newStr;
   }
 }

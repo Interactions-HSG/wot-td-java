@@ -25,6 +25,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ch.unisg.ics.interactions.wot.td.io.ReadWriteUtils.getStringReaderFromRDF;
+
 /**
  * A reader for deserializing TDs from RDF representations. The created <code>ThingDescription</code>
  * maintains the full RDF graph read as input, which can be retrieved with the <code>getGraph</code>
@@ -108,7 +110,7 @@ public class TDGraphReader {
 
     RDFParser parser = Rio.createParser(format);
     parser.setRDFHandler(new StatementCollector(model));
-    try (StringReader stringReader = conversion(representation, format)) {
+    try (StringReader stringReader = getStringReaderFromRDF(representation, format)) {
       parser.parse(stringReader, baseURI);
     } catch (RDFParseException | RDFHandlerException | IOException e) {
       throw new InvalidTDException("RDF Syntax Error", e);
@@ -590,25 +592,6 @@ public class TDGraphReader {
         DataSchema schema = opDataSchema.get();
         builder.addUriVariable(name, schema);
       }
-  }
-
-  private StringReader conversion(String str, RDFFormat format){
-    String newStr = "";
-    if (format.equals(RDFFormat.TURTLE)) {
-      for (int i = 0; i < str.length(); i++) {
-        char c = str.charAt(i);
-        if (c == '{') {
-          newStr = newStr + "%7B";
-        } else if (c == '}') {
-          newStr = newStr + "%7D";
-        } else {
-          newStr = newStr + c;
-        }
-      }
-    } else {
-      newStr = str;
-    }
-    return new StringReader(newStr);
   }
 
   private String getUniqueSecurityName(String securitySchemeName) {
