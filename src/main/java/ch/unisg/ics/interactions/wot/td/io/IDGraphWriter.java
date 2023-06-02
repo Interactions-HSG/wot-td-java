@@ -4,7 +4,6 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.interaction.InteractionDescription;
 import ch.unisg.ics.interactions.wot.td.interaction.InteractionTypes;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -24,7 +23,6 @@ import java.util.Arrays;
  */
 public class IDGraphWriter {
   private static final String[] HTTP_URI_SCHEMES = new String[]{"http:", "https:"};
-  private final static String tdNS = TD.PREFIX;
   private final static String hctlNS = "https://www.w3.org/2019/wot/hypermedia#";
   private final static String htvNS = "http://www.w3.org/2011/http#";
   private final static String logNS = "https://example.org/log#";
@@ -45,7 +43,6 @@ public class IDGraphWriter {
     this.graphBuilder = new ModelBuilder();
 
     // Default namespace bindings
-    graphBuilder.setNamespace("td", tdNS);
     graphBuilder.setNamespace("hctl", hctlNS);
     graphBuilder.setNamespace("htv", htvNS);
     graphBuilder.setNamespace("log", logNS);
@@ -67,6 +64,7 @@ public class IDGraphWriter {
       .addInput()
       .addOutput()
       .addType()
+      .addForm()
       .write(RDFFormat.TURTLE);
   }
 
@@ -87,13 +85,13 @@ public class IDGraphWriter {
   }
 
   private IDGraphWriter addTitle() {
-    graphBuilder.add(intdId, rdf.createIRI(TD.title), intd.getTitle());
+    graphBuilder.add(intdId, rdf.createIRI(logNS, "title"), intd.getTitle());
     return this;
   }
 
   private IDGraphWriter addURI() {
     if (intd.getUri() != null && !intd.getUri().isEmpty()) {
-      graphBuilder.add(intdId, rdf.createIRI(TD.hasBase), rdf.createIRI(intd.getUri()));
+      graphBuilder.add(intdId, rdf.createIRI(logNS, "uri"), rdf.createIRI(intd.getUri()));
     }
 
     return this;
@@ -117,15 +115,13 @@ public class IDGraphWriter {
     }
 
     BNode inputId = rdf.createBNode();
-    graphBuilder.add(intdId, rdf.createIRI(tdNS, "hasInput"), inputId);
+    graphBuilder.add(intdId, rdf.createIRI(logNS, "hasInput"), inputId);
 
     // Not all requests have a request body with a data schema
     if(intd.getInput().getValue() != null) {
-      graphBuilder.add(inputId, rdf.createIRI(tdNS, "value"), intd.getInput().getValue());
+      graphBuilder.add(inputId, rdf.createIRI(logNS, "value"), intd.getInput().getValue());
       addSchema(inputId, intd.getInput().getSchema());
     }
-
-    addFormForInput(inputId, intd.getInput().getForm());
     return this;
   }
 
@@ -139,8 +135,8 @@ public class IDGraphWriter {
     }
 
     Resource outputId = rdf.createBNode();
-    graphBuilder.add(intdId, rdf.createIRI(tdNS, "hasOutput"), outputId);
-    graphBuilder.add(outputId, rdf.createIRI(tdNS, "value"), intd.getOutput().getValue());
+    graphBuilder.add(intdId, rdf.createIRI(logNS, "hasOutput"), outputId);
+    graphBuilder.add(outputId, rdf.createIRI(logNS, "value"), intd.getOutput().getValue());
     addSchema(outputId, intd.getOutput().getSchema());
     return this;
   }
@@ -150,12 +146,18 @@ public class IDGraphWriter {
   }
 
   /**
-   * @param inputId the id of the input node
-   * @param form form of the interaction (e.g. HTTP GET Request)
+   *
    */
-  private void addFormForInput(BNode inputId, Form form) {
+  private IDGraphWriter addForm() {
+    // Not all requests have a form
+    if(intd.getForm() == null) {
+      return this;
+    }
+
     BNode formId = rdf.createBNode();
-    graphBuilder.add(inputId, rdf.createIRI(TD.hasForm), formId);
+    graphBuilder.add(intdId, rdf.createIRI(logNS, "hasForm"), formId);
+
+    Form form = intd.getForm();
 
     // Only writes the method name for forms with one operation type (to avoid ambiguity)
     if (form.getMethodName().isPresent() && form.getOperationTypes().size() == 1) {
@@ -163,7 +165,9 @@ public class IDGraphWriter {
         graphBuilder.add(formId, rdf.createIRI(htvNS, "methodName"), form.getMethodName().get());
       }
     }
+
     FormGraphWriter.write(graphBuilder, formId, form);
+    return this;
   }
 
   private Model getModel() {
@@ -177,11 +181,11 @@ public class IDGraphWriter {
   private IDGraphWriter addType() {
     if (intd.getType() != null) {
       if (intd.getType().equals(InteractionTypes.PROPERTY)) {
-        graphBuilder.add(intdId, RDF.TYPE, rdf.createIRI(logNS, "PropertyLog"));
+        graphBuilder.add(intdId, RDF.TYPE, rdf.createIRI(logNS, "PropertyObservation"));
       } else if (intd.getType().equals(InteractionTypes.ACTION)) {
-        graphBuilder.add(intdId, RDF.TYPE, rdf.createIRI(logNS, "ActionLog"));
+        graphBuilder.add(intdId, RDF.TYPE, rdf.createIRI(logNS, "ActionExecution"));
       } else if (intd.getType().equals(InteractionTypes.EVENT)) {
-        graphBuilder.add(intdId, RDF.TYPE, rdf.createIRI(logNS, "EventLog"));
+        graphBuilder.add(intdId, RDF.TYPE, rdf.createIRI(logNS, "Event"));
       }
     }
     return this;

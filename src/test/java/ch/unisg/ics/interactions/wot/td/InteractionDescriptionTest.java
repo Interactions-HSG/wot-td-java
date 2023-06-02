@@ -39,17 +39,11 @@ public class InteractionDescriptionTest {
 
   @Test
   public void testInput() {
-    Form form = new Form.Builder("http://example.org/action")
-      .addOperationType(TD.invokeAction)
-      .setContentType("application/json")
-      .setMethodName("POST")
-      .build();
-
     DataSchema schema = new DataSchema.Builder()
       .addSemanticType(DataSchema.STRING)
       .build();
 
-    InteractionInput input = new InteractionInput("input1", form, schema);
+    InteractionInput input = new InteractionInput("input1", schema);
 
     InteractionDescription intd = InteractionDescription.builder()
       .title("interaction-1")
@@ -73,6 +67,22 @@ public class InteractionDescriptionTest {
       .build();
 
     assertSame(output, intd.getOutput());
+  }
+
+  @Test
+  public void testForm() {
+    Form form = new Form.Builder("http://example.org/action")
+      .addOperationType(TD.invokeAction)
+      .setContentType("application/json")
+      .setMethodName("POST")
+      .build();
+
+    InteractionDescription intd = InteractionDescription.builder()
+      .title("interaction-1")
+      .form(form)
+      .build();
+
+    assertEquals(form, intd.getForm());
   }
 
   @Test

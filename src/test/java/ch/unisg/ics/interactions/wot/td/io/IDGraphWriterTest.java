@@ -22,9 +22,8 @@ import java.time.format.DateTimeFormatter;
 import static org.junit.Assert.assertTrue;
 
 public class IDGraphWriterTest {
-  private static final String ID_TITLE = "interaction-1";
+  private static final String ID_TITLE = "actionlog-1";
   private static final String PREFIXES =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
       "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
       "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
       "@prefix log: <https://example.org/log#> .\n";
@@ -56,29 +55,30 @@ public class IDGraphWriterTest {
   public void testWriteCompleteID() throws IOException {
     InteractionDescription completeIntD = InteractionDescription.builder()
       .title(ID_TITLE)
-      .input(new InteractionInput("input1", POST_FORM, STRING_SCHEMA))
+      .uri("http://example.org/log#actionlog-1")
+      .form(POST_FORM)
+      .input(new InteractionInput("input1", STRING_SCHEMA))
       .output(new InteractionOutput("output1", STRING_SCHEMA))
       .type(InteractionTypes.ACTION)
-      .uri("http://example.org/log#interaction-1")
       .build();
 
     String testID = PREFIXES + String.format(
-      "\n<http://example.org/log#interaction-1> a log:ActionLog;\n" +
-      "  td:title \"interaction-1\";\n" +
-      "  td:hasBase <http://example.org/log#interaction-1>;\n" +
-      "  log:created \"%s\";\n" +
-      "  td:hasInput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
-      "      td:value \"input1\";\n" +
-      "      td:hasForm [\n" +
-      "          htv:methodName \"POST\";\n" +
-      "          hctl:hasTarget <http://example.org/action>;\n" +
-      "          hctl:forContentType \"application/json\";\n" +
-      "          hctl:hasOperationType td:invokeAction\n" +
-      "        ]\n" +
-      "    ];\n" +
-      "  td:hasOutput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
-      "      td:value \"output1\"\n" +
-      "    ] .\n", getDateTimeWithoutSeconds());
+      "\n<http://example.org/log#actionlog-1> a log:ActionExecution;\n" +
+        "  log:title \"actionlog-1\";\n" +
+        "  log:uri <http://example.org/log#actionlog-1>;\n" +
+        "  log:created \"%s\";\n" +
+        "  log:hasInput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
+        "      log:value \"input1\"\n" +
+        "    ];\n" +
+        "  log:hasOutput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
+        "      log:value \"output1\"\n" +
+        "    ];\n" +
+        "  log:hasForm [\n" +
+        "      htv:methodName \"POST\";\n" +
+        "      hctl:hasTarget <http://example.org/action>;\n" +
+        "      hctl:forContentType \"application/json\";\n" +
+        "      hctl:hasOperationType <https://www.w3.org/2019/wot/td#invokeAction>\n" +
+        "    ] .\n", getDateTimeWithoutSeconds());
 
     assertIsomorphicGraphs(testID, completeIntD);
   }
@@ -88,75 +88,53 @@ public class IDGraphWriterTest {
     InteractionDescription intDWithoutInput = InteractionDescription.builder()
       .title(ID_TITLE)
       .type(InteractionTypes.EVENT)
+      .form(GET_FORM)
       .output(new InteractionOutput("output1", STRING_SCHEMA))
-      .uri("http://example.org/log#interaction-1")
+      .uri("http://example.org/log#actionlog-1")
       .build();
 
     String testID = PREFIXES + String.format(
-      "\n<http://example.org/log#interaction-1> a log:EventLog;\n" +
-        "  td:title \"interaction-1\";\n" +
-        "  td:hasBase <http://example.org/log#interaction-1>;\n" +
+      "\n<http://example.org/log#actionlog-1> a log:Event;\n" +
+        "  log:title \"actionlog-1\";\n" +
+        "  log:uri <http://example.org/log#actionlog-1>;\n" +
         "  log:created \"%s\";\n" +
-        "  td:hasOutput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
-        "      td:value \"output1\"\n" +
-        "    ] .\n", getDateTimeWithoutSeconds());
+        "  log:hasOutput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
+        "      log:value \"output1\"\n" +
+        "    ];\n" +
+        "  log:hasForm [\n" +
+        "      htv:methodName \"GET\";\n" +
+        "      hctl:hasTarget <http://example.org/action>;\n" +
+        "      hctl:forContentType \"application/json\";\n" +
+        "      hctl:hasOperationType <https://www.w3.org/2019/wot/td#readProperty>\n" +
+        "    ] .", getDateTimeWithoutSeconds());
 
     assertIsomorphicGraphs(testID, intDWithoutInput);
-  }
-
-  @Test
-  public void testWriteIDWithoutInputValue() throws IOException {
-    InteractionDescription requestIntD = InteractionDescription.builder()
-      .title(ID_TITLE)
-      .input(new InteractionInput(GET_FORM))
-      .output(new InteractionOutput("output1", STRING_SCHEMA))
-      .type(InteractionTypes.ACTION)
-      .uri("http://example.org/log#interaction-1")
-      .build();
-
-    String testID = PREFIXES + String.format(
-      "\n<http://example.org/log#interaction-1> a log:ActionLog;\n" +
-        "  td:title \"interaction-1\";\n" +
-        "  td:hasBase <http://example.org/log#interaction-1>;\n" +
-        "  log:created \"%s\";\n" +
-        "  td:hasInput [\n" +
-        "      td:hasForm [\n" +
-        "          htv:methodName \"GET\";\n" +
-        "          hctl:hasTarget <http://example.org/action>;\n" +
-        "          hctl:forContentType \"application/json\";\n" +
-        "          hctl:hasOperationType td:readProperty\n" +
-        "        ]\n" +
-        "    ];\n" +
-        "  td:hasOutput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
-        "      td:value \"output1\"\n" +
-        "    ] .\n", getDateTimeWithoutSeconds());
-
-    assertIsomorphicGraphs(testID, requestIntD);
   }
 
   @Test
   public void testWriteIDWithoutOutput() throws IOException {
     InteractionDescription intDWithoutOutput = InteractionDescription.builder()
       .title(ID_TITLE)
-      .input(new InteractionInput("input1", POST_FORM, STRING_SCHEMA))
+      .input(new InteractionInput("input1", STRING_SCHEMA))
+      .form(POST_FORM)
       .type(InteractionTypes.ACTION)
       .uri("http://example.org/log#interaction-1")
       .build();
 
     String testID = PREFIXES + String.format(
-      "\n<http://example.org/log#interaction-1> a log:ActionLog;\n" +
-        "  td:title \"interaction-1\";\n" +
-        "  td:hasBase <http://example.org/log#interaction-1>;\n" +
+      "\n<http://example.org/log#interaction-1> a log:ActionExecution;\n" +
+        "  log:title \"actionlog-1\";\n" +
+        "  log:uri <http://example.org/log#interaction-1>;\n" +
         "  log:created \"%s\";\n" +
-        "  td:hasInput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
-        "      td:value \"input1\";\n" +
-        "      td:hasForm [\n" +
-        "          htv:methodName \"POST\";\n" +
-        "          hctl:hasTarget <http://example.org/action>;\n" +
-        "          hctl:forContentType \"application/json\";\n" +
-        "          hctl:hasOperationType td:invokeAction\n" +
-        "        ]\n" +
-        "    ].\n", getDateTimeWithoutSeconds());
+        "  log:hasInput [ a <https://www.w3.org/2019/wot/json-schema#StringSchema>;\n" +
+        "      log:value \"input1\"\n" +
+        "    ];\n" +
+        "  log:hasForm [\n" +
+        "      htv:methodName \"POST\";\n" +
+        "      hctl:hasTarget <http://example.org/action>;\n" +
+        "      hctl:forContentType \"application/json\";\n" +
+        "      hctl:hasOperationType <https://www.w3.org/2019/wot/td#invokeAction>\n" +
+        "    ] .", getDateTimeWithoutSeconds());
 
     assertIsomorphicGraphs(testID, intDWithoutOutput);
   }

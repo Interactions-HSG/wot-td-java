@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.interaction;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -35,11 +36,18 @@ public class InteractionDescription {
    */
   private final InteractionTypes type;
 
-  protected InteractionDescription(@NonNull String title, String uri, InteractionInput input, InteractionOutput output, InteractionTypes type) {
+
+  /**
+   * The form of the interaction.
+   */
+  private final Form form;
+
+  protected InteractionDescription(@NonNull String title, String uri, InteractionInput input, InteractionOutput output, InteractionTypes type, Form form) {
     this.title = title;
     this.uri = uri;
     this.input = input;
     this.output = output;
     this.type = type;
+    this.form = form;
   }
 }
