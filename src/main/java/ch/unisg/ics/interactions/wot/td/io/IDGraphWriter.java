@@ -27,6 +27,8 @@ public class IDGraphWriter {
   private final static String htvNS = "http://www.w3.org/2011/http#";
   private final static String logNS = "https://example.org/log#";
 
+  private final static String jsNS = "https://www.w3.org/2019/wot/json-schema#";
+
   private final Resource intdId;
   private final InteractionDescription intd;
   private final ModelBuilder graphBuilder;
@@ -46,6 +48,7 @@ public class IDGraphWriter {
     graphBuilder.setNamespace("hctl", hctlNS);
     graphBuilder.setNamespace("htv", htvNS);
     graphBuilder.setNamespace("log", logNS);
+    graphBuilder.setNamespace("js", jsNS);
   }
 
   /**
@@ -119,9 +122,11 @@ public class IDGraphWriter {
 
     // Not all requests have a request body with a data schema
     if(intd.getInput().getValue() != null) {
-      graphBuilder.add(inputId, rdf.createIRI(logNS, "value"), intd.getInput().getValue());
+      addValue(inputId, intd.getInput().getValue());
       addSchema(inputId, intd.getInput().getSchema());
     }
+
+    graphBuilder.add(inputId, RDF.TYPE, rdf.createIRI(logNS, "Input"));
     return this;
   }
 
@@ -134,15 +139,26 @@ public class IDGraphWriter {
       return this;
     }
 
-    Resource outputId = rdf.createBNode();
+    BNode outputId = rdf.createBNode();
     graphBuilder.add(intdId, rdf.createIRI(logNS, "hasOutput"), outputId);
-    graphBuilder.add(outputId, rdf.createIRI(logNS, "value"), intd.getOutput().getValue());
-    addSchema(outputId, intd.getOutput().getSchema());
+
+    // Not all interactions have a response body with a data schema
+    if(intd.getOutput().getValue() != null) {
+      addValue(outputId, intd.getOutput().getValue());
+      addSchema(outputId, intd.getOutput().getSchema());
+    }
+
+    graphBuilder.add(outputId, RDF.TYPE, rdf.createIRI(logNS, "Output"));
     return this;
   }
 
+  private void addValue(BNode nodeId, Object value) {
+    graphBuilder.add(nodeId, rdf.createIRI(logNS, "hasValue"), value);
+  }
   private void addSchema(Resource nodeId, DataSchema schema) {
-    SchemaGraphWriter.write(graphBuilder, nodeId, schema);
+    BNode schemaId = rdf.createBNode();
+    graphBuilder.add(nodeId, rdf.createIRI(logNS, "hasSchema"), schemaId);
+    SchemaGraphWriter.write(graphBuilder, schemaId, schema);
   }
 
   /**
