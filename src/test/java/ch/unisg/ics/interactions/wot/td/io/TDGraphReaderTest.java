@@ -10,8 +10,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme.TokenLocation;
+import ch.unisg.ics.interactions.wot.td.security.*;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class TDGraphReaderTest {
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "@prefix saref: <https://saref.etsi.org/core/> .\n" +
+      "@prefix ex: <https://example.org#> .\n" +
       "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
   private static final String TEST_SIMPLE_TD =
@@ -270,97 +272,527 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/", reader.readBaseURI().get());
   }
 
+  //Test security schemes
   @Test
   public void testReadOneSecurityScheme() {
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, TEST_SIMPLE_TD);
 
-    assertEquals(1, reader.readSecuritySchemes().size());
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
 
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme ->
-        scheme.getSchemeType().equals(WoTSec.NoSecurityScheme)));
+    List<String> nosecSchemes = getSecurityNamesforSchemeName(SecurityScheme.NOSEC, schemes);
+    assertEquals(1, nosecSchemes.size());
+
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme ->
+      scheme.getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
   }
+
 
   @Test
   public void testReadAPIKeySecurityScheme() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    td:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"header\" ;\n" +
-        "        wotsec:name \"X-API-Key\" ;\n" +
-        "  ] .";
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"X-API-Key\" ;\n" +
+      "  ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
-    assertEquals(1, reader.readSecuritySchemes().size());
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
 
-    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
+    List<String> apikeySchemes = getSecurityNamesforSchemeName(SecurityScheme.APIKEY, schemes);
+    assertEquals(1, apikeySchemes.size());
+
+    SecurityScheme scheme = schemes.get(apikeySchemes.get(0));
     assertTrue(scheme instanceof APIKeySecurityScheme);
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
-    assertEquals(TokenLocation.HEADER, ((APIKeySecurityScheme) scheme).getIn());
-    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getName().get());
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertEquals(TokenLocation.HEADER,
+      ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertTrue(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
+    assertEquals("X-API-Key", ((APIKeySecurityScheme) scheme).getTokenName().get());
   }
 
   @Test
   public void testAPIKeySecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> apikeySchemes = getSecurityNamesforSchemeName(SecurityScheme.APIKEY, schemes);
+    assertEquals(1, apikeySchemes.size());
+
+    SecurityScheme scheme = schemes.get(apikeySchemes.get(0));
+    assertTrue(scheme instanceof APIKeySecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.APIKeySecurityScheme));
+    assertEquals(TokenLocation.QUERY,
+      ((APIKeySecurityScheme) scheme).getTokenLocation());
+    assertFalse(((APIKeySecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test
+  public void testAPIKeySecuritySchemeInvalidTokenLocation() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
+      "        wotsec:in \"bla\" ;\n" +
+      "  ] .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+    });
+    String expectedMessage = "Invalid security scheme configuration";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadBasicSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> basicSchemes = getSecurityNamesforSchemeName(SecurityScheme.BASIC, schemes);
+    assertEquals(1, basicSchemes.size());
+
+    SecurityScheme scheme = schemes.get(basicSchemes.get(0));
+    assertTrue(scheme instanceof BasicSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertEquals(TokenLocation.HEADER,
+      ((BasicSecurityScheme) scheme).getTokenLocation());
+    assertTrue(((BasicSecurityScheme) scheme).getTokenName().isPresent());
+    assertEquals("Authorization", ((BasicSecurityScheme) scheme).getTokenName().get());
+  }
+
+  @Test
+  public void testBasicSecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BasicSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> basicSchemes = getSecurityNamesforSchemeName(SecurityScheme.BASIC, schemes);
+    assertEquals(1, basicSchemes.size());
+
+    SecurityScheme scheme = schemes.get(basicSchemes.get(0));
+    assertTrue(scheme instanceof BasicSecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BasicSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((BasicSecurityScheme) scheme).getTokenLocation());
+    assertFalse(((BasicSecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test
+  public void testReadDigestSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"nonce\" ;\n" +
+      "        wotsec:qop \"auth-int\" ;\n" +
+      "    ] .\n";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> digestSchemes = getSecurityNamesforSchemeName(SecurityScheme.DIGEST, schemes);
+    assertEquals(1, digestSchemes.size());
+
+    SecurityScheme scheme = schemes.get(digestSchemes.get(0));
+    assertTrue(scheme instanceof DigestSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertEquals(TokenLocation.HEADER,
+      ((DigestSecurityScheme) scheme).getTokenLocation());
+    assertEquals(DigestSecurityScheme.QualityOfProtection.AUTH_INT,
+      ((DigestSecurityScheme) scheme).getQoP());
+    assertTrue(((DigestSecurityScheme) scheme).getTokenName().isPresent());
+    assertEquals("nonce", ((DigestSecurityScheme) scheme).getTokenName().get());
+  }
+
+  @Test
+  public void testDigestSecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> digestSchemes = getSecurityNamesforSchemeName(SecurityScheme.DIGEST, schemes);
+    assertEquals(1, digestSchemes.size());
+
+    SecurityScheme scheme = schemes.get(digestSchemes.get(0));
+    assertTrue(scheme instanceof DigestSecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.DigestSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((DigestSecurityScheme) scheme).getTokenLocation());
+    assertEquals(DigestSecurityScheme.QualityOfProtection.AUTH,
+      ((DigestSecurityScheme) scheme).getQoP());
+    assertFalse(((DigestSecurityScheme) scheme).getTokenName().isPresent());
+  }
+
+  @Test
+  public void testDigestSecuritySchemeInvalidQualityOfProtection() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:DigestSecurityScheme ;\n" +
+      "        wotsec:qop \"bla\" ;\n" +
+      "  ] .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+    });
+    String expectedMessage = "Invalid security scheme configuration";
+    String actualMessage = exception.getMessage();
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadBearerSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme, ex:Type ;\n" +
+      "        wotsec:in \"header\" ;\n" +
+      "        wotsec:name \"Authorization\" ;\n" +
+      "        wotsec:authorization <http://server.example.com> ;\n" +
+      "        wotsec:alg \"ECDSA 256\" ;\n" +
+      "        wotsec:format \"cwt\" ;\n" +
+      "    ] .\n";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> bearerSchemes = getSecurityNamesforSchemeName(SecurityScheme.BEARER, schemes);
+    assertEquals(1, bearerSchemes.size());
+
+    SecurityScheme scheme = schemes.get(bearerSchemes.get(0));
+    assertTrue(scheme instanceof BearerSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+
+    BearerSecurityScheme bearerScheme = (BearerSecurityScheme) scheme;
+    assertEquals(TokenLocation.HEADER, bearerScheme.getTokenLocation());
+    assertEquals("ECDSA 256", bearerScheme.getAlg());
+    assertEquals("cwt", bearerScheme.getFormat());
+    assertTrue(bearerScheme.getAuthorization().isPresent());
+    assertEquals("http://server.example.com", bearerScheme.getAuthorization().get());
+    assertTrue(bearerScheme.getTokenName().isPresent());
+    assertEquals("Authorization", bearerScheme.getTokenName().get());
+  }
+
+  @Test
+  public void testBearerSecuritySchemeDefaultValues() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> digestSchemes = getSecurityNamesforSchemeName(SecurityScheme.BEARER, schemes);
+    assertEquals(1, digestSchemes.size());
+
+    SecurityScheme scheme = schemes.get(digestSchemes.get(0));
+    assertTrue(scheme instanceof BearerSecurityScheme);
+    assertEquals(1, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+
+
+    BearerSecurityScheme bearerScheme = (BearerSecurityScheme) scheme;
+    assertEquals(TokenLocation.HEADER, bearerScheme.getTokenLocation());
+    assertEquals("ES256", bearerScheme.getAlg());
+    assertEquals("jwt", bearerScheme.getFormat());
+    assertFalse(bearerScheme.getAuthorization().isPresent());
+    assertFalse(bearerScheme.getTokenName().isPresent());
+  }
+
+  @Test
+  public void testBearerSecuritySchemeInvalidAuth() {
     String testTD =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    td:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] .";
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:BearerSecurityScheme ;\n" +
+        "        wotsec:authorization \"invalidIRI\" ;\n" +
+        "  ] .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
     assertEquals(1, reader.readSecuritySchemes().size());
-    SecurityScheme scheme = reader.readSecuritySchemes().iterator().next();
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.getSchemeType());
-    assertEquals(TokenLocation.QUERY, ((APIKeySecurityScheme) scheme).getIn());
-    assertFalse(((APIKeySecurityScheme) scheme).getName().isPresent());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.BearerSecurityScheme));
+    assertEquals(TokenLocation.HEADER,
+      ((BearerSecurityScheme) scheme).getTokenLocation());
+    assertFalse(((BearerSecurityScheme) scheme).getAuthorization().isPresent());
   }
 
-  @Test(expected = InvalidTDException.class)
-  public void testAPIKeySecuritySchemeInvalidTokenLocation() {
+  @Test
+  public void testReadPSKSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:PSKSecurityScheme, ex:Type ;\n" +
+      "        wotsec:identity \"192.0.2.1\" ;\n" +
+      "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    Map<String, SecurityScheme> schemes = reader.readSecuritySchemes();
+    assertEquals(1, schemes.size());
+
+    List<String> apikeySchemes = getSecurityNamesforSchemeName(SecurityScheme.PSK, schemes);
+    assertEquals(1, apikeySchemes.size());
+
+    SecurityScheme scheme = schemes.get(apikeySchemes.get(0));
+    assertTrue(scheme instanceof PSKSecurityScheme);
+    assertEquals(2, scheme.getSemanticTypes().size());
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.PSKSecurityScheme));
+    assertTrue(scheme.getSemanticTypes().contains("https://example.org#Type"));
+    assertTrue(((PSKSecurityScheme) scheme).getIdentity().isPresent());
+    assertEquals("192.0.2.1", ((PSKSecurityScheme) scheme).getIdentity().get());
+  }
+
+  @Test
+  public void testReadOAuth2SecurityScheme() {
     String testTD =
       "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
         "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
         "@prefix dct: <http://purl.org/dc/terms/> .\n" +
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
-        "    td:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ;\n" +
-        "        wotsec:in \"bla\" ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:authorization <https://example.com/authorization> ;\n" +
+        "        wotsec:token <https://example.com/token/1> ;\n" +
+        "        wotsec:refresh <https://example.com/token/2> ;\n" +
+        "        wotsec:scopes \"limited\", \"special\", \"c\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
         "  ] .";
 
-    new TDGraphReader(RDFFormat.TURTLE, testTD).readSecuritySchemes();
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+
+    assertEquals(1, reader.readSecuritySchemes().size());
+
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme instanceof OAuth2SecurityScheme);
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals(scheme.getSchemeName(), "oauth2");
+    assertEquals("https://example.com/authorization", ((OAuth2SecurityScheme) scheme).getAuthorization().get());
+    assertEquals("https://example.com/token/1", ((OAuth2SecurityScheme) scheme).getToken().get());
+    assertEquals("https://example.com/token/2", ((OAuth2SecurityScheme) scheme).getRefresh().get());
+    assertEquals(3, ((OAuth2SecurityScheme) scheme).getScopes().get().size());
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("special"));
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("limited"));
+    assertTrue(((OAuth2SecurityScheme) scheme).getScopes().get().contains("c"));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+
+  }
+
+  @Test
+  public void testReadOAuth2SecuritySchemeMissingFlow() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "  ] .";
+
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readSecuritySchemes();
+    });
+
+    String expectedMessage = "Missing or invalid configuration value of type " + WoTSec.flow +
+      " on defining security scheme";
+
+    String actualMessage = String.valueOf(exception.getCause());
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testOAuthSecuritySchemeInvalidAuth() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:authorization \"invalidIRI\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+    assertFalse(((OAuth2SecurityScheme) scheme).getAuthorization().isPresent());
+  }
+
+  @Test
+  public void testOAuthSecuritySchemeInvalidToken() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:token \"invalidIRI\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+    assertFalse(((OAuth2SecurityScheme) scheme).getToken().isPresent());
+  }
+
+  @Test
+  public void testOAuthSecuritySchemeInvalidRefresh() {
+    String testTD =
+      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+        "\n" +
+        "<http://example.org/#thing> a td:Thing ;\n" +
+        "    dct:title \"My Thing\" ;\n" +
+        "    td:hasSecurityConfiguration [ a wotsec:OAuth2SecurityScheme ;\n" +
+        "        wotsec:refresh \"invalidIRI\" ;\n" +
+        "        wotsec:flow  \"code\";\n" +
+        "  ] .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    assertEquals(1, reader.readSecuritySchemes().size());
+    SecurityScheme scheme = reader.readSecuritySchemes().values().iterator().next();
+    assertTrue(scheme.getSemanticTypes().contains(WoTSec.OAuth2SecurityScheme));
+    assertEquals("code", ((OAuth2SecurityScheme) scheme).getFlow());
+    assertFalse(((OAuth2SecurityScheme) scheme).getRefresh().isPresent());
+  }
+
+  @Test
+  public void testReadUnknownSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a ex:UnknownSecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> .";
+
+    TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      reader.readSecuritySchemes();
+    });
+
+    String expectedMessage = "Unknown type of security scheme";
+
+    String actualMessage = String.valueOf(exception.getCause());
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadMissingSecurityScheme() {
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasBase <http://example.org/> .";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTD);
+    });
+
+    String expectedMessage = "Missing mandatory security definitions.";
+
+    String actualMessage = String.valueOf(exception.getMessage());
+    assertTrue(actualMessage.contains(expectedMessage));
   }
 
   @Test
   public void testReadMultipleSecuritySchemes() {
-    String testTD =
-      "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
-        "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
-        "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
-        "@prefix dct: <http://purl.org/dc/terms/> .\n" +
-        "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
-        "\n" +
-        "<http://example.org/#thing> a td:Thing ;\n" +
-        "    td:title \"My Thing\" ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> .";
+    String testTD = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:APIKeySecurityScheme ] ;\n" +
+      "    td:hasBase <http://example.org/> .";
 
     TDGraphReader reader = new TDGraphReader(RDFFormat.TURTLE, testTD);
 
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.NoSecurityScheme)));
-    assertTrue(reader.readSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.APIKeySecurityScheme)));
+    assertEquals(2, reader.readSecuritySchemes().size());
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
+      .getSemanticTypes().contains(WoTSec.NoSecurityScheme)));
+    assertTrue(reader.readSecuritySchemes().values().stream().anyMatch(scheme -> scheme
+      .getSemanticTypes().contains(WoTSec.APIKeySecurityScheme)));
   }
 
   @Test
@@ -1087,8 +1519,8 @@ public class TDGraphReaderTest {
     assertEquals("http://example.org/#thing", td.getThingURI().get());
     assertEquals(1, td.getSemanticTypes().size());
     assertTrue(td.getSemanticTypes().contains("https://www.w3.org/2019/wot/td#Thing"));
-    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSchemeType()
-      .equals(WoTSec.NoSecurityScheme)));
+    assertTrue(td.getSecuritySchemes().stream().anyMatch(scheme -> scheme.getSemanticTypes()
+      .contains(WoTSec.NoSecurityScheme)));
     assertEquals(1, td.getActions().size());
 
     // Check action metadata
@@ -1365,5 +1797,12 @@ public class TDGraphReaderTest {
     assertEquals(target, form.getTarget());
     assertEquals(contentType, form.getContentType());
     assertTrue(form.hasOperationType(operationType));
+  }
+
+  private List<String> getSecurityNamesforSchemeName(String schemeName, Map<String, SecurityScheme> schemes) {
+    return schemes.keySet()
+      .stream()
+      .filter(s -> s.startsWith(schemeName))
+      .collect(Collectors.toList());
   }
 }
