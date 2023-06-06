@@ -163,6 +163,22 @@ public class BaseOperationTest {
   }
 
   @Test
+  public void testNoTimeout() throws IOException {
+    DummyOperation op = new DummyOperation();
+    op.setTimeout(0);
+    long delay = op.getDelay();
+
+    long t1 = System.currentTimeMillis();
+    op.sendRequest();
+    Response r = op.getResponse();
+    long t2 = System.currentTimeMillis();
+
+    assertEquals(Response.ResponseStatus.OK, r.getStatus());
+    assertTrue(t2 - t1 > 0.8 * delay);
+    assertTrue(t2 - t1 < 1.2 * delay);
+  }
+
+  @Test
   public void testCallback() {
     BaseOperation op = new DummyOperation();
     DummyResponseCallback cb = new DummyResponseCallback();

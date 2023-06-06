@@ -44,7 +44,7 @@ public abstract class BaseOperation implements Operation {
   /**
    * Set timeout between request and (first) response.
    *
-   * @param timeout timeout (in seconds)
+   * @param timeout timeout (in seconds). A timeout of 0s is equivalent to no timeout.
    */
   public void setTimeout(long timeout) {
     this.timeout = timeout;
@@ -79,7 +79,7 @@ public abstract class BaseOperation implements Operation {
   @Override
   public Response getResponse() throws NoResponseException {
     try {
-      Optional<Response> r = lastResponse.poll(timeout, TimeUnit.SECONDS);
+      Optional<Response> r = timeout > 0 ? lastResponse.poll(timeout, TimeUnit.SECONDS) : lastResponse.take();
 
       if (r != null && r.isPresent()) return r.get();
       else throw new NoResponseException();
