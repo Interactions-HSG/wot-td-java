@@ -141,7 +141,7 @@ public class TDCoapOperationTest {
   @Test
   public void testNoDefaultBindingForOperationType() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(new Form.Builder("coap://example.org/action")
+      new TDCoapOperation(new Form.Builder("coap://example.org/action")
         .addOperationType(TD.invokeAction).build(),
         TD.readProperty);
     });
