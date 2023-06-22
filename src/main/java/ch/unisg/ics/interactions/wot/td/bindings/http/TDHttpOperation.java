@@ -51,7 +51,6 @@ public class TDHttpOperation extends BaseOperation {
 
   }
 
-  private final Form form;
   private final String target;
 
   private final TDHttpHandler handler;
@@ -60,7 +59,8 @@ public class TDHttpOperation extends BaseOperation {
   private CloseableHttpAsyncClient client;
 
   public TDHttpOperation(Form form, String operationType) {
-    this.form = form;
+    super(form, operationType);
+
     this.target = form.getTarget();
     this.handler = new TDHttpHandler();
     this.client = HttpAsyncClients.createDefault();
@@ -101,6 +101,11 @@ public class TDHttpOperation extends BaseOperation {
   public TDHttpOperation addHeader(String key, String value) {
     this.request.addHeader(key, value);
     return this;
+  }
+
+  @Override
+  protected Object getPayload() {
+    return this.request.getBody();
   }
 
   @Override

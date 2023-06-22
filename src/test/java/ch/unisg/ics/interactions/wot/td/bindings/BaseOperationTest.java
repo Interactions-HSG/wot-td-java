@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
 import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
@@ -16,9 +17,15 @@ public class BaseOperationTest {
 
   private class DummyOperation extends BaseOperation {
 
+    private final static String DUMMY_OP = "executeDummyOp";
+
     private Object payload;
 
     private long delay = 1000;
+
+    public DummyOperation() {
+      super(new Form.Builder("http://example.org/dummy").addOperationType(DUMMY_OP).build(), DUMMY_OP);
+    }
 
     public Object getPayload() {
       return payload;
@@ -45,6 +52,11 @@ public class BaseOperationTest {
           onResponse(r);
         }
       }).start();
+    }
+
+    @Override
+    public Response getResponse() throws NoResponseException {
+      return super.getResponse();
     }
 
     @Override
@@ -205,6 +217,14 @@ public class BaseOperationTest {
     nbOp.sendRequest();
 
     assertEquals(Response.ResponseStatus.OK, nbOp.getResponse().getStatus());
+  }
+
+  @Test
+  public void testToString() {
+    BaseOperation op = new DummyOperation();
+    String str = op.toString();
+
+    assertTrue(str.contains(DummyOperation.DUMMY_OP));
   }
 
 }

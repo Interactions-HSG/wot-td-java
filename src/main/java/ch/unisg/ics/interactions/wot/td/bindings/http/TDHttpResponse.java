@@ -1,7 +1,7 @@
 package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
-import ch.unisg.ics.interactions.wot.td.bindings.Response;
+import ch.unisg.ics.interactions.wot.td.bindings.BaseResponse;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * deserialized based on a <code>DataSchema</code> from a given <code>ThingDescription</code>.
  *
  */
-public class TDHttpResponse implements Response {
+public class TDHttpResponse extends BaseResponse {
   private final static Logger LOGGER = Logger.getLogger(TDHttpResponse.class.getCanonicalName());
 
   private final static Pattern LINK_HEADER_PATTERN = Pattern.compile("\\w*<(?<target>.*)>;\\w*rel=\"(?<rel>.*)\"");

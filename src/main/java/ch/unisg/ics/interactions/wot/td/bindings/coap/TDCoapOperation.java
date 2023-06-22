@@ -52,6 +52,8 @@ public class TDCoapOperation extends BaseOperation {
   private final String target;
 
   public TDCoapOperation(Form form, String operationType) {
+    super(form, operationType);
+
     this.handler = new TDCoapHandler();
     this.target = form.getTarget();
 
@@ -105,6 +107,11 @@ public class TDCoapOperation extends BaseOperation {
   public TDCoapOperation addOption(String key, String value) {
     // TODO Support CoAP options e.g. for observation flag
     return null;
+  }
+
+  @Override
+  protected Object getPayload() {
+    return request.getPayload();
   }
 
   @Override

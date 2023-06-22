@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.io.IOException;
@@ -25,6 +26,16 @@ public abstract class BaseOperation implements Operation {
   public static final long DEFAULT_TIMEOUT = 60l;
 
   /**
+   * Form from which the operation was built.
+   */
+  protected final Form form;
+
+  /**
+   * Operation type for which the operation was built.
+   */
+  protected final String operationType;
+
+  /**
    * Semaphore to block getter if no response sent before call
    * (if an error occurs, an empty value is passed to the semaphore)
    */
@@ -40,6 +51,11 @@ public abstract class BaseOperation implements Operation {
    * the Thing has {@code timeout} seconds to send a response
    */
   private long timeout = DEFAULT_TIMEOUT;
+
+  public BaseOperation(Form form, String operationType) {
+    this.form = form;
+    this.operationType = operationType;
+  }
 
   /**
    * Set timeout between request and (first) response.
@@ -97,6 +113,25 @@ public abstract class BaseOperation implements Operation {
   public void unregisterResponseCallback(ResponseCallback callback) {
     callbacks.remove(callback);
   }
+
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+
+    builder.append(String.format("[%s] Operation type: %s", this.getClass().getSimpleName(), this.operationType));
+    builder.append(String.format(", Target: ", this.form.getTarget()));
+    builder.append(String.format(", Payload: %s", getPayload()));
+
+    return builder.toString();
+  }
+
+  /**
+   * Return a binding-dependent encapsulation of the payload for the request initiating the operation.
+   * <i>This method is used in <code>toString()</code></i>.
+   *
+   * @return the payload, encapsulated in some arbitrary object
+   */
+  protected abstract Object getPayload();
 
   protected boolean validatePayload(DataSchema schema, Object payload) {
     // TODO use schema.validate() instead
