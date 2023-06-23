@@ -2,6 +2,7 @@ package ch.unisg.ics.interactions.wot.td.bindings.http;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
 import ch.unisg.ics.interactions.wot.td.bindings.BaseResponse;
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
@@ -30,7 +31,9 @@ public class TDHttpResponse extends BaseResponse {
   private final SimpleHttpResponse response;
   private Optional<String> payload;
 
-  public TDHttpResponse(SimpleHttpResponse response) {
+  public TDHttpResponse(SimpleHttpResponse response, Operation op) {
+    super(op);
+
     this.response = response;
 
     if (response.getBodyText() == null) {
@@ -81,7 +84,7 @@ public class TDHttpResponse extends BaseResponse {
         Matcher m = LINK_HEADER_PATTERN.matcher(h.getValue());
         if (m.matches()) links.add(new Link(m.group("target"), m.group("rel")));
       }
-    };
+    }
 
     return links;
   }

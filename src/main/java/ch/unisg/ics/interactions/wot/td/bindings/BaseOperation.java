@@ -57,6 +57,16 @@ public abstract class BaseOperation implements Operation {
     this.operationType = operationType;
   }
 
+  @Override
+  public Form getForm() {
+    return this.form;
+  }
+
+  @Override
+  public String getOperationType() {
+    return this.operationType;
+  }
+
   /**
    * Set timeout between request and (first) response.
    *

@@ -42,7 +42,7 @@ public class BaseOperationTest {
     @Override
     public void sendRequest() throws IOException {
       new Thread(() -> {
-        Response r = new DummyResponse();
+        Response r = new DummyResponse(this);
 
         try {
           Thread.sleep(delay);
@@ -115,6 +115,17 @@ public class BaseOperationTest {
 
   private class DummyResponse implements Response {
 
+    private final Operation operation;
+
+    public DummyResponse(Operation op) {
+      this.operation = op;
+    }
+
+    @Override
+    public Operation getOperation() {
+      return operation;
+    }
+
     @Override
     public ResponseStatus getStatus() {
       return ResponseStatus.OK;
@@ -136,7 +147,7 @@ public class BaseOperationTest {
   public void testOnResponse() throws NoResponseException {
     BaseOperation op = new DummyOperation();
 
-    op.onResponse(new DummyResponse());
+    op.onResponse(new DummyResponse(op));
     Response r = op.getResponse();
     assertEquals("ok", r.getPayload().get());
   }
@@ -197,7 +208,7 @@ public class BaseOperationTest {
 
     op.registerResponseCallback(cb);
 
-    op.onResponse(new DummyResponse());
+    op.onResponse(new DummyResponse(op));
     assertEquals("ok", cb.getState());
 
     op.onError();

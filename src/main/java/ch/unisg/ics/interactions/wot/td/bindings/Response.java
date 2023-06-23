@@ -14,6 +14,8 @@ public interface Response {
     UNKNOWN_ERROR
   }
 
+  Operation getOperation();
+
   ResponseStatus getStatus();
 
   Optional<Object> getPayload();

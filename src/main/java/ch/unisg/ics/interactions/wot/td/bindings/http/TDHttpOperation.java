@@ -34,7 +34,7 @@ public class TDHttpOperation extends BaseOperation {
 
     @Override
     public void completed(SimpleHttpResponse r) {
-      onResponse(new TDHttpResponse(r));
+      onResponse(new TDHttpResponse(r, TDHttpOperation.this));
       client.close(CloseMode.GRACEFUL);
     }
 

@@ -56,6 +56,16 @@ public class ProtocolBindingsTest {
   private static class DummyOperation implements Operation {
 
     @Override
+    public Form getForm() {
+      return null;
+    }
+
+    @Override
+    public String getOperationType() {
+      return "executeDummyOp";
+    }
+
+    @Override
     public void setPayload(DataSchema schema, Object payload) {
       // do nothing
     }

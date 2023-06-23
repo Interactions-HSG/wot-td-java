@@ -2,6 +2,7 @@ package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
 import ch.unisg.ics.interactions.wot.td.bindings.BaseResponse;
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
@@ -26,7 +27,8 @@ public class TDCoapResponse extends BaseResponse {
   private final Response response;
   private Optional<String> payload;
 
-  public TDCoapResponse(Response response) {
+  public TDCoapResponse(Response response, Operation op) {
+    super(op);
 
     this.response = response;
 

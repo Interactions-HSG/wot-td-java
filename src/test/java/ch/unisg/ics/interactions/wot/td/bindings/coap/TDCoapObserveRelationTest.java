@@ -1,7 +1,5 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
-import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapObserveRelation;
-import ch.unisg.ics.interactions.wot.td.bindings.coap.TDCoapResponse;
 import org.eclipse.californium.core.CoapObserveRelation;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.Response;
@@ -15,7 +13,7 @@ import static org.mockito.Mockito.*;
 public class TDCoapObserveRelationTest {
 
   private final CoapObserveRelation relationMock = mock(CoapObserveRelation.class);
-  private final TDCoapObserveRelation relation = new TDCoapObserveRelation(relationMock);
+  private final TDCoapObserveRelation relation = new TDCoapObserveRelation(relationMock, null);
 
   private String mockHolder = "no_invocation";
 

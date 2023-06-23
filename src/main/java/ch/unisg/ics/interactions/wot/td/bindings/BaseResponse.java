@@ -4,6 +4,17 @@ import ch.unisg.ics.interactions.wot.td.affordances.Link;
 
 public abstract class BaseResponse implements Response {
 
+  protected final Operation operation;
+
+  public BaseResponse(Operation op) {
+    operation = op;
+  }
+
+  @Override
+  public Operation getOperation() {
+    return operation;
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();

@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import org.eclipse.californium.core.CoapObserveRelation;
 
 /**
@@ -7,10 +8,13 @@ import org.eclipse.californium.core.CoapObserveRelation;
  */
 public class TDCoapObserveRelation {
 
+  private final Operation operation;
+
   private final CoapObserveRelation observeRelation;
 
-  protected TDCoapObserveRelation(CoapObserveRelation observeRelation) {
+  protected TDCoapObserveRelation(CoapObserveRelation observeRelation, Operation op) {
     this.observeRelation = observeRelation;
+    this.operation = op;
   }
 
   /**
@@ -19,7 +23,7 @@ public class TDCoapObserveRelation {
    * @return the current notification wrapped in a <code>TDCoapResponse</code>
    */
   public TDCoapResponse getCurrent() {
-    return new TDCoapResponse(observeRelation.getCurrentResponse());
+    return new TDCoapResponse(observeRelation.getCurrentResponse(), operation);
   }
 
   /**

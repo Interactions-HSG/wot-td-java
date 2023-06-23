@@ -1,5 +1,6 @@
 package ch.unisg.ics.interactions.wot.td.bindings;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.io.IOException;
@@ -11,6 +12,20 @@ import java.io.IOException;
  * and several responses during an {@code observeProperty} operation.
  */
 public interface Operation {
+
+  /**
+   * Return the form used to initiate the operation.
+   *
+   * @return a TD form
+   */
+  Form getForm();
+
+  /**
+   * Return the operation type for the operation, which must be one of the operation types listed in the form.
+   *
+   * @return one of the form's operation types, represented as a full URI (e.g. <code>https://www.w3.org/2019/wot/td#readProperty</code>)
+   */
+  String getOperationType();
 
   /**
    * Fill out the form with a payload that should be a proper instance of the given (JSON) schema.
