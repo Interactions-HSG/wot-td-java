@@ -41,6 +41,8 @@ public final class TD {
   public static final String readProperty = PREFIX + "readProperty";
   public static final String writeProperty = PREFIX + "writeProperty";
   public static final String invokeAction = PREFIX + "invokeAction";
+  public static final String queryAction = PREFIX + "queryAction";
+  public static final String cancelAction = PREFIX + "cancelAction";
   public static final String observeProperty = PREFIX + "observeProperty";
   public static final String unobserveProperty = PREFIX + "unobserveProperty";
   public static final String subscribeEvent = PREFIX + "subscribeEvent";

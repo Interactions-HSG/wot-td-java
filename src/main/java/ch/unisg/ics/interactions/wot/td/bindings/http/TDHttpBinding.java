@@ -7,6 +7,12 @@ import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 
 import java.util.*;
 
+/**
+ * Binding that supports the HTTP Basic Profile, as defined in the
+ * <a href="https://w3c.github.io/wot-profile/#http-basic-profile">WoT Profiles</a> specification.
+ *
+ * TODO readallproperties, writemultipleproperties, queryallactions
+ */
 public class TDHttpBinding extends BaseProtocolBinding {
 
   private final static String HTTP_PROTOCOL = "HTTP";
@@ -22,6 +28,8 @@ public class TDHttpBinding extends BaseProtocolBinding {
     DEFAULT_METHODS.put(TD.readProperty, "GET");
     DEFAULT_METHODS.put(TD.writeProperty, "PUT");
     DEFAULT_METHODS.put(TD.invokeAction, "POST");
+    DEFAULT_METHODS.put(TD.queryAction, "GET");
+    DEFAULT_METHODS.put(TD.cancelAction, "DELETE");
   }
 
   @Override
