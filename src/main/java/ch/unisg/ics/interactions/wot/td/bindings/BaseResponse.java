@@ -2,6 +2,9 @@ package ch.unisg.ics.interactions.wot.td.bindings;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Link;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public abstract class BaseResponse implements Response {
 
   protected final Operation operation;
@@ -19,16 +22,35 @@ public abstract class BaseResponse implements Response {
   public String toString() {
     StringBuilder builder = new StringBuilder();
 
-    builder.append(String.format("[%s] %s", this.getClass().getName(), getStatus()));
+    builder.append(String.format("[%s] %s", this.getClass().getSimpleName(), getStatus()));
 
     builder.append(String.format(", Links: "));
-    for (Link lnk : getLinks()) {
-      builder.append(String.format("<%s>; rel=\"%s\", ", lnk.getTarget(), lnk.getRelationType()));
+
+    if (!getLinks().isEmpty()) {
+      for (Link lnk : getLinks()) {
+        builder.append(String.format("<%s>; rel=\"%s\", ", lnk.getTarget(), lnk.getRelationType()));
+      }
+    } else {
+      builder.append("<none>, ");
     }
 
-    builder.append(String.format("Payload: %s", getPayload()));
+    builder.append("Payload: ");
+
+    if (getPayload().isPresent()) {
+      String str = getOneLineString(getPayload().get());
+      builder.append(str);
+    } else {
+      builder.append("<none>");
+    }
 
     return builder.toString();
+  }
+
+  private String getOneLineString(Object obj) {
+    Pattern p = Pattern.compile("([^\\r\\n]*)\\r?\\n");
+    Matcher m = p.matcher(obj.toString());
+
+    return m.find() ? m.group(1) + "..." : obj.toString();
   }
 
 }
