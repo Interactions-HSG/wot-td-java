@@ -171,6 +171,20 @@ public class TDHttpResponseTest {
   }
 
   @Test
+  public void testArbitraryJSONPayload() {
+    SimpleHttpResponse response = constructHttpResponse("[" + USER_PAYLOAD + "]");
+
+    Object array = new TDHttpResponse(response, null).getPayload().get();
+    assertTrue(array instanceof List);
+
+    Object obj = ((List<Object>) array).get(0);
+    assertTrue(obj instanceof Map);
+
+    Object str = ((Map<String, Object>) obj).get("first_name");
+    assertTrue(str instanceof String);
+  }
+
+  @Test
   public void testHeaders(){
     SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
     response.addHeader("Content-Type", "application/json");

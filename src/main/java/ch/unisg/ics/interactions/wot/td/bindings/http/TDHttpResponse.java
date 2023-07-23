@@ -6,10 +6,11 @@ import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 
 import java.util.*;
@@ -29,7 +30,10 @@ public class TDHttpResponse extends BaseResponse {
   private final static Pattern LINK_HEADER_PATTERN = Pattern.compile("\\w*<(?<target>.*)>;\\w*rel=\"(?<rel>.*)\"");
 
   private final SimpleHttpResponse response;
-  private Optional<String> payload;
+
+  private Optional<JsonElement> jsonPayload;
+
+  private Optional<Object> payload;
 
   public TDHttpResponse(SimpleHttpResponse response, Operation op) {
     super(op);
@@ -37,9 +41,21 @@ public class TDHttpResponse extends BaseResponse {
     this.response = response;
 
     if (response.getBodyText() == null) {
+      this.jsonPayload = Optional.empty();
       this.payload = Optional.empty();
     } else {
-      this.payload = Optional.of(response.getBodyText());
+      String txt = response.getBodyText();
+
+      if (response.getContentType().equals(ContentType.APPLICATION_JSON)) {
+        JsonElement val = JsonParser.parseString(txt);
+
+        this.jsonPayload = Optional.of(val);
+        this.payload = Optional.of(asJavaObject(val));
+      } else {
+        // assuming textual content
+        this.jsonPayload = Optional.of(new JsonPrimitive(txt));
+        this.payload = Optional.of(txt);
+      }
     }
   }
 
@@ -68,9 +84,7 @@ public class TDHttpResponse extends BaseResponse {
 
   @Override
   public Optional<Object> getPayload() {
-    // TODO parse JSON if proper Content-Type
-    if (payload.isPresent()) return Optional.of(payload.get());
-    else return Optional.empty();
+    return payload;
   }
 
   @Override
@@ -90,19 +104,19 @@ public class TDHttpResponse extends BaseResponse {
   }
 
   public Boolean getPayloadAsBoolean() {
-    return new Gson().fromJson(payload.get(), Boolean.class);
+    return (Boolean) payload.get();
   }
 
-  public Integer getPayloadAsInteger() {
-    return new Gson().fromJson(payload.get(), Integer.class);
+  public Long getPayloadAsInteger() {
+    return (Long) payload.get();
   }
 
   public Double getPayloadAsDouble() {
-    return new Gson().fromJson(payload.get(), Double.class);
+    return (Double) payload.get();
   }
 
   public String getPayloadAsString() {
-    return new Gson().fromJson(payload.get(), String.class);
+    return (String) payload.get();
   }
 
   /**
@@ -148,11 +162,53 @@ public class TDHttpResponse extends BaseResponse {
   }
 
   public Object getPayloadWithSchema(DataSchema schema) throws IllegalArgumentException {
-    JsonElement content = JsonParser.parseString(payload.get());
-    return schema.parseJson(content);
+    return schema.parseJson(jsonPayload.get());
   }
 
   public boolean isPayloadNull() {
     return true;
   }
+
+  /**
+   * TODO share implementation with CoAP (and classes in package "schemas").
+   *
+   * @param val a JSON value
+   * @return a Java object using only the Collection API
+   */
+  private Object asJavaObject(JsonElement val) {
+    if (val.isJsonPrimitive()) {
+      JsonPrimitive primitiveVal = val.getAsJsonPrimitive();
+
+      if (primitiveVal.isBoolean()) return val.getAsBoolean();
+      if (primitiveVal.isNumber()) return asDoubleOrLong(val.getAsNumber());
+      else return val.getAsString();
+    } else if (val.isJsonObject()) {
+      Map<String, Object> obj = new HashMap<>();
+
+      for (Map.Entry<String, JsonElement> kv : val.getAsJsonObject().entrySet()) {
+        obj.put(kv.getKey(), asJavaObject(kv.getValue()));
+      }
+
+      return obj;
+    } else if (val.isJsonArray()) {
+      List<Object> array = new ArrayList<>();
+
+      for (JsonElement v : val.getAsJsonArray().asList()) {
+        array.add(asJavaObject(v));
+      }
+
+      return array;
+    } else {
+      return null;
+    }
+  }
+
+  private Number asDoubleOrLong(Number nb) {
+    try {
+      return Long.parseLong(nb.toString());
+    } catch (NumberFormatException e) {
+      return nb.doubleValue();
+    }
+  }
+
 }
