@@ -9,8 +9,8 @@ import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
-import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 
 import java.util.*;
@@ -46,12 +46,12 @@ public class TDHttpResponse extends BaseResponse {
     } else {
       String txt = response.getBodyText();
 
-      if (response.getContentType().equals(ContentType.APPLICATION_JSON)) {
+      try {
         JsonElement val = JsonParser.parseString(txt);
 
         this.jsonPayload = Optional.of(val);
         this.payload = Optional.of(asJavaObject(val));
-      } else {
+      } catch (JsonSyntaxException e) {
         // assuming textual content
         this.jsonPayload = Optional.of(new JsonPrimitive(txt));
         this.payload = Optional.of(txt);
