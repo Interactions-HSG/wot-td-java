@@ -71,6 +71,11 @@ public class ProtocolBindingsTest {
     }
 
     @Override
+    public void setPayload(Object payload) {
+      // do nothing
+    }
+
+    @Override
     public void sendRequest() throws IOException {
       // do nothing
     }

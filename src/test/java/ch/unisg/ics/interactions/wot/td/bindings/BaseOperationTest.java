@@ -228,6 +228,12 @@ public class BaseOperationTest {
     nbOp.sendRequest();
 
     assertEquals(Response.ResponseStatus.OK, nbOp.getResponse().getStatus());
+
+    BaseOperation intNbOp = new DummyOperation();
+    intNbOp.setPayload(new NumberSchema.Builder().build(), 5);
+    intNbOp.sendRequest();
+
+    assertEquals(Response.ResponseStatus.OK, intNbOp.getResponse().getStatus());
   }
 
   @Test

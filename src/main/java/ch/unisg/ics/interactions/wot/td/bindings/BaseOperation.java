@@ -4,7 +4,6 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
@@ -78,7 +77,10 @@ public abstract class BaseOperation implements Operation {
 
   /**
    * Validate the given payload against its schema and call an internal method to set the payload
-   * ({@link BaseOperation#setPayload(Object)}).
+   * ({@link BaseOperation#setJSONPayload(Object)}).
+   *
+   * @param schema JSON schema of the payload
+   * @param payload any payload that can map to a JSON value
    */
   @Override
   public void setPayload(DataSchema schema, Object payload) {
@@ -88,7 +90,17 @@ public abstract class BaseOperation implements Operation {
       throw new IllegalArgumentException(msg);
     }
 
-    setPayload(payload);
+    setJSONPayload(payload);
+  }
+
+  /**
+   * Call an internal method to set the payload ({@link BaseOperation#setJSONPayload(Object)}).
+   *
+   * @param payload any payload that can map to a JSON value
+   */
+  @Override
+  public void setPayload(Object payload) {
+    setJSONPayload(payload);
   }
 
   /**
@@ -155,9 +167,7 @@ public abstract class BaseOperation implements Operation {
                                    || payload instanceof Integer
                                    || payload instanceof Short
                                    || payload instanceof Byte;
-      case DataSchema.NUMBER: return payload instanceof BigDecimal
-                                  || payload instanceof Double
-                                  || payload instanceof Float;
+      case DataSchema.NUMBER: return payload instanceof Number;
       default: return false;
     }
   }
@@ -176,7 +186,7 @@ public abstract class BaseOperation implements Operation {
    *
    * @param payload a payload expected to be equivalent to a JSON value (object, array, string, ...)
    */
-  protected void setPayload(Object payload) {
+  protected void setJSONPayload(Object payload) {
     if (payload instanceof Map) setObjectPayload((Map<String, Object>) payload);
     else if (payload instanceof List) setArrayPayload((List<Object>) payload);
     else if (payload instanceof String) setStringPayload((String) payload);
@@ -187,9 +197,7 @@ public abstract class BaseOperation implements Operation {
           || payload instanceof Short
           || payload instanceof Byte)
       setIntegerPayload(((Number) payload).longValue());
-    else if (payload instanceof BigDecimal
-          || payload instanceof Double
-          || payload instanceof Float)
+    else if (payload instanceof Number)
       setNumberPayload(((Number) payload).doubleValue());
     else throw new IllegalArgumentException(String.format("Given payload type isn't supported: %s", payload.getClass()));
   }

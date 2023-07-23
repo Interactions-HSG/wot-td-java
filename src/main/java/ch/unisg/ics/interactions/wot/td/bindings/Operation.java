@@ -36,12 +36,20 @@ public interface Operation {
   void setPayload(DataSchema schema, Object payload);
 
   /**
+   * Fill out the form with a payload. No schema validation is performed on the payload. The Thing may reject it and return
+   * {@link ch.unisg.ics.interactions.wot.td.bindings.Response.ResponseStatus#CONSUMER_ERROR CONSUMER_ERROR} status.
+   *
+   * @param payload payload to send to the Thing
+   */
+  void setPayload(Object payload);
+
+  /**
    * Start the operation by sending a message to the Thing with payload.
    * When the method returns, the Consumer may assume the request was received by the Thing.
    * This doesn't imply that the Thing already responded, though.
    * To synchronously wait for a response, use {@link Operation#getResponse()}.
    *
-   * @throws IOException if connection to the Thing is lost or if the request is never received the Thing.
+   * @throws IOException if connection to the Thing is lost or if the request is never received by the Thing
    */
   void sendRequest() throws IOException;
 
@@ -67,8 +75,7 @@ public interface Operation {
   /**
    * Remove a callback from the list of registered callbacks for the operation.
    *
-   * @param callback response callback already registered via
-   * {@link Operation#registerResponseCallback(ResponseCallback)}
+   * @param callback response callback already registered via {@link Operation#registerResponseCallback(ResponseCallback)}
    */
   void unregisterResponseCallback(ResponseCallback callback);
 
