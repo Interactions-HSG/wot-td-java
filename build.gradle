@@ -24,7 +24,7 @@ dependencies {
   implementation 'com.google.code.gson:gson:2.10.1'
   implementation 'org.slf4j:slf4j-api:2.0.7'
 
-  implementation('org.eclipse.rdf4j:rdf4j-runtime:3.7.7@pom') {
+  implementation('org.eclipse.rdf4j:rdf4j-runtime:4.3.7@pom') {
     transitive = true;
   }
 
