@@ -1,5 +1,8 @@
-package ch.unisg.ics.interactions.wot.td.clients;
+package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
+import ch.unisg.ics.interactions.wot.td.affordances.Link;
+import ch.unisg.ics.interactions.wot.td.bindings.BaseResponse;
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
@@ -10,24 +13,22 @@ import org.eclipse.californium.core.coap.Option;
 import org.eclipse.californium.core.coap.OptionNumberRegistry;
 import org.eclipse.californium.core.coap.Response;
 
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * Wrapper for a CoAP response received when performing a
- * {@link ch.unisg.ics.interactions.wot.td.clients.TDCoapRequest}. The payload of the response is
+ * {@link TDCoapOperation}. The payload of the response is
  * deserialized based on a <code>DataSchema</code> from a given <code>ThingDescription</code>.
  */
-public class TDCoapResponse {
+public class TDCoapResponse extends BaseResponse {
   private final static Logger LOGGER = Logger.getLogger(TDCoapResponse.class.getCanonicalName());
 
   private final Response response;
   private Optional<String> payload;
 
-  public TDCoapResponse(Response response) {
+  public TDCoapResponse(Response response, Operation op) {
+    super(op);
 
     this.response = response;
 
@@ -57,8 +58,34 @@ public class TDCoapResponse {
     return response.getCode().name();
   }
 
-  public Optional<String> getPayload() {
-    return payload;
+  @Override
+  public ResponseStatus getStatus() {
+    switch (response.getCode().codeClass) {
+      case 2: return ResponseStatus.OK;
+      case 4: return ResponseStatus.CONSUMER_ERROR;
+      case 5: return ResponseStatus.THING_ERROR;
+      default: return ResponseStatus.UNKNOWN_ERROR;
+    }
+  }
+
+  public Optional<Object> getPayload() {
+    if (payload.isPresent()) return Optional.of(payload.get());
+    else return Optional.empty();
+  }
+
+  @Override
+  public Collection<Link> getLinks() {
+    Set<Link> links = new HashSet<>();
+
+    if (response.getRawCode() == 201) {
+      String p = response.getOptions().getLocationPathString();
+      String q = response.getOptions().getLocationQueryString();
+
+      Link link = new Link(String.format("%s?%s", p, q), "");
+      links.add(link);
+    }
+
+    return links;
   }
 
   public Boolean getPayloadAsBoolean() {

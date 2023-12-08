@@ -1,15 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
+
+import java.util.*;
 
 public abstract class SecurityScheme {
 

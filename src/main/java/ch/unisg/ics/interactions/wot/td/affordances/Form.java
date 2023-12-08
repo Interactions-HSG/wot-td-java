@@ -1,8 +1,9 @@
 package ch.unisg.ics.interactions.wot.td.affordances;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import ch.unisg.ics.interactions.wot.td.bindings.BindingNotFoundException;
+import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
+
+import java.util.*;
 
 public class Form {
 
@@ -10,6 +11,7 @@ public class Form {
   private final String contentType;
   private final Set<String> operationTypes;
   private final Optional<String> subProtocol;
+  private final Map<String, Object> additionalProperties = new HashMap<>();
   private Optional<String> methodName;
 
   private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
@@ -19,6 +21,12 @@ public class Form {
     this.contentType = mediaType;
     this.operationTypes = operationTypes;
     this.subProtocol = subProtocol;
+  }
+
+  private Form(String href, Optional<String> methodName, String mediaType, Set<String> operationTypes,
+               Optional<String> subProtocol, Map<String, Object> additionalProperties) {
+    this(href, methodName, mediaType, operationTypes, subProtocol);
+    this.additionalProperties.putAll(additionalProperties);
   }
 
   public Optional<String> getMethodName() {
@@ -39,7 +47,11 @@ public class Form {
       return methodName;
     }
 
-    return ProtocolBinding.getDefaultMethod(target, operationType);
+    try {
+      return ProtocolBindings.getBinding(this).getDefaultMethod(operationType);
+    } catch (BindingNotFoundException e) {
+      return Optional.empty();
+    }
   }
 
   public String getTarget() {
@@ -60,6 +72,10 @@ public class Form {
 
   public Optional<String> getSubProtocol() {
     return subProtocol;
+  }
+
+  public Map<String, Object> getAdditionalProperties() {
+    return additionalProperties;
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation
@@ -84,16 +100,27 @@ public class Form {
       return subProtocol;
     }
 
-    return ProtocolBinding.getDefaultSubProtocol(target, operationType);
+    try {
+      return ProtocolBindings.getBinding(this).getDefaultSubProtocol(operationType);
+    } catch (BindingNotFoundException e) {
+      return Optional.empty();
+    }
   }
 
   public boolean hasProtocol(String protocol) {
-    Optional<String> targetProtocol = ProtocolBinding.getProtocol(target);
-    return targetProtocol.isPresent() && protocol.equals(targetProtocol.get());
+    try {
+      return protocol.equals(ProtocolBindings.getBinding(this).getProtocol());
+    } catch (BindingNotFoundException e) {
+      return false;
+    }
   }
 
   public Optional<String> getProtocol() {
-    return ProtocolBinding.getProtocol(target);
+    try {
+      return Optional.of(ProtocolBindings.getBinding(this).getProtocol());
+    } catch (BindingNotFoundException e) {
+      return Optional.empty();
+    }
   }
 
   // Package-level access, used for setting affordance-specific default values after instantiation
@@ -107,6 +134,7 @@ public class Form {
     private Optional<String> methodName;
     private String contentType;
     private Optional<String> subProtocol;
+    private Map<String, Object> additionalProperties;
 
     public Builder(String target) {
       this.target = target;
@@ -114,6 +142,16 @@ public class Form {
       this.contentType = "application/json";
       this.operationTypes = new HashSet<String>();
       this.subProtocol = Optional.empty();
+      this.additionalProperties = new HashMap<>();
+    }
+
+    public Builder(String target, Form model) {
+      this.target = target;
+      this.methodName = model.getMethodName();
+      this.contentType = model.getContentType();
+      this.operationTypes = model.getOperationTypes();
+      this.subProtocol = model.getSubProtocol();
+      this.additionalProperties = model.getAdditionalProperties();
     }
 
     public Builder addOperationType(String operationType) {
@@ -141,9 +179,14 @@ public class Form {
       return this;
     }
 
+    public Builder addProperty(String key, Object value) {
+      this.additionalProperties.put(key, value);
+      return this;
+    }
+
     public Form build() {
       return new Form(this.target, this.methodName, this.contentType, this.operationTypes,
-        this.subProtocol);
+        this.subProtocol, this.additionalProperties);
     }
 
   }

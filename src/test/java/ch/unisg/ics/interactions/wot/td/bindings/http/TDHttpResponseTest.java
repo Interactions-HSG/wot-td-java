@@ -1,26 +1,16 @@
-package ch.unisg.ics.interactions.wot.td.clients;
+package ch.unisg.ics.interactions.wot.td.bindings.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import ch.unisg.ics.interactions.wot.td.schemas.*;
+import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
-import org.junit.Test;
-
-import ch.unisg.ics.interactions.wot.td.schemas.ArraySchema;
-import ch.unisg.ics.interactions.wot.td.schemas.BooleanSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NullSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
-import ch.unisg.ics.interactions.wot.td.schemas.StringSchema;
+import static org.junit.Assert.*;
 
 public class TDHttpResponseTest {
   private static final String PREFIX = "http://example.org/";
@@ -28,41 +18,41 @@ public class TDHttpResponseTest {
 
   @Test
   public void testNoPayload() {
-    ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
-    Optional<String> payload = new TDHttpResponse(response).getPayload();
+    SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
+    Optional<Object> payload = new TDHttpResponse(response, null).getPayload();
     assertFalse(payload.isPresent());
   }
 
   @Test
   public void testBooleanPayload() {
-    ClassicHttpResponse response = constructHttpResponse(false);
-    assertFalse(new TDHttpResponse(response).getPayloadAsBoolean());
+    SimpleHttpResponse response = constructHttpResponse(false);
+    assertFalse(new TDHttpResponse(response, null).getPayloadAsBoolean());
   }
 
   @Test
   public void testStringPayload() {
-    ClassicHttpResponse response = constructHttpResponse("test");
-    assertEquals("test", new TDHttpResponse(response).getPayloadAsString());
+    SimpleHttpResponse response = constructHttpResponse("test");
+    assertEquals("test", new TDHttpResponse(response, null).getPayloadAsString());
   }
 
   @Test
   public void testIntegerPayload() {
-    ClassicHttpResponse response = constructHttpResponse("101");
-    assertEquals(101, new TDHttpResponse(response).getPayloadAsInteger().intValue());
+    SimpleHttpResponse response = constructHttpResponse("101");
+    assertEquals(101, new TDHttpResponse(response, null).getPayloadAsInteger().intValue());
   }
 
   @Test
   public void testDoublePayload() {
-    ClassicHttpResponse response = constructHttpResponse("101.005");
-    assertEquals(101.005, new TDHttpResponse(response).getPayloadAsDouble().doubleValue(), 0.001);
+    SimpleHttpResponse response = constructHttpResponse("101.005");
+    assertEquals(101.005, new TDHttpResponse(response, null).getPayloadAsDouble().doubleValue(), 0.001);
   }
 
   @Test
   public void testObjectPayload() {
-    ClassicHttpResponse response = constructHttpResponse(USER_PAYLOAD);
+    SimpleHttpResponse response = constructHttpResponse(USER_PAYLOAD);
 
-    ObjectSchema schema = TDHttpRequestTest.USER_SCHEMA;
-    Map<String, Object> payload = new TDHttpResponse(response).getPayloadAsObject(schema);
+    ObjectSchema schema = TDHttpOperationTest.USER_SCHEMA;
+    Map<String, Object> payload = new TDHttpResponse(response, null).getPayloadAsObject(schema);
 
     assertEquals(2, payload.size());
     assertEquals("Andrei", payload.get(PREFIX + "FirstName"));
@@ -71,14 +61,14 @@ public class TDHttpResponseTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testObjectRequiredPayload() {
-    ClassicHttpResponse response = constructHttpResponse("{\"first_name\" : \"Andrei\"}");
-    ObjectSchema schema = TDHttpRequestTest.USER_SCHEMA;
-    new TDHttpResponse(response).getPayloadAsObject(schema);
+    SimpleHttpResponse response = constructHttpResponse("{\"first_name\" : \"Andrei\"}");
+    ObjectSchema schema = TDHttpOperationTest.USER_SCHEMA;
+    new TDHttpResponse(response, null).getPayloadAsObject(schema);
   }
 
   @Test
   public void testNestedObjectPayload() {
-    ClassicHttpResponse response = constructHttpResponse("{\n" +
+    SimpleHttpResponse response = constructHttpResponse("{\n" +
         "  \"count\" : 1,\n" +
         "  \"user\" : " + USER_PAYLOAD + "\n" +
         "}");
@@ -88,10 +78,10 @@ public class TDHttpResponseTest {
         .addProperty("count", new IntegerSchema.Builder()
             .addSemanticType(prefix + "Count")
             .build())
-        .addProperty("user", TDHttpRequestTest.USER_SCHEMA)
+        .addProperty("user", TDHttpOperationTest.USER_SCHEMA)
         .build();
 
-    Map<String, Object> payload = new TDHttpResponse(response).getPayloadAsObject(schema);
+    Map<String, Object> payload = new TDHttpResponse(response, null).getPayloadAsObject(schema);
     assertEquals(2, payload.size());
     assertEquals(1, payload.get(prefix + "Count"));
 
@@ -104,7 +94,7 @@ public class TDHttpResponseTest {
 
   @Test
   public void testPrimitiveArrayPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[\"my_string\", 1.5, 2, true, null]");
+    SimpleHttpResponse response = constructHttpResponse("[\"my_string\", 1.5, 2, true, null]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new StringSchema.Builder().build())
@@ -114,7 +104,7 @@ public class TDHttpResponseTest {
         .addItem(new NullSchema.Builder().build())
         .build();
 
-    List<Object> payload = new TDHttpResponse(response).getPayloadAsArray(schema);
+    List<Object> payload = new TDHttpResponse(response, null).getPayloadAsArray(schema);
     assertEquals(5, payload.size());
     assertTrue(payload.contains("my_string"));
     assertTrue(payload.contains(1.5));
@@ -125,13 +115,13 @@ public class TDHttpResponseTest {
 
   @Test
   public void testIntegerArrayPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[1, 2, 3]");
+    SimpleHttpResponse response = constructHttpResponse("[1, 2, 3]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new IntegerSchema.Builder().build())
         .build();
 
-    List<Object> payload = new TDHttpResponse(response).getPayloadAsArray(schema);
+    List<Object> payload = new TDHttpResponse(response, null).getPayloadAsArray(schema);
     assertEquals(3, payload.size());
     assertTrue(payload.contains(1));
     assertTrue(payload.contains(2));
@@ -140,14 +130,14 @@ public class TDHttpResponseTest {
 
   @Test
   public void testObjectArrayPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[" + USER_PAYLOAD + "]");
+    SimpleHttpResponse response = constructHttpResponse("[" + USER_PAYLOAD + "]");
 
     String prefix = "http://example.org/";
     ArraySchema schema = new ArraySchema.Builder()
-        .addItem(TDHttpRequestTest.USER_SCHEMA)
+        .addItem(TDHttpOperationTest.USER_SCHEMA)
         .build();
 
-    List<Object> payload = new TDHttpResponse(response).getPayloadAsArray(schema);
+    List<Object> payload = new TDHttpResponse(response, null).getPayloadAsArray(schema);
     assertEquals(1, payload.size());
 
     @SuppressWarnings("unchecked")
@@ -158,41 +148,54 @@ public class TDHttpResponseTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testArrayMinItemsPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[1, 2]");
+    SimpleHttpResponse response = constructHttpResponse("[1, 2]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new IntegerSchema.Builder().build())
         .addMinItems(3)
         .build();
 
-    new TDHttpResponse(response).getPayloadAsArray(schema);
+    new TDHttpResponse(response, null).getPayloadAsArray(schema);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testArrayMaxItemsPayload() {
-    ClassicHttpResponse response = constructHttpResponse("[1, 2, 3]");
+    SimpleHttpResponse response = constructHttpResponse("[1, 2, 3]");
 
     ArraySchema schema = new ArraySchema.Builder()
         .addItem(new IntegerSchema.Builder().build())
         .addMaxItems(2)
         .build();
 
-    new TDHttpResponse(response).getPayloadAsArray(schema);
+    new TDHttpResponse(response, null).getPayloadAsArray(schema);
+  }
+
+  @Test
+  public void testArbitraryJSONPayload() {
+    SimpleHttpResponse response = constructHttpResponse("[" + USER_PAYLOAD + "]");
+
+    Object array = new TDHttpResponse(response, null).getPayload().get();
+    assertTrue(array instanceof List);
+
+    Object obj = ((List<Object>) array).get(0);
+    assertTrue(obj instanceof Map);
+
+    Object str = ((Map<String, Object>) obj).get("first_name");
+    assertTrue(str instanceof String);
   }
 
   @Test
   public void testHeaders(){
-    ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
+    SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
     response.addHeader("Content-Type", "application/json");
-    TDHttpResponse tdHttpResponse = new TDHttpResponse(response);
+    TDHttpResponse tdHttpResponse = new TDHttpResponse(response, null);
     Map<String, String> headers = tdHttpResponse.getHeaders();
     assertEquals("application/json", headers.get("Content-Type"));
-
   }
 
-  private ClassicHttpResponse constructHttpResponse(Object payload) {
-    ClassicHttpResponse response = new BasicClassicHttpResponse(HttpStatus.SC_OK);
-    response.setEntity(new StringEntity(String.valueOf(payload)));
+  private SimpleHttpResponse constructHttpResponse(Object payload) {
+    SimpleHttpResponse response = SimpleHttpResponse.create(HttpStatus.SC_OK);
+    response.setBody(String.valueOf(payload), ContentType.APPLICATION_JSON);
     return response;
   }
 

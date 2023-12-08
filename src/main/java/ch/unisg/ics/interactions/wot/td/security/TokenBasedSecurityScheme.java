@@ -1,9 +1,11 @@
 package ch.unisg.ics.interactions.wot.td.security;
 
-import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
 
-import java.util.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class TokenBasedSecurityScheme extends SecurityScheme {
 

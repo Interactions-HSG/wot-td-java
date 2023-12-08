@@ -1,32 +1,20 @@
-package ch.unisg.ics.interactions.wot.td.clients;
+package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
+import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import org.eclipse.californium.core.CoapObserveRelation;
 
 /**
- * Wrapper for a control-handle of a CoAP observe relation.
- * <p>
- * An observe relation is established when sending
- * an asynchronous CoAP observe request, by using
- * {@link TDCoapRequest#establishRelation(TDCoapHandler)} and
- * {@link TDCoapRequest#establishRelationAndWait(TDCoapHandler)}.
- * The <code>TDCoapRequest</code> instance needs to use
- * a form for the sub-protocol "cov:observe".
- * </p>
- *
- * <p>
- * An observe relation can be cancelled reactively or
- * proactively through the API of <code>TDCoapObserveRelation</code>.
- * The relation can also be cancelled by executing a
- * <code>TDCoapRequest</code> with a form of operation
- * type "unobserveproperty".
- * </p>
+ * TODO replace with TDCoapRequest which handle {@code unobserveProperty} and other cancellation operations.
  */
 public class TDCoapObserveRelation {
 
+  private final Operation operation;
+
   private final CoapObserveRelation observeRelation;
 
-  protected TDCoapObserveRelation(CoapObserveRelation observeRelation) {
+  protected TDCoapObserveRelation(CoapObserveRelation observeRelation, Operation op) {
     this.observeRelation = observeRelation;
+    this.operation = op;
   }
 
   /**
@@ -35,7 +23,7 @@ public class TDCoapObserveRelation {
    * @return the current notification wrapped in a <code>TDCoapResponse</code>
    */
   public TDCoapResponse getCurrent() {
-    return new TDCoapResponse(observeRelation.getCurrentResponse());
+    return new TDCoapResponse(observeRelation.getCurrentResponse(), operation);
   }
 
   /**

@@ -1,4 +1,4 @@
-package ch.unisg.ics.interactions.wot.td.clients;
+package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import org.eclipse.californium.core.coap.Option;
@@ -21,7 +21,7 @@ public class TDCoapResponseTest {
   @Test
   public void testNoPayload() {
     Response response = new Response(ResponseCode.VALID);
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertFalse(testResponse.getPayload().isPresent());
@@ -32,7 +32,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload(String.valueOf(false));
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -44,7 +44,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("test");
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -57,7 +57,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload(String.valueOf(101));
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -69,7 +69,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload(String.valueOf(101.005));
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -81,8 +81,8 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload(USER_PAYLOAD);
 
-    ObjectSchema schema = TDCoapRequestTest.USER_SCHEMA;
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    ObjectSchema schema = TDCoapOperationTest.USER_SCHEMA;
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -98,9 +98,9 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("{\"first_name\" : \"Andrei\"}");
 
-    ObjectSchema schema = TDCoapRequestTest.USER_SCHEMA;
+    ObjectSchema schema = TDCoapOperationTest.USER_SCHEMA;
 
-    new TDCoapResponse(response).getPayloadAsObject(schema);
+    new TDCoapResponse(response, null).getPayloadAsObject(schema);
   }
 
   @Test
@@ -111,7 +111,7 @@ public class TDCoapResponseTest {
       .addProperty("count", new IntegerSchema.Builder()
         .addSemanticType(prefix + "Count")
         .build())
-      .addProperty("user", TDCoapRequestTest.USER_SCHEMA)
+      .addProperty("user", TDCoapOperationTest.USER_SCHEMA)
       .build();
 
     Response response = new Response(ResponseCode.VALID);
@@ -120,7 +120,7 @@ public class TDCoapResponseTest {
       "  \"user\" : " + USER_PAYLOAD + "\n" +
       "}");
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -150,7 +150,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("[\"my_string\", 1.5, 2, true, null]");
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -174,7 +174,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("[1, 2, 3]");
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -191,13 +191,13 @@ public class TDCoapResponseTest {
 
     String prefix = "http://example.org/";
     ArraySchema schema = new ArraySchema.Builder()
-      .addItem(TDCoapRequestTest.USER_SCHEMA)
+      .addItem(TDCoapOperationTest.USER_SCHEMA)
       .build();
 
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("[" + USER_PAYLOAD + "]");
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
 
     assertEquals("VALID", testResponse.getResponseCodeName());
     assertTrue(testResponse.getPayload().isPresent());
@@ -222,7 +222,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("[1, 2, 3]");
 
-    new TDCoapResponse(response).getPayloadAsArray(schema);
+    new TDCoapResponse(response, null).getPayloadAsArray(schema);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -236,7 +236,7 @@ public class TDCoapResponseTest {
     Response response = new Response(ResponseCode.VALID);
     response.setPayload("[1, 2, 3]");
 
-    new TDCoapResponse(response).getPayloadAsArray(schema);
+    new TDCoapResponse(response, null).getPayloadAsArray(schema);
   }
 
 
@@ -255,7 +255,7 @@ public class TDCoapResponseTest {
       expectedOptions.put(key, value);
     }
 
-    TDCoapResponse testResponse = new TDCoapResponse(response);
+    TDCoapResponse testResponse = new TDCoapResponse(response, null);
     Map <String, String> testOptions  = testResponse.getOptions();
     assertTrue(testOptions.containsKey("Location-Path"));
     assertEquals(testOptions.get("Location-Path"), "http://example.com");

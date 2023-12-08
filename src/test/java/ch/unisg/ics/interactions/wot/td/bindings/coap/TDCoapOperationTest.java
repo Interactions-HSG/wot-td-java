@@ -1,9 +1,10 @@
-package ch.unisg.ics.interactions.wot.td.clients;
+package ch.unisg.ics.interactions.wot.td.bindings.coap;
 
 import ch.unisg.ics.interactions.wot.td.ThingDescription;
 import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
+import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
 import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
@@ -15,12 +16,11 @@ import org.eclipse.californium.core.coap.Request;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class TDCoapRequestTest {
+public class TDCoapOperationTest {
   private static final String PREFIX = "http://example.org/";
 
   static final ObjectSchema USER_SCHEMA = new ObjectSchema.Builder()
@@ -93,20 +93,6 @@ public class TDCoapRequestTest {
 
   private ThingDescription td;
 
-  static TDCoapHandler getEmptyTDCoAPHandler() {
-    return new TDCoapHandler() {
-      @Override
-      public void handleLoad(TDCoapResponse response) {
-        // empty load handle
-      }
-
-      @Override
-      public void handleError() {
-        // empty error handle
-      }
-    };
-  }
-
   @Before
   public void init() {
     td = TDGraphReader.readFromString(ThingDescription.TDFormat.RDF_TURTLE, FORKLIFT_ROBOT_TD);
@@ -114,14 +100,14 @@ public class TDCoapRequestTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testNoDefaultMethodName() {
-    new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .addOperationType("http://example.org#observeProperty").build(),
       TD.invokeAction);
   }
 
   @Test
   public void testObserveOption() {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    TDCoapOperation coapRequest = new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .setMethodName("GET")
       .addOperationType(TD.observeProperty)
       .addSubProtocol(COV.observe).build(),
@@ -132,7 +118,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testObserveWithDefaultBinding() {
-    TDCoapRequest coapRequest = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    TDCoapOperation coapRequest = new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .addOperationType(TD.observeProperty).build(),
       TD.observeProperty);
 
@@ -142,7 +128,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testToStringNoPayload() {
-    TDCoapRequest request = new TDCoapRequest(new Form.Builder("coap://example.org/action")
+    TDCoapOperation request = new TDCoapOperation(new Form.Builder("coap://example.org/action")
       .setMethodName("POST")
       .addOperationType(TD.invokeAction).build(),
       TD.invokeAction);
@@ -155,17 +141,18 @@ public class TDCoapRequestTest {
   @Test
   public void testNoDefaultBindingForOperationType() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(FORM, TD.readProperty);
+      new TDCoapOperation(new Form.Builder("coap://example.org/action")
+        .addOperationType(TD.invokeAction).build(),
+        TD.readProperty);
     });
 
     String expectedMessage = "Unknown operation type: https://www.w3.org/2019/wot/td#readProperty";
     assertTrue(ex.getMessage().contains(expectedMessage));
   }
 
+  /*
   @Test
-  public void testAsyncObserveRelationWithNoSubprotocol() {
-    TDCoapRequest coapRequest = new TDCoapRequest(FORM, TD.invokeAction);
-
+  public void testAsyncObserveRelationWithNoSubprotocol() {TDCoapRequest coapRequest = new TDCoapRequest(FORM, TD.invokeAction);
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
       coapRequest.establishRelation(getEmptyTDCoAPHandler());
     });
@@ -187,6 +174,7 @@ public class TDCoapRequestTest {
       ".org/coap-binding#observe for the given operation type";
     assertTrue(ex.getMessage().contains(expectedMessage));
   }
+  */
 
   @Test
   public void testWriteProperty() throws UnsupportedOperationException {
@@ -196,9 +184,10 @@ public class TDCoapRequestTest {
     Optional<Form> form = property.get().getFirstFormForOperationType(TD.writeProperty);
     assertTrue(form.isPresent());
 
-    Request request = new TDCoapRequest(form.get(), TD.writeProperty)
-      .setPrimitivePayload(property.get().getDataSchema(), true)
-      .getRequest();
+    TDCoapOperation r = new TDCoapOperation(form.get(), TD.writeProperty);
+    r.setPayload(property.get().getDataSchema(), true);
+
+    Request request = r.getRequest();
 
     assertEquals("PUT", request.getCode().name());
 
@@ -216,12 +205,12 @@ public class TDCoapRequestTest {
     assertTrue(form.isPresent());
 
     Map<String, Object> payloadVariables = new HashMap<>();
-    payloadVariables.put(PREFIX + "SourcePosition", Arrays.asList(30, 50, 70));
-    payloadVariables.put(PREFIX + "TargetPosition", Arrays.asList(30, 60, 70));
+    payloadVariables.put("sourcePosition", Arrays.asList(30, 50, 70));
+    payloadVariables.put("targetPosition", Arrays.asList(30, 60, 70));
 
-    Request request = new TDCoapRequest(form.get(), TD.invokeAction)
-      .setObjectPayload((ObjectSchema) action.get().getInputSchema().get(), payloadVariables)
-      .getRequest();
+    TDCoapOperation r = new TDCoapOperation(form.get(), TD.invokeAction);
+    r.setPayload(action.get().getInputSchema().get(), payloadVariables);
+    Request request = r.getRequest();
 
     assertEquals("PUT", request.getCode().name());
 
@@ -240,7 +229,7 @@ public class TDCoapRequestTest {
 
   @Test
   public void testNoPayload() {
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
+    Request request = new TDCoapOperation(FORM, TD.invokeAction)
       .getRequest();
     assertNull(request.getPayload());
   }
@@ -256,90 +245,50 @@ public class TDCoapRequestTest {
     payloadVariables.put("first_name", "Andrei");
     payloadVariables.put("last_name", "Ciortea");
 
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setObjectPayload(payloadSchema, payloadVariables)
-      .getRequest();
+    TDCoapOperation r = new TDCoapOperation(FORM, TD.invokeAction);
+    r.setPayload(payloadSchema, payloadVariables);
+    Request request = r.getRequest();
 
-    assertUserSchemaPayload(request);
-  }
-
-  @Test
-  public void testMissingProtocolBinding() {
-    Form form = new Form.Builder("x://example.org/toggle")
-      .addOperationType(TD.invokeAction)
-      .build();
-
-    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(form, TD.invokeAction);
-    });
-
-    String expectedMessage = "The CoAP protocol binding cannot be applied with the given form";
-    assertTrue(ex.getMessage().contains(expectedMessage));
-  }
-
-  @Test
-  public void testMismatchedProtocolBinding() {
-    Form form = new Form.Builder("http://example.org/toggle")
-      .addOperationType(TD.invokeAction)
-      .build();
-
-    Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(form, TD.invokeAction);
-    });
-
-    String expectedMessage = "The CoAP protocol binding cannot be applied with the given form";
-    assertTrue(ex.getMessage().contains(expectedMessage));
-  }
-
-  @Test
-  public void testSimpleSemanticObjectPayload() throws JsonSyntaxException {
-    Map<String, Object> payloadVariables = new HashMap<>();
-    payloadVariables.put(PREFIX + "FirstName", "Andrei");
-    payloadVariables.put(PREFIX + "LastName", "Ciortea");
-
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setObjectPayload(USER_SCHEMA, payloadVariables)
-      .getRequest();
-
-    assertEquals("PUT", request.getCode().name());
-    assertEquals(0, request.getURI().compareTo("coap://example.org/toggle"));
     assertUserSchemaPayload(request);
   }
 
   @Test
   public void testInvalidBooleanPayload() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(FORM, TD.invokeAction)
-        .setPrimitivePayload(new BooleanSchema.Builder().build(), "string");
+      new TDCoapOperation(FORM, TD.invokeAction)
+        .setPayload(new BooleanSchema.Builder().build(), "string");
     });
 
-    String expectedMessage = "The payload's datatype does not match StringSchema " +
-      "(payload datatype: boolean)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.String";
+    String providedSchema = "BooleanSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test
   public void testInvalidIntegerPayload() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(FORM, TD.invokeAction)
-        .setPrimitivePayload(new IntegerSchema.Builder().build(), 0.5);
+      new TDCoapOperation(FORM, TD.invokeAction)
+        .setPayload(new IntegerSchema.Builder().build(), 0.5);
     });
 
-    String expectedMessage = "The payload's datatype does not match NumberSchema " +
-      "(payload datatype: integer)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.Double";
+    String providedSchema = "IntegerSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test
   public void testInvalidStringPayload() {
     Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-      new TDCoapRequest(FORM, TD.invokeAction)
-        .setPrimitivePayload(new StringSchema.Builder().build(), true);
+      new TDCoapOperation(FORM, TD.invokeAction)
+        .setPayload(new StringSchema.Builder().build(), true);
     });
 
-    String expectedMessage = "The payload's datatype does not match BooleanSchema " +
-      "(payload datatype: string)";
-    assertTrue(ex.getMessage().contains(expectedMessage));
+    String providedPayloadType = "java.lang.Boolean";
+    String providedSchema = "StringSchema";
+    assertTrue(ex.getMessage().contains(providedPayloadType));
+    assertTrue(ex.getMessage().contains(providedSchema));
   }
 
   @Test
@@ -353,9 +302,9 @@ public class TDCoapRequestTest {
     payloadVariables.add(3);
     payloadVariables.add(5);
 
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setArrayPayload(payloadSchema, payloadVariables)
-      .getRequest();
+    TDCoapOperation r = new TDCoapOperation(FORM, TD.invokeAction);
+    r.setPayload(payloadSchema, payloadVariables);
+    Request request = r.getRequest();
 
     JsonArray payload = JsonParser.parseString(request.getPayloadString()).getAsJsonArray();
     assertEquals(3, payload.size());
@@ -382,12 +331,12 @@ public class TDCoapRequestTest {
     coordinates.add(70);
 
     Map<String, Object> payloadVariables = new HashMap<>();
-    payloadVariables.put(PREFIX + "Speed", 3.5);
-    payloadVariables.put(PREFIX + "3DCoordinates", coordinates);
+    payloadVariables.put("speed", 3.5);
+    payloadVariables.put("coordinates", coordinates);
 
-    Request request = new TDCoapRequest(FORM, TD.invokeAction)
-      .setObjectPayload(payloadSchema, payloadVariables)
-      .getRequest();
+    TDCoapOperation r = new TDCoapOperation(FORM, TD.invokeAction);
+    r.setPayload(payloadSchema, payloadVariables);
+    Request request = r.getRequest();
 
     JsonObject payload = JsonParser.parseString(request.getPayloadString()).getAsJsonObject();
     assertEquals(3.5, payload.get("speed").getAsDouble(), 0.01);
@@ -400,32 +349,17 @@ public class TDCoapRequestTest {
   }
 
   @Test
-  public void testArrayOfSemanticObjectsPayload() {
-    // TODO
-  }
-
-  @Test
-  public void testSemanticObjectWithArrayOfSemanticObjectsPayload() {
-    // TODO
-  }
-
-  @Test
-  public void testValidateArrayPayload() {
-    // TODO
-  }
-
-  @Test
   public void testPathVariable() {
     Form form = new Form.Builder("coap://example.org/{subscriptionId}")
       .setMethodName("PUT")
       .addOperationType(TD.invokeAction)
       .build();
-    Map<String, DataSchema> uriVariables = new HashMap<>();
+    Map<String, DataSchema> uriVariables = new HashMap();
     uriVariables.put("subscriptionId", new StringSchema.Builder().build());
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("subscriptionId", "abc");
-    TDCoapRequest request = new TDCoapRequest(form, TD.invokeAction, uriVariables, parameters);
-    assertEquals("coap://example.org/abc", request.getTarget());
+    TDCoapOperation op = (TDCoapOperation) ProtocolBindings.getBinding(form).bind(form, TD.invokeAction, uriVariables, parameters);
+    assertEquals("coap://example.org/abc", op.getTarget());
   }
 
   private void assertUserSchemaPayload(Request request)

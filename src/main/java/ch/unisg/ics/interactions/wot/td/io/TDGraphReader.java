@@ -562,6 +562,10 @@ public class TDGraphReader {
         builder.addSubProtocol(subprotocolOpt.get());
       }
 
+      for (Map.Entry<String, Object> kv : readAdditionalProperties(formId).entrySet()) {
+        builder.addProperty(kv.getKey(), kv.getValue());
+      }
+
       forms.add(builder.build());
     }
 
@@ -571,6 +575,26 @@ public class TDGraphReader {
     }
 
     return forms;
+  }
+
+  private Map<String, Object> readAdditionalProperties(Resource entityId) {
+    Map<String, Object> kv = new HashMap<>();
+
+    for (Statement st : model.filter(entityId, null, null)) {
+      String k = st.getPredicate().stringValue();
+      String v = st.getObject().stringValue(); // TODO get typed literal?
+
+      if (!k.startsWith(TD.PREFIX)
+        && !k.startsWith(HCTL.PREFIX)
+        && !k.startsWith(WoTSec.PREFIX)
+        && !k.startsWith(JSONSchema.PREFIX)
+        && !k.startsWith(HTV.PREFIX)
+        && !k.startsWith(COV.PREFIX)) {
+        kv.put(k, v);
+      }
+    }
+
+    return kv;
   }
 
   private void readUriVariables(InteractionAffordance
