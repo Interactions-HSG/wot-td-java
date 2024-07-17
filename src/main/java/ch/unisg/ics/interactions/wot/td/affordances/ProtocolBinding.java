@@ -2,7 +2,7 @@ package ch.unisg.ics.interactions.wot.td.affordances;
 
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.collections4.map.MultiKeyMap;
 
 import java.util.HashMap;
 import java.util.Optional;

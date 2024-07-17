@@ -4,8 +4,8 @@ apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 
   withJavadocJar()
   withSourcesJar()
@@ -14,31 +14,36 @@ java {
 version '0.1.1'
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 dependencies {
-  implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-  implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.2.1'
+  implementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
+  implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.3.1'
   implementation 'org.eclipse.californium:californium-core:2.6.3'
-  implementation 'com.google.code.gson:gson:2.10.1'
-  implementation 'org.slf4j:slf4j-api:2.0.9'
+  implementation 'com.google.code.gson:gson:2.11.0'
+  implementation 'org.slf4j:slf4j-api:2.0.13'
 
-  implementation('org.eclipse.rdf4j:rdf4j-runtime:3.7.7@pom') {
-    transitive = true;
-  }
+  implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
+  implementation 'commons-io:commons-io:2.16.1'
+
+  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: '5.0.1'
+  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-jsonld', version: '5.0.1'
+  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-model', version: '5.0.1'
 
   // Use JUnit test framework
   testImplementation 'junit:junit:4.13.2'
-  testImplementation 'org.mockito:mockito-all:1.10.19'
+  // https://mvnrepository.com/artifact/org.mockito/mockito-core
+  testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.12.0'
+  testImplementation 'org.apache.httpcomponents:httpclient:4.5.14'
 
-  runtime 'org.slf4j:slf4j-log4j12:2.0.9'
+  runtimeOnly 'org.slf4j:slf4j-log4j12:2.0.9'
 }
 
 jacocoTestReport {
   reports {
-    xml.enabled true
-    html.enabled false
+    xml.required.set true
+    html.required.set false
   }
 }
 
@@ -54,7 +59,7 @@ publishing {
 
   repositories {
     maven {
-      url = "file://${buildDir}/repo"
+      url = "file://${layout.buildDirectory}/repo"
     }
   }
 }
