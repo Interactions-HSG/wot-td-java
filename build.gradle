@@ -22,7 +22,7 @@ dependencies {
   implementation 'org.apache.httpcomponents.client5:httpclient5-fluent:5.3.1'
   implementation 'org.eclipse.californium:californium-core:2.6.3'
   implementation 'com.google.code.gson:gson:2.11.0'
-  implementation 'org.slf4j:slf4j-api:2.0.13'
+  implementation 'org.slf4j:slf4j-api:2.0.15'
 
   implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
   implementation 'commons-io:commons-io:2.16.1'
