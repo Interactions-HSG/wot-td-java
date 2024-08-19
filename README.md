@@ -145,7 +145,7 @@ String description = new TDGraphWriter(td)
 
 The generated TD is:
 
-```
+```turtle
 @prefix td: <https://www.w3.org/2019/wot/td#> .
 @prefix htv: <http://www.w3.org/2011/http#> .
 @prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
@@ -304,7 +304,7 @@ primitive data type (`BooleanSchema`, `NumberSchema`, `IntegerSchema`, `StringSc
 For instance, a device may provide an action affordance to register its user, where the action
 affordance is specified by the device's TD as follows:
 
-```text
+```turtle
 [ a td:ActionAffordance, onto:LogIn;
   td:name "logIn";
   td:title "Log In";
@@ -372,7 +372,7 @@ We can extract payloads from responses similar to how we set payloads for reques
 
 Given the following property affordance for reading a humidity value using a CoAP device:
 
-```text
+```turtle
 [ a td:PropertyAffordance, miro:Humidity, js:ObjectSchema;
   td:name "humidity";
   td:title "Humidity";
