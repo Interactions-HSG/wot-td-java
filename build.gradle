@@ -28,7 +28,7 @@ dependencies {
   implementation 'commons-io:commons-io:2.16.1'
 
   implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: '5.0.2'
-  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-jsonld', version: '5.0.1'
+  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-jsonld', version: '5.0.2'
   implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-model', version: '5.0.2'
 
   // Use JUnit test framework
