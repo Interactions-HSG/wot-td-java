@@ -192,7 +192,7 @@ public class TDGraphWriterTest {
       .build();
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
-      new TDGraphWriter(td).write();
+      new TDGraphWriter(td).write(RDFFormat.TURTLE);
     });
 
     String expectedMessage = "Invalid security scheme configuration. " + WoTSec.authorization + " value should " +
@@ -263,7 +263,7 @@ public class TDGraphWriterTest {
       .build();
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
-      new TDGraphWriter(td).write();
+      new TDGraphWriter(td).write(RDFFormat.TURTLE);
     });
 
     String expectedMessage = "Invalid security scheme configuration. " + WoTSec.authorization + " value should " +
@@ -284,7 +284,7 @@ public class TDGraphWriterTest {
       .build();
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
-      new TDGraphWriter(td).write();
+      new TDGraphWriter(td).write(RDFFormat.TURTLE);
     });
 
     String expectedMessage = "Invalid security scheme configuration. " + WoTSec.token + " value should " +
@@ -305,7 +305,7 @@ public class TDGraphWriterTest {
       .build();
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
-      new TDGraphWriter(td).write();
+      new TDGraphWriter(td).write(RDFFormat.TURTLE);
     });
 
     String expectedMessage = "Invalid security scheme configuration. " + WoTSec.refresh + " value should " +
@@ -1053,7 +1053,7 @@ public class TDGraphWriterTest {
       .setNamespace("ex", "https://example.org#")
       .setNamespace("saref", "https://saref.etsi.org/core/")
       .setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
-      .write();
+      .write(RDFFormat.TURTLE);
 
     System.out.println(description);
 

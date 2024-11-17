@@ -25,7 +25,7 @@ final class ReadWriteUtils {
       throws RDFParseException, RDFHandlerException, IOException {
     StringReader stringReader = new StringReader(description);
     
-    RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE);
+    RDFParser rdfParser = Rio.createParser(format);
     Model model = new LinkedHashModel();
     rdfParser.setRDFHandler(new StatementCollector(model));
     
