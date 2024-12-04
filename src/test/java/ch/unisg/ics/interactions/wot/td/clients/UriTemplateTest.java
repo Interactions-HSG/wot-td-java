@@ -187,7 +187,6 @@ public class UriTemplateTest {
     ThingDescription td = TDGraphReader.readFromString(ThingDescription.TDFormat.RDF_TURTLE, TDDescription);
     ActionAffordance actionAffordance = td.getActionByName("toggleAffordance").get();
     String path = actionAffordance.getFirstForm().get().getTarget();
-    //String path = "http://example.com/{?p,q}";
     Map<String, DataSchema> uriVariables = new HashMap<>();
     uriVariables.put("p", new StringSchema.Builder().build());
     uriVariables.put("q", new IntegerSchema.Builder().build());
@@ -196,6 +195,5 @@ public class UriTemplateTest {
     map2.put("q", 32);
     String uri = new UriTemplate(path).createUri(uriVariables, map2); //UriTemplate.createUri(path, uriVariables, map2);
     assertEquals("http://mylamp.example.org/toggle?p=abc&q=32", uri);
-
   }
 }
