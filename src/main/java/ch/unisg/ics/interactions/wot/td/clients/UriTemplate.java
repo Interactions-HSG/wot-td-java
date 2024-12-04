@@ -2,6 +2,8 @@ package ch.unisg.ics.interactions.wot.td.clients;
 
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class UriTemplate {
@@ -14,6 +16,11 @@ public class UriTemplate {
   }
 
   static List<String> extract(String path) {
+    try {
+      path = URLDecoder.decode(path, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
     List<String> extracted = new ArrayList<>();
     int n = path.length();
     String s = "";

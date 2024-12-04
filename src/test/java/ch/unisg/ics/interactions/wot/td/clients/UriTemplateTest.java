@@ -1,5 +1,8 @@
 package ch.unisg.ics.interactions.wot.td.clients;
 
+import ch.unisg.ics.interactions.wot.td.ThingDescription;
+import ch.unisg.ics.interactions.wot.td.affordances.ActionAffordance;
+import ch.unisg.ics.interactions.wot.td.io.TDGraphReader;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
 import org.junit.Test;
 
@@ -145,5 +148,52 @@ public class UriTemplateTest {
     map2.put("p", "abc");
     String uri = new UriTemplate(path).createUri(uriVariables, map2);
     assertEquals("http://example.com/abc", uri);
+  }
+
+  @Test
+  public void testFromTD(){
+    String TDDescription = "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
+      "@prefix htv: <http://www.w3.org/2011/http#> .\n" +
+      "@prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .\n" +
+      "@prefix dct: <http://purl.org/dc/terms/> .\n" +
+      "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
+      "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+      "<http://example.org/lamp123> a td:Thing, <https://saref.etsi.org/core/LightSwitch>;\n" +
+      "  td:title \"My Lamp Thing\";\n" +
+      "  td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme\n" +
+      "    ];\n" +
+      "  td:hasActionAffordance [ a td:ActionAffordance,\n" +
+      "        <https://saref.etsi.org/core/ToggleCommand>;\n" +
+      "  td:name   \"toggleAffordance\"; "+
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
+      "      td:name \"p\"    ];"+
+      "      td:hasUriTemplateSchema [ a js:StringSchema;\n"+
+      "      td:name \"q\"    ];"+
+      "      td:title \"Toggle\";\n" +
+      "      td:hasForm [\n" +
+      "          htv:methodName \"PUT\";\n" +
+      "          hctl:hasTarget <http://mylamp.example.org/toggle{?p,q}>;\n" +
+      "          hctl:forContentType \"application/json\";\n" +
+      "          hctl:hasOperationType td:invokeAction\n" +
+      "        ];\n" +
+      "      td:hasInputSchema [ a js:ObjectSchema,\n" +
+      "            <https://saref.etsi.org/core/OnOffState>;\n" +
+      "          js:properties [ a js:BooleanSchema;\n" +
+      "              js:propertyName \"status\"\n" +
+      "            ];\n" +
+      "          js:required \"status\"\n" +
+      "        ]\n" +
+      "    ] .\n";
+    ThingDescription td = TDGraphReader.readFromString(ThingDescription.TDFormat.RDF_TURTLE, TDDescription);
+    ActionAffordance actionAffordance = td.getActionByName("toggleAffordance").get();
+    String path = actionAffordance.getFirstForm().get().getTarget();
+    Map<String, DataSchema> uriVariables = new HashMap<>();
+    uriVariables.put("p", new StringSchema.Builder().build());
+    uriVariables.put("q", new IntegerSchema.Builder().build());
+    Map<String, Object> map2 = new HashMap<>();
+    map2.put("p", "abc");
+    map2.put("q", 32);
+    String uri = new UriTemplate(path).createUri(uriVariables, map2);  
+    assertEquals("http://mylamp.example.org/toggle?p=abc&q=32", uri);
   }
 }
