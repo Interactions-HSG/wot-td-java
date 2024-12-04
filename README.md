@@ -3,7 +3,7 @@
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![build](https://github.com/Interactions-HSG/wot-td-java/workflows/build/badge.svg)
 [![](https://www.code-inspector.com/project/8927/score/svg)](https://frontend.code-inspector.com/public/project/8927/wot-td-java/dashboard)
-[![codecov](https://codecov.io/gh/Interactions-HSG/wot-td-java/branch/dev/graph/badge.svg)](https://codecov.io/gh/Interactions-HSG/wot-td-java)
+[![codecov](https://codecov.io/github/Interactions-HSG/wot-td-java/branch/master/graph/badge.svg?token=PGWQ70IFCI)](https://codecov.io/github/Interactions-HSG/wot-td-java)
 
 WoT-TD-Java is a Java library for the [W3C Web of Things (WoT) Thing Description (TD)](https://www.w3.org/TR/wot-thing-description/).
 
