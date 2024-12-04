@@ -193,7 +193,7 @@ public class UriTemplateTest {
     Map<String, Object> map2 = new HashMap<>();
     map2.put("p", "abc");
     map2.put("q", 32);
-    String uri = new UriTemplate(path).createUri(uriVariables, map2); //UriTemplate.createUri(path, uriVariables, map2);
+    String uri = new UriTemplate(path).createUri(uriVariables, map2);  
     assertEquals("http://mylamp.example.org/toggle?p=abc&q=32", uri);
   }
 }
