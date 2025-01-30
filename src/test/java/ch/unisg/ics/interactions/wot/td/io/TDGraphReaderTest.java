@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -54,7 +55,7 @@ public class TDGraphReaderTest {
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:baseURI <http://example.org/> ;\n" +
       "    td:hasPropertyAffordance [\n" +
       "        a td:PropertyAffordance, js:NumberSchema ;\n" +
       "        td:name \"my_property\" ;\n" +
@@ -218,7 +219,7 @@ public class TDGraphReaderTest {
       "  \"https://www.w3.org/2019/wot/td#hasActionAffordance\" : [ {\n" +
       "    \"@id\" : \"_:node1ea75dfphx112\"\n" +
       "  } ],\n" +
-      "  \"https://www.w3.org/2019/wot/td#hasBase\" : [ {\n" +
+      "  \"https://www.w3.org/2019/wot/td#baseURI\" : [ {\n" +
       "    \"@id\" : \"http://example.org/\"\n" +
       "  } ],\n" +
       "  \"https://www.w3.org/2019/wot/td#hasSecurityConfiguration\" : [ {\n" +
@@ -237,7 +238,7 @@ public class TDGraphReaderTest {
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    td:title \"My Thing\" ;\n" +
       "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-      "    td:hasBase <http://example.org/> ;\n" +
+      "    td:baseURI <http://example.org/> ;\n" +
       "    td:hasActionAffordance [\n" +
       "        a td:ActionAffordance ;\n" +
       "        td:name \"my_action\" ;\n" +
@@ -1208,7 +1209,7 @@ public class TDGraphReaderTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
+        "    td:baseURI <http://example.org/> ;\n" +
         "    td:hasActionAffordance [\n" +
         "        a td:ActionAffordance ;\n" +
         "        td:name \"first_action\" ;\n" +
@@ -1559,13 +1560,13 @@ public class TDGraphReaderTest {
         "\n" +
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> .\n";
+        "    td:baseURI <http://example.org/> .\n";
 
     Exception exception = assertThrows(InvalidTDException.class, () -> {
       TDGraphReader.readFromString(TDFormat.RDF_TURTLE, testTDWithMissingTitle);
     });
 
-    String expectedMessage = "Missing mandatory title.";
+    String expectedMessage = "Missing mandatory title";
     String actualMessage = exception.getMessage();
 
     assertTrue(actualMessage.contains(expectedMessage));
@@ -1600,8 +1601,8 @@ public class TDGraphReaderTest {
 
     StringWriter writer = new StringWriter();
     exception.printStackTrace(new PrintWriter(writer));
-    String expectedMessage = "Invalid property definition.";
-    String expectedRootMessage = "Missing mandatory affordance name.";
+    String expectedMessage = "Invalid property definition";
+    String expectedRootMessage = "Missing mandatory affordance name";
     String actualMessage = writer.toString();
 
     assertTrue(actualMessage.contains(expectedMessage));
@@ -1637,8 +1638,8 @@ public class TDGraphReaderTest {
 
     StringWriter writer = new StringWriter();
     exception.printStackTrace(new PrintWriter(writer));
-    String expectedMessage = "Invalid action definition.";
-    String expectedRootMessage = "Missing mandatory affordance name.";
+    String expectedMessage = "Invalid action definition";
+    String expectedRootMessage = "Missing mandatory affordance name";
     String actualMessage = writer.toString();
 
     assertTrue(actualMessage.contains(expectedMessage));
@@ -1736,7 +1737,7 @@ public class TDGraphReaderTest {
         "<http://example.org/#thing> a td:Thing ;\n" +
         "    td:title \"My Thing\" ;\n" +
         "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
-        "    td:hasBase <http://example.org/> ;\n" +
+        "    td:baseURI <http://example.org/> ;\n" +
         "    td:hasPropertyAffordance [\n" +
         "        a td:PropertyAffordance, js:NumberSchema ;\n" +
         "        td:name \"my_property\" ;\n" +
@@ -1785,10 +1786,134 @@ public class TDGraphReaderTest {
         "            ] ;\n" +
         "            js:required \"boolean_value\" ;\n" +
         "        ]\n" +
-        "    ] ." ;
+        "    ] .";
     ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
     DataSchema uriVariableSchema1 = td.getProperties().get(0).getUriVariables().get().get("name");
-    assertEquals(DataSchema.STRING,uriVariableSchema1.getDatatype());
+    assertEquals(DataSchema.STRING, uriVariableSchema1.getDatatype());
+  }
+
+  @Test
+  public void testReadFormsRelativeURIs() {
+    String TDDescription = PREFIXES +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example-2.org/action> ;\n" +
+      "            hctl:forSubProtocol \"prA\";\n" +
+      "        ] , [\n" +
+      "            hctl:hasTarget <action> ;\n" +
+      "            hctl:forSubProtocol \"prB\";\n" +
+      "        ] ;\n" +
+      "    ];\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance ;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <property> ;\n" +
+      "            hctl:hasOperationType td:writeProperty;\n" +
+      "        ] , [\n" +
+      "            hctl:hasTarget <http://example.org/property-2> ;\n" +
+      "            hctl:hasOperationType td:readProperty;\n" +
+      "        ] ;\n" +
+      "    ];\n" +
+      "    td:baseURI <http://example.org/>.\n";
+    ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
+
+    // Actions
+    List<ActionAffordance> actions = td.getActions();
+    assertEquals(1, actions.size());
+
+    ActionAffordance action = actions.get(0);
+    assertEquals(2, action.getForms().size());
+
+    Optional<Form> actionForm1 = action.getFirstFormForSubProtocol(TD.invokeAction, "prA");
+    Optional<Form> actionForm2 = action.getFirstFormForSubProtocol(TD.invokeAction, "prB");
+    assertTrue(actionForm1.isPresent());
+    assertTrue(actionForm2.isPresent());
+
+    assertEquals("http://example-2.org/action", actionForm1.get().getTarget());
+    assertEquals("http://example.org/action", actionForm2.get().getTarget());
+
+    // Properties
+    List<PropertyAffordance> properties = td.getProperties();
+    assertEquals(1, properties.size());
+
+    PropertyAffordance prop = properties.get(0);
+    assertEquals(2, prop.getForms().size());
+
+    Optional<Form> propForm1 = prop.getFirstFormForOperationType(TD.writeProperty);
+    Optional<Form> propForm2 = prop.getFirstFormForOperationType(TD.readProperty);
+    assertTrue(propForm1.isPresent());
+    assertTrue(propForm2.isPresent());
+
+    assertEquals("http://example.org/property", propForm1.get().getTarget());
+    assertEquals("http://example.org/property-2", propForm2.get().getTarget());
+  }
+
+  @Test
+  public void testReadFormsRelativeWithNoTDBase() {
+    String TDDescription = PREFIXES +
+      "@base <http://example.org/file-base/>." +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <action> ;\n" +
+      "        ] ;\n" +
+      "    ].\n";
+
+    Exception exception = assertThrows(InvalidTDException.class, () -> {
+      TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
+    });
+
+    String expectedMessage = "RDF Syntax Error";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
+  public void testReadRelativeURIsWithBaseAndTDBase() {
+    String TDDescription = PREFIXES +
+      "@base <http://example.org/file-base/>." +
+      "\n" +
+      "<http://example.org/#thing> a td:Thing, <not-an-affordance> ;\n" +
+      "    dct:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasActionAffordance [\n" +
+      "        a td:ActionAffordance ;\n" +
+      "        td:name \"my_action\" ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <action> ;\n" +
+      "        ] ;\n" +
+      "    ];\n" +
+      "    td:baseURI <http://example.org/td-base/>.\n";
+    ThingDescription td = TDGraphReader.readFromString(TDFormat.RDF_TURTLE, TDDescription);
+
+    //TD base
+    assertTrue(td.getBaseURI().isPresent());
+    assertEquals("http://example.org/td-base/", td.getBaseURI().get());
+
+    // Thing type
+    Set<String> types = td.getSemanticTypes();
+    assertTrue(types.contains("http://example.org/file-base/not-an-affordance"));
+
+    //Action
+    List<ActionAffordance> actions = td.getActions();
+    assertEquals(1, actions.size());
+    ActionAffordance action = actions.get(0);
+    assertEquals(1, action.getForms().size());
+    assertTrue(action.getFirstForm().isPresent());
+    assertEquals("http://example.org/td-base/action", action.getFirstForm().get().getTarget());
   }
 
   private void assertForm(Form form, String methodName, String target,
