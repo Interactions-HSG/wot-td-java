@@ -48,7 +48,7 @@ public class TDCoapRequestTest {
     "@prefix ex: <http://example.org/> .\n" +
     "\n" +
     "ex:forkliftRobot a td:Thing ; \n" +
-    "    dct:title \"forkliftRobot\" ;\n" +
+    "    td:title \"forkliftRobot\" ;\n" +
     "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
     "    td:hasPropertyAffordance [\n" +
     "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
@@ -62,7 +62,7 @@ public class TDCoapRequestTest {
     "    td:hasActionAffordance [\n" +
     "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
     "        td:name \"carry\" ;\n" +
-    "        dct:title \"carry\" ; \n" +
+    "        td:title \"carry\" ; \n" +
     "        td:hasForm [\n" +
     "            hctl:hasTarget <coap://example.org/forkliftRobot/carry> ; \n" +
     "            cov:methodName \"PUT\" ; \n" +

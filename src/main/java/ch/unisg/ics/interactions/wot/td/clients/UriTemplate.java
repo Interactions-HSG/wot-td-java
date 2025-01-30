@@ -2,7 +2,10 @@ package ch.unisg.ics.interactions.wot.td.clients;
 
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 
+import java.net.URLDecoder;
 import java.util.*;
+import java.nio.charset.StandardCharsets;
+
 
 public class UriTemplate {
 
@@ -14,6 +17,7 @@ public class UriTemplate {
   }
 
   static List<String> extract(String path) {
+    path = URLDecoder.decode(path, StandardCharsets.UTF_8);
     List<String> extracted = new ArrayList<>();
     int n = path.length();
     String s = "";

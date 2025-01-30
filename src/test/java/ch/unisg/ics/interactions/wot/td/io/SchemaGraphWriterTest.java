@@ -16,7 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -315,10 +317,10 @@ public class SchemaGraphWriterTest {
       "    js:oneOf [ a js:StringSchema, ex:Schema1] ;\n" +
       "] .";
 
-    List<DataSchema> dataSchemas = new ArrayList<>();
-    dataSchemas.add(new ObjectSchema.Builder().addSemanticType("https://example.org/#Schema0").build());
-    dataSchemas.add(new StringSchema.Builder().addSemanticType("https://example.org/#Schema1").build());
-    DataSchema schema = DataSchema.getSuperSchema(dataSchemas);
+    DataSchema schema = new DataSchema.Builder()
+      .oneOf(new ObjectSchema.Builder().addSemanticType("https://example.org/#Schema0").build())
+      .oneOf(new StringSchema.Builder().addSemanticType("https://example.org/#Schema1").build())
+      .build();
 
     assertModel(expectedSchema, schema);
   }

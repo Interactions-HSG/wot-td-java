@@ -22,7 +22,7 @@ public class StringSchema extends DataSchema {
     return element.getAsString();
   }
 
-  public static class Builder extends DataSchema.Builder<StringSchema, StringSchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<StringSchema, StringSchema.Builder> {
 
     @Override
     public StringSchema build() {

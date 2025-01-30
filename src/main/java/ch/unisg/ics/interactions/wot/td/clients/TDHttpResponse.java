@@ -135,8 +135,4 @@ public class TDHttpResponse {
     JsonElement content = JsonParser.parseString(payload.get());
     return schema.parseJson(content);
   }
-
-  public boolean isPayloadNull() {
-    return true;
-  }
 }

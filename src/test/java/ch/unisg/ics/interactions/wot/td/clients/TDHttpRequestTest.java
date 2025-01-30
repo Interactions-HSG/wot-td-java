@@ -54,7 +54,7 @@ public class TDHttpRequestTest {
     "@prefix ex: <http://example.org/> .\n" +
     "\n" +
     "ex:forkliftRobot a td:Thing ; \n" +
-    "    dct:title \"forkliftRobot\" ;\n" +
+    "    td:title \"forkliftRobot\" ;\n" +
     "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
     "    td:hasPropertyAffordance [\n" +
     "        a td:PropertyAffordance, js:BooleanSchema, ex:Status ; \n" +
@@ -65,7 +65,7 @@ public class TDHttpRequestTest {
     "    ] ;\n" +
     "    td:hasActionAffordance [\n" +
     "        a td:ActionAffordance, ex:CarryFromTo ;\n" +
-    "        dct:title \"carry\" ; \n" +
+    "        td:title \"carry\" ; \n" +
     "        td:name \"carry\" ; \n" +
     "        td:hasForm [\n" +
     "            hctl:hasTarget <http://example.org/forkliftRobot/carry> ; \n" +

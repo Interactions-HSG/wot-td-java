@@ -6,7 +6,6 @@ import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.io.InvalidTDException;
 import ch.unisg.ics.interactions.wot.td.security.APIKeySecurityScheme;
-import ch.unisg.ics.interactions.wot.td.security.NoSecurityScheme;
 import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -73,7 +72,7 @@ public class ThingDescriptionTest {
       .build();
 
     commonTd = new ThingDescription.Builder("A Thing")
-      .addSecurityScheme(new NoSecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
       .addProperty(prop0)
       .addProperty(prop1)
       .addAction(action0)
@@ -141,13 +140,13 @@ public class ThingDescriptionTest {
   @Test
   public void testGetFirstSecuritySchemeByType() {
     ThingDescription td = new ThingDescription.Builder("Secured Thing")
-      .addSecurityScheme(new NoSecurityScheme())
-      .addSecurityScheme(new APIKeySecurityScheme())
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
+      .addSecurityScheme("apikey_sc", new APIKeySecurityScheme.Builder().build())
       .build();
 
     Optional<SecurityScheme> scheme = td.getFirstSecuritySchemeByType(WoTSec.APIKeySecurityScheme);
     assertTrue(scheme.isPresent());
-    assertEquals(WoTSec.APIKeySecurityScheme, scheme.get().getSchemeType());
+    assertTrue(SecurityScheme.APIKEY.equals(scheme.get().getSchemeName()));
   }
 
   @Test
@@ -219,6 +218,9 @@ public class ThingDescriptionTest {
     Optional<EventAffordance> event1 = commonTd.getEventByName("smoke-alarm");
     assertTrue(event1.isPresent());
     assertTrue(event1.get().getSemanticTypes().contains("ex:SmokeAlarm"));
+
+    Optional<EventAffordance> event2 = commonTd.getEventByName("unknown-event");
+    assertFalse(event2.isPresent());
   }
 
   @Test

@@ -3,7 +3,7 @@
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![build](https://github.com/Interactions-HSG/wot-td-java/workflows/build/badge.svg)
 [![](https://www.code-inspector.com/project/8927/score/svg)](https://frontend.code-inspector.com/public/project/8927/wot-td-java/dashboard)
-[![codecov](https://codecov.io/gh/Interactions-HSG/wot-td-java/branch/dev/graph/badge.svg)](https://codecov.io/gh/Interactions-HSG/wot-td-java)
+[![codecov](https://codecov.io/github/Interactions-HSG/wot-td-java/branch/master/graph/badge.svg?token=PGWQ70IFCI)](https://codecov.io/github/Interactions-HSG/wot-td-java)
 
 WoT-TD-Java is a Java library for the [W3C Web of Things (WoT) Thing Description (TD)](https://www.w3.org/TR/wot-thing-description/).
 
@@ -55,7 +55,7 @@ Maven:
 
 Gradle:
 ```groovy
-implementation 'com.github.Interactions-HSG:wot-td-java:v0.1.1'
+implementation 'com.github.Interactions-HSG:wot-td-java:v0.1.2'
 ```
 
 Maven:
@@ -63,7 +63,7 @@ Maven:
 <dependency>
   <groupId>com.github.Interactions-HSG</groupId>
   <artifactId>wot-td-java</artifactId>
-  <version>v0.1.1</version>
+  <version>v0.1.2</version>
 </dependency>
 ```
 
@@ -145,7 +145,7 @@ String description = new TDGraphWriter(td)
 
 The generated TD is:
 
-```
+```turtle
 @prefix td: <https://www.w3.org/2019/wot/td#> .
 @prefix htv: <http://www.w3.org/2011/http#> .
 @prefix hctl: <https://www.w3.org/2019/wot/hypermedia#> .
@@ -155,12 +155,12 @@ The generated TD is:
 @prefix saref: <https://saref.etsi.org/core/> .
 
 <http://example.org/lamp123> a td:Thing, saref:LightSwitch;
-  dct:title "My Lamp Thing";
+  td:title "My Lamp Thing";
   td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme
     ];
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
       td:name "toggle";
-      dct:title "Toggle";
+      td:title "Toggle";
       td:hasForm [
           htv:methodName "PUT";
           hctl:hasTarget <http://mylamp.example.org/toggle>;
@@ -304,10 +304,10 @@ primitive data type (`BooleanSchema`, `NumberSchema`, `IntegerSchema`, `StringSc
 For instance, a device may provide an action affordance to register its user, where the action
 affordance is specified by the device's TD as follows:
 
-```text
+```turtle
 [ a td:ActionAffordance, onto:LogIn;
   td:name "logIn";
-  dct:title "Log In";
+  td:title "Log In";
   td:hasForm [
     htv:methodName "POST";
     hctl:hasTarget <https://api.interactions.ics.unisg.ch/xarm/user>;
@@ -372,10 +372,10 @@ We can extract payloads from responses similar to how we set payloads for reques
 
 Given the following property affordance for reading a humidity value using a CoAP device:
 
-```text
+```turtle
 [ a td:PropertyAffordance, miro:Humidity, js:ObjectSchema;
   td:name "humidity";
-  dct:title "Humidity";
+  td:title "Humidity";
   td:hasForm [
       cov:methodName "GET";
       hctl:hasTarget <coap://130.82.171.10:5683/humidity>;

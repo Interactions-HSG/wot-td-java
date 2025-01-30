@@ -43,7 +43,7 @@ public class ArraySchema extends DataSchema {
 
   public Optional<DataSchema> getFirstItemSchema(String datatype) {
     for (DataSchema schema : items) {
-      if (schema.getDatatype() == datatype) {
+      if (schema.getDatatype().equals(datatype)) {
         return Optional.of(schema);
       }
     }
@@ -112,7 +112,7 @@ public class ArraySchema extends DataSchema {
     return itemSchema;
   }
 
-  public static class Builder extends DataSchema.Builder<ArraySchema, ArraySchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<ArraySchema, ArraySchema.Builder> {
     final private List<DataSchema> items;
     private Optional<Integer> minItems;
     private Optional<Integer> maxItems;

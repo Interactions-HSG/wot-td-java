@@ -32,7 +32,7 @@ public class IntegerSchema extends NumberSchema {
     return element.getAsInt();
   }
 
-  public static class Builder extends DataSchema.Builder<IntegerSchema, IntegerSchema.Builder> {
+  public static final class Builder extends DataSchema.JsonSchemaBuilder<IntegerSchema, IntegerSchema.Builder> {
     private Optional<Double> minimum;
     private Optional<Double> maximum;
 

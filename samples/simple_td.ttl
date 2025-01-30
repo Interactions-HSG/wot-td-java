@@ -6,7 +6,7 @@
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
 
 <http://example.org/#thing> a td:Thing ;
-    dct:title "My Thing" ;
+    td:title "My Thing" ;
     td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;
     td:baseURI <http://example.org/> ;
     td:hasActionAffordance [
