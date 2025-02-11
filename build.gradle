@@ -27,7 +27,7 @@ dependencies {
   implementation 'org.apache.commons:commons-collections4:4.5.0-M3'
   implementation 'commons-io:commons-io:2.18.0'
 
-  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: '5.1.1'
+  implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-turtle', version: '5.1.2'
   implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-rio-jsonld', version: '5.1.1'
   implementation group: 'org.eclipse.rdf4j', name: 'rdf4j-model', version: '5.1.1'
 
