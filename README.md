@@ -17,11 +17,12 @@ What you can do with the current version:
 
 **Table of Contents**
 - [Getting Started](#getting-started)
-- [Retrieving and Parsing WoT TDs](#reading-tds)
-- [Creating and Writing WoT TDs](#creating-and-writing-tds)
+- [Retrieving and Parsing WoT TDs](#retrieving-and-parsing-wot-tds)
+- [Creating and Writing WoT TDs](#creating-and-writing-wot-tds)
 - [Executing HTTP Requests](#executing-http-requests)
 - [Executing CoAP Requests](#executing-coap-requests)
 - [Working with Semantic Payloads](#working-with-semantic-payloads)
+- [Working with URI Templates](#working-with-uri-templates)
 
 
 ## Getting Started
@@ -425,3 +426,48 @@ payload.get("https://interactions.ics.unisg.ch/mirogate#HumidityValue");
 
 The values for primitive data types are wrapped in equivalent Java objects. In this example, the humidity
 value is retrieved as a `Double`.
+
+## Working with URI Templates
+
+### Defining URI Template variables in WoT TDs
+
+Variables of target URIs can be defined within the scope of an affordance. [URI variables](https://www.w3.org/TR/wot-thing-description11/#form-uriVariables) are defined as data schemas based on the [Data Schema Vocabulary Definitions](https://www.w3.org/TR/wot-thing-description/#sec-data-schema-vocabulary-definition), and target URIs are defined as templates based on [RFC6570](https://www.rfc-editor.org/rfc/rfc6570). A URI variabe cannot be an object schema or an array schema since it needs to be serialized as a string in the target URI upon exploiting the affordance.
+
+We can construct an affordance with URI variables as follows:
+
+```java
+Form toggleForm = new Form.Builder("http://mylamp.example.org/{bulb}/toggle")
+  .setMethodName("PUT")
+  .build();
+
+ActionAffordance.Builder("toggle", toggleForm)
+  .addTitle("Toggle")
+  .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
+  .addUriVariable("name", new IntegerSchema.Builder().build())
+  .build();
+```
+
+The above code snippet creates a `toggle` action with a `bulb` URI variable of type `IntegerSchema`. 
+
+### Specifying values for URI Template variables
+
+We can use a form with URI Template to create and execute a request for given values of the URI variables. To do so, we will need to create a map between the URI variables and our values.
+
+```java
+Map<String, DataSchema> uriValues = new HashMap<>();
+uriValues.put("bulb", 2);
+```
+
+After we specify the values for the URI variables, we need to set them to the target URI on the request with their data schema definitions from the TD:
+
+```java
+// Retrieve the URI variable data schemas from the action affordance
+Optional<Map<String, DataSchema>> uriVariables = action.getUriVariables();
+
+if (uriVariables.isPresent()){
+  TDHttpRequest request = new TDHttpRequest(form, TD.invokeAction, uriVariables, uriValues);
+}
+```
+WoT-TD-Java will use the form, the URI variable data schemas, and the provided values to construct the target URI. In our example, the constructed URI will be http://mylamp.example.org/2/toggle.
+
+
