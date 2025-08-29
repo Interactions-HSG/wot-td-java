@@ -9,8 +9,12 @@ import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenL
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.DefaultConnectionKeepAliveStrategy;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
@@ -68,7 +72,11 @@ public class TDHttpRequest {
   }
 
   public TDHttpResponse execute() throws IOException {
-    HttpClient client = HttpClients.createDefault();
+    CloseableHttpClient client = HttpClients.custom()
+      .setConnectionManager(new PoolingHttpClientConnectionManager())
+      .setConnectionReuseStrategy(DefaultConnectionReuseStrategy.INSTANCE)
+      .setKeepAliveStrategy(DefaultConnectionKeepAliveStrategy.INSTANCE)
+      .build();
     HttpResponse response = client.execute(request);
     return new TDHttpResponse((ClassicHttpResponse) response);
   }
