@@ -216,7 +216,7 @@ public class InteractionAffordance {
     }
 
     @SuppressWarnings("unchecked")
-    public S setComment(String comment) {
+    public S addComment(String comment) {
       this.comment = Optional.of(comment);
       return (S) this;
     }

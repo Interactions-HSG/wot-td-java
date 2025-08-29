@@ -1060,7 +1060,7 @@ public class TDGraphWriterTest {
     PropertyAffordance property = new PropertyAffordance.Builder("my_property",
       new Form.Builder("http://example.org/count").build())
       .addDataSchema(new IntegerSchema.Builder().build())
-      .setComment("This is my thing.")
+      .addComment("This is my thing.")
       .build();
 
     ThingDescription td = new ThingDescription.Builder(THING_TITLE)

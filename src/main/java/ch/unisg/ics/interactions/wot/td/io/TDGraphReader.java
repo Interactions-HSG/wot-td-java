@@ -514,7 +514,7 @@ public class TDGraphReader {
     /* Read comment */
     Optional<Literal> comment = Models.objectLiteral(model.filter(affordanceId,
       RDFS.COMMENT, null));
-    comment.ifPresent(literal -> builder.setComment(literal.stringValue()));
+    comment.ifPresent(literal -> builder.addComment(literal.stringValue()));
   }
 
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
