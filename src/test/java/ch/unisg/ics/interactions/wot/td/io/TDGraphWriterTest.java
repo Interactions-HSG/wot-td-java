@@ -6,8 +6,8 @@ import ch.unisg.ics.interactions.wot.td.affordances.EventAffordance;
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
 import ch.unisg.ics.interactions.wot.td.affordances.PropertyAffordance;
 import ch.unisg.ics.interactions.wot.td.schemas.*;
-import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.security.*;
+import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -1036,6 +1036,40 @@ public class TDGraphWriterTest {
       .build();
 
     assertIsomorphicGraphs(testTD,td);
+  }
+
+  @Test
+  public void testWriteAffordanceComment() throws RDFParseException, RDFHandlerException,
+    IOException {
+    String testTD = PREFIXES +
+      "<http://example.org/#thing> a td:Thing ;\n" +
+      "    td:title \"My Thing\" ;\n" +
+      "    td:hasSecurityConfiguration [ a wotsec:NoSecurityScheme ] ;\n" +
+      "    td:hasPropertyAffordance [\n" +
+      "        a td:PropertyAffordance, js:IntegerSchema;\n" +
+      "        td:name \"my_property\" ;\n" +
+      "        rdfs:comment \"This is my thing.\" ;\n" +
+      "        td:isObservable false ;\n" +
+      "        td:hasForm [\n" +
+      "            hctl:hasTarget <http://example.org/count> ;\n" +
+      "            hctl:forContentType \"application/json\";\n" +
+      "            hctl:hasOperationType td:readProperty, td:writeProperty;\n" +
+      "        ] ;\n" +
+      "    ] .";
+
+    PropertyAffordance property = new PropertyAffordance.Builder("my_property",
+      new Form.Builder("http://example.org/count").build())
+      .addDataSchema(new IntegerSchema.Builder().build())
+      .addComment("This is my thing.")
+      .build();
+
+    ThingDescription td = new ThingDescription.Builder(THING_TITLE)
+      .addThingURI(THING_IRI)
+      .addSecurityScheme("nosec_sc", SecurityScheme.getNoSecurityScheme())
+      .addProperty(property)
+      .build();
+
+    assertIsomorphicGraphs(testTD, td);
   }
 
   private void assertIsomorphicGraphs(String expectedTD, ThingDescription td) throws RDFParseException,

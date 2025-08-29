@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.util.*;
@@ -243,6 +244,10 @@ public class TDGraphWriter {
 
     if (affordance.getTitle().isPresent()) {
       graphBuilder.add(affordanceId, rdf.createIRI(TD.title), affordance.getTitle().get());
+    }
+
+    if (affordance.getComment().isPresent()) {
+      graphBuilder.add(affordanceId, RDFS.COMMENT, affordance.getComment().get());
     }
 
     addFormsForInteraction(affordanceId, affordance);

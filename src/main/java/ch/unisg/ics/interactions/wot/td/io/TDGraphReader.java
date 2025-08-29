@@ -14,6 +14,7 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
@@ -508,10 +509,12 @@ public class TDGraphReader {
     /* Read title */
     Optional<Literal> title = Models.objectLiteral(model.filter(affordanceId,
       rdf.createIRI(TD.title), null));
+    title.ifPresent(literal -> builder.addTitle(literal.stringValue()));
 
-    if (title.isPresent()) {
-      builder.addTitle(title.get().stringValue());
-    }
+    /* Read comment */
+    Optional<Literal> comment = Models.objectLiteral(model.filter(affordanceId,
+      RDFS.COMMENT, null));
+    comment.ifPresent(literal -> builder.addComment(literal.stringValue()));
   }
 
   private List<Form> readForms(Resource affordanceId, String affordanceType) {
