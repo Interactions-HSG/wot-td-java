@@ -20,11 +20,12 @@ public class InteractionAffordance {
   protected Optional<String> title;
   protected List<String> types;
   protected List<Form> forms;
-
   protected Optional<Map<String, DataSchema>> uriVariables;
+  protected Optional<String> comment;
 
   protected InteractionAffordance(String name, Optional<String> title, List<String> types,
-                                  List<Form> forms, Optional<Map<String,DataSchema>> uriVariables) {
+                                  List<Form> forms, Optional<Map<String, DataSchema>> uriVariables,
+                                  Optional<String> comment) {
     if (name == null) {
       throw new InvalidTDException("The name of an affordance cannot be null.");
     }
@@ -33,6 +34,7 @@ public class InteractionAffordance {
     this.types = types;
     this.forms = forms;
     this.uriVariables = uriVariables;
+    this.comment = comment;
   }
 
   public String getName() {
@@ -130,6 +132,10 @@ public class InteractionAffordance {
     return true;
   }
 
+  public Optional<String> getComment() {
+    return this.comment;
+  }
+
   /**
    * Abstract builder for interaction affordances.
    */
@@ -139,6 +145,7 @@ public class InteractionAffordance {
     protected List<String> types;
     protected List<Form> forms;
     protected Optional<Map<String,DataSchema>> uriVariables;
+    protected Optional<String> comment;
 
     protected Builder(String name, Form form) {
       this(name, new ArrayList<Form>(Arrays.asList(form)));
@@ -150,6 +157,7 @@ public class InteractionAffordance {
       this.types = new ArrayList<String>();
       this.forms = forms;
       this.uriVariables = Optional.empty();
+      this.comment = Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -204,6 +212,12 @@ public class InteractionAffordance {
         addUriVariable(key,variables.get(key));
 
       }
+      return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S addComment(String comment) {
+      this.comment = Optional.of(comment);
       return (S) this;
     }
 
