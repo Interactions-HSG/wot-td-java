@@ -108,6 +108,7 @@ The above code snippet creates a `ThingDescription` for a lamp with the title `M
 ActionAffordance toggle = new ActionAffordance.Builder("toggle", toggleForm)
     .addTitle("Toggle")
     .addSemanticType("https://saref.etsi.org/core/ToggleCommand")
+    .addComment("This action changes the state of my lamp.")
     .addInputSchema(new ObjectSchema.Builder()
         .addSemanticType("https://saref.etsi.org/core/OnOffState")
         .addProperty("status", new BooleanSchema.Builder()
@@ -139,6 +140,7 @@ String description = new TDGraphWriter(td)
         .setNamespace("wotsec", "https://www.w3.org/2019/wot/security#")
         .setNamespace("dct", "http://purl.org/dc/terms/")
         .setNamespace("js", "https://www.w3.org/2019/wot/json-schema#")
+        .setNamespace("rdfs", "http://www.w3.org/2000/01/rdf-schema#")
         .setNamespace("saref", "https://saref.etsi.org/core/")
         .write();
 ```
@@ -152,6 +154,7 @@ The generated TD is:
 @prefix wotsec: <https://www.w3.org/2019/wot/security#> .
 @prefix dct: <http://purl.org/dc/terms/> .
 @prefix js: <https://www.w3.org/2019/wot/json-schema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix saref: <https://saref.etsi.org/core/> .
 
 <http://example.org/lamp123> a td:Thing, saref:LightSwitch;
@@ -161,6 +164,7 @@ The generated TD is:
   td:hasActionAffordance [ a td:ActionAffordance, saref:ToggleCommand;
       td:name "toggle";
       td:title "Toggle";
+      rdfs:comment "This action changes the state of my lamp.";
       td:hasForm [
           htv:methodName "PUT";
           hctl:hasTarget <http://mylamp.example.org/toggle>;
