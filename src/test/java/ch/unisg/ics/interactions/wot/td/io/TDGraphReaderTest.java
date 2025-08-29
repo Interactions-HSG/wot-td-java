@@ -12,7 +12,6 @@ import ch.unisg.ics.interactions.wot.td.schemas.NumberSchema;
 import ch.unisg.ics.interactions.wot.td.schemas.ObjectSchema;
 import ch.unisg.ics.interactions.wot.td.security.*;
 import ch.unisg.ics.interactions.wot.td.security.TokenBasedSecurityScheme.TokenLocation;
-import ch.unisg.ics.interactions.wot.td.security.SecurityScheme;
 import ch.unisg.ics.interactions.wot.td.vocabularies.COV;
 import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
 import ch.unisg.ics.interactions.wot.td.vocabularies.WoTSec;
@@ -41,7 +40,8 @@ public class TDGraphReaderTest {
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
       "@prefix saref: <https://saref.etsi.org/core/> .\n" +
       "@prefix ex: <https://example.org#> .\n" +
-      "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
+      "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n" +
+      "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n";
 
   private static final String TEST_SIMPLE_TD =
     "@prefix td: <https://www.w3.org/2019/wot/td#> .\n" +
@@ -50,6 +50,7 @@ public class TDGraphReaderTest {
       "@prefix dct: <http://purl.org/dc/terms/> .\n" +
       "@prefix wotsec: <https://www.w3.org/2019/wot/security#> .\n" +
       "@prefix js: <https://www.w3.org/2019/wot/json-schema#> .\n" +
+      "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" +
       "\n" +
       "<http://example.org/#thing> a td:Thing ;\n" +
       "    td:title \"My Thing\" ;\n" +
@@ -78,6 +79,7 @@ public class TDGraphReaderTest {
       "        a td:ActionAffordance ;\n" +
       "        td:name \"my_action\" ;\n" +
       "        td:title \"My Action\" ;\n" +
+      "        rdfs:comment \"This action somehow affects the state of the environment.\" ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
       "            hctl:hasTarget <http://example.org/action> ;\n" +
@@ -107,6 +109,7 @@ public class TDGraphReaderTest {
       "        a td:EventAffordance ;\n" +
       "        td:name \"my_event\" ;\n" +
       "        td:title \"My Event\" ;\n" +
+      "        rdfs:comment \"This event will notify you about something.\" ;\n" +
       "        td:hasForm [\n" +
       "            htv:methodName \"PUT\" ;\n" +
       "            hctl:hasTarget <http://example.org/event> ;\n" +
@@ -808,6 +811,7 @@ public class TDGraphReaderTest {
     assertTrue(property.isObservable());
     assertEquals(2, property.getSemanticTypes().size());
     assertEquals(2, property.getForms().size());
+    assertFalse(property.getComment().isPresent());
 
     Optional<Form> form = property.getFirstFormForOperationType(TD.readProperty);
     assertTrue(form.isPresent());
@@ -1189,6 +1193,10 @@ public class TDGraphReaderTest {
     assertEquals(1, action.getSemanticTypes().size());
     assertEquals(TD.ActionAffordance, action.getSemanticTypes().get(0));
 
+    assertTrue(action.getComment().isPresent());
+    assertEquals("This action somehow affects the state of the environment.",
+      action.getComment().get());
+
     assertEquals(1, action.getForms().size());
     Form form = action.getForms().get(0);
 
@@ -1338,6 +1346,10 @@ public class TDGraphReaderTest {
 
     Optional<Form> form = event.getFirstFormForOperationType(TD.subscribeEvent);
     assertTrue(form.isPresent());
+
+    assertTrue(event.getComment().isPresent());
+    assertEquals("This event will notify you about something.",
+      event.getComment().get());
 
     /* Test subscription schema */
     Optional<DataSchema> subscription = event.getSubscriptionSchema();

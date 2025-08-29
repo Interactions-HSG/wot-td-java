@@ -11,10 +11,10 @@ public class EventAffordance extends InteractionAffordance {
   private final Optional<DataSchema> cancellation;
 
   private EventAffordance(String name, Optional<String> title, List<String> types,
-                          List<Form> forms, Optional<Map<String,DataSchema>> uriVariables,
+                          List<Form> forms, Optional<Map<String, DataSchema>> uriVariables, Optional<String> comment,
                           Optional<DataSchema> subscription, Optional<DataSchema> notification,
                           Optional<DataSchema> cancellation) {
-    super(name, title, types, forms, uriVariables);
+    super(name, title, types, forms, uriVariables, comment);
     this.subscription = subscription;
     this.notification = notification;
     this.cancellation = cancellation;
@@ -73,7 +73,8 @@ public class EventAffordance extends InteractionAffordance {
 
     @Override
     public EventAffordance build() {
-      return new EventAffordance(name, title, types, forms, uriVariables, subscription, notification, cancellation);
+      return new EventAffordance(name, title, types, forms, uriVariables, comment, subscription, notification,
+        cancellation);
     }
   }
 }
