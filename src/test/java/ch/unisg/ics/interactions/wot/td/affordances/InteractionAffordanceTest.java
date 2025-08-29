@@ -9,9 +9,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class InteractionAffordanceTest {
   private static final String prefix = "http://example.org";
@@ -39,13 +37,14 @@ public class InteractionAffordanceTest {
 
     test_affordance = new InteractionAffordance("my_affordance",
       Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"),
-      Arrays.asList(form1, form2, form3, form4), Optional.empty());
+      Arrays.asList(form1, form2, form3, form4), Optional.empty(), Optional.of("my comment"));
   }
 
   @Test(expected = InvalidTDException.class)
   public void testAffordanceWithoutNameThrowsException() {
     new InteractionAffordance(null,
-      Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), null, Optional.empty());
+      Optional.of("My Affordance"), Arrays.asList(prefix + "Type1", prefix + "Type2"), null,
+      Optional.empty(), Optional.empty());
   }
 
   @Test
@@ -200,5 +199,11 @@ public class InteractionAffordanceTest {
   public void testNoFirstFormForOperationType() {
     assertFalse(test_affordance.getFirstFormForOperationType(TD.invokeAction)
       .isPresent());
+  }
+
+  @Test
+  public void testGetComment() {
+    assertTrue(test_affordance.getComment().isPresent());
+    assertEquals("my comment", test_affordance.getComment().get());
   }
 }
