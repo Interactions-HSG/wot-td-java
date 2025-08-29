@@ -17,8 +17,8 @@ What you can do with the current version:
 
 **Table of Contents**
 - [Getting Started](#getting-started)
-- [Retrieving and Parsing WoT TDs](#reading-tds)
-- [Creating and Writing WoT TDs](#creating-and-writing-tds)
+- [Retrieving and Parsing WoT TDs](#retrieving-and-parsing-wot-tds)
+- [Creating and Writing WoT TDs](#creating-and-writing-wot-tds)
 - [Executing HTTP Requests](#executing-http-requests)
 - [Executing CoAP Requests](#executing-coap-requests)
 - [Working with Semantic Payloads](#working-with-semantic-payloads)
