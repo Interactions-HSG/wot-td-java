@@ -11,8 +11,6 @@ java {
   withSourcesJar()
 }
 
-version '0.1.1'
-
 repositories {
   mavenCentral()
 }
@@ -53,7 +51,6 @@ publishing {
       from components.java
       groupId 'ch.unisg.ics.interactions'
       artifactId 'wot-td-java'
-      version '0.1.1'
     }
   }
 
