@@ -3,6 +3,9 @@ apply plugin: 'jacoco'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
+// Set version: use CLI parameter if provided, otherwise use git-based default
+version = findProperty('version') ?: 'master-SNAPSHOT'
+
 java {
   sourceCompatibility = JavaVersion.VERSION_21
   targetCompatibility = JavaVersion.VERSION_21
@@ -47,7 +50,7 @@ jacocoTestReport {
 
 publishing {
   publications {
-    ai4industry(MavenPublication) {
+    maven(MavenPublication) {
       from components.java
       groupId 'ch.unisg.ics.interactions'
       artifactId 'wot-td-java'
